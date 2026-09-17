@@ -1,107 +1,14 @@
 <!doctype html>
 <html lang="es">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="AgenticWeb — interfaz pública de AgentiCuantico." />
-    <meta name="theme-color" content="#07111f" />
-    <title>AgentiCuantico — AgenticWeb</title>
-    <link rel="stylesheet" href="./styles.css" />
-  </head>
-  <body>
-    <header class="topbar">
-      <a class="brand" href="https://agenticuantico.dev.ar" target="_blank" rel="noreferrer">
-        <span class="brand-mark">AQ</span>
-        <span>AgentiCuantico</span>
-      </a>
-      <nav aria-label="Navegación principal">
-        <a href="#inicio">Inicio</a>
-        <a href="#sistema">Sistema</a>
-        <a href="#dominio">Dominio</a>
-        <a href="https://github.com/agenticuantico/AgentiCuantico" target="_blank" rel="noreferrer">Cerebro</a>
-      </nav>
-    </header>
-
-    <main id="inicio">
-      <section class="hero">
-        <div class="hero-copy">
-          <p class="eyebrow">AGENTICWEB · CAPA DE PRESENTACIÓN</p>
-          <h1>La web de <span>AgentiCuantico</span></h1>
-          <p class="lead">
-            Esta interfaz presenta el contenido público de <strong>agenticuantico.dev.ar</strong>
-            y mantiene separada la capa visual del cerebro operativo.
-          </p>
-          <div class="actions">
-            <a class="button primary" href="#dominio">Ver dominio</a>
-            <a class="button secondary" href="https://github.com/agenticuantico/AgentiCuantico" target="_blank" rel="noreferrer">Abrir cerebro</a>
-          </div>
-        </div>
-        <div class="orb" aria-hidden="true">
-          <div class="orb-core"></div>
-          <div class="orbit orbit-a"></div>
-          <div class="orbit orbit-b"></div>
-          <div class="orbit orbit-c"></div>
-        </div>
-      </section>
-
-      <section id="sistema" class="section">
-        <div class="section-heading">
-          <p class="eyebrow">ARQUITECTURA</p>
-          <h2>Dos capas, una experiencia</h2>
-        </div>
-        <div class="grid">
-          <article class="card">
-            <span class="card-index">01</span>
-            <h3>AgenticWeb</h3>
-            <p>Presentación pública, navegación, contenido, autenticación futura y experiencia de usuario.</p>
-            <span class="status">INTERFAZ</span>
-          </article>
-          <article class="card featured">
-            <span class="card-index">02</span>
-            <h3>AgentiCuantico</h3>
-            <p>Motor operativo: orquestación, dominio, proveedores, seguridad, integraciones y skills.</p>
-            <span class="status">CEREBRO</span>
-          </article>
-          <article class="card">
-            <span class="card-index">03</span>
-            <h3>Contrato</h3>
-            <p>La interfaz consume capacidades del backend mediante contratos explícitos, sin secretos ni lógica privada.</p>
-            <span class="status">API</span>
-          </article>
-        </div>
-      </section>
-
-      <section id="dominio" class="section domain-section">
-        <div class="section-heading inline">
-          <div>
-            <p class="eyebrow">CONTENIDO PÚBLICO</p>
-            <h2>agenticuantico.dev.ar</h2>
-          </div>
-          <a class="button secondary" href="https://agenticuantico.dev.ar" target="_blank" rel="noreferrer">Abrir en nueva pestaña ↗</a>
-        </div>
-        <div class="domain-frame-wrap">
-          <iframe
-            id="domain-frame"
-            title="Contenido público de agenticuantico.dev.ar"
-            src="https://agenticuantico.dev.ar"
-            loading="lazy"
-            referrerpolicy="strict-origin-when-cross-origin"
-          ></iframe>
-          <div id="frame-fallback" class="frame-fallback" hidden>
-            <div class="fallback-icon">↗</div>
-            <h3>El dominio no permite incrustación</h3>
-            <p>El navegador puede bloquear el contenido si el dominio usa políticas como <code>X-Frame-Options</code> o CSP.</p>
-            <a class="button primary" href="https://agenticuantico.dev.ar" target="_blank" rel="noreferrer">Visitar agenticuantico.dev.ar</a>
-          </div>
-        </div>
-      </section>
-    </main>
-
-    <footer>
-      <span>AgentiCuantico · AgenticWeb</span>
-      <span>Frontend independiente del cerebro operativo</span>
-    </footer>
-
-    <script src="./app.js" defer></script>
-  </body>
-</html>
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="AgentiCuantico: experiencia 3D y laboratorio de inteligencia agéntica.">
+<title>AgentiCuantico · AgenticWeb</title><link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<header class="topbar"><a class="brand" href="#inicio"><span class="brand-mark">AQ</span> AgentiCuantico</a><nav><a href="#inicio">Inicio</a><a href="#chat">Chat</a><a href="#sistema">Arquitectura</a><a href="https://github.com/agenticuantico/AgentiCuantico" target="_blank" rel="noreferrer">Cerebro ↗</a></nav></header>
+<main id="inicio">
+<section class="hero"><div class="hero-copy"><p class="eyebrow">INTELIGENCIA AGÉNTICA · EVOLUCIÓN CONTINUA</p><h1>Una inteligencia que <span>explora, aprende y actúa.</span></h1><p class="lead">Una interfaz 3D para conversar con tu sistema, convertir objetivos en planes y construir memoria verificable con el tiempo.</p><div class="actions"><a class="button primary" href="#chat">Iniciar conversación</a><a class="button secondary" href="#sistema">Ver arquitectura</a></div><div class="pill-row"><span>● Cerebro desacoplado</span><span>● Agentes coordinados</span><span>● Control humano</span></div></div><div class="orb" aria-label="Visualización 3D decorativa" role="img"><div class="orb-core"></div><div class="orbit orbit-a"></div><div class="orbit orbit-b"></div><div class="orbit orbit-c"></div><div class="orb-label">AGENTIC<br>CORE</div></div></section>
+<section id="chat" class="section chat-section"><div class="section-heading"><p class="eyebrow">INTERFAZ OPERATIVA</p><h2>Habla con AgentiCuantico</h2><p>El frontend está preparado para conectarse a una API propia. Configura el endpoint en <code>app.js</code>; nunca expongas claves en este repositorio público.</p></div><div class="chat-shell"><div id="messages" class="messages" aria-live="polite"><div class="message assistant"><b>AgentiCuantico</b><p>Hola. Puedo ayudarte a convertir una idea en un objetivo, planificar pasos y registrar aprendizajes cuando el cerebro operativo esté conectado.</p></div></div><form id="chat-form" class="chat-form"><textarea id="prompt" rows="2" placeholder="Escribe un objetivo para tus agentes..." required></textarea><button class="button primary" type="submit">Enviar ↗</button></form><p id="chat-status" class="chat-status">Modo demostración · API pendiente de configuración</p></div></section>
+<section id="sistema" class="section"><div class="section-heading"><p class="eyebrow">ARQUITECTURA</p><h2>Separación por diseño</h2></div><div class="grid"><article class="card"><span class="card-index">01</span><h3>AgenticWeb</h3><p>Experiencia 3D, chat, visualización de objetivos y controles del usuario.</p><span class="status">PÚBLICO</span></article><article class="card featured"><span class="card-index">02</span><h3>AgentiCuantico</h3><p>Planificador, memoria, agentes, herramientas, seguridad y evaluación en un repositorio privado.</p><span class="status">CEREBRO</span></article><article class="card"><span class="card-index">03</span><h3>Aprendizaje verificable</h3><p>La mejora se basa en registros, pruebas, revisión humana y métricas; no en cambios autónomos ilimitados.</p><span class="status">CONTROL</span></article></div></section>
+</main><footer><span>AgentiCuantico · AgenticWeb</span><span>Autonomía con límites, trazabilidad y seguridad</span></footer><script src="./app.js" defer></script></body></html>
