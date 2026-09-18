@@ -5,19 +5,43 @@ const messages = document.querySelector('#messages');
 const status = document.querySelector('#chat-status');
 
 function addMessage(role, text) {
-  const item = document.createElement('div'); item.className = `message ${role}`;
+  const item = document.createElement('div');
+  item.className = `message ${role}`;
   const name = role === 'user' ? 'Tú' : 'AgentiCuantico';
-  item.innerHTML = `<b>${name}</b><p></p>`; item.querySelector('p').textContent = text;
-  messages.appendChild(item); messages.scrollTop = messages.scrollHeight;
+  item.innerHTML = `<b>${name}</b><p></p>`;
+  item.querySelector('p').textContent = text;
+  messages.appendChild(item);
+  messages.scrollTop = messages.scrollHeight;
 }
 
 form?.addEventListener('submit', async (event) => {
-  event.preventDefault(); const text = prompt.value.trim(); if (!text) return;
-  addMessage('user', text); prompt.value = ''; status.textContent = 'Procesando objetivo…';
-  if (!API_BASE) { addMessage('assistant', 'Modo demostración: conecta AGENTICUANTICO_API con tu backend privado para activar agentes, memoria y ejecución.'); status.textContent = 'Modo demostración · ningún dato fue enviado'; return; }
+  event.preventDefault();
+  const text = prompt.value.trim();
+  if (!text) return;
+
+  addMessage('user', text);
+  prompt.value = '';
+  status.textContent = 'Procesando tu objetivo…';
+
+  if (!API_BASE) {
+    addMessage('assistant', 'La conexión todavía no está disponible. Intentá nuevamente más tarde.');
+    status.textContent = 'Servicio temporalmente no disponible';
+    return;
+  }
+
   try {
-    const response = await fetch(`${API_BASE}/v1/conversations/messages`, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text})});
+    const response = await fetch(`${API_BASE}/v1/conversations/messages`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: text })
+    });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const data = await response.json(); addMessage('assistant', data.message || data.output || 'El backend respondió sin texto.'); status.textContent = 'Conectado al cerebro operativo';
-  } catch (error) { addMessage('assistant', 'No se pudo conectar con el cerebro operativo. Verifica el endpoint y la configuración CORS.'); status.textContent = 'Error de conexión'; console.error(error); }
+    const data = await response.json();
+    addMessage('assistant', data.message || data.output || 'Se recibió una respuesta sin texto.');
+    status.textContent = 'Respuesta recibida';
+  } catch (error) {
+    addMessage('assistant', 'No pudimos procesar tu solicitud en este momento. Intentá nuevamente.');
+    status.textContent = 'No se pudo completar la solicitud';
+    console.error('Request failed:', error);
+  }
 });
