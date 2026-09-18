@@ -1,8 +1,9 @@
-const API_BASE = window.AGENTICUANTICO_API || '';
+const API_BASE = (window.AGENTICUANTICO_API || window.location.origin).replace(/\/$/, '');
 const form = document.querySelector('#chat-form');
 const prompt = document.querySelector('#prompt');
 const messages = document.querySelector('#messages');
 const status = document.querySelector('#chat-status');
+const history = [];
 
 function addMessage(role, text) {
   const item = document.createElement('div');
@@ -14,34 +15,40 @@ function addMessage(role, text) {
   messages.scrollTop = messages.scrollHeight;
 }
 
+function setBusy(busy) {
+  prompt.disabled = busy;
+  form.querySelector('button').disabled = busy;
+  status.textContent = busy ? 'Pensando…' : 'Listo';
+}
+
 form?.addEventListener('submit', async (event) => {
   event.preventDefault();
   const text = prompt.value.trim();
-  if (!text) return;
+  if (!text || prompt.disabled) return;
 
   addMessage('user', text);
   prompt.value = '';
-  status.textContent = 'Procesando tu objetivo…';
-
-  if (!API_BASE) {
-    addMessage('assistant', 'La conexión todavía no está disponible. Intentá nuevamente más tarde.');
-    status.textContent = 'Servicio temporalmente no disponible';
-    return;
-  }
+  setBusy(true);
 
   try {
     const response = await fetch(`${API_BASE}/v1/conversations/messages`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: text })
+      body: JSON.stringify({ message: text, history })
     });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const data = await response.json();
-    addMessage('assistant', data.message || data.output || 'Se recibió una respuesta sin texto.');
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || `HTTP ${response.status}`);
+
+    const answer = data.message || 'No se recibió una respuesta.';
+    addMessage('assistant', answer);
+    history.push({ role: 'user', content: text }, { role: 'assistant', content: answer });
+    while (history.length > 12) history.shift();
     status.textContent = 'Respuesta recibida';
   } catch (error) {
-    addMessage('assistant', 'No pudimos procesar tu solicitud en este momento. Intentá nuevamente.');
-    status.textContent = 'No se pudo completar la solicitud';
-    console.error('Request failed:', error);
+    addMessage('assistant', 'No pude procesar tu mensaje en este momento. Intentá nuevamente.');
+    status.textContent = 'Servicio no disponible';
+    console.error('Chat request failed:', error);
+  } finally {
+    setBusy(false);
   }
 });
