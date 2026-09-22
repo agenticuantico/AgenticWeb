@@ -1,0 +1,31 @@
+name: AgenticWeb validation
+
+on:
+  pull_request:
+    branches: ["main"]
+  push:
+    branches: ["main", "feature/premium-3d-plans"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Validate JavaScript syntax
+        run: node --check app.js
+
+      - name: Validate Worker syntax
+        run: node --check worker.js
+
+      - name: Validate Cloudflare deployment configuration
+        run: npx wrangler@latest deploy --dry-run
