@@ -29,6 +29,24 @@ function addTyping(){
   messages.scrollTop=messages.scrollHeight;
   return item;
 }
+async function checkBrainConnection(){
+  if(!status)return;
+  try{
+    const r=await fetch(API_BASE+'/health',{credentials:'include',cache:'no-store'});
+    const d=await r.json().catch(()=>({}));
+    if(r.ok&&d.status==='ok'){
+      status.textContent=d.model_enabled?'Cerebro conectado · modelo activo':'Cerebro conectado · modo local/fallback';
+      if(brainState)brainState.textContent=d.model_enabled?'CEREBRO ONLINE · MODELO ACTIVO':'CEREBRO ONLINE · MODO LOCAL';
+    }else{
+      status.textContent=d.error==='core_api_not_configured'?'Puente del cerebro sin configurar':'Cerebro no disponible';
+      if(brainState)brainState.textContent='PUENTE · REVISAR CONEXIÓN';
+    }
+  }catch(_){
+    status.textContent='No se pudo verificar el cerebro';
+    if(brainState)brainState.textContent='SIN CONEXIÓN';
+  }
+}
+checkBrainConnection();
 async function sendFeedback(feedback,messageId){
   try{
     await fetch(API_BASE+'/v1/conversations/feedback',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({feedback,message_id:messageId})});
