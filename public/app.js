@@ -1,5 +1,6 @@
 import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js";
 import {GLTFLoader} from "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/loaders/GLTFLoader.js";
+import {createFacialRig} from "./assets/avatar/facial-rig.js";
 
 const API=(window.AGENTICUANTICO_API_URL||"https://agenticweb.agenticuantico.workers.dev").replace(/\/$/,"");
 const K={chat:"aq_chat_v7",conversations:"aq_conversations_v1",active:"aq_active_v1",session:"aq_guest_v6",agents:"aq_agents_v5",teams:"aq_teams_v5",profile:"aq_profile_v5",auth:"aq_auth_v1",improvement:"aq_improvement_consent_v1"};
@@ -93,14 +94,17 @@ async function initAvatar3D(){
   const particles=new THREE.Points(pg,pm);scene.add(particles);
   const group=new THREE.Group();scene.add(group);
   const loadUrl=window.AGENTICUANTICO_AVATAR_GLB||localStorage.getItem("aq_avatar_glb")||"https://raw.githubusercontent.com/met4citizen/TalkingHead/main/avatars/mpfb.glb";
-  const build=gender=>{group.clear();avatar3d.model=createHumanoid3D(gender);group.add(avatar3d.model)};
-  avatar3d={renderer,scene,camera,group,model:null,speaking:false,gender:"female",mouthLevel:0,mouseX:0,mouseY:0,
+  const build=gender=>{group.clear();avatar3d.model=createHumanoid3D(gender);avatar3d.facialRig=createFacialRig(avatar3d.model);group.add(avatar3d.model)};
+  avatar3d={renderer,scene,camera,group,model:null,facialRig:null,mixer:null,speaking:false,gender:"female",mouthLevel:0,mouseX:0,mouseY:0,
    setSpeaking(v){this.speaking=!!v},setMouth(v){this.mouthLevel=Math.max(0,Math.min(1,v))},
    setGender(g){this.gender=g;build(g)},
    setGlb(url){
     new GLTFLoader().load(url,g=>{
       group.clear();
       avatar3d.model=g.scene;
+      avatar3d.facialRig=createFacialRig(g.scene);
+      avatar3d.mixer=g.animations?.length?new THREE.AnimationMixer(g.scene):null;
+      if(avatar3d.mixer)g.animations.forEach(clip=>avatar3d.mixer.clipAction(clip).play());
       g.scene.traverse(o=>{
         if(o.isMesh&&o.morphTargetDictionary&&o.morphTargetInfluences)o.userData.hasFaceMorphs=true;
         if(o.isMesh&&o.material){o.material.roughness=Math.min(o.material.roughness??.6,.62);o.material.envMapIntensity=1.25}
@@ -119,6 +123,7 @@ async function initAvatar3D(){
   const clock=new THREE.Clock(),animate=()=>{
    const t=clock.getElapsedTime(),m=avatar3d.model;
    particles.rotation.y=t*.035;particles.rotation.x=Math.sin(t*.17)*.05;
+   if(avatar3d.mixer)avatar3d.mixer.update(Math.min(clock.getDelta(),.05));
    if(m){
     m.rotation.y+=((avatar3d.mouseX*.11+Math.sin(t*.42)*.035)-m.rotation.y)*.035;
     m.rotation.x+=((avatar3d.mouseY*.035)-m.rotation.x)*.035;
@@ -128,6 +133,7 @@ async function initAvatar3D(){
     const mouth=m.userData.mouth;if(mouth)mouth.scale.y=.72+avatar3d.mouthLevel*2.1;
     if(m.userData.eyes)for(const eye of m.userData.eyes){eye.position.x+=(Math.max(-.04,Math.min(.04,avatar3d.mouseX*.035))-(eye.position.x-(eye===m.userData.eyes[0]?-0.29:0.29)))*.08}
     if(m.userData.arms)for(const a of m.userData.arms){const wave=avatar3d.speaking?Math.sin(t*2.1+a.side)*.07:Math.sin(t*.8+a.side)*.025;a.upper.rotation.z=a.side*(.13+wave);a.fore.rotation.z=a.side*(.08-wave*.7);a.hand.position.y=-1.98+Math.sin(t*1.6+a.side)*.018}
+    if(avatar3d.facialRig){avatar3d.facialRig.updateBody(t,avatar3d.speaking);avatar3d.facialRig.look(avatar3d.mouseX*.85,avatar3d.mouseY*.65);avatar3d.facialRig.setMouth(avatar3d.mouthLevel,String(avatar3d.morphText||"A").toUpperCase())}
     const blink=Math.sin(t*.43)*.5+.5;if(blink>.985){m.userData.blink=Math.min(1,m.userData.blink+.18)}else m.userData.blink=Math.max(0,m.userData.blink-.25);
     m.traverse(o=>{if(o.isMesh&&o.morphTargetDictionary&&o.morphTargetInfluences){for(const [name,idx] of Object.entries(o.morphTargetDictionary)){if(/mouth|jaw|viseme|phoneme|open/i.test(name))o.morphTargetInfluences[idx]=avatar3d.mouthLevel*.78;if(/blink|eye.?close/i.test(name))o.morphTargetInfluences[idx]=m.userData.blink}}})
    }
