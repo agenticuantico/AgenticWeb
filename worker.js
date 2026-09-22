@@ -98,8 +98,6 @@ async function callHuggingFace(request, env) {
           temperature: 0.7,
           top_p: 0.8,
           max_tokens: 512,
-          temperature: 0.7,
-          top_p: 0.8,
           presence_penalty: 1.5,
           reasoning_effort: "low",
           stream: false,
