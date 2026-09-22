@@ -1,195 +1,209 @@
 const DEFAULT_NATIVE_API='https://agenticuantico.dev.ar';
 const PUBLIC_API='https://agenticweb.agenticuantico.workers.dev';
-const isNative=window.location.protocol==='capacitor:';
-const API_BASE=(window.AGENTICUANTICO_API||(isNative?DEFAULT_NATIVE_API:PUBLIC_API)).replace(/\/$/,'');
-const form=document.querySelector('#chat-form'),prompt=document.querySelector('#prompt'),messages=document.querySelector('#messages'),status=document.querySelector('#chat-status'),brainState=document.querySelector('#brain-state');
-const history=[];
-let lastMessageId=null;
+const API_BASE=(window.AGENTICUANTICO_API||(window.location.protocol==='capacitor:'?DEFAULT_NATIVE_API:PUBLIC_API)).replace(/\/$/,'');
+const $=s=>document.querySelector(s);
+const $$=s=>[...document.querySelectorAll(s)];
+const state={plan:'explorer',agent:'planner',history:[],chats:[],busy:false};
 
-function addMessage(role,text,meta=''){
-  const item=document.createElement('div');
-  item.className='message '+role;
-  item.innerHTML='<div class="avatar">'+(role==='user'?'TÚ':'AQ')+'</div><div><b>'+(role==='user'?'Tú':'AgentiCuantico')+'</b><p></p>'+(meta?'<small class="message-meta"></small>':'')+'</div>';
-  item.querySelector('p').textContent=text;
-  if(meta)item.querySelector('.message-meta').textContent=meta;
-  messages.appendChild(item);
-  messages.scrollTop=messages.scrollHeight;
-  return item;
+const AGENTS=[
+ {id:'planner',name:'AgentiCuantico Core',short:'Agente base',icon:'AQ',desc:'Conversación, planificación y coordinación segura.',plans:['explorer','creator','pro','studio'],skills:['Planificación','Memoria','Verificación']},
+ {id:'fullstack-junior',name:'Full Stack',short:'Programación',icon:'</>',desc:'Construcción y mantenimiento de interfaces y funciones web.',plans:['creator','pro','studio'],skills:['HTML','CSS','JavaScript','Git']},
+ {id:'web-designer',name:'Web Designer',short:'UI / UX',icon:'✦',desc:'Interfaces responsive, accesibles y sistemas visuales.',plans:['creator','pro','studio'],skills:['UX','UI','Motion','Responsive']},
+ {id:'backend',name:'Backend',short:'APIs y servicios',icon:'API',desc:'APIs, persistencia, autenticación y servicios.',plans:['pro','studio'],skills:['Python','FastAPI','REST','Testing']},
+ {id:'cybersecurity',name:'Security',short:'AppSec',icon:'◇',desc:'Revisión defensiva de seguridad y cadena de suministro.',plans:['pro','studio'],skills:['OWASP','Auth','Headers','Audit']},
+ {id:'3d-branding-prototyping',name:'3D Studio',short:'3D / Branding',icon:'3D',desc:'Conceptos 3D, branding, prototipos y experiencias.',plans:['studio'],skills:['3D','Branding','Motion','Prototype']},
+ {id:'illustrator',name:'Creative',short:'Ilustración',icon:'✧',desc:'Recursos visuales e identidad original del producto.',plans:['studio'],skills:['Iconos','Branding','Composición']}
+];
+
+function publicText(value){
+  let text=String(value??'').trim();
+  text=text.replace(/\bRun\s*:\s*[0-9a-f]{8}-[0-9a-f-]{27,}\.?/gi,'');
+  text=text.replace(/\b(run[_ -]?id|trace[_ -]?id|correlation[_ -]?id)\s*[:=]\s*[0-9a-f-]{8,}/gi,'');
+  text=text.replace(/\b(?:stack trace|internal error|provider temporarily unavailable)\b[^\n]*/gi,'');
+  text=text.replace(/\n{3,}/g,'\n\n').trim();
+  return text||'No recibí una respuesta utilizable. Intentá nuevamente.';
 }
-function setBusy(b){
-  prompt.disabled=b;
-  form.querySelector('button').disabled=b;
-  status.textContent=b?'AgentiCuantico está pensando…':'Listo para conversar';
-  if(brainState)brainState.textContent=b?'PROCESANDO · MEMORIA + CEREBRO':'CEREBRO LISTO · MEMORIA ACTIVA';
+
+function escapeHtml(v){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+
+function currentAgent(){return AGENTS.find(a=>a.id===state.agent)||AGENTS[0]}
+function canUse(a){return a.plans.includes(state.plan)}
+function renderAgentCard(a,compact=false){
+  const locked=!canUse(a);
+  return '<article class="agent-card '+(a.id===state.agent?'active ':'')+(locked?'locked':'')+'">'+
+    '<div class="agent-icon">'+escapeHtml(a.icon)+'</div><h3>'+escapeHtml(a.name)+'</h3><p>'+escapeHtml(a.desc)+'</p>'+
+    '<footer><span>'+escapeHtml(a.skills.slice(0,2).join(' · '))+'</span><span>'+escapeHtml(a.short)+'</span></footer>'+
+    '<button type="button" data-agent="'+a.id+'" '+(locked?'disabled':'')+'>'+ (locked?'Bloqueado':'Usar') +'</button></article>';
+}
+function renderAgents(){
+  const grid=$('#agent-grid'),picker=$('#picker-grid');
+  if(grid)grid.innerHTML=AGENTS.map(a=>renderAgentCard(a)).join('');
+  if(picker)picker.innerHTML=AGENTS.map(a=>renderAgentCard(a,true)).join('');
+  $$('.agent-card [data-agent]').forEach(b=>b.addEventListener('click',()=>selectAgent(b.dataset.agent)));
+}
+function selectAgent(id){
+  const a=AGENTS.find(x=>x.id===id);
+  if(!a)return;
+  if(!canUse(a)){location.hash='plans';return}
+  state.agent=id;
+  $('#selected-agent-name').textContent=a.name;
+  $('#selected-agent-meta').textContent=a.short+' · '+state.plan.charAt(0).toUpperCase()+state.plan.slice(1);
+  const current=$('#agent-current');
+  if(current)current.innerHTML='<span class="agent-orb">'+escapeHtml(a.icon)+'</span><span><b>'+escapeHtml(a.name)+'</b><small>'+escapeHtml(a.short)+' · '+escapeHtml(state.plan)+'</small></span><span>⌄</span>';
+  $('#agent-picker')?.classList.remove('open');
+  $('#agent-picker')?.setAttribute('aria-hidden','true');
+  renderAgents();
+}
+function openPicker(){const m=$('#agent-picker');m?.classList.add('open');m?.setAttribute('aria-hidden','false');renderAgents()}
+$$('[data-close-picker]').forEach(x=>x.addEventListener('click',()=>{$('#agent-picker')?.classList.remove('open');$('#agent-picker')?.setAttribute('aria-hidden','true')}))
+$('#model-button')?.addEventListener('click',openPicker);
+$('#agent-current')?.addEventListener('click',openPicker);
+
+function saveChats(){
+  try{localStorage.setItem('aq_public_chats',JSON.stringify(state.chats.slice(-20)))}catch(_){}
+}
+function loadChats(){
+  try{state.chats=JSON.parse(localStorage.getItem('aq_public_chats')||'[]')}catch(_){state.chats=[]}
+  renderChatHistory();
+}
+function renderChatHistory(){
+  const box=$('#chat-history');if(!box)return;
+  box.innerHTML=state.chats.slice().reverse().map((c,i)=>'<button class="history-item '+(i===0?'active':'')+'" data-chat="'+escapeHtml(c.id)+'">'+escapeHtml(c.title)+'</button>').join('')||'<span class="history-item">Todavía no hay chats</span>';
+}
+function newChat(){
+  state.history=[];state.busy=false;
+  const box=$('#messages');
+  if(box)box.innerHTML='<div class="welcome"><div class="welcome-orb">AQ</div><h2>Nuevo chat.</h2><p>Contame qué querés construir, resolver o mejorar.</p><div class="suggestions"><button data-suggestion="Analizá mi proyecto y proponé mejoras concretas.">Analizar mi proyecto</button><button data-suggestion="Quiero crear una web moderna y premium.">Crear una web</button><button data-suggestion="Quiero que un agente revise mi código.">Revisar código</button></div></div>';
+  bindSuggestions();
+  $('#prompt')?.focus();
+}
+$('#new-chat')?.addEventListener('click',newChat);
+
+function addMessage(role,text,options={}){
+  const box=$('#messages');if(!box)return;
+  box.querySelector('.welcome')?.remove();
+  const item=document.createElement('div');item.className='message '+role;
+  const safe=publicText(text);
+  const avatar=role==='user'?'TÚ':'AQ';
+  item.innerHTML='<div class="avatar">'+avatar+'</div><div class="message-body"><div class="message-author">'+(role==='user'?'Vos':'AgentiCuantico')+'</div><div class="message-text"></div>'+(role==='assistant'?'<div class="message-actions"><button data-copy>Copiar</button><button data-feedback="positive">Útil</button><button data-feedback="negative">No me sirve</button></div>':'')+'</div>';
+  item.querySelector('.message-text').textContent=safe;
+  box.appendChild(item);
+  box.scrollTop=box.scrollHeight;
+  if(role==='assistant'){
+    item.querySelector('[data-copy]')?.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(safe)}catch(_){}});
+    item.querySelector('[data-feedback="positive"]')?.addEventListener('click',()=>sendFeedback('positive',state.lastMessageId));
+    item.querySelector('[data-feedback="negative"]')?.addEventListener('click',()=>sendFeedback('negative',state.lastMessageId));
+  }
+  return item;
 }
 function addTyping(){
-  const item=document.createElement('div');
-  item.className='message assistant typing';
-  item.innerHTML='<div class="avatar">AQ</div><div><b>AgentiCuantico</b><p>Estoy pensando<span>.</span><span>.</span><span>.</span></p></div>';
-  messages.appendChild(item);
-  messages.scrollTop=messages.scrollHeight;
-  return item;
+  const box=$('#messages'),item=document.createElement('div');item.className='message assistant';
+  item.innerHTML='<div class="avatar">AQ</div><div class="message-body"><div class="message-author">AgentiCuantico</div><div class="message-text typing-dots">Procesando <span>.</span><span>.</span><span>.</span></div></div>';
+  box.appendChild(item);box.scrollTop=box.scrollHeight;return item;
 }
-async function checkBrainConnection(){
-  if(!status)return;
+function setBusy(v){
+  state.busy=v;$('#prompt').disabled=v;$('#send').disabled=v;
+  $('#task-indicator').textContent=v?'Trabajando…':'Listo';
+  $('#brain-state').textContent=v?'Procesando objetivo':'Online · listo';
+}
+async function checkHealth(){
   try{
     const r=await fetch(API_BASE+'/health',{credentials:'include',cache:'no-store'});
     const d=await r.json().catch(()=>({}));
     if(r.ok&&d.status==='ok'){
-      status.textContent=d.model_enabled?'Cerebro conectado · modelo activo':'Cerebro conectado · modo local/fallback';
-      if(brainState)brainState.textContent=d.model_enabled?'CEREBRO ONLINE · MODELO ACTIVO':'CEREBRO ONLINE · MODO LOCAL';
-    }else{
-      status.textContent=d.error==='core_api_not_configured'?'Puente del cerebro sin configurar':'Cerebro no disponible';
-      if(brainState)brainState.textContent='PUENTE · REVISAR CONEXIÓN';
-    }
+      $('#connection-pill').innerHTML='<i></i> Online';
+      $('#brain-state').textContent='Online · listo';
+    }else throw new Error();
   }catch(_){
-    status.textContent='No se pudo verificar el cerebro';
-    if(brainState)brainState.textContent='SIN CONEXIÓN';
+    $('#connection-pill').innerHTML='<i style="background:#ffbd6b"></i> Degradado';
+    $('#brain-state').textContent='Conexión limitada';
   }
 }
-checkBrainConnection();
 async function sendFeedback(feedback,messageId){
-  try{
-    await fetch(API_BASE+'/v1/conversations/feedback',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({feedback,message_id:messageId})});
-  }catch(_){}
+  try{await fetch(API_BASE+'/v1/conversations/feedback',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({feedback,message_id:messageId})})}catch(_){}
 }
-form?.addEventListener('submit',async e=>{
-  e.preventDefault();
-  const text=prompt.value.trim();
-  if(!text||prompt.disabled)return;
-  addMessage('user',text);
-  prompt.value='';
-  setBusy(true);
-  const typing=addTyping();
+
+async function sendMessage(text){
+  if(!text||state.busy)return;
+  addMessage('user',text);$('#prompt').value='';autoGrow();
+  setBusy(true);const typing=addTyping();
   try{
-    const r=await fetch(API_BASE+'/v1/conversations/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      credentials:'include',
-      body:JSON.stringify({message:text,history:history.slice(-12)})
-    });
+    const r=await fetch(API_BASE+'/v1/conversations/messages',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({message:text,history:state.history.slice(-12),agent_id:state.agent})});
     const d=await r.json().catch(()=>({}));
-    if(!r.ok)throw new Error(d.detail||d.error||('HTTP '+r.status));
+    if(!r.ok)throw new Error('request_failed');
     typing.remove();
-    const answer=d.message||'No recibí contenido del cerebro.';
-    const item=addMessage('assistant',answer);
-    lastMessageId=d.conversation_id||null;
-    const feedback=document.createElement('div');
-    feedback.className='message-feedback';
-    feedback.innerHTML='<button type="button">✓ Útil</button><button type="button">✕ No me sirve</button>';
-    feedback.children[0].onclick=()=>{sendFeedback('positive',lastMessageId);feedback.remove()};
-    feedback.children[1].onclick=()=>{sendFeedback('negative',lastMessageId);feedback.remove()};
-    item.appendChild(feedback);
-    history.push({role:'user',content:text},{role:'assistant',content:answer});
-    while(history.length>12)history.shift();
-    status.textContent=d.guest_memory?'Memoria de esta conversación activa':'Conversación y memoria activas';
-  }catch(err){
-    typing.remove();
-    const detail=String(err.message||'error');
-    addMessage('assistant','El servicio de IA está temporalmente no disponible. Intentá nuevamente en unos instantes.');
-    status.textContent='Conexión con el cerebro no disponible';
-    console.error('chat_request_failed', err);
+    const answer=publicText(d.message);
+    state.lastMessageId=d.conversation_id||null;
+    addMessage('assistant',answer);
+    state.history.push({role:'user',content:text},{role:'assistant',content:answer});
+    while(state.history.length>12)state.history.shift();
+    if(d.task_status)$('#task-indicator').textContent='Trabajo iniciado';
+    const title=text.length>42?text.slice(0,42)+'…':text;
+    if(!state.chats.some(c=>c.title===title))state.chats.push({id:crypto.randomUUID?.()||String(Date.now()),title,agent:state.agent});
+    saveChats();renderChatHistory();
+  }catch(_){
+    typing.remove();addMessage('assistant','No pude conectar con el cerebro en este momento. La interfaz sigue disponible; probá nuevamente en unos instantes.');
   }finally{setBusy(false)}
-});
-document.querySelectorAll('[data-plan]').forEach(btn=>btn.addEventListener('click',async()=>{const plan=btn.dataset.plan;if(plan==='explorer'){location.hash='chat';return}const email=prompt('Ingresá el email que usarás para la suscripción:');if(!email)return;const choice=prompt('Elegí la pasarela: 1 = Mercado Pago, 2 = PayPal','1');const provider=choice==='2'?'paypal':'mercadopago';btn.disabled=true;btn.textContent='Preparando checkout…';try{const r=await fetch(API_BASE+'/v1/billing/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({plan,provider,email})});const d=await r.json().catch(()=>({}));if(!r.ok||!d.checkout_url)throw new Error(d.detail||d.error||'checkout_unavailable');window.location.href=d.checkout_url}catch(e){btn.disabled=false;btn.textContent='Elegir '+plan.charAt(0).toUpperCase()+plan.slice(1);alert('El checkout no está disponible todavía. Configurá las credenciales y los IDs de planes en el backend.')}}));
-const canvas=document.querySelector('#brain-canvas');
-const ctx=canvas?.getContext('2d');
-let nodes=[];
-let rotation={x:-0.08,y:0.25};
-let drag={active:false,x:0,y:0};
-let pulse=0;
-function resize3D(){
-  if(!canvas)return;
-  const r=canvas.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2);
-  canvas.width=Math.max(1,Math.floor(r.width*d));
-  canvas.height=Math.max(1,Math.floor(r.height*d));
-  ctx.setTransform(d,0,0,d,0,0);
-  nodes=Array.from({length:150},()=> {
-    const z=Math.random()*2-1, a=Math.random()*Math.PI*2, s=Math.sqrt(1-z*z);
-    return {x:Math.cos(a)*s,y:z,z:Math.sin(a)*s,phase:Math.random()*Math.PI*2,energy:.35+Math.random()*.65};
-  });
 }
-function project3D(p,w,h,t){
-  const cy=Math.cos(rotation.y),sy=Math.sin(rotation.y),cx=Math.cos(rotation.x),sx=Math.sin(rotation.x);
-  let x=p.x*cy-p.z*sy, z=p.x*sy+p.z*cy;
-  let y=p.y*cx-z*sx; z=p.y*sx+z*cx;
-  const scale=Math.min(w,h)*.34;
-  const perspective=1/(1.65-z*.62);
-  return {x:w/2+x*scale*perspective,y:h/2+y*scale*perspective,z,scale:perspective};
+$('#chat-form')?.addEventListener('submit',e=>{e.preventDefault();sendMessage($('#prompt').value.trim())});
+function autoGrow(){const el=$('#prompt');if(!el)return;el.style.height='auto';el.style.height=Math.min(el.scrollHeight,160)+'px'}
+$('#prompt')?.addEventListener('input',autoGrow);
+$('#prompt')?.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage(e.currentTarget.value.trim())}});
+function bindSuggestions(){$$('[data-suggestion]').forEach(b=>b.onclick=()=>{const v=b.dataset.suggestion;$('#prompt').value=v;autoGrow();sendMessage(v)})}
+bindSuggestions();
+
+async function loadAccount(){
+  try{
+    const r=await fetch(API_BASE+'/v1/auth/me',{credentials:'include'});
+    const d=await r.json();
+    state.plan=d.user?.plan||'explorer';
+  }catch(_){state.plan='explorer'}
+  const allowed=AGENTS.find(a=>a.id===state.agent&&canUse(a))?state.agent:'planner';
+  state.agent=allowed;
+  selectAgent(allowed);renderAgents();
 }
-function draw3D(t=0){
-  if(!canvas)return;
-  const w=canvas.clientWidth,h=canvas.clientHeight;
-  ctx.clearRect(0,0,w,h);
-  const cx=w/2,cy=h/2,R=Math.min(w,h)*.36;
-  const glow=ctx.createRadialGradient(cx,cy,10,cx,cy,R);
-  glow.addColorStop(0,'rgba(101,231,255,.12)');
-  glow.addColorStop(.55,'rgba(155,124,255,.06)');
-  glow.addColorStop(1,'rgba(0,0,0,0)');
-  ctx.fillStyle=glow;ctx.beginPath();ctx.arc(cx,cy,R*1.25,0,Math.PI*2);ctx.fill();
-  const points=nodes.map((p,i)=>{
-    const wobble=.025*Math.sin(t*.001+p.phase);
-    const q={x:p.x*(1+wobble),y:p.y*(1+wobble),z:p.z*(1+wobble)};
-    return {...project3D(q,w,h,t),p,i};
-  }).sort((a,b)=>a.z-b.z);
-  ctx.lineWidth=1;
-  for(let i=0;i<points.length;i+=3){
-    const a=points[i],b=points[(i+7)%points.length];
-    const dx=a.x-b.x,dy=a.y-b.y;
-    if(dx*dx+dy*dy<5200){
-      ctx.strokeStyle='rgba(101,231,255,.12)';
-      ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
-    }
-  }
-  for(const q of points){
-    const active=.5+.5*Math.sin(t*.002+q.p.phase);
-    const size=(1.2+2.6*active)*q.scale;
-    ctx.globalAlpha=Math.max(.18,Math.min(.95,.3+q.p.energy*.7))*q.scale;
-    ctx.fillStyle=q.p.z>.1?'#65e7ff':'#9b7cff';
-    ctx.beginPath();ctx.arc(q.x,q.y,size,0,Math.PI*2);ctx.fill();
-  }
-  ctx.globalAlpha=.7;
-  ctx.strokeStyle='rgba(101,231,255,.18)';
-  ctx.lineWidth=1;
-  for(let i=0;i<3;i++){
-    ctx.beginPath();
-    ctx.ellipse(cx,cy,R*(.72+i*.12),R*(.32+i*.07),rotation.y+i*.65,0,Math.PI*2);
-    ctx.stroke();
-  }
-  if(pulse>0){
-    ctx.globalAlpha=pulse;
-    ctx.strokeStyle='#65e7ff';
-    ctx.lineWidth=2;
-    ctx.beginPath();ctx.arc(cx,cy,R*(1.02+(1-pulse)*.32),0,Math.PI*2);ctx.stroke();
-    pulse=Math.max(0,pulse-.018);
-  }
-  ctx.globalAlpha=1;
-  requestAnimationFrame(draw3D);
-}
-canvas?.addEventListener('pointerdown',e=>{drag.active=true;drag.x=e.clientX;drag.y=e.clientY;canvas.setPointerCapture?.(e.pointerId)});
-canvas?.addEventListener('pointermove',e=>{if(!drag.active)return;rotation.y+=(e.clientX-drag.x)*.006;rotation.x=Math.max(-.8,Math.min(.8,rotation.x+(e.clientY-drag.y)*.006));drag.x=e.clientX;drag.y=e.clientY});
-canvas?.addEventListener('pointerup',()=>{drag.active=false;pulse=1});
-canvas?.addEventListener('pointercancel',()=>{drag.active=false});
-canvas?.addEventListener('wheel',e=>{e.preventDefault();pulse=1},{passive:false});
-addEventListener('resize',resize3D);
-resize3D();
-draw3D();
+$$('[data-plan]').forEach(btn=>btn.addEventListener('click',async()=>{
+  const plan=btn.dataset.plan;
+  if(plan==='explorer'){location.hash='chat';return}
+  const email=window.prompt('Correo para la suscripción:');if(!email)return;
+  const provider=window.prompt('Pasarela: 1 = Mercado Pago, 2 = PayPal','1')==='2'?'paypal':'mercadopago';
+  const old=btn.textContent;btn.disabled=true;btn.textContent='Preparando…';
+  try{
+    const r=await fetch(API_BASE+'/v1/billing/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({plan,provider,email})});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok||!d.checkout_url)throw new Error('checkout');
+    location.href=d.checkout_url;
+  }catch(_){btn.disabled=false;btn.textContent=old;alert('El checkout todavía no está disponible para este plan.')}
+}));
+
 let authMode='login';
-document.querySelectorAll('.auth-tab').forEach(tab=>tab.addEventListener('click',()=>{authMode=tab.dataset.auth;document.querySelectorAll('.auth-tab').forEach(x=>x.classList.toggle('active',x===tab));document.querySelector('#auth-submit').textContent=authMode==='login'?'Ingresar':'Crear cuenta';document.querySelector('#password-wrap input').autocomplete=authMode==='login'?'current-password':'new-password'}));
-document.querySelector('#auth-form')?.addEventListener('submit',async e=>{e.preventDefault();const email=document.querySelector('#auth-email').value.trim(),password=document.querySelector('#auth-password').value;try{const r=await fetch(API_BASE+(authMode==='login'?'/v1/auth/login':'/v1/auth/register'),{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({email,password})});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.detail||'auth_error');if(d.requires_otp){const code=prompt('Te enviamos un código de seguridad. Ingresalo para continuar:');if(!code)return;const v=await fetch(API_BASE+'/v1/auth/verify-phone',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({challenge_id:d.challenge_id,code})});const vd=await v.json();if(!v.ok)throw new Error(vd.detail||'otp_error')}if(d.session)sessionStorage.setItem('aq_session',d.session);alert(authMode==='login'?'Bienvenido a AgentiCuantico.':'Cuenta creada. Bienvenido.');location.hash='account'}catch(err){alert('No se pudo completar el acceso. Revisá los datos e intentá nuevamente.');console.error(err)}});
-window.handleGoogleCredential=async response=>{try{const r=await fetch(API_BASE+'/v1/auth/google',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({credential:response.credential})});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.detail||'google_auth_error');if(d.session)sessionStorage.setItem('aq_session',d.session);location.hash='account'}catch(err){alert('No se pudo iniciar sesión con Google.');console.error(err)}};
-const passkeyButton=document.querySelector('#passkey-button');
-if(passkeyButton){passkeyButton.disabled=true;passkeyButton.textContent='◉ Passkey / biometría · próximamente';}
+$$('.auth-tab').forEach(tab=>tab.addEventListener('click',()=>{authMode=tab.dataset.auth;$$('.auth-tab').forEach(x=>x.classList.toggle('active',x===tab));$('#auth-submit').textContent=authMode==='login'?'Ingresar':'Crear cuenta'}));
+$('#auth-form')?.addEventListener('submit',async e=>{
+  e.preventDefault();const email=$('#auth-email').value.trim(),password=$('#auth-password').value;
+  try{
+    const r=await fetch(API_BASE+(authMode==='login'?'/v1/auth/login':'/v1/auth/register'),{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({email,password})});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok)throw new Error('auth');
+    if(d.requires_otp){alert('La cuenta requiere una verificación adicional. Completala desde el flujo de acceso.')}
+    else if(authMode==='login'){await loadAccount();alert('Sesión iniciada.')}
+    else alert('Cuenta creada. Ahora podés ingresar.');
+  }catch(_){alert('No se pudo completar el acceso. Revisá los datos e intentá nuevamente.')}
+});
 
-const toolCatalog=["repository.read","repository.write_branch","repository.write_file","repository.create_pr","tests.run","git.diff","preview.capture","asset.create","asset.optimize"];
-const builderForm=document.querySelector('#agent-builder-form');
-function renderTools(){const box=document.querySelector('#agent-tools');if(!box)return;box.innerHTML=toolCatalog.map(t=>'<label class="tool-check"><input type="checkbox" value="'+t+'"> '+t+'</label>').join('')}
-function fillTemplate(t){if(!t)return;document.querySelector('#agent-name').value=t.name||'';document.querySelector('#agent-role').value=t.role||'';document.querySelector('#agent-description').value=t.description||'';document.querySelector('#agent-skills').value=(t.skills||[]).join(', ');document.querySelector('#agent-autonomy').value=t.autonomy_level||'supervised';(t.tools||[]).forEach(v=>{const el=document.querySelector('#agent-tools input[value="'+v+'"]');if(el)el.checked=true});previewBuilder()}
-async function loadTemplates(){try{const r=await fetch(API_BASE+'/v1/account/agents/templates',{credentials:'include'});if(!r.ok)return;const d=await r.json();const box=document.querySelector('#agent-templates');box.innerHTML=(d.templates||[]).map(t=>'<button type="button" class="template-chip" data-template="'+t.id+'">'+t.name+'</button>').join('');box.querySelectorAll('[data-template]').forEach(b=>b.addEventListener('click',()=>fillTemplate(d.templates.find(t=>t.id===b.dataset.template))))}catch(e){}}
-function previewBuilder(){const name=document.querySelector('#agent-name')?.value||'Tu nuevo agente',role=document.querySelector('#agent-role')?.value||'rol personalizado',mission=document.querySelector('#agent-mission')?.value||'Definí una misión y el agente aparecerá aquí.';document.querySelector('#preview-name').textContent=name;document.querySelector('#preview-role').textContent=role;document.querySelector('#preview-mission').textContent=mission;document.querySelector('#preview-meta').textContent=document.querySelector('#agent-autonomy')?.selectedOptions[0]?.text+' · '+document.querySelector('#agent-memory')?.selectedOptions[0]?.text}
-['#agent-name','#agent-role','#agent-mission','#agent-autonomy','#agent-memory'].forEach(s=>document.querySelector(s)?.addEventListener('input',previewBuilder));
-async function loadMyAgents(){const box=document.querySelector('#my-agents');if(!box)return;try{const r=await fetch(API_BASE+'/v1/account/agents',{credentials:'include'});if(!r.ok){box.innerHTML='<span class="muted">Iniciá sesión para cargar tus agentes.</span>';return}const d=await r.json();box.innerHTML=(d.agents||[]).map(a=>'<div class="agent-item"><b>'+escapeHtml(a.avatar||'◈')+' '+escapeHtml(a.name)+'</b><small>'+escapeHtml(a.role)+' · '+escapeHtml(a.autonomy_level)+'</small><button data-delete-agent="'+a.id+'">Desactivar</button></div>').join('')||'<span class="muted">Todavía no tenés agentes.</span>';box.querySelectorAll('[data-delete-agent]').forEach(b=>b.addEventListener('click',async()=>{if(!confirm('¿Desactivar este agente?'))return;await fetch(API_BASE+'/v1/account/agents/'+b.dataset.deleteAgent,{method:'DELETE',credentials:'include'});loadMyAgents()}))}catch(e){}}
-function escapeHtml(v){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-builderForm?.addEventListener('submit',async e=>{e.preventDefault();const status=document.querySelector('#builder-status');status.textContent='Creando…';const body={name:document.querySelector('#agent-name').value.trim(),role:document.querySelector('#agent-role').value.trim(),description:document.querySelector('#agent-description').value.trim(),mission:document.querySelector('#agent-mission').value.trim(),skills:document.querySelector('#agent-skills').value.split(',').map(x=>x.trim()).filter(Boolean),tools:[...document.querySelectorAll('#agent-tools input:checked')].map(x=>x.value),autonomy_level:document.querySelector('#agent-autonomy').value,memory_policy:document.querySelector('#agent-memory').value,credit_limit:Number(document.querySelector('#agent-credit').value||0),success_criteria:document.querySelector('#agent-success').value.trim(),instructions:document.querySelector('#agent-instructions').value.trim(),workspace:document.querySelector('#agent-workspace').value.trim()};try{const r=await fetch(API_BASE+'/v1/account/agents',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify(body)});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.detail||'No se pudo crear');status.textContent='Agente creado correctamente.';loadMyAgents()}catch(err){status.textContent=err.message||'Error al crear el agente.'}});
-renderTools();loadTemplates();loadMyAgents();previewBuilder();
-
+function initBrain(){
+  const canvas=$('#brain-canvas');if(!canvas)return;
+  const ctx=canvas.getContext('2d');let nodes=[],rx=-.1,ry=.3,drag=null,pulse=0;
+  function resize(){const r=canvas.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2);canvas.width=Math.max(1,r.width*d);canvas.height=Math.max(1,r.height*d);ctx.setTransform(d,0,0,d,0,0);nodes=Array.from({length:190},(_,i)=>{const z=Math.random()*2-1,a=Math.random()*Math.PI*2,s=Math.sqrt(1-z*z);return{x:Math.cos(a)*s*(.88+Math.random()*.12),y:z*(.9+Math.random()*.1),z:Math.sin(a)*s,phase:Math.random()*6.28,e:.3+Math.random()*.7}})}
+  function project(p,w,h){const cy=Math.cos(ry),sy=Math.sin(ry),cx=Math.cos(rx),sx=Math.sin(rx);let x=p.x*cy-p.z*sy,z=p.x*sy+p.z*cy;let y=p.y*cx-z*sx;z=p.y*sx+z*cx;const scale=Math.min(w,h)*.34,per=1/(1.7-z*.62);return{x:w/2+x*scale*per,y:h/2+y*scale*per,z,per}}
+  function draw(t=0){const w=canvas.clientWidth,h=canvas.clientHeight;ctx.clearRect(0,0,w,h);const cx=w/2,cy=h/2,R=Math.min(w,h)*.35;const g=ctx.createRadialGradient(cx,cy,5,cx,cy,R*1.3);g.addColorStop(0,'rgba(105,231,255,.15)');g.addColorStop(.5,'rgba(157,131,255,.06)');g.addColorStop(1,'transparent');ctx.fillStyle=g;ctx.beginPath();ctx.arc(cx,cy,R*1.4,0,Math.PI*2);ctx.fill();
+    const pts=nodes.map(p=>{const wv=.025*Math.sin(t*.001+p.phase);return{...project({x:p.x*(1+wv),y:p.y*(1+wv),z:p.z*(1+wv)},w,h),p}}).sort((a,b)=>a.z-b.z);
+    for(let i=0;i<pts.length;i+=2){const a=pts[i],b=pts[(i+11)%pts.length],dx=a.x-b.x,dy=a.y-b.y;if(dx*dx+dy*dy<4200){ctx.strokeStyle='rgba(105,231,255,.09)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke()}}
+    for(const q of pts){const a=.5+.5*Math.sin(t*.002+q.p.phase),s=(1+2.8*a)*q.per;ctx.globalAlpha=Math.max(.16,Math.min(.9,(.25+q.p.e*.65)*q.per));ctx.fillStyle=q.z>.05?'#69e7ff':'#9d83ff';ctx.beginPath();ctx.arc(q.x,q.y,s,0,Math.PI*2);ctx.fill()}
+    if(pulse){ctx.globalAlpha=pulse;ctx.strokeStyle='#69e7ff';ctx.lineWidth=2;ctx.beginPath();ctx.arc(cx,cy,R*(1.02+(1-pulse)*.28),0,Math.PI*2);ctx.stroke();pulse=Math.max(0,pulse-.02)}
+    ctx.globalAlpha=1;requestAnimationFrame(draw)}
+  canvas.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY};canvas.setPointerCapture?.(e.pointerId)});
+  canvas.addEventListener('pointermove',e=>{if(!drag)return;ry+=(e.clientX-drag.x)*.006;rx=Math.max(-.75,Math.min(.75,rx+(e.clientY-drag.y)*.006));drag={x:e.clientX,y:e.clientY}});
+  canvas.addEventListener('pointerup',()=>{drag=null;pulse=1});canvas.addEventListener('pointercancel',()=>drag=null);canvas.addEventListener('wheel',e=>{e.preventDefault();pulse=1},{passive:false});
+  addEventListener('resize',resize);resize();draw();
+}
+initBrain();loadChats();checkHealth();loadAccount();renderAgents();
