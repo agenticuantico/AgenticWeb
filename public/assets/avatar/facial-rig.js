@@ -7,7 +7,7 @@ export const ARKIT52=[
 "cheekPuff","cheekSquintLeft","cheekSquintRight","noseSneerLeft","noseSneerRight",
 "jawForward","jawLeft","jawOpen","jawRight",
 "mouthClose","mouthDimpleLeft","mouthDimpleRight","mouthFrownLeft","mouthFrownRight","mouthFunnel","mouthLeft","mouthLowerDownLeft","mouthLowerDownRight","mouthPressLeft","mouthPressRight","mouthPucker","mouthRight","mouthRollLower","mouthRollUpper","mouthShrugLower","mouthShrugUpper","mouthSmileLeft","mouthSmileRight","mouthStretchLeft","mouthStretchRight","mouthUpperUpLeft","mouthUpperUpRight",
-"tongueOut","eyeLookInLeft","eyeLookInRight"
+"tongueOut"
 ];
 const OCULUS={sil:"viseme_sil",PP:"viseme_PP",FF:"viseme_FF",TH:"viseme_TH",DD:"viseme_DD",kk:"viseme_kk",CH:"viseme_CH",SS:"viseme_SS",nn:"viseme_nn",RR:"viseme_RR",aa:"viseme_aa",E:"viseme_E",ih:"viseme_I",oh:"viseme_O",ou:"viseme_U"};
 const norm=s=>String(s||"").toLowerCase().replace(/[^a-z0-9]/g,"");
@@ -61,8 +61,8 @@ export function createFacialRig(root){
      set("eyeLookUpLeft",Math.max(0,-y));set("eyeLookUpRight",Math.max(0,-y));
      set("eyeLookDownLeft",Math.max(0,y));set("eyeLookDownRight",Math.max(0,y));
    },
-   updateBody(t,speaking=false){
-     if(head){head.rotation.y+=(s*.12+Math.sin(t*.5)*.018-head.rotation.y)*.08;head.rotation.x+=(-s*.04-head.rotation.x)*.08}
+   updateBody(t,speaking=false,lookX=0,lookY=0){
+     if(head){head.rotation.y+=(lookX*.12+Math.sin(t*.5)*.018-head.rotation.y)*.08;head.rotation.x+=(-lookY*.04-head.rotation.x)*.08}
      if(spine)spine.rotation.z+=Math.sin(t*.7)*.002;
      for(const [n,b] of Object.entries(bones)){
        if(/upperarm|shoulder|arm/.test(n)) b.rotation.z+=(Math.sin(t*1.7+(n.includes("left")?-1:1))*(speaking?.035:.012)-b.rotation.z)*.05;
