@@ -114,16 +114,16 @@ async function initAvatar3D(){
       g.scene.scale.setScalar(scale);
       g.scene.position.set(-center.x*scale,-center.y*scale-.35,-center.z*scale);
       group.add(g.scene);
-      $("avatarRigStatus").textContent="GLB · facial rig listo";
+      const morphCount=Object.values(avatar3d.facialRig?.targets||[]).length; const boneCount=Object.keys(avatar3d.facialRig?.bones||{}).length; $("avatarRigStatus").textContent=`GLB · ${morphCount?"ARKit/Oculus facial":"sin morphs"} · ${boneCount} huesos`;
     },undefined,()=>{$("avatarRigStatus").textContent="3D · fallback WebGL"})
   }};
   build("female");if(loadUrl)avatar3d.setGlb(loadUrl);else $("avatarRigStatus").textContent="WEBGL · humanoide";
   canvas.addEventListener("pointermove",e=>{const r=canvas.getBoundingClientRect();avatar3d.mouseX=((e.clientX-r.left)/r.width-.5)*2;avatar3d.mouseY=((e.clientY-r.top)/r.height-.5)*2});
   const resize=()=>{const w=canvas.clientWidth||500,h=canvas.clientHeight||420;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()};new ResizeObserver(resize).observe(canvas);resize();
   const clock=new THREE.Clock(),animate=()=>{
-   const t=clock.getElapsedTime(),m=avatar3d.model;
+   const dt=Math.min(clock.getDelta(),.05),t=clock.elapsedTime,m=avatar3d.model;
    particles.rotation.y=t*.035;particles.rotation.x=Math.sin(t*.17)*.05;
-   if(avatar3d.mixer)avatar3d.mixer.update(Math.min(clock.getDelta(),.05));
+   if(avatar3d.mixer)avatar3d.mixer.update(dt);
    if(m){
     m.rotation.y+=((avatar3d.mouseX*.11+Math.sin(t*.42)*.035)-m.rotation.y)*.035;
     m.rotation.x+=((avatar3d.mouseY*.035)-m.rotation.x)*.035;
@@ -133,7 +133,7 @@ async function initAvatar3D(){
     const mouth=m.userData.mouth;if(mouth)mouth.scale.y=.72+avatar3d.mouthLevel*2.1;
     if(m.userData.eyes)for(const eye of m.userData.eyes){eye.position.x+=(Math.max(-.04,Math.min(.04,avatar3d.mouseX*.035))-(eye.position.x-(eye===m.userData.eyes[0]?-0.29:0.29)))*.08}
     if(m.userData.arms)for(const a of m.userData.arms){const wave=avatar3d.speaking?Math.sin(t*2.1+a.side)*.07:Math.sin(t*.8+a.side)*.025;a.upper.rotation.z=a.side*(.13+wave);a.fore.rotation.z=a.side*(.08-wave*.7);a.hand.position.y=-1.98+Math.sin(t*1.6+a.side)*.018}
-    if(avatar3d.facialRig){avatar3d.facialRig.updateBody(t,avatar3d.speaking);avatar3d.facialRig.look(avatar3d.mouseX*.85,avatar3d.mouseY*.65);avatar3d.facialRig.setMouth(avatar3d.mouthLevel,String(avatar3d.morphText||"A").toUpperCase())}
+    if(avatar3d.facialRig){avatar3d.facialRig.updateBody(t,avatar3d.speaking,avatar3d.mouseX*.85,avatar3d.mouseY*.65);avatar3d.facialRig.look(avatar3d.mouseX*.85,avatar3d.mouseY*.65);avatar3d.facialRig.setMouth(avatar3d.mouthLevel,String(avatar3d.morphText||"A").toUpperCase())}
     const blink=Math.sin(t*.43)*.5+.5;if(blink>.985){m.userData.blink=Math.min(1,m.userData.blink+.18)}else m.userData.blink=Math.max(0,m.userData.blink-.25);
     m.traverse(o=>{if(o.isMesh&&o.morphTargetDictionary&&o.morphTargetInfluences){for(const [name,idx] of Object.entries(o.morphTargetDictionary)){if(/mouth|jaw|viseme|phoneme|open/i.test(name))o.morphTargetInfluences[idx]=avatar3d.mouthLevel*.78;if(/blink|eye.?close/i.test(name))o.morphTargetInfluences[idx]=m.userData.blink}}})
    }
