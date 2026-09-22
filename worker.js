@@ -186,6 +186,18 @@ async function handleApi(request, env) {
     return json({ ok: true, service: "agenticweb" }, 200, request);
   }
 
+  if (url.pathname === "/v1/public/model" && request.method === "GET") {
+    const configured = String(env.HF_MODEL || "Qwen/Qwen3.8-27B").trim();
+    const available = String(env.HF_MODELS || configured).split(",").map(x => x.trim()).filter(Boolean);
+    return json({
+      ok: true,
+      model: configured,
+      available_models: available,
+      provider: "Hugging Face Inference Providers",
+      endpoint: "OpenAI-compatible chat completions"
+    }, 200, request);
+  }
+
   if (url.pathname === "/v1/public/chat" && request.method === "POST") {
     try {
       const response = await callHuggingFace(request.clone(), env);
