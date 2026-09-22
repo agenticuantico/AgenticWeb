@@ -6,6 +6,9 @@ on:
     branches: [main]
     paths:
       - ".github/workflows/autonomous-brain-supervisor.yml"
+      - "worker.js"
+      - "wrangler.jsonc"
+      - "public/**"
   schedule:
     - cron: "*/15 * * * *"
 
