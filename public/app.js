@@ -68,7 +68,7 @@ async function initAvatar3D(){
   build("female");
   if(loadUrl){avatar3d.setGlb(loadUrl)} else $("avatarRigStatus").textContent="3D · humanoide";
   const clock=new THREE.Clock(),resize=()=>{const w=canvas.clientWidth||500,h=canvas.clientHeight||420;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()};new ResizeObserver(resize).observe(canvas);resize();
-  const animate=()=>{const t=clock.getElapsedTime(),m=avatar3d.model;if(m){m.rotation.y=Math.sin(t*.42)*.08;m.position.y=Math.sin(t*1.15)*.035;if(avatar3d.speaking)avatar3d.mouthLevel=.35+.65*(.5+.5*Math.sin(t*22));const mouth=m.userData.mouth;if(mouth)mouth.scale.y=.7+avatar3d.mouthLevel*2.4;const head=m.userData.head;if(head){head.rotation.z=Math.sin(t*.7)*.018;head.rotation.x=Math.sin(t*.53)*.012}}renderer.render(scene,camera);requestAnimationFrame(animate)};animate();
+  const animate=()=>{const t=clock.getElapsedTime(),m=avatar3d.model;if(m){m.rotation.y=Math.sin(t*.42)*.08;m.position.y=Math.sin(t*1.15)*.035;if(avatar3d.speaking)avatar3d.mouthLevel=.35+.65*(.5+.5*Math.sin(t*22));const mouth=m.userData.mouth;if(mouth)mouth.scale.y=.7+avatar3d.mouthLevel*2.4;m.traverse(o=>{if(o.isMesh&&o.morphTargetDictionary&&o.morphTargetInfluences){for(const [name,idx] of Object.entries(o.morphTargetDictionary)){if(/mouth|jaw|viseme|phoneme|open/i.test(name))o.morphTargetInfluences[idx]=avatar3d.mouthLevel*.72}}});const head=m.userData.head;if(head){head.rotation.z=Math.sin(t*.7)*.018;head.rotation.x=Math.sin(t*.53)*.012}}renderer.render(scene,camera);requestAnimationFrame(animate)};animate();
  }catch(e){const st=$("avatarRigStatus");if(st)st.textContent="3D · navegador no compatible"}
 }
 
