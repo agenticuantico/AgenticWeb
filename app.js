@@ -115,7 +115,7 @@ async function checkHealth(){
       $('#brain-state').textContent='Online · listo';
     }else throw new Error();
   }catch(_){
-    $('#connection-pill').innerHTML='<i style="background:#ffbd6b"></i> Degradado';
+    $('#connection-pill').innerHTML='<i class="degraded-dot"></i> Degradado';
     $('#brain-state').textContent='Conexión limitada';
   }
 }
