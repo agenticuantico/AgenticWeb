@@ -109,6 +109,12 @@
 </section>
 <section id="admin" class="section admin-section">
 <div class="section-heading"><div class="eyebrow">ADMINISTRACIÓN</div><h2>Panel administrativo.</h2><p>Área exclusiva para administradores: usuarios, suscripciones, pagos, agentes, seguridad, tareas y auditoría.</p></div>
+<div class="chat-shell admin-chat-shell">
+<div class="chat-top"><div><b>Cerebro administrativo</b><span><i></i> Solo admin</span></div><small>Órdenes con confirmación para acciones sensibles</small></div>
+<div id="admin-messages" class="messages" aria-live="polite"><div class="message assistant"><div class="avatar">AQ</div><div><b>AgentiCuantico</b><p>Panel de control listo. Podés consultarme sobre usuarios, agentes, tareas y estado del sistema.</p></div></div></div>
+<form id="admin-chat-form" class="chat-form"><textarea id="admin-prompt" rows="2" placeholder="Ej.: Mostrame el estado de los agentes..." required></textarea><button class="send" type="submit">Ordenar <span>↗</span></button></form>
+<div class="chat-footer"><span id="admin-chat-status">Control administrativo listo</span><span>Acciones sensibles requieren confirmación</span></div>
+</div>
 <div class="admin-grid"><span>👥 Usuarios y roles</span><span>◈ Suscripciones y pagos</span><span>⚙ Agentes y tareas</span><span>🛡 Seguridad y alertas</span><span>⌁ Auditoría</span><span>▦ Métricas del sistema</span></div>
 </section>
 </main>
