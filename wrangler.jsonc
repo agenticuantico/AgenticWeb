@@ -17,6 +17,7 @@
   },
   "vars": {
     "HF_MODEL": "Qwen/Qwen3.8-27B",
-    "HF_API_URL": "https://router.huggingface.co/v1/chat/completions"
+    "HF_API_URL": "https://router.huggingface.co/v1/chat/completions",
+    "HF_MODELS": "Qwen/Qwen3.8-27B,Qwen/Qwen3.8-27B-FP8,Qwen/Qwen3.6-27B"
   }
 }
