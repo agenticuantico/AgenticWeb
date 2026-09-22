@@ -49,7 +49,7 @@ async function proxyToCore(request, env) {
   try {
     target = new URL(origin + new URL(request.url).pathname + new URL(request.url).search);
     if (target.protocol !== "https:") {
-      return json({ ok: false, error: "core_api_requires_https" }, 503);
+      return applySecurityHeaders(json({ ok: false, error: "service_unavailable", message: "El servicio de IA está temporalmente no disponible." }, 503), request);
     }
   } catch {
     return applySecurityHeaders(json({ ok: false, error: "service_unavailable", message: "El servicio de IA está temporalmente no disponible." }, 503), request);
