@@ -1,7 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/wrangler.json",
   "name": "agenticweb",
-  "account_id": "${CLOUDFLARE_ACCOUNT_ID}",
   "main": "worker.js",
   "compatibility_date": "2026-09-22",
   "routes": [
