@@ -171,7 +171,7 @@ document.addEventListener("click",e=>{if(!$("quickMenu").contains(e.target)&&e.t
 $("composer").onsubmit=e=>{e.preventDefault();const t=$("input").value.trim();if((t||pendingAttachments.length)&&!busy){$("input").value="";send(t||"Analizá los archivos adjuntos.")}};
 $("input").oninput=()=>{$("input").style.height="auto";$("input").style.height=Math.min($("input").scrollHeight,140)+"px"};
 $("input").onkeydown=e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();$("composer").requestSubmit()}};
-$("newChat").onclick=newConversation;
+$("newChat").onclick=newConversation;$("clearHistory").onclick=()=>{if(!confirm("¿Borrar todo el historial local?"))return;conversations=[];currentId="";history=[];ensureConversation();$("messages").innerHTML="";renderConversationList();toast("Historial borrado")};
 window.addEventListener("load",()=>{
  document.querySelectorAll(".nav-icon[data-icon]").forEach(el=>el.innerHTML=icon(el.dataset.icon));
  history.forEach(x=>add(x.role,x.content,false));
