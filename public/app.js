@@ -92,12 +92,31 @@ async function initAvatar3D(){
   const pm=new THREE.PointsMaterial({color:0x45dfff,size:.035,transparent:true,opacity:.62,blending:THREE.AdditiveBlending,depthWrite:false});
   const particles=new THREE.Points(pg,pm);scene.add(particles);
   const group=new THREE.Group();scene.add(group);
-  const loadUrl=window.AGENTICUANTICO_AVATAR_GLB||localStorage.getItem("aq_avatar_glb")||"";
+  const loadUrl=window.AGENTICUANTICO_AVATAR_GLB||localStorage.getItem("aq_avatar_glb")||"https://raw.githubusercontent.com/met4citizen/TalkingHead/main/avatars/mpfb.glb";
   const build=gender=>{group.clear();avatar3d.model=createHumanoid3D(gender);group.add(avatar3d.model)};
   avatar3d={renderer,scene,camera,group,model:null,speaking:false,gender:"female",mouthLevel:0,mouseX:0,mouseY:0,
    setSpeaking(v){this.speaking=!!v},setMouth(v){this.mouthLevel=Math.max(0,Math.min(1,v))},
    setGender(g){this.gender=g;build(g)},
-   setGlb(url){new GLTFLoader().load(url,g=>{group.clear();avatar3d.model=g.scene;group.add(g.scene);$("avatarRigStatus").textContent="GLB · cargado";},undefined,()=>{$("avatarRigStatus").textContent="3D · fallback WebGL"})}};
+   setGlb(url){
+    new GLTFLoader().load(url,g=>{
+      group.clear();
+      avatar3d.model=g.scene;
+      g.scene.traverse(o=>{
+        if(o.isMesh){
+          if(o.morphTargetDictionary&&o.morphTargetInfluences)o.userData.hasFaceMorphs=true;
+          if(o.material){o.material.roughness=Math.min(o.material.roughness??.6,.62);o.material.envMapIntensity=1.25}
+        }
+      });
+      const box=new THREE.Box3().setFromObject(g.scene),size=box.getSize(new THREE.Vector3()),center=box.getCenter(new THREE.Vector3());
+      const scale=2.65/Math.max(size.y,.001);
+      g.scene.scale.setScalar(scale);
+      g.scene.position.set(-center.x*scale,-center.y*scale-.35,-center.z*scale);
+      group.add(g.scene);
+      $("avatarRigStatus").textContent="GLB · ARKit/visemes listo";
+    },undefined,()=>{
+      $("avatarRigStatus").textContent="3D · fallback WebGL";
+    })
+  }};
   build("female");if(loadUrl)avatar3d.setGlb(loadUrl);else $("avatarRigStatus").textContent="WEBGL · humanoide";
   canvas.addEventListener("pointermove",e=>{const r=canvas.getBoundingClientRect();avatar3d.mouseX=((e.clientX-r.left)/r.width-.5)*2;avatar3d.mouseY=((e.clientY-r.top)/r.height-.5)*2});
   const resize=()=>{const w=canvas.clientWidth||500,h=canvas.clientHeight||420;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()};new ResizeObserver(resize).observe(canvas);resize();
@@ -116,7 +135,13 @@ async function initAvatar3D(){
     const blink=Math.sin(t*.43)*.5+.5;if(blink>.985){m.userData.blink=Math.min(1,m.userData.blink+.18)}else m.userData.blink=Math.max(0,m.userData.blink-.25);
     m.traverse(o=>{if(o.isMesh&&o.morphTargetDictionary&&o.morphTargetInfluences){for(const [name,idx] of Object.entries(o.morphTargetDictionary)){if(/mouth|jaw|viseme|phoneme|open/i.test(name))o.morphTargetInfluences[idx]=avatar3d.mouthLevel*.78;if(/blink|eye.?close/i.test(name))o.morphTargetInfluences[idx]=m.userData.blink}}})
    }
-   renderer.render(scene,camera);requestAnimationFrame(animate)
+   renderer.render(scene,camera);requestAnimationFrame(animate)};
+   animate();
+  } catch(error){
+   console.error("[AgentiCuantico] Avatar 3D init failed:",error);
+   const status=$("avatarRigStatus"); if(status) status.textContent="3D · fallback visual";
+  }
+}
 
 // WebGPU avatar is optional. The stable WebGL avatar below is the default renderer.
 
@@ -232,3 +257,7 @@ async function initAvatar3D(){
     if(document.hidden) window.speechSynthesis?.pause?.();
   });
 })();
+
+
+/* Avatar bootstrap: one renderer only. */
+window.addEventListener("load",()=>{ try{ initAvatar3D(); }catch(e){ console.error(e); } },{once:true});
