@@ -1,13 +1,68 @@
 <!doctype html>
 <html lang="es">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="AgentiCuantico: una experiencia para conversar, explorar ideas y convertir objetivos en planes.">
-<title>AgentiCuantico</title><link rel="stylesheet" href="./styles.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="AgentiCuantico — inteligencia agéntica para conversar, crear y convertir objetivos en acciones.">
+<meta name="theme-color" content="#050816">
+<title>AgentiCuantico — Inteligencia que evoluciona</title>
+<link rel="stylesheet" href="./styles.css">
 </head>
 <body>
-<header class="topbar"><a class="brand" href="#inicio"><span class="brand-mark">AQ</span> AgentiCuantico</a><nav><a href="#inicio">Inicio</a><a href="#chat">Chat</a></nav></header>
-<main id="inicio">
-<section class="hero"><div class="hero-copy"><p class="eyebrow">INTELIGENCIA AGÉNTICA · EVOLUCIÓN CONTINUA</p><h1>Una inteligencia que <span>explora, aprende y actúa.</span></h1><p class="lead">Conversá con una inteligencia diseñada para ayudarte a comprender problemas, crear planes y avanzar con claridad y seguridad.</p><div class="actions"><a class="button primary" href="#chat">Iniciar conversación</a></div><div class="pill-row"><span>● Respuestas útiles</span><span>● Control humano</span><span>● Seguridad</span></div></div><div class="orb" aria-label="Visualización decorativa" role="img"><div class="orb-core"></div><div class="orbit orbit-a"></div><div class="orbit orbit-b"></div><div class="orbit orbit-c"></div><div class="orb-label">AGENTIC<br>AI</div></div></section>
-<section id="chat" class="section chat-section"><div class="section-heading"><p class="eyebrow">ASISTENTE</p><h2>Hablá con AgentiCuantico</h2><p>Escribí una pregunta, una idea o un objetivo para comenzar.</p></div><div class="chat-shell"><div id="messages" class="messages" aria-live="polite"><div class="message assistant"><b>AgentiCuantico</b><p>Hola. ¿En qué puedo ayudarte hoy?</p></div></div><form id="chat-form" class="chat-form"><textarea id="prompt" rows="2" placeholder="Escribí tu mensaje..." required></textarea><button class="button primary" type="submit">Enviar ↗</button></form><p id="chat-status" class="chat-status">Listo</p></div></section>
-</main><footer><span>AgentiCuantico</span><span>Asistencia inteligente con control y seguridad</span></footer><script src="./app.js" defer></script></body></html>
+<div class="ambient"></div>
+<header class="topbar">
+  <a class="brand" href="#inicio"><span class="brand-mark">AQ</span><span>Agenti<span>Cuantico</span></span></a>
+  <nav><a href="#como-funciona">Cómo funciona</a><a href="#chat">Chat</a><a href="#planes">Planes</a></nav>
+  <a class="nav-cta" href="#planes">Comenzar</a>
+</header>
+<main>
+<section id="inicio" class="hero">
+  <div class="hero-copy">
+    <div class="eyebrow"><i></i> INTELIGENCIA AGÉNTICA · 2026</div>
+    <h1>Tu idea.<br><span>Su próxima acción.</span></h1>
+    <p class="lead">Conversá con AgentiCuantico, una arquitectura de inteligencia agéntica diseñada para transformar objetivos en planes, tareas y resultados verificables.</p>
+    <div class="actions"><a class="button primary" href="#chat">Hablar con la IA <b>↗</b></a><a class="button glass" href="#planes">Ver planes</a></div>
+    <div class="trust"><span>✦ Agentes especializados</span><span>◈ Seguridad defensiva</span><span>◉ Control humano</span></div>
+  </div>
+  <div class="brain-stage" aria-label="Visualización 3D del cerebro de AgentiCuantico">
+    <canvas id="brain-canvas"></canvas>
+    <div class="brain-hud"><span class="live-dot"></span><b>CEREBRO ACTIVO</b><small id="brain-state">EXPLORANDO · 3 AGENTES</small></div>
+    <div class="node-label label-a">PLANNER</div><div class="node-label label-b">SECURITY</div><div class="node-label label-c">DESIGN</div>
+  </div>
+</section>
+
+<section id="como-funciona" class="section">
+  <div class="section-heading"><div class="eyebrow">UN SISTEMA, MUCHAS CAPACIDADES</div><h2>De una conversación a una ejecución.</h2><p>La experiencia pública vive en AgenticWeb; el cerebro operativo y sus agentes trabajan detrás de una API protegida.</p></div>
+  <div class="feature-grid">
+    <article class="feature"><span>01</span><h3>Entiende</h3><p>Interpreta tu objetivo y lo convierte en un plan estructurado.</p></article>
+    <article class="feature featured"><span>02</span><h3>Orquesta</h3><p>Coordina agentes especializados para programación, diseño, investigación y seguridad defensiva.</p></article>
+    <article class="feature"><span>03</span><h3>Verifica</h3><p>Revisa resultados y registra el estado de las tareas antes de informar.</p></article>
+  </div>
+</section>
+
+<section id="chat" class="section chat-section">
+  <div class="section-heading"><div class="eyebrow">LIVE AI</div><h2>Probalo ahora.</h2><p>Escribí un objetivo. La interfaz se conecta con el cerebro de AgentiCuantico.</p></div>
+  <div class="chat-shell">
+    <div class="chat-top"><div><b>AgentiCuantico</b><span><i></i> Online</span></div><small>Sesión protegida</small></div>
+    <div id="messages" class="messages" aria-live="polite"><div class="message assistant"><div class="avatar">AQ</div><div><b>AgentiCuantico</b><p>Hola. Contame qué querés crear, resolver o mejorar.</p></div></div></div>
+    <form id="chat-form" class="chat-form"><textarea id="prompt" rows="2" placeholder="Ej.: Quiero crear una web para mi proyecto..." required></textarea><button class="send" type="submit">Enviar <span>↗</span></button></form>
+    <div class="chat-footer"><span id="chat-status">Listo para conversar</span><span>AgentiWeb → AgentiCuantico</span></div>
+  </div>
+</section>
+
+<section id="planes" class="section pricing">
+  <div class="section-heading center"><div class="eyebrow">ELEGÍ TU NIVEL</div><h2>Planes para cada etapa.</h2><p>Suscripciones pensadas para empezar simple y ampliar capacidades cuando tu proyecto crece.</p></div>
+  <div class="pricing-grid">
+    <article class="price-card"><div class="price-top"><span>Explorer</span><small>Para conocer el sistema</small></div><div class="price">Gratis</div><ul><li>✓ Chat con AgentiCuantico</li><li>✓ Experiencia 3D</li><li>✓ Capacidades básicas</li></ul><button class="price-button glass" data-plan="explorer">Comenzar gratis</button></article>
+    <article class="price-card"><div class="price-top"><span>Creator</span><small>Para crear y producir</small></div><div class="price"><b>USD 9</b><small>/ mes</small></div><ul><li>✓ Mayor uso del cerebro</li><li>✓ Agentes de programación y diseño</li><li>✓ Historial ampliado</li></ul><button class="price-button primary" data-plan="creator">Elegir Creator</button></article>
+    <article class="price-card featured-price"><div class="popular">MÁS ELEGIDO</div><div class="price-top"><span>Pro</span><small>Para proyectos serios</small></div><div class="price"><b>USD 19</b><small>/ mes</small></div><ul><li>✓ Agentes avanzados</li><li>✓ Automatizaciones y tareas largas</li><li>✓ Seguridad defensiva prioritaria</li></ul><button class="price-button primary" data-plan="pro">Elegir Pro</button></article>
+    <article class="price-card"><div class="price-top"><span>Studio</span><small>Para equipos y empresas</small></div><div class="price"><b>USD 49</b><small>/ mes</small></div><ul><li>✓ Mayor capacidad de agentes</li><li>✓ Flujos para equipos</li><li>✓ Administración y controles</li></ul><button class="price-button glass" data-plan="studio">Elegir Studio</button></article>
+  </div>
+  <div class="payments"><span>Pagos disponibles</span><b>Mercado Pago</b><em>·</em><b>PayPal</b><small>La disponibilidad de moneda y métodos depende del país y la cuenta del comercio.</small></div>
+</section>
+
+<section class="final-cta"><div><div class="eyebrow">EL PRÓXIMO PASO EMPIEZA ACÁ</div><h2>¿Qué querés construir?</h2></div><a class="button primary" href="#chat">Empezar conversación ↗</a></section>
+</main>
+<footer><span>© 2026 AgentiCuantico</span><span>Inteligencia agéntica · Seguridad · Evolución</span></footer>
+<script src="./app.js" defer></script>
+</body></html>
