@@ -161,9 +161,10 @@
         </div>
         <aside class="brain-stage glass" aria-label="Avatar 3D de AgentiCuantico">
           <div class="stage-top"><div><b id="avatarName">Agente Principal</b><small id="avatarState">En línea · listo para hablar</small></div><span class="stage-live">● LIVE</span></div>
-          <div class="robot-avatar" id="robotAvatar" data-gender="female"><div class="avatar-realistic" aria-hidden="true"><div class="avatar-depth"></div></div>
-            <div class="avatar-aura"></div><div class="avatar-head"><i class="ear left"></i><i class="ear right"></i><i class="brow left"></i><i class="brow right"></i><i class="eye left"></i><i class="eye right"></i><i class="nose"></i><i class="mouth"></i><i class="chin"></i></div>
-            <div class="avatar-neck"></div><div class="avatar-body"><span class="body-core"></span><i class="shoulder left"></i><i class="shoulder right"></i></div>
+          <div class="robot-avatar avatar-3d" id="robotAvatar" data-gender="female">
+            <div class="avatar-aura"></div>
+            <canvas id="avatarCanvas" aria-label="Avatar 3D interactivo de AgentiCuantico"></canvas>
+            <div class="avatar-3d-hud"><span class="hud-chip">WEBGL · 3D</span><span class="hud-chip" id="avatarRigStatus">RIG · listo</span></div>
             <div class="algorithm-spectrum"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
           </div>
           <div class="voice-status"><span class="voice-wave"><i></i><i></i><i></i><i></i><i></i></span><div><b id="voiceStatus">Voz lista</b><small id="voiceName">Clara · Español (Argentina)</small></div><button id="stopVoice" class="ghost mini" type="button">Detener</button></div>
