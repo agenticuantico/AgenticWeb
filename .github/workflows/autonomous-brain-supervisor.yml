@@ -23,7 +23,7 @@ jobs:
       - name: Check public brain health
         run: |
           set -euo pipefail
-          url="https://agenticuantico.dev.ar/health"
+          url="https://agenticweb.agenticuantico.workers.dev/health"
           ok=0
           for attempt in 1 2 3 4 5; do
             echo "Health check attempt $attempt/5"
@@ -46,7 +46,7 @@ jobs:
           ok=0
           for attempt in 1 2 3; do
             echo "Conversation check attempt $attempt/3"
-            response="$(curl -sS --max-time 45 -H 'Content-Type: application/json' -H 'Origin: https://agenticuantico.dev.ar' -d "$payload" -w $'\nHTTP_STATUS:%{http_code}' https://agenticuantico.dev.ar/v1/public/chat || true)"
+            response="$(curl -sS --max-time 45 -H 'Content-Type: application/json' -H 'Origin: https://agenticuantico.dev.ar' -d "$payload" -w $'\nHTTP_STATUS:%{http_code}' https://agenticweb.agenticuantico.workers.dev/v1/public/chat || true)"
             echo "$response"
             body="${response%$'\nHTTP_STATUS:'*}"
             status="${response##*HTTP_STATUS:}"
