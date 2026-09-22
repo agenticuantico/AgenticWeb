@@ -12,6 +12,9 @@
       "/health"
     ]
   },
+  "triggers": {
+    "crons": ["*/15 * * * *"]
+  },
   "observability": {
     "enabled": true
   },
