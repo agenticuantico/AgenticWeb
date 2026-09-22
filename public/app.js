@@ -127,6 +127,10 @@ import "./avatar-webgpu.js";
   const hero=document.getElementById("cinematicHero");
   if(!hero) return;
   const video=document.getElementById("heroScrubVideo");
+  const pinBg=document.getElementById("pinBackgroundImage");
+  // Offline-first: the committed world asset is always available. Pinterest is only a reference.
+  // Never make the landing page depend on Pinterest being online.
+  if(pinBg) pinBg.addEventListener("error",()=>{pinBg.src="./assets/background/quantum-world.svg";},{once:false});
   const typeEl=document.getElementById("heroTypewriter");
   const actions=document.getElementById("heroActions");
   let prevX=null,targetTime=0,seekQueued=false,seeking=false;
