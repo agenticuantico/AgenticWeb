@@ -79,7 +79,7 @@ function showChat(){
 function panel(view){
  $("chat").classList.add("hidden");$("panel").classList.remove("hidden");
  document.querySelectorAll(".nav-item").forEach(x=>x.classList.toggle("active",x.dataset.view===view));
- $("title").textContent=({projects:"Proyectos",agents:"Agentes",teams:"Equipos de trabajo",coder:"Agentic Codex",account:"Registro / perfil",skills:"Skills"})[view]||"AgentiCuantico";
+ $("title").textContent=({projects:"Proyectos",agents:"Agentes",teams:"Equipos de trabajo",coder:"CodQ",account:"Registro / perfil",skills:"Skills"})[view]||"AgentiCuantico";
  closeMobile();
  if(view==="agents")agentsPanel();else if(view==="teams")teamsPanel();else if(view==="coder")coderPanel();else if(view==="account")accountPanel();else if(view==="skills")skillsPanel();else projectsPanel()
 }
