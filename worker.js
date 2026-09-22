@@ -36,6 +36,10 @@ async function callHuggingFace(request, env) {
   const token = String(env.HF_TOKEN || "").trim();
   const model = String(env.HF_MODEL || "Qwen/Qwen3.8-27B").trim();
   const endpoint = String(env.HF_API_URL || "https://router.huggingface.co/v1/chat/completions").trim();
+  const models = [
+    model,
+    ...["novita", "cerebras", "ovhcloud", "deepinfra"].map(provider => `${model}:${provider}`)
+  ].filter((value, index, list) => list.indexOf(value) === index);
 
   if (!token) return null;
 
@@ -72,31 +76,39 @@ async function callHuggingFace(request, env) {
     { role: "user", content: message }
   ];
 
-  const upstream = await fetch(endpoint, {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${token}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      model,
-      messages,
-      temperature: 0.7,
-      max_tokens: 1024,
-      stream: false
-    })
-  });
+  for (const selectedModel of models) {
+    try {
+      const upstream = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: selectedModel,
+          messages,
+          temperature: 0.7,
+          max_tokens: 1024,
+          stream: false
+        })
+      });
 
-  if (!upstream.ok) return null;
+      if (!upstream.ok) continue;
 
-  const data = await upstream.json();
-  const answer = data?.choices?.[0]?.message?.content;
-  if (typeof answer !== "string" || !answer.trim()) return null;
+      const data = await upstream.json();
+      const answer = data?.choices?.[0]?.message?.content;
+      if (typeof answer !== "string" || !answer.trim()) continue;
 
-  return json({
-    ok: true,
-    answer: answer.trim()
-  }, 200, request);
+      return json({
+        ok: true,
+        answer: answer.trim()
+      }, 200, request);
+    } catch {
+      continue;
+    }
+  }
+
+  return null;
 }
 
 async function handleApi(request, env) {
