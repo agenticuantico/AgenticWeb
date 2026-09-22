@@ -203,8 +203,67 @@ async function handleApi(request, env) {
   }, 404, request);
 }
 
+async function autonomousBrainCycle(env) {
+  const token = String(env.HF_TOKEN || "").trim();
+  if (!token) {
+    console.log("agent-cycle: skipped; HF_TOKEN is not configured");
+    return;
+  }
+
+  const endpoint = String(env.HF_API_URL || "https://router.huggingface.co/v1/chat/completions").trim();
+  const models = String(env.HF_MODELS || env.HF_MODEL || "Qwen/Qwen3.8-27B")
+    .split(",").map(x => x.trim()).filter(Boolean)
+    .map(x => x.endsWith(":fastest") ? x : x + ":fastest");
+
+  const messages = [
+    {
+      role: "system",
+      content: "Sos el supervisor autónomo interno de AgentiCuantico. Trabajás como un agente de software, no como una persona. No accedas a datos de usuarios. No reveles secretos. En cada ciclo analizá únicamente el estado operativo conocido y proponé una próxima tarea segura de mantenimiento."
+    },
+    {
+      role: "user",
+      content: "Ciclo autónomo: verificá conceptualmente salud del servicio, disponibilidad del modelo y posibles mejoras de estabilidad. Devolvé un plan breve de hasta 3 acciones. No inventes resultados de herramientas que no ejecutaste."
+    }
+  ];
+
+  for (const model of models) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 20000);
+    try {
+      const response = await fetch(endpoint, {
+        method: "POST",
+        signal: controller.signal,
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model,
+          messages,
+          temperature: 0.2,
+          max_tokens: 256,
+          stream: false
+        })
+      });
+      if (!response.ok) continue;
+      const data = await response.json();
+      const plan = data?.choices?.[0]?.message?.content;
+      if (typeof plan === "string" && plan.trim()) {
+        console.log("agent-cycle: completed", plan.trim().slice(0, 2000));
+        return;
+      }
+    } catch {
+      // Fail silently: autonomous cycles must never break public chat.
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+
+  console.log("agent-cycle: provider unavailable");
+}
+
 export default {
-  async fetch(request, env) {
+  async scheduled(controller, env, ctx) {\n    ctx.waitUntil(autonomousBrainCycle(env));\n  },\n\n  async fetch(request, env) {
     const url = new URL(request.url);
 
     if (isApiPath(url.pathname)) {
