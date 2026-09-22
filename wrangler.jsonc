@@ -5,8 +5,8 @@
   "compatibility_date": "2026-09-21",
   "workers_dev": false,
   "routes": [
-    { "pattern": "agenticuantico.dev.ar/v1/*" },
-    { "pattern": "agenticuantico.dev.ar/health" }
+    { "pattern": "agenticuantico.dev.ar/v1/*", "zone_name": "agenticuantico.dev.ar" },
+    { "pattern": "agenticuantico.dev.ar/health", "zone_name": "agenticuantico.dev.ar" }
   ],
   "assets": {
     "directory": "./public",
