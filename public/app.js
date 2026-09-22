@@ -1,3 +1,6 @@
+import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js";
+import {GLTFLoader} from "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/loaders/GLTFLoader.js";
+
 const API=(window.AGENTICUANTICO_API_URL||"https://agenticweb.agenticuantico.workers.dev").replace(/\/$/,"");
 const K={chat:"aq_chat_v7",conversations:"aq_conversations_v1",active:"aq_active_v1",session:"aq_guest_v6",agents:"aq_agents_v5",teams:"aq_teams_v5",profile:"aq_profile_v5",auth:"aq_auth_v1",improvement:"aq_improvement_consent_v1"};
 let conversations=JSON.parse(localStorage.getItem(K.conversations)||"[]");
@@ -32,6 +35,43 @@ const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const icon=(name)=>({chat:"<svg viewBox='0 0 24 24'><path d='M5 6.5h14v9H9l-4 3v-12Z'/><path d='M8 10h8M8 13h5'/></svg>",projects:"<svg viewBox='0 0 24 24'><path d='M4 7.5h6l1.5 2H20v9H4z'/><path d='M4 7.5V5h6l1.5 2'/></svg>",agents:"<svg viewBox='0 0 24 24'><circle cx='12' cy='8' r='3'/><path d='M6 19c.6-3.2 2.7-5 6-5s5.4 1.8 6 5'/><path d='M4 12h3M17 12h3'/></svg>",teams:"<svg viewBox='0 0 24 24'><circle cx='8' cy='9' r='2.5'/><circle cx='16' cy='9' r='2.5'/><path d='M3.5 18c.5-2.5 2-4 4.5-4s4 1.5 4.5 4M11.5 18c.5-2.5 2-4 4.5-4s4 1.5 4.5 4'/></svg>",code:"<svg viewBox='0 0 24 24'><path d='m8 7-5 5 5 5M16 7l5 5-5 5M14 4l-4 16'/></svg>",user:"<svg viewBox='0 0 24 24'><circle cx='12' cy='8' r='3'/><path d='M5 20c.7-4 3-6 7-6s6.3 2 7 6'/></svg>",spark:"<svg viewBox='0 0 24 24'><path d='m12 3 1.7 5.3L19 10l-5.3 1.7L12 17l-1.7-5.3L5 10l5.3-1.7Z'/><path d='m19 16 .7 2.3L22 19l-2.3.7L19 22l-.7-2.3L16 19l2.3-.7Z'/></svg>"}[name]||"");
 
+
+let avatar3d=null;
+function makeAvatarMaterial(color,roughness=.55,metalness=0){return new THREE.MeshStandardMaterial({color,roughness,metalness})}
+function capsule(radius,length,material){const g=new THREE.CapsuleGeometry(radius,length,8,16);return new THREE.Mesh(g,material)}
+function createHumanoid3D(gender="female"){
+ const root=new THREE.Group(), skin=makeAvatarMaterial(gender==="female"?0xf0b8a0:0xc9947e,.68), dark=makeAvatarMaterial(0x10172a,.38,.55), hair=makeAvatarMaterial(gender==="female"?0x251b3b:0x172033,.42,.12), white=makeAvatarMaterial(0xeaf8ff,.22,.15), iris=makeAvatarMaterial(0x73dfff,.2,.65), lip=makeAvatarMaterial(0xc95e86,.42,.05), glow=makeAvatarMaterial(0x66eaff,.2,.7);
+ const torso=new THREE.Mesh(new THREE.CapsuleGeometry(.72,.95,10,20),dark);torso.scale.set(1.05,1.05,.62);torso.position.y=-1.05;root.add(torso);
+ const neck=new THREE.Mesh(new THREE.CylinderGeometry(.18,.23,.34,16),skin);neck.position.y=-.25;root.add(neck);
+ const head=new THREE.Mesh(new THREE.SphereGeometry(.78,32,24),skin);head.scale.set(.84,1.08,.78);head.position.y=.58;root.add(head);root.userData.head=head;
+ const hairCap=new THREE.Mesh(new THREE.SphereGeometry(.82,32,20,0,Math.PI*2,0,Math.PI*.62),hair);hairCap.scale.set(.87,1.02,.83);hairCap.position.set(0,.78,-.02);root.add(hairCap);
+ if(gender==="female"){const lockL=new THREE.Mesh(new THREE.SphereGeometry(.33,20,16),hair);lockL.scale.set(.7,1.55,.55);lockL.position.set(-.65,.42,-.02);root.add(lockL);const lockR=lockL.clone();lockR.position.x=.65;root.add(lockR)}
+ for(const x of[-.29,.29]){const eye=new THREE.Mesh(new THREE.SphereGeometry(.115,20,14),white);eye.scale.z=.42;eye.position.set(x,.64,.68);root.add(eye);const p=new THREE.Mesh(new THREE.SphereGeometry(.055,16,12),iris);p.position.set(x,.64,.775);root.add(p)}
+ const nose=new THREE.Mesh(new THREE.CapsuleGeometry(.045,.18,6,10),skin);nose.position.set(0,.39,.72);nose.rotation.x=Math.PI/2;root.add(nose);
+ const mouth=new THREE.Mesh(new THREE.TorusGeometry(.15,.028,8,24,Math.PI),lip);mouth.position.set(0,.20,.70);mouth.rotation.z=Math.PI;mouth.scale.set(1,.75,1);root.add(mouth);root.userData.mouth=mouth;
+ for(const x of[-.46,.46]){const arm=capsule(.17,.72, dark);arm.position.set(x,-1.05,0);arm.rotation.z=x<0?-.12:.12;root.add(arm);const hand=new THREE.Mesh(new THREE.SphereGeometry(.2,16,12),skin);hand.position.set(x*1.08,-1.72,.02);root.add(hand)}
+ const core=new THREE.Mesh(new THREE.SphereGeometry(.15,20,16),glow);core.position.set(0,-.98,.42);root.add(core);
+ root.userData.blink=0;root.userData.gender=gender;
+ return root
+}
+async function initAvatar3D(){
+ const canvas=$("avatarCanvas");if(!canvas)return;
+ try{
+  const renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true,powerPreference:"high-performance"});
+  renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));renderer.setSize(canvas.clientWidth||500,canvas.clientHeight||420,false);renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.12;
+  const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(28,1,.1,100);camera.position.set(0,.1,6.2);
+  scene.add(new THREE.AmbientLight(0x9ccfff,1.5));const key=new THREE.DirectionalLight(0xffffff,2.5);key.position.set(-2,4,5);scene.add(key);const rim=new THREE.PointLight(0x735cff,16,8);rim.position.set(2,1,-1);scene.add(rim);const cyan=new THREE.PointLight(0x5feeff,12,7);cyan.position.set(-2,.2,2);scene.add(cyan);
+  const group=new THREE.Group();scene.add(group);
+  const loadUrl=window.AGENTICUANTICO_AVATAR_GLB||localStorage.getItem("aq_avatar_glb")||"";
+  const build=gender=>{group.clear();avatar3d.model=createHumanoid3D(gender);group.add(avatar3d.model)};
+  avatar3d={renderer,scene,camera,group,model:null,speaking:false,gender:"female",mouthLevel:0,setSpeaking(v){this.speaking=!!v},setMouth(v){this.mouthLevel=Math.max(0,Math.min(1,v))},setGender(g){this.gender=g;build(g)},setGlb(url){new GLTFLoader().load(url,g=>{group.clear();avatar3d.model=g.scene;group.add(g.scene);$("avatarRigStatus").textContent="GLB · cargado";},undefined,()=>{$("avatarRigStatus").textContent="3D · fallback humanoide"})}};
+  build("female");
+  if(loadUrl){avatar3d.setGlb(loadUrl)} else $("avatarRigStatus").textContent="3D · humanoide";
+  const clock=new THREE.Clock(),resize=()=>{const w=canvas.clientWidth||500,h=canvas.clientHeight||420;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()};new ResizeObserver(resize).observe(canvas);resize();
+  const animate=()=>{const t=clock.getElapsedTime(),m=avatar3d.model;if(m){m.rotation.y=Math.sin(t*.42)*.08;m.position.y=Math.sin(t*1.15)*.035;if(avatar3d.speaking)avatar3d.mouthLevel=.35+.65*(.5+.5*Math.sin(t*22));const mouth=m.userData.mouth;if(mouth)mouth.scale.y=.7+avatar3d.mouthLevel*2.4;const head=m.userData.head;if(head){head.rotation.z=Math.sin(t*.7)*.018;head.rotation.x=Math.sin(t*.53)*.012}}renderer.render(scene,camera);requestAnimationFrame(animate)};animate();
+ }catch(e){const st=$("avatarRigStatus");if(st)st.textContent="3D · navegador no compatible"}
+}
+
 function state(x){$("status").textContent=x;$("sideStatus").textContent=x;const c=document.getElementById("chatContext");if(c)c.textContent=x}
 function modelLabel(){return "AgentiQ"}
 function updateModelBadge(){activeModel="AgentiQ";const pill=document.querySelector(".pill");if(pill)pill.textContent="AgentiQ · Cerebro";const cm=document.getElementById("contextModel");if(cm)cm.textContent="AgentiQ · Cerebro";}
@@ -45,12 +85,12 @@ async function loadModelInfo(){
 function toast(x){$("toast").textContent=x;$("toast").classList.add("show");clearTimeout(window.__toast);window.__toast=setTimeout(()=>$("toast").classList.remove("show"),2200)}
 function currentVoice(){return voiceProfiles.find(v=>v.id===selectedVoiceId)||voiceProfiles[0]}
 function bestDeviceVoice(profile){const target=profile.lang.toLowerCase(),base=target.split("-")[0],pool=deviceVoices||[],used=voiceProfiles.filter(v=>v!==profile&&v.__voice).map(v=>v.__voice);const v=pool.find(v=>v.lang.toLowerCase()===target&&profile.hints?.some(h=>v.name.toLowerCase().includes(h.toLowerCase())))||pool.find(v=>v.lang.toLowerCase()===target&&!used.includes(v.name))||pool.find(v=>v.lang.toLowerCase().startsWith(base)&&!used.includes(v.name))||pool.find(v=>v.lang.toLowerCase().startsWith(base))||pool.find(v=>v.default)||null;if(v)profile.__voice=v.name;return v}
-function setSpeaking(on,label){const av=$("robotAvatar"),vs=$("voiceStatus"),st=$("avatarState");if(av)av.classList.toggle("speaking",!!on);if(vs)vs.textContent=label||(on?"Hablando…":"Voz lista");if(st)st.textContent=on?"Hablando · sincronización visual activa":"En línea · listo para hablar"}
+function setSpeaking(on,label){window.__avatar3d?.setSpeaking(on);const av=$("robotAvatar"),vs=$("voiceStatus"),st=$("avatarState");if(av)av.classList.toggle("speaking",!!on);if(vs)vs.textContent=label||(on?"Hablando…":"Voz lista");if(st)st.textContent=on?"Hablando · sincronización visual activa":"En línea · listo para hablar"}
 function speechText(text){return String(text||"").replace(/<[^>]*>/g," ").replace(/\*{1,3}/g,"").replace(/[_~#>`]/g,"").replace(/\[([^\]]+)\]\([^\)]+\)/g,"$1").replace(/\s{2,}/g," ").trim()}
-function speak(text){const clean=speechText(text);if(!clean||typeof speechSynthesis==="undefined")return;const p=currentVoice(),v=bestDeviceVoice(p);speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(clean.slice(0,12000));u.lang=p.lang;u.pitch=p.pitch;u.rate=.98;u.volume=1;if(v)u.voice=v;u.onstart=()=>setSpeaking(true,"Hablando…");u.onboundary=()=>{const av=$("robotAvatar");if(av){av.classList.remove("mouth-a","mouth-b");void av.offsetWidth;av.classList.add(Math.random()>.5?"mouth-a":"mouth-b")}};u.onend=()=>{setSpeaking(false,"Voz lista");const av=$("robotAvatar");if(av)av.classList.remove("mouth-a","mouth-b")};u.onerror=()=>setSpeaking(false,"Voz no disponible");speechSynthesis.speak(u)}
+function speak(text){const clean=speechText(text);if(!clean||typeof speechSynthesis==="undefined")return;const p=currentVoice(),v=bestDeviceVoice(p);speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(clean.slice(0,12000));u.lang=p.lang;u.pitch=p.pitch;u.rate=.98;u.volume=1;if(v)u.voice=v;u.onstart=()=>setSpeaking(true,"Hablando…");u.onboundary=()=>{const av=$("robotAvatar");if(av){av.classList.remove("mouth-a","mouth-b");void av.offsetWidth;av.classList.add(Math.random()>.5?"mouth-a":"mouth-b")}window.__avatar3d?.setMouth(.8)};u.onend=()=>{setSpeaking(false,"Voz lista");const av=$("robotAvatar");if(av)av.classList.remove("mouth-a","mouth-b")};u.onerror=()=>setSpeaking(false,"Voz no disponible");speechSynthesis.speak(u)}
 function populateDeviceVoices(){deviceVoices=typeof speechSynthesis!=="undefined"?speechSynthesis.getVoices():[];renderVoiceList()}
 function renderVoiceList(){const box=$("voiceList");if(!box)return;const list=voiceProfiles.filter(v=>v.gender===voiceGender);box.innerHTML=list.map(v=>`<button class="voice-option ${v.id===selectedVoiceId?"active":""}" data-voice="${v.id}"><span class="voice-avatar">${v.gender==="female"?"♀":"♂"}</span><span><b>${esc(v.name)}</b><small>${esc(v.label)}</small></span><i>${v.id===selectedVoiceId?"✓":"▶"}</i></button>`).join("");box.querySelectorAll("[data-voice]").forEach(b=>b.onclick=()=>selectVoice(b.dataset.voice))}
-function selectVoice(id){const p=voiceProfiles.find(v=>v.id===id);if(!p)return;selectedVoiceId=id;voiceGender=p.gender;const avatar=$("robotAvatar");if(avatar)avatar.dataset.gender=p.gender;localStorage.setItem("aq_voice",id);const name=$("voiceName");if(name)name.textContent=p.name+" · "+p.label;const gp=$("genderPicker");if(gp)gp.innerHTML="◈ Avatar <small>"+(p.gender==="female"?"Femenino":"Masculino")+"</small>";renderVoiceList();toast("Voz seleccionada · "+p.name)}
+function selectVoice(id){const p=voiceProfiles.find(v=>v.id===id);if(!p)return;window.__avatar3d?.setGender(p.gender);selectedVoiceId=id;voiceGender=p.gender;const avatar=$("robotAvatar");if(avatar)avatar.dataset.gender=p.gender;localStorage.setItem("aq_voice",id);const name=$("voiceName");if(name)name.textContent=p.name+" · "+p.label;const gp=$("genderPicker");if(gp)gp.innerHTML="◈ Avatar <small>"+(p.gender==="female"?"Femenino":"Masculino")+"</small>";renderVoiceList();toast("Voz seleccionada · "+p.name)}
 function openVoicePanel(){voiceGender=currentVoice().gender;$("voicePanel").classList.remove("hidden");renderVoiceList()}
 function toggleRecognition(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){toast("Este navegador no habilita reconocimiento de voz");return}if(listening){recognition?.stop();return}recognition=new SR();recognition.lang=currentVoice().lang;recognition.interimResults=true;recognition.continuous=false;recognition.onstart=()=>{listening=true;$("voiceInput").classList.add("recording");$("voiceStatus").textContent="Escuchando…";$("avatarState").textContent="Escuchando · hablá ahora"};recognition.onresult=e=>{let final="";for(let i=e.resultIndex;i<e.results.length;i++){if(e.results[i].isFinal)final+=e.results[i][0].transcript}recognition.__final=(recognition.__final||"")+final};recognition.onerror=()=>{listening=false;$("voiceInput").classList.remove("recording");$("voiceStatus").textContent="Voz lista"};recognition.onend=()=>{listening=false;$("voiceInput").classList.remove("recording");$("voiceStatus").textContent="Voz lista";const t=(recognition.__final||"").trim();recognition.__final="";$("input").value="";if(t&&!busy)send(t,{silentUser:true})};recognition.start()}
 
@@ -180,7 +220,7 @@ window.addEventListener("load",()=>{
  for(let i=0;i<45;i++){const p=document.createElement("i");p.style.setProperty("--x",(Math.random()*260-130)+"px");p.style.setProperty("--y",(Math.random()*260-130)+"px");p.style.setProperty("--z",(Math.random()*260-130)+"px");$("particles").appendChild(p)}
  applyTilt();
  if(typeof speechSynthesis!=="undefined"){populateDeviceVoices();speechSynthesis.addEventListener?.("voiceschanged",populateDeviceVoices)}
- selectVoice(selectedVoiceId);loadAuth();
+ selectVoice(selectedVoiceId);initAvatar3D();loadAuth();
  $("attachButton").onclick=()=>$("attachInput").click();$("attachInput").onchange=e=>{handleFiles(e.target.files);e.target.value=""};$("voiceInput").onclick=toggleRecognition;
  $("stopVoice").onclick=()=>{window.speechSynthesis?.cancel();setSpeaking(false,"Voz lista")};
  $("voicePicker").onclick=openVoicePanel;$("langPicker").onclick=openVoicePanel;
