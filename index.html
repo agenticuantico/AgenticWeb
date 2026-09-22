@@ -1,112 +1,31 @@
 <!doctype html>
 <html lang="es">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="AgentiCuantico — inteligencia agéntica para conversar, crear y convertir objetivos en acciones.">
-<meta name="theme-color" content="#050816">
-<title>AgentiCuantico — Inteligencia que evoluciona</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AgentiCuantico — IA Agéntica</title>
+<meta name="description" content="AgentiCuantico: conversación con un cerebro de IA agéntica.">
 <link rel="stylesheet" href="./styles.css">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
-<div class="ambient"></div>
-<header class="topbar">
-  <a class="brand" href="#inicio"><span class="brand-mark">AQ</span><span>Agenti<span>Cuantico</span></span></a>
-  <nav><a href="#como-funciona">Cómo funciona</a><a href="#chat">Chat</a><a href="#planes">Planes</a></nav>
-  <a class="nav-cta" href="#planes">Comenzar</a>
-</header>
-<main>
-<section id="inicio" class="hero">
-  <div class="hero-copy">
-    <div class="eyebrow"><i></i> INTELIGENCIA AGÉNTICA · 2026</div>
-    <h1>Tu idea.<br><span>Su próxima acción.</span></h1>
-    <p class="lead">Conversá con AgentiCuantico, una arquitectura de inteligencia agéntica diseñada para transformar objetivos en planes, tareas y resultados verificables.</p>
-    <div class="actions"><a class="button primary" href="#chat">Hablar con la IA <b>↗</b></a><a class="button glass" href="#planes">Ver planes</a></div>
-    <div class="trust"><span>✦ Agentes especializados</span><span>◈ Seguridad defensiva</span><span>◉ Control humano</span></div>
-  </div>
-  <div class="brain-stage" aria-label="Visualización 3D del cerebro de AgentiCuantico">
-    <canvas id="brain-canvas"></canvas>
-    <div class="brain-hud"><span class="live-dot"></span><b>CEREBRO ACTIVO</b><small id="brain-state">3D INTERACTIVO · ARRASTRÁ PARA GIRAR</small></div>
-    <div class="node-label label-a">PLANNER</div><div class="node-label label-b">SECURITY</div><div class="node-label label-c">DESIGN</div>
-  </div>
-</section>
-
-<section id="como-funciona" class="section">
-  <div class="section-heading"><div class="eyebrow">UN SISTEMA, MUCHAS CAPACIDADES</div><h2>De una conversación a una ejecución.</h2><p>La experiencia pública está diseñada para conversar, crear y transformar objetivos en acciones verificables.</p></div>
-  <div class="feature-grid">
-    <article class="feature"><span>01</span><h3>Entiende</h3><p>Interpreta tu objetivo y lo convierte en un plan estructurado.</p></article>
-    <article class="feature featured"><span>02</span><h3>Orquesta</h3><p>Coordina agentes especializados para programación, diseño, investigación y seguridad defensiva.</p></article>
-    <article class="feature"><span>03</span><h3>Verifica</h3><p>Revisa resultados y registra el estado de las tareas antes de informar.</p></article>
-  </div>
-</section>
-
-<section id="chat" class="section chat-section">
-  <div class="section-heading"><div class="eyebrow">LIVE AI</div><h2>Probalo ahora.</h2><p>Escribí un objetivo. La interfaz se conecta con el cerebro de AgentiCuantico.</p></div>
-  <div class="chat-shell">
-    <div class="chat-top"><div><b>AgentiCuantico</b><span><i></i> Online</span></div><small>Sesión protegida</small></div>
-    <div id="messages" class="messages" aria-live="polite"><div class="message assistant"><div class="avatar">AQ</div><div><b>AgentiCuantico</b><p>Hola. Contame qué querés crear, resolver o mejorar.</p></div></div></div>
-    <form id="chat-form" class="chat-form"><textarea id="prompt" rows="2" placeholder="Ej.: Quiero crear una web para mi proyecto..." required></textarea><button class="send" type="submit">Enviar <span>↗</span></button></form>
-    <div class="chat-footer"><span id="chat-status">Verificando conexión con el cerebro…</span><span>AgentiWeb → AgentiCuantico · Memoria activa</span></div>
-  </div>
-</section>
-
-<section id="planes" class="section pricing">
-  <div class="section-heading center"><div class="eyebrow">ELEGÍ TU NIVEL</div><h2>Planes para cada etapa.</h2><p>Suscripciones pensadas para empezar simple y ampliar capacidades cuando tu proyecto crece.</p></div>
-  <div class="pricing-grid">
-    <article class="price-card"><div class="price-top"><span>Explorer</span><small>Para conocer el sistema</small></div><div class="price">Gratis</div><ul><li>✓ Chat con AgentiCuantico</li><li>✓ Experiencia 3D</li><li>✓ Capacidades básicas</li></ul><button class="price-button glass" data-plan="explorer">Comenzar gratis</button></article>
-    <article class="price-card"><div class="price-top"><span>Creator</span><small>Para crear y producir</small></div><div class="price"><b>USD 9</b><small>/ mes</small></div><ul><li>✓ Mayor uso del cerebro</li><li>✓ Agentes de programación y diseño</li><li>✓ Historial ampliado</li></ul><button class="price-button primary" data-plan="creator">Elegir Creator</button></article>
-    <article class="price-card featured-price"><div class="popular">MÁS ELEGIDO</div><div class="price-top"><span>Pro</span><small>Para proyectos serios</small></div><div class="price"><b>USD 19</b><small>/ mes</small></div><ul><li>✓ Agentes avanzados</li><li>✓ Automatizaciones y tareas largas</li><li>✓ Seguridad defensiva prioritaria</li></ul><button class="price-button primary" data-plan="pro">Elegir Pro</button></article>
-    <article class="price-card"><div class="price-top"><span>Studio</span><small>Para equipos y empresas</small></div><div class="price"><b>USD 49</b><small>/ mes</small></div><ul><li>✓ Mayor capacidad de agentes</li><li>✓ Flujos para equipos</li><li>✓ Administración y controles</li></ul><button class="price-button glass" data-plan="studio">Elegir Studio</button></article>
-  </div>
-  <div class="payments"><span>Pagos disponibles</span><b>Mercado Pago</b><em>·</em><b>PayPal</b><small>La disponibilidad de moneda y métodos depende del país y la cuenta del comercio.</small></div>
-</section>
-
-<section class="final-cta"><div><div class="eyebrow">EL PRÓXIMO PASO EMPIEZA ACÁ</div><h2>¿Qué querés construir?</h2></div><a class="button primary" href="#chat">Empezar conversación ↗</a></section>
-
-<section id="auth" class="section auth-section">
-<div class="section-heading center"><div class="eyebrow">CUENTA AGENTICUANTICO</div><h2>Entrá en tu espacio.</h2><p>Usá tu correo y contraseña. También podremos habilitar Google cuando la integración esté configurada. No necesitás registrar un número de teléfono.</p></div>
-<div class="auth-grid">
-<article class="auth-card">
-<div class="auth-tabs"><button class="auth-tab active" data-auth="login">Ingresar</button><button class="auth-tab" data-auth="register">Crear cuenta</button></div>
-<form id="auth-form">
-<label>Correo electrónico<input id="auth-email" type="email" autocomplete="email" required placeholder="vos@ejemplo.com"></label>
-<label id="password-wrap">Contraseña<input id="auth-password" type="password" minlength="8" autocomplete="current-password" placeholder="Tu contraseña"></label>
-<button class="price-button primary" type="submit" id="auth-submit">Ingresar</button>
-</form>
-<div class="auth-divider"><span>o continuar con</span></div>
-<div id="google-login" class="google-login" aria-live="polite"></div>
-<button id="passkey-button" class="price-button glass" type="button">◉ Usar passkey / biometría</button>
-<p class="auth-note">No se muestra información interna del cerebro en la interfaz pública. La sesión se gestiona de forma segura.</p>
-</article>
-<aside class="security-card"><span class="security-icon">◈</span><h3>Acceso simple y privado</h3><p>La cuenta puede funcionar con correo y contraseña. Google queda como opción adicional cuando esté habilitado.</p><div class="security-list"><span>✓ Contraseña almacenada con hash seguro</span><span>✓ Sesión protegida</span><span>✓ Google opcional</span><span>✓ Passkey opcional en una futura actualización</span><span>✓ Sin teléfono obligatorio</span></div></aside>
-</div>
-</section>
-<section id="agent-builder" class="section builder-section">
-<div class="section-heading"><div class="eyebrow">AGENT BUILDER</div><h2>Creá tu propio agente.</h2><p>Definí misión, capacidades, herramientas, memoria, autonomía y presupuesto. Los límites reales los controla el backend según tu plan.</p></div>
-<div class="builder-layout">
-<article class="builder-card">
-<div class="builder-templates"><b>Plantillas rápidas</b><div id="agent-templates"></div></div>
-<form id="agent-builder-form" class="builder-form">
-<div class="builder-row"><label>Nombre<input id="agent-name" required maxlength="60" placeholder="Ej. Mi desarrollador"></label><label>Rol<input id="agent-role" required maxlength="120" placeholder="backend"></label></div>
-<label>Descripción<input id="agent-description" maxlength="500" placeholder="Qué hace este agente"></label>
-<label>Misión<textarea id="agent-mission" required maxlength="1000" placeholder="Objetivo principal del agente"></textarea></label>
-<div class="builder-row"><label>Autonomía<select id="agent-autonomy"><option value="supervised">Supervisado</option><option value="semi_autonomous">Semi-autónomo</option><option value="autonomous">Autónomo</option></select></label><label>Memoria<select id="agent-memory"><option value="session">Sesión</option><option value="project">Proyecto</option><option value="persistent">Persistente</option></select></label></div>
-<label>Habilidades<input id="agent-skills" placeholder="Python, Git, APIs"></label>
-<label>Criterios de éxito<textarea id="agent-success" maxlength="1000" placeholder="Cómo debe demostrar que terminó correctamente"></textarea></label>
-<label>Instrucciones<textarea id="agent-instructions" maxlength="2000" placeholder="Reglas de comportamiento y trabajo"></textarea></label>
-<label>Workspace / proyecto<input id="agent-workspace" maxlength="300" placeholder="AgentiCuantico / AgenticWeb"></label>
-<label>Presupuesto máximo de créditos por agente<input id="agent-credit" type="number" min="0" max="100000" value="0"></label>
-<div class="tool-picker"><b>Herramientas permitidas</b><div id="agent-tools"></div></div>
-<button class="price-button primary" type="submit">Crear agente</button><span id="builder-status" class="builder-status"></span>
-</form></article>
-<aside class="builder-side"><div class="builder-preview"><small>VISTA PREVIA</small><div id="builder-avatar">◈</div><h3 id="preview-name">Tu nuevo agente</h3><span id="preview-role">rol personalizado</span><p id="preview-mission">Definí una misión y el agente aparecerá aquí.</p><div id="preview-meta"></div></div><div class="builder-list"><small>TUS AGENTES</small><div id="my-agents"><span class="muted">Iniciá sesión para cargar tus agentes.</span></div></div></aside>
-</div></section>
-<section id="account" class="section dashboard-section">
-<div class="section-heading"><div class="eyebrow">ESPACIO PERSONAL</div><h2>Tu centro de control.</h2></div>
-<div class="dashboard-grid"><article class="dash-card"><small>PLAN ACTUAL</small><strong id="account-plan">Explorer</strong><span id="account-status">Cuenta gratuita</span></article><article class="dash-card"><small>AGENTES</small><strong>3+</strong><span>Programación · Diseño · Seguridad</span></article><article class="dash-card"><small>SEGURIDAD</small><strong>Activa</strong><span>Controles de sesión y MFA</span></article></div>
-</section>
-
-</main>
-<footer><span>© 2026 AgentiCuantico</span><span>Inteligencia agéntica · Seguridad · Evolución</span></footer>
-<script src="https://accounts.google.com/gsi/client" async defer></script><script src="./app.js" defer></script>
+<div class="shell">
+<aside class="side">
+  <div class="brand"><span class="orb"></span><b>AgentiCuantico</b></div>
+  <button id="newChat">＋ Nueva conversación</button>
+  <div class="side-note">Cerebro IA agéntico<br><small>Memoria opcional · privacidad primero</small></div>
+</aside>
+<main class="main">
+  <header><div><strong>AgentiCuantico</strong><span id="status">Desconectado</span></div><div id="user"></div></header>
+  <section id="login" class="login">
+    <div class="hero-orb"></div><h1>Habla con el cerebro.</h1>
+    <p>Una interfaz pública limpia. El backend, las herramientas y los secretos permanecen fuera de la vista.</p>
+    <div id="googleBtn"></div>
+  </section>
+  <section id="chat" class="chat hidden">
+    <div id="messages" class="messages"></div>
+    <form id="composer"><textarea id="input" placeholder="Escribe un mensaje…" rows="1"></textarea><button>Enviar</button></form>
+    <label class="memory"><input id="memoryConsent" type="checkbox"> Permitir memoria para esta conversación</label>
+  </section>
+</main></div>
+<script src="./app.js"></script>
 </body></html>
