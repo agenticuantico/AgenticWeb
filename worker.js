@@ -59,7 +59,8 @@ async function callHuggingFace(request, env) {
   const message = typeof body?.message === "string" ? body.message.trim() : "";
   const agent = body?.agent && typeof body.agent === "object" ? body.agent : null;
   const team = body?.team && typeof body.team === "object" ? body.team : null;
-  if (!message) {
+  const hasAttachments = Array.isArray(body?.attachments) && body.attachments.length > 0;
+  if (!message && !hasAttachments) {
     return json({ ok: false, error: "invalid_request", message: "El mensaje no puede estar vacío." }, 400, request);
   }
 
@@ -73,12 +74,12 @@ async function callHuggingFace(request, env) {
     ? body.attachments.filter(a => a && typeof a.name === "string" && typeof a.data === "string").slice(0,5)
     : [];
   const imageParts = attachments
-    .filter(a => a.kind === "image" && /^data:image\\/(png|jpeg|jpg|webp|gif);base64,/i.test(a.data) && a.data.length < 7000000)
+    .filter(a => a.kind === "image" && String(a.data).startsWith("data:image/") && a.data.length < 7000000)
     .map(a => ({type:"image_url",image_url:{url:a.data}}));
   const fileText = attachments
     .filter(a => a.kind !== "image")
-    .map(a => "\\n[Archivo " + a.name + "]\\n" + a.data.slice(0,30000))
-    .join("\\n");
+    .map(a => "\n[Archivo " + a.name + "]\n" + a.data.slice(0,30000))
+    .join("\n");
   const userContent = imageParts.length
     ? [{type:"text",text:(message || "Analizá los archivos adjuntos.") + fileText},...imageParts]
     : (message || "Analizá los archivos adjuntos.") + fileText;
@@ -299,7 +300,7 @@ async function handleApi(request, env) {
         "access-control-allow-origin": request.headers.get("Origin") || "https://agenticuantico.dev.ar",
         "access-control-allow-credentials": "true",
         "access-control-allow-methods": "GET,HEAD,POST,OPTIONS,DELETE,PATCH",
-        "access-control-allow-headers": "Content-Type, X-Guest-Session, X-API-Key, X-User-ID"
+        "access-control-allow-headers": "Content-Type, X-Guest-Session, X-API-Key, X-User-ID, Authorization"
       }
     }), request);
   }
