@@ -9,6 +9,20 @@ let agents=JSON.parse(localStorage.getItem(K.agents)||"null")||[
 ];
 let teams=JSON.parse(localStorage.getItem(K.teams)||"[]");
 let activeAgent=null,activeTeam=null,busy=false,conversation=crypto.randomUUID(),activeModel="Qwen/Qwen3.8-27B";
+const voiceProfiles=[
+{id:"clara",name:"Clara",gender:"female",lang:"es-AR",label:"Español (Argentina)",pitch:1.05},
+{id:"luna",name:"Luna",gender:"female",lang:"es-AR",label:"Español (Argentina)",pitch:1.12},
+{id:"valentina",name:"Valentina",gender:"female",lang:"es-ES",label:"Español (España)",pitch:1.02},
+{id:"alexa",name:"Alexa",gender:"female",lang:"en-US",label:"English (United States)",pitch:1.02},
+{id:"sophie",name:"Sophie",gender:"female",lang:"en-US",label:"English (United States)",pitch:1.08},
+{id:"mateo",name:"Mateo",gender:"male",lang:"es-AR",label:"Español (Argentina)",pitch:.9},
+{id:"bruno",name:"Bruno",gender:"male",lang:"es-AR",label:"Español (Argentina)",pitch:.84},
+{id:"diego",name:"Diego",gender:"male",lang:"es-ES",label:"Español (España)",pitch:.9},
+{id:"alex",name:"Alex",gender:"male",lang:"en-US",label:"English (United States)",pitch:.88},
+{id:"james",name:"James",gender:"male",lang:"en-US",label:"English (United States)",pitch:.82}
+];
+let selectedVoiceId=localStorage.getItem("aq_voice")||"clara";
+let voiceGender="female",deviceVoices=[],recognition=null,listening=false;
 localStorage.setItem(K.session,guest);
 
 const $=id=>document.getElementById(id);
@@ -35,6 +49,16 @@ async function loadModelInfo(){
  }catch{}
 }
 function toast(x){$("toast").textContent=x;$("toast").classList.add("show");clearTimeout(window.__toast);window.__toast=setTimeout(()=>$("toast").classList.remove("show"),2200)}
+function currentVoice(){return voiceProfiles.find(v=>v.id===selectedVoiceId)||voiceProfiles[0]}
+function bestDeviceVoice(profile){const target=profile.lang.toLowerCase(),base=target.split("-")[0],pool=deviceVoices||[];return pool.find(v=>v.lang.toLowerCase()===target)||pool.find(v=>v.lang.toLowerCase().startsWith(base)&&v.localService)||pool.find(v=>v.lang.toLowerCase().startsWith(base))||pool.find(v=>v.default)||null}
+function setSpeaking(on,label){const av=$("robotAvatar"),vs=$("voiceStatus"),st=$("avatarState");if(av)av.classList.toggle("speaking",!!on);if(vs)vs.textContent=label||(on?"Hablando…":"Voz lista");if(st)st.textContent=on?"Hablando · sincronización visual activa":"En línea · listo para hablar"}
+function speak(text){if(!text||typeof speechSynthesis==="undefined")return;const p=currentVoice(),v=bestDeviceVoice(p);speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(String(text).slice(0,12000));u.lang=p.lang;u.pitch=p.pitch;u.rate=.98;u.volume=1;if(v)u.voice=v;u.onstart=()=>setSpeaking(true,"Hablando…");u.onboundary=()=>{const av=$("robotAvatar");if(av){av.classList.remove("mouth-a","mouth-b");void av.offsetWidth;av.classList.add(Math.random()>.5?"mouth-a":"mouth-b")}};u.onend=()=>{setSpeaking(false,"Voz lista");const av=$("robotAvatar");if(av)av.classList.remove("mouth-a","mouth-b")};u.onerror=()=>setSpeaking(false,"Voz no disponible");speechSynthesis.speak(u)}
+function populateDeviceVoices(){deviceVoices=typeof speechSynthesis!=="undefined"?speechSynthesis.getVoices():[];renderVoiceList()}
+function renderVoiceList(){const box=$("voiceList");if(!box)return;const list=voiceProfiles.filter(v=>v.gender===voiceGender);box.innerHTML=list.map(v=>`<button class="voice-option ${v.id===selectedVoiceId?"active":""}" data-voice="${v.id}"><span class="voice-avatar">${v.gender==="female"?"♀":"♂"}</span><span><b>${esc(v.name)}</b><small>${esc(v.label)}</small></span><i>${v.id===selectedVoiceId?"✓":"▶"}</i></button>`).join("");box.querySelectorAll("[data-voice]").forEach(b=>b.onclick=()=>selectVoice(b.dataset.voice))}
+function selectVoice(id){const p=voiceProfiles.find(v=>v.id===id);if(!p)return;selectedVoiceId=id;voiceGender=p.gender;localStorage.setItem("aq_voice",id);const name=$("voiceName");if(name)name.textContent=p.name+" · "+p.label;const gp=$("genderPicker");if(gp)gp.innerHTML="◈ Avatar <small>"+(p.gender==="female"?"Femenino":"Masculino")+"</small>";renderVoiceList();toast("Voz seleccionada · "+p.name)}
+function openVoicePanel(){voiceGender=currentVoice().gender;voicePanel.classList.remove("hidden");renderVoiceList()}
+function toggleRecognition(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){toast("Este navegador no habilita reconocimiento de voz");return}if(listening){recognition?.stop();return}recognition=new SR();recognition.lang=currentVoice().lang;recognition.interimResults=true;recognition.continuous=false;recognition.onstart=()=>{listening=true;$("voiceInput").classList.add("recording");$("voiceStatus").textContent="Escuchando…";$("avatarState").textContent="Escuchando · hablá ahora"};recognition.onresult=e=>{let final="";for(let i=e.resultIndex;i<e.results.length;i++)final+=e.results[i][0].transcript;$("input").value=final;$("input").dispatchEvent(new Event("input"))};recognition.onerror=()=>{listening=false;$("voiceInput").classList.remove("recording");$("voiceStatus").textContent="Voz lista"};recognition.onend=()=>{listening=false;$("voiceInput").classList.remove("recording");$("voiceStatus").textContent="Voz lista";const t=$("input").value.trim();if(t&&!busy)send(t)};recognition.start()}
+
 function persist(){localStorage.setItem(K.chat,JSON.stringify(history.slice(-20)))}
 function add(role,text,save=true){
  const d=document.createElement("div");d.className="msg "+role;
@@ -62,7 +86,7 @@ async function send(text){
  try{
   const a=await remote(text);
   p.innerHTML=esc(a).replace(/\n/g,"<br>");
-  history.push({role:"assistant",content:a});persist();
+  history.push({role:"assistant",content:a});persist(); speak(a);
   state(activeTeam?"Equipo conectado · Qwen":activeAgent?activeAgent+" · Qwen":"Cerebro conectado · Qwen");
  }catch(e){
   p.textContent=e.name==="AbortError"?"El cerebro está tardando demasiado. Probá nuevamente.":"No pude conectar con el cerebro. Intentá nuevamente.";
@@ -110,8 +134,22 @@ function teamForm(){
  $("teamForm").onsubmit=e=>{e.preventDefault();const members=[...document.querySelectorAll(".checks input:checked")].map(x=>x.value);if(!members.length)return toast("Elegí al menos un agente");teams.push({name:$("tn").value.trim(),members});localStorage.setItem(K.teams,JSON.stringify(teams));panel("teams");toast("Equipo creado")}
 }
 function coderPanel(){
- $("panel").innerHTML=`<div class="head"><div><span class="eyebrow">CODQ · AGENTIC BUILD</span><h2>CodQ</h2><p>Tu compañero de programación para analizar repositorios y convertir objetivos en cambios concretos.</p></div></div><div class="code-grid"><div class="card form"><label>Agente programador</label><select id="ca">${agents.map(a=>`<option>${esc(a.name)}</option>`).join("")}</select><label>Repositorio</label><input id="cr" value="agenticuantico/AgenticWeb" placeholder="agenticuantico/AgenticWeb"><label>Objetivo</label><textarea id="cg" placeholder="Ej.: analizá el proyecto y proponé los cambios necesarios."></textarea><button class="primary" id="runCode">Analizar con CodQ</button><div id="codexResult" class="code-result hidden"></div></div><div class="card code-flow"><div class="flow-icon">⌘</div><h3>Flujo Agentic</h3><div class="flow"><span>Objetivo</span><i>→</i><span>Plan</span><i>→</i><span>Código</span><i>→</i><span>Revisión</span></div><p>La ejecución real de herramientas y repositorios permanece protegida en backend, sin exponer secretos al navegador.</p></div></div>`;
- $("runCode").onclick=async()=>{const g=$("cg").value.trim();const repo=$("cr").value.trim();if(!g)return toast("Escribí un objetivo");const box=$("codexResult");box.classList.remove("hidden");box.innerHTML="<b>CodQ analizando…</b><br><span>Lectura de repositorio + Qwen</span>";$("runCode").disabled=true;try{const r=await fetch(API+"/v1/public/codex",{method:"POST",headers:{"Content-Type":"application/json","X-Guest-Session":guest},body:JSON.stringify({repo,task:g})});const d=await r.json();if(!r.ok||!d.ok)throw Error(d.message||"codex_failed");activeModel=d.model||activeModel;updateModelBadge(activeModel);box.innerHTML="<b>CodQ · "+esc(d.repo)+"</b><br><small>"+esc(d.branch)+" · "+d.files.length+" archivos revisados</small><div class='codex-answer'>"+esc(d.answer).replace(/\n/g,"<br>")+"</div>"}catch(e){box.innerHTML="<b>No se pudo completar el análisis.</b><br><span>"+esc(e.message)+"</span>"}finally{$("runCode").disabled=false}}
+ $("panel").innerHTML=`<div class="codq-workspace">
+  <div class="codq-head"><div><span class="eyebrow">CODQ · AGENTIC WORKSPACE</span><h2>Workspace</h2><p>Programación, UI/UX, ilustración 3D y QA coordinados desde un mismo espacio.</p></div><div class="codq-head-actions"><span class="workspace-state">● Workspace listo</span><button class="primary" id="codqRun">Ejecutar análisis</button></div></div>
+  <div class="codq-toolbar"><input id="cr" value="agenticuantico/AgenticWeb" aria-label="Repositorio"><button class="tool-tab active" data-codq-tab="editor">Editor</button><button class="tool-tab" data-codq-tab="preview">Preview</button><button class="tool-tab" data-codq-tab="terminal">Terminal</button><button class="tool-tab" data-codq-tab="agents">Equipo</button></div>
+  <div class="codq-grid">
+   <aside class="codq-files card"><div class="pane-title">PROYECTO <span>main</span></div><div class="tree"><button class="tree-file active">▾ <b>public</b></button><button class="tree-file indent">◇ index.html</button><button class="tree-file indent active-file">◇ app.js</button><button class="tree-file indent">◇ styles.css</button><button class="tree-file indent">◇ favicon.svg</button><button class="tree-file">▾ <b>.github</b></button><button class="tree-file indent">◇ workflows</button><button class="tree-file">◇ wrangler.jsonc</button><button class="tree-file">◇ README.md</button></div><div class="repo-meta"><span>Repositorio</span><b id="repoMeta">AgenticWeb</b><small>Secretos protegidos en backend</small></div></aside>
+   <section class="codq-editor card"><div class="editor-top"><div><span id="editorFile">app.js</span><small id="editorLang">JavaScript · Agentic UI</small></div><div class="editor-actions"><button class="ghost mini" id="copyPlan">Copiar plan</button><button class="ghost mini" id="applyPatch">Aplicar cambio</button></div></div><pre id="editorCode" class="code-editor"><code><span class="kw">const</span> workspace = {
+  <span class="key">frontend</span>: <span class="str">"AgentiCuantico"</span>,
+  <span class="key">agents</span>: [<span class="str">"programación"</span>, <span class="str">"UI/UX"</span>, <span class="str">"3D"</span>, <span class="str">"QA"</span>],
+  <span class="key">workflow</span>: [<span class="str">"analizar"</span>, <span class="str">"diseñar"</span>, <span class="str">"implementar"</span>, <span class="str">"revisar"</span>]
+};</code></pre><div id="codqOutput" class="codq-output"><b>CodQ está listo.</b><span>Definí un objetivo y ejecutá el análisis para convertirlo en un plan de trabajo.</span></div></section>
+   <aside class="codq-crew card"><div class="pane-title">EQUIPO AGENTIC <span>4 roles</span></div><div class="crew"><div class="crew-item"><i>⌘</i><div><b>Programador</b><small>Código · APIs · GitHub</small></div><em>ON</em></div><div class="crew-item"><i>✦</i><div><b>UI/UX</b><small>Arquitectura visual · responsive</small></div><em>ON</em></div><div class="crew-item"><i>◇</i><div><b>3D / Ilustración</b><small>Avatar · motion · identidad</small></div><em>ON</em></div><div class="crew-item"><i>✓</i><div><b>QA / Seguridad</b><small>Validación · secretos · regresión</small></div><em>ON</em></div></div><div class="goal-box"><label>Objetivo del trabajo</label><textarea id="cg" placeholder="Ej.: llevar el sitio al diseño 3D de referencia y convertir CodQ en un workspace profesional."></textarea><small>CodQ analiza el repositorio real antes de proponer cambios.</small></div></aside>
+  </div>
+ </div>`;
+ const output=$("codqOutput"),run=$("codqRun");
+ async function runCodQ(){const repo=$("cr").value.trim(),task=$("cg").value.trim()||"Analizá el proyecto y prepará la siguiente evolución del workspace CodQ, UI/UX 3D, voz y experiencia de agentes.";run.disabled=true;run.textContent="Analizando…";output.innerHTML="<b>CodQ trabajando…</b><span>Inspeccionando repositorio + preparando plan de implementación.</span>";try{const r=await fetch(API+"/v1/public/codex",{method:"POST",headers:{"Content-Type":"application/json","X-Guest-Session":guest},body:JSON.stringify({repo,task})});const d=await r.json();if(!r.ok||!d.ok)throw Error(d.message||"codex_failed");activeModel=d.model||activeModel;updateModelBadge(activeModel);$("repoMeta").textContent=String(d.repo).split("/").pop();output.innerHTML="<b>CodQ · análisis completado</b><small>"+esc(d.branch)+" · "+d.files.length+" archivos revisados · "+esc(modelLabel(d.model))+"</small><div class='codq-answer'>"+esc(d.answer).replace(/\n/g,"<br>")+"</div>";toast("Plan CodQ generado")}catch(e){output.innerHTML="<b>CodQ no pudo completar el análisis.</b><span>"+esc(e.message)+"</span>";toast("Error de análisis")}finally{run.disabled=false;run.textContent="Ejecutar análisis"}}
+ run.onclick=runCodQ;$("copyPlan").onclick=()=>{navigator.clipboard?.writeText($("codqOutput").innerText||"");toast("Plan copiado")};$("applyPatch").onclick=()=>toast("Aplicación protegida: requiere autorización del workspace");document.querySelectorAll("[data-codq-tab]").forEach(b=>b.onclick=()=>{document.querySelectorAll(".tool-tab").forEach(x=>x.classList.remove("active"));b.classList.add("active");toast(b.textContent+" listo")});
 }
 function skillsPanel(){
  const skills=["Programación","Backend","Frontend","GitHub","Web design","UI/UX","3D","SEO","Datos","Investigación","Automatización","Asistencia"];
@@ -155,4 +193,13 @@ window.addEventListener("load",()=>{
  history.forEach(x=>add(x.role,x.content,false));
  for(let i=0;i<45;i++){const p=document.createElement("i");p.style.setProperty("--x",(Math.random()*260-130)+"px");p.style.setProperty("--y",(Math.random()*260-130)+"px");p.style.setProperty("--z",(Math.random()*260-130)+"px");$("particles").appendChild(p)}
  applyTilt();
+ if(typeof speechSynthesis!=="undefined"){populateDeviceVoices();speechSynthesis.addEventListener?.("voiceschanged",populateDeviceVoices)}
+ selectVoice(selectedVoiceId);
+ $("voiceInput").onclick=toggleRecognition;
+ $("stopVoice").onclick=()=>{speechSynthesis?.cancel();setSpeaking(false,"Voz lista")};
+ $("voicePicker").onclick=openVoicePanel;$("langPicker").onclick=openVoicePanel;
+ $("genderPicker").onclick=()=>{const p=currentVoice();selectVoice(p.gender==="female"?"mateo":"clara")};
+ $("closeVoice").onclick=()=>$("voicePanel").classList.add("hidden");
+ document.querySelectorAll(".voice-tab").forEach(b=>b.onclick=()=>{voiceGender=b.dataset.voiceGender;document.querySelectorAll(".voice-tab").forEach(x=>x.classList.toggle("active",x===b));renderVoiceList()});
+
 });
