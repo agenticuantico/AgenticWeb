@@ -1,4 +1,4 @@
-const API = window.AGENTICUANTICO_API || "https://brain-api-production-df31.up.railway.app";
+const API = window.AGENTICUANTICO_API || "https://agenti-cuanticobrain-api-production.up.railway.app";
 let token = localStorage.getItem("aq_session"); let conversationId = crypto.randomUUID();
 const $=id=>document.getElementById(id);
 function setState(s){$("status").textContent=s}
