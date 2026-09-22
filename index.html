@@ -1,31 +1,34 @@
 <!doctype html>
 <html lang="es">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>AgentiCuantico — IA Agéntica</title>
-<meta name="description" content="AgentiCuantico: conversación con un cerebro de IA agéntica.">
+<meta name="description" content="AgentiCuantico: cerebro de IA agéntica ejecutado localmente en el navegador.">
 <link rel="stylesheet" href="./styles.css">
-<script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
 <div class="shell">
 <aside class="side">
   <div class="brand"><span class="orb"></span><b>AgentiCuantico</b></div>
   <button id="newChat">＋ Nueva conversación</button>
-  <div class="side-note">Cerebro IA agéntico<br><small>Memoria opcional · privacidad primero</small></div>
+  <div class="side-note">Cerebro IA agéntico<br><small>Privacidad primero · ejecución local</small></div>
 </aside>
 <main class="main">
-  <header><div><strong>AgentiCuantico</strong><span id="status">Desconectado</span></div><div id="user"></div></header>
-  <section id="login" class="login">
-    <div class="hero-orb"></div><h1>Habla con el cerebro.</h1>
-    <p>Una interfaz pública limpia. El backend, las herramientas y los secretos permanecen fuera de la vista.</p>
-    <div id="googleBtn"></div>
-  </section>
-  <section id="chat" class="chat hidden">
+  <header>
+    <div><strong>AgentiCuantico</strong><span id="status">Iniciando…</span></div>
+    <div class="local-badge">LOCAL</div>
+  </header>
+  <section id="chat" class="chat">
     <div id="messages" class="messages"></div>
-    <form id="composer"><textarea id="input" placeholder="Escribe un mensaje…" rows="1"></textarea><button>Enviar</button></form>
-    <label class="memory"><input id="memoryConsent" type="checkbox"> Permitir memoria para esta conversación</label>
+    <form id="composer">
+      <textarea id="input" placeholder="Escribe un mensaje…" rows="1" autocomplete="off"></textarea>
+      <button type="submit">Enviar</button>
+    </form>
+    <div class="memory">Las conversaciones se guardan solo en este navegador.</div>
   </section>
-</main></div>
-<script src="./app.js"></script>
-</body></html>
+</main>
+</div>
+<script type="module" src="./app.js"></script>
+</body>
+</html>
