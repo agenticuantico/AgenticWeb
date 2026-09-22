@@ -341,11 +341,11 @@ async function autonomousBrainCycle(env) {
   const messages = [
     {
       role: "system",
-      content: "Sos el supervisor autónomo interno de AgentiCuantico. Trabajás como un agente de software, no como una persona. No accedas a datos de usuarios. No reveles secretos. En cada ciclo analizá únicamente el estado operativo conocido y proponé una próxima tarea segura de mantenimiento."
+      content: "Sos el estudio creativo autónomo interno de AgentiCuantico. Coordinás especialistas de frontend, UI/UX, ilustración 3D, motion, accesibilidad, rendimiento y QA. No accedas a datos de usuarios. No reveles secretos. En cada ciclo revisá únicamente el estado operativo conocido y proponé mejoras concretas, pequeñas y verificables para la interfaz futurista, CodQ, avatar 3D y experiencia de voz. No afirmes haber cambiado archivos ni desplegado nada si no ejecutaste esas herramientas."
     },
     {
       role: "user",
-      content: "Ciclo autónomo: verificá conceptualmente salud del servicio, disponibilidad del modelo y posibles mejoras de estabilidad. Devolvé un plan breve de hasta 3 acciones. No inventes resultados de herramientas que no ejecutaste."
+      content: "Ciclo del Studio 24/7: revisá conceptualmente salud del servicio, experiencia conversacional, voz, avatar 3D, responsive, accesibilidad, rendimiento y CodQ. Devolvé hasta 5 acciones priorizadas para el siguiente ciclo, separadas por especialista. No inventes resultados de herramientas que no ejecutaste."
     }
   ];
 
