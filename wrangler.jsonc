@@ -3,17 +3,7 @@
   "name": "agenticweb",
   "main": "worker.js",
   "compatibility_date": "2026-09-21",
-  "workers_dev": false,
-  "routes": [
-    {
-      "pattern": "agenticuantico.dev.ar",
-      "custom_domain": true
-    },
-    {
-      "pattern": "www.agenticuantico.dev.ar",
-      "custom_domain": true
-    }
-  ],
+  "workers_dev": true,
   "assets": {
     "directory": ".",
     "binding": "ASSETS",
