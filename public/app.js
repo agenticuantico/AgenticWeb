@@ -8,7 +8,7 @@ let agents=JSON.parse(localStorage.getItem(K.agents)||"null")||[
 {name:"Diseñador",role:"Diseñador UI/UX y 3D",skills:["UI/UX","3D","branding"],knowledge:["interfaces","responsive","experiencia de usuario"]}
 ];
 let teams=JSON.parse(localStorage.getItem(K.teams)||"[]");
-let activeAgent=null,activeTeam=null,busy=false,conversation=crypto.randomUUID();
+let activeAgent=null,activeTeam=null,busy=false,conversation=crypto.randomUUID(),activeModel="Qwen/Qwen3.8-27B";
 localStorage.setItem(K.session,guest);
 
 const $=id=>document.getElementById(id);
@@ -16,6 +16,24 @@ const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&
 const icon=(name)=>({chat:"<svg viewBox='0 0 24 24'><path d='M5 6.5h14v9H9l-4 3v-12Z'/><path d='M8 10h8M8 13h5'/></svg>",projects:"<svg viewBox='0 0 24 24'><path d='M4 7.5h6l1.5 2H20v9H4z'/><path d='M4 7.5V5h6l1.5 2'/></svg>",agents:"<svg viewBox='0 0 24 24'><circle cx='12' cy='8' r='3'/><path d='M6 19c.6-3.2 2.7-5 6-5s5.4 1.8 6 5'/><path d='M4 12h3M17 12h3'/></svg>",teams:"<svg viewBox='0 0 24 24'><circle cx='8' cy='9' r='2.5'/><circle cx='16' cy='9' r='2.5'/><path d='M3.5 18c.5-2.5 2-4 4.5-4s4 1.5 4.5 4M11.5 18c.5-2.5 2-4 4.5-4s4 1.5 4.5 4'/></svg>",code:"<svg viewBox='0 0 24 24'><path d='m8 7-5 5 5 5M16 7l5 5-5 5M14 4l-4 16'/></svg>",user:"<svg viewBox='0 0 24 24'><circle cx='12' cy='8' r='3'/><path d='M5 20c.7-4 3-6 7-6s6.3 2 7 6'/></svg>",spark:"<svg viewBox='0 0 24 24'><path d='m12 3 1.7 5.3L19 10l-5.3 1.7L12 17l-1.7-5.3L5 10l5.3-1.7Z'/><path d='m19 16 .7 2.3L22 19l-2.3.7L19 22l-.7-2.3L16 19l2.3-.7Z'/></svg>"}[name]||"");
 
 function state(x){$("status").textContent=x;$("sideStatus").textContent=x}
+function modelLabel(model){
+ const m=String(model||"Qwen/Qwen3.8-27B").replace(":fastest","");
+ const parts=m.split("/");
+ const name=parts[parts.length-1];
+ return name.replace(/^Qwen/i,"Qwen");
+}
+function updateModelBadge(model){
+ activeModel=model||activeModel;
+ const pill=document.querySelector(".pill");
+ if(pill)pill.textContent=modelLabel(activeModel)+" · HF";
+}
+async function loadModelInfo(){
+ try{
+  const r=await fetch(API+"/v1/public/model",{headers:{"Accept":"application/json"}});
+  const d=await r.json();
+  if(d?.ok){activeModel=d.model||activeModel;updateModelBadge(activeModel);state("Cerebro listo · "+modelLabel(activeModel))}
+ }catch{}
+}
 function toast(x){$("toast").textContent=x;$("toast").classList.add("show");clearTimeout(window.__toast);window.__toast=setTimeout(()=>$("toast").classList.remove("show"),2200)}
 function persist(){localStorage.setItem(K.chat,JSON.stringify(history.slice(-20)))}
 function add(role,text,save=true){
@@ -32,7 +50,7 @@ async function remote(text){
    body:JSON.stringify({conversation_id:conversation,message:text,consent_to_memory:false,history:history.slice(-10),agent:agents.find(a=>a.name===activeAgent)||null,team:teams.find(a=>a.name===activeTeam)||null})});
   const d=await r.json().catch(()=>({}));
   if(!r.ok||!d.answer)throw Error(d.message||"ai_unavailable");
-  return d.answer;
+  activeModel=d.model||activeModel; updateModelBadge(activeModel); return d.answer;
  }finally{clearTimeout(t)}
 }
 async function send(text){
