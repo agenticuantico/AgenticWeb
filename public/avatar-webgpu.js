@@ -1,4 +1,5 @@
 import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.webgpu.js";
+import { GLTFLoader } from "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/loaders/GLTFLoader.js";
 
 const host = document.querySelector(".robot-avatar");
 const legacy = document.getElementById("avatarCanvas");
@@ -205,6 +206,41 @@ if (!host) {
   });
   if (voiceStatus) observer.observe(voiceStatus, { childList: true, characterData: true, subtree: true });
 
+  // Prefer the final hyperrealistic, rigged GLB when it is available.
+  // The procedural avatar remains as a graceful fallback until the asset is uploaded.
+  const MODEL_URL = "./assets/avatar/agenticuantico-woman.glb";
+  let loadedModel = null;
+  let mixer = null;
+  let modelClock = new THREE.Clock();
+  try {
+    const loader = new GLTFLoader();
+    loader.load(MODEL_URL, (gltf) => {
+      loadedModel = gltf.scene;
+      loadedModel.position.set(0, -1.05, 0);
+      loadedModel.scale.setScalar(1.42);
+      loadedModel.traverse((obj) => {
+        if (!obj.isMesh) return;
+        obj.castShadow = true;
+        obj.receiveShadow = true;
+        if (obj.material) {
+          obj.material.needsUpdate = true;
+          if ("toneMapped" in obj.material) obj.material.toneMapped = true;
+        }
+      });
+      root.clear();
+      root.add(loadedModel);
+      if (gltf.animations?.length) {
+        mixer = new THREE.AnimationMixer(loadedModel);
+        gltf.animations.forEach((clip) => mixer.clipAction(clip).play());
+      }
+      setStatus("GLB · mujer IA · 3D");
+    }, undefined, () => {
+      setStatus("WEBGPU · avatar fallback");
+    });
+  } catch {
+    setStatus("WEBGPU · avatar fallback");
+  }
+
   setStatus("WEBGPU · avatar activo");
 
   const clock = new THREE.Clock();
@@ -214,6 +250,7 @@ if (!host) {
     particles.rotation.y = t * .035;
     particles.rotation.x = Math.sin(t * .17) * .05;
 
+    if (mixer) mixer.update(Math.min(modelClock.getDelta(), .05));
     root.rotation.y += ((targetX * .11 + Math.sin(t * .42) * .035) - root.rotation.y) * .035;
     root.rotation.x += ((targetY * .035) - root.rotation.x) * .035;
     root.position.y = -.1 + Math.sin(t * 1.15) * .025;
