@@ -1,6 +1,94 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#05060d"><title>AgentiCuantico — Intelligence OS</title><link rel="stylesheet" href="./styles.css?v=20260922-3"></head><body>
-<div class="scene"><div class="grid"></div><div class="ambient a"></div><div class="ambient b"></div><div class="neural-orb"><div class="core"></div><div class="ring r1"></div><div class="ring r2"></div><div class="ring r3"></div><div id="particles"></div></div></div>
-<div id="backdrop" class="backdrop hidden"></div><div class="shell"><aside id="sidebar" class="side glass"><div class="brand"><span class="orb"></span><div><b>AgentiCuantico</b><small>INTELLIGENCE OS</small></div></div><button id="newChat" class="new-chat">＋ Nueva conversación</button><nav class="nav"><span class="nav-title">ESPACIO</span><button class="nav-item active" data-view="chat">⌁ Chat</button><button class="nav-item" data-view="projects">◇ Proyectos</button><button class="nav-item" data-view="agents">◌ Agentes</button><button class="nav-item" data-view="teams">◈ Equipos</button><button class="nav-item" data-view="coder">⌘ Agentic Codex</button><span class="nav-title gap">CUENTA</span><button class="nav-item" data-view="account">◎ Registro / perfil</button><button class="nav-item" data-view="skills">✦ Skills</button></nav><div class="side-footer"><span class="status-dot"></span><div><b>AgentiCuantico</b><small id="sideStatus">Cerebro listo</small></div></div></aside>
-<main class="main"><header class="topbar glass"><button id="mobileMenu" class="mobile-menu">☰</button><div class="top-title"><span class="pulse"></span><div><strong id="title">AgentiCuantico</strong><small id="status">Cerebro listo</small></div></div><div class="actions"><span class="pill">QWEN · BRAIN</span><button id="menuBtn" class="menu-btn" aria-label="Abrir menú">⋯</button></div></header>
-<section id="chat" class="chat"><div class="welcome"><div class="eyebrow">AGENTIC INTELLIGENCE</div><h1>Pensá. Creá.<br><span>Construí con IA.</span></h1><p>Un cerebro agéntico para conversar, programar, diseñar y convertir objetivos en resultados.</p></div><div id="messages" class="messages"></div><form id="composer" class="composer glass"><textarea id="input" rows="1" placeholder="¿Qué querés construir hoy?"></textarea><button id="send" class="send" type="submit">↑</button></form><div class="memory">● Conversación privada en este dispositivo · No mostramos secretos ni información interna.</div></section><section id="panel" class="panel hidden"></section></main></div><div id="toast" class="toast"></div>
-<script>window.AGENTICUANTICO_API_URL="https://agenticweb.agenticuantico.workers.dev";</script><script type="module" src="./app.js?v=20260922-3"></script></body></html>
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#05060d">
+<meta name="description" content="AgentiCuantico — espacio de inteligencia agéntica para conversar, crear, programar y colaborar.">
+<link rel="icon" href="./favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="./favicon.svg">
+<link rel="manifest" href="./manifest.json">
+<link rel="stylesheet" href="./styles.css?v=20260922-4">
+<title>AgentiCuantico — Intelligence OS</title>
+</head>
+<body>
+<div class="scene" aria-hidden="true">
+  <div class="grid"></div><div class="ambient a"></div><div class="ambient b"></div>
+  <div class="neural-orb">
+    <div class="core"></div><div class="ring r1"></div><div class="ring r2"></div><div class="ring r3"></div><div id="particles"></div>
+  </div>
+</div>
+
+<div id="backdrop" class="backdrop hidden"></div>
+<div class="shell">
+  <aside id="sidebar" class="side glass">
+    <div class="brand">
+      <span class="orb" aria-hidden="true"></span>
+      <div><b>AgentiCuantico</b><small>INTELLIGENCE OS</small></div>
+    </div>
+    <button id="newChat" class="new-chat"><span class="nav-icon">＋</span><span>Nueva conversación</span></button>
+
+    <nav class="nav" aria-label="Espacio de trabajo">
+      <span class="nav-title">ESPACIO</span>
+      <button class="nav-item active" data-view="chat"><span class="nav-icon" data-icon="chat"></span><span>Chat</span></button>
+      <button class="nav-item" data-view="projects"><span class="nav-icon" data-icon="projects"></span><span>Proyectos</span></button>
+      <button class="nav-item" data-view="agents"><span class="nav-icon" data-icon="agents"></span><span>Agentes</span></button>
+      <button class="nav-item" data-view="teams"><span class="nav-icon" data-icon="teams"></span><span>Equipos</span></button>
+      <button class="nav-item" data-view="coder"><span class="nav-icon" data-icon="code"></span><span>Agentic Codex</span></button>
+      <span class="nav-title gap">CUENTA</span>
+      <button class="nav-item" data-view="account"><span class="nav-icon" data-icon="user"></span><span>Registro / perfil</span></button>
+      <button class="nav-item" data-view="skills"><span class="nav-icon" data-icon="spark"></span><span>Skills</span></button>
+    </nav>
+
+    <div class="side-footer">
+      <span class="status-dot"></span>
+      <div><b>AgentiCuantico</b><small id="sideStatus">Cerebro listo</small></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar glass">
+      <button id="mobileMenu" class="mobile-menu" aria-label="Abrir navegación">☰</button>
+      <div class="top-title">
+        <span class="pulse"></span>
+        <div><strong id="title">AgentiCuantico</strong><small id="status">Cerebro listo</small></div>
+      </div>
+      <div class="actions">
+        <span class="pill">QWEN · BRAIN</span>
+        <button id="menuBtn" class="menu-btn" aria-label="Acciones rápidas" aria-expanded="false">⋯</button>
+        <div id="quickMenu" class="quick-menu hidden" role="menu">
+          <button data-quick="chat"><span>✦</span> Nueva conversación</button>
+          <button data-quick="agents"><span>◈</span> Explorar agentes</button>
+          <button data-quick="teams"><span>◇</span> Abrir equipos</button>
+          <button data-quick="coder"><span>⌘</span> Abrir Agentic Codex</button>
+        </div>
+      </div>
+    </header>
+
+    <section id="chat" class="chat">
+      <div class="welcome">
+        <div class="eyebrow">AGENTIC INTELLIGENCE</div>
+        <h1>Pensá. Creá.<br><span>Construí con IA.</span></h1>
+        <p>Un espacio visual, simple y dinámico para conversar, crear agentes, formar equipos y convertir objetivos en resultados.</p>
+        <div class="quick-cards">
+          <button class="hero-card tilt" data-quick="agents"><span class="hero-icon">◈</span><b>Agentes</b><small>Creá especialistas</small></button>
+          <button class="hero-card tilt" data-quick="teams"><span class="hero-icon">◇</span><b>Equipos</b><small>Colaboración multiagente</small></button>
+          <button class="hero-card tilt" data-quick="coder"><span class="hero-icon">⌘</span><b>Codex</b><small>Programación asistida</small></button>
+        </div>
+      </div>
+      <div id="messages" class="messages"></div>
+      <form id="composer" class="composer glass">
+        <textarea id="input" rows="1" autocomplete="off" placeholder="¿Qué querés construir hoy?"></textarea>
+        <button id="send" class="send" type="submit" aria-label="Enviar">↑</button>
+      </form>
+      <div class="memory">● Conversación privada en este dispositivo · No mostramos secretos ni información interna.</div>
+    </section>
+
+    <section id="panel" class="panel hidden"></section>
+  </main>
+</div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script>window.AGENTICUANTICO_API_URL="https://agenticweb.agenticuantico.workers.dev";</script>
+<script type="module" src="./app.js?v=20260922-4"></script>
+</body>
+</html>
