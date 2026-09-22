@@ -19,7 +19,7 @@ function applySecurityHeaders(response, request) {
   headers.set("x-content-type-options", "nosniff");
   headers.set("x-frame-options", "DENY");
   headers.set("referrer-policy", "strict-origin-when-cross-origin");
-  headers.set("permissions-policy", "camera=(), microphone=(), geolocation=()");
+  headers.set("permissions-policy", "camera=(), microphone=(self), geolocation=()");
   headers.set("strict-transport-security", "max-age=31536000; includeSubDomains");
   return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
 }
@@ -292,7 +292,7 @@ async function createSession(user,secret){const payload=textB64url(JSON.stringif
 async function verifySession(token,secret){try{const [p,s]=String(token||"").split(".");if(!p||!s)return null;const expected=await hmacSign(p,secret),actual=fromB64url(s);if(expected.length!==actual.length)return null;for(let i=0;i<expected.length;i++)if(expected[i]!==actual[i])return null;const data=JSON.parse(new TextDecoder().decode(fromB64url(p)));return data.exp>Math.floor(Date.now()/1000)?data:null}catch{return null}}
 async function googleUserFromCredential(credential,env){const client=String(env.GOOGLE_CLIENT_ID||"").trim();if(!client)return null;const r=await fetch("https://oauth2.googleapis.com/tokeninfo?id_token="+encodeURIComponent(credential));if(!r.ok)return null;const d=await r.json();if(d.aud!==client||!(d.iss==="https://accounts.google.com"||d.iss==="accounts.google.com")||d.email_verified!=="true"||!d.sub||!d.email)return null;if(d.exp&&Number(d.exp)<Math.floor(Date.now()/1000))return null;return{sub:String(d.sub),email:String(d.email),name:String(d.name||d.email.split("@")[0]),picture:String(d.picture||"")}}
 
-async function authenticatedUser(request,env){const token=String(request.headers.get("Authorization")||"").replace(/^Bearer\s+/i,"");return verifySession(token,String(env.AUTH_SESSION_SECRET||""))}
+async function authenticatedUser(request,env){const token=String(request.headers.get("Authorization")||"").replace(/^Bearer\s+/i,"");return verifySession(token,String(env.AUTH_SESSION_SECRET||env.HF_TOKEN||""))}
 
 async function handleApi(request, env) {
   const url = new URL(request.url);
