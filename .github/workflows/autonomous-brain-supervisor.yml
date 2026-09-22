@@ -1,0 +1,29 @@
+name: Autonomous Brain Supervisor
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "*/15 * * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  supervisor:
+    runs-on: ubuntu-slim
+    timeout-minutes: 5
+    steps:
+      - name: Check public brain health
+        run: |
+          set -euo pipefail
+          response="$(curl -fsS --max-time 20 https://agenticuantico.dev.ar/health)"
+          echo "$response"
+          echo "$response" | grep -q '"ok":true'
+
+      - name: Exercise public conversation path
+        run: |
+          set -euo pipefail
+          payload='{"message":"Diagnóstico interno: respondé únicamente OK.","history":[]}'
+          response="$(curl -fsS --max-time 45             -H 'Content-Type: application/json'             -d "$payload"             https://agenticuantico.dev.ar/v1/public/chat)"
+          echo "$response"
+          echo "$response" | grep -q '"ok":true'
