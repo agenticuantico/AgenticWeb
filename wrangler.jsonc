@@ -16,6 +16,6 @@
     "enabled": true
   },
   "vars": {
-    "CORE_API_ORIGIN": "https://agenti-cuanticocore-production.up.railway.app"
+    "CORE_API_ORIGIN": "https://agenti-cuanticocore-live-production.up.railway.app"
   }
 }
