@@ -1,0 +1,15 @@
+{
+  "name":"AgentiCuantico — Intelligence OS",
+  "short_name":"AgentiCuantico",
+  "description":"Espacio de inteligencia agéntica para conversar, crear agentes, formar equipos y programar.",
+  "start_url":"./",
+  "scope":"./",
+  "display":"standalone",
+  "orientation":"any",
+  "theme_color":"#05060d",
+  "background_color":"#04050b",
+  "icons":[
+    {"src":"./favicon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}
+  ],
+  "categories":["productivity","developer tools","utilities"]
+}
