@@ -8,7 +8,7 @@
 <link rel="icon" href="./favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="./favicon.svg">
 <link rel="manifest" href="./manifest.json">
-<link rel="stylesheet" href="./styles.css?v=20260922-5">
+<link rel="stylesheet" href="./styles.css?v=20260922-6">
 <title>AgentiCuantico — Intelligence OS</title>
 </head>
 <body>
@@ -76,19 +76,43 @@
         <div><b>AgentiCuantico</b><small id="chatContext">Cerebro listo · conversación privada</small></div>
         <span class="context-model" id="contextModel">Qwen · HF</span>
       </div>
-      <div id="messages" class="messages"></div>
-      <form id="composer" class="composer glass">
-        <textarea id="input" rows="1" autocomplete="off" placeholder="¿Qué querés construir hoy?"></textarea>
-        <button id="send" class="send" type="submit" aria-label="Enviar">↑</button>
-      </form>
-      <div class="memory">● Conversación privada en este dispositivo · No mostramos secretos ni información interna.</div>
+      <div class="chat-layout">
+        <div class="conversation-pane">
+          <div id="messages" class="messages"></div>
+          <form id="composer" class="composer glass">
+            <button id="voiceInput" class="voice-btn" type="button" aria-label="Hablar con AgentiCuantico">⌕</button>
+            <textarea id="input" rows="1" autocomplete="off" placeholder="Escribí tu mensaje o usá la voz…"></textarea>
+            <button id="send" class="send" type="submit" aria-label="Enviar">↑</button>
+          </form>
+          <div class="memory">● Conversación privada en este dispositivo · No mostramos secretos ni información interna.</div>
+        </div>
+        <aside class="brain-stage glass" aria-label="Avatar 3D de AgentiCuantico">
+          <div class="stage-top"><div><b id="avatarName">Agente Principal</b><small id="avatarState">En línea · listo para hablar</small></div><span class="stage-live">● LIVE</span></div>
+          <div class="robot-avatar" id="robotAvatar" data-gender="female">
+            <div class="avatar-aura"></div><div class="avatar-head"><i class="ear left"></i><i class="ear right"></i><i class="brow left"></i><i class="brow right"></i><i class="eye left"></i><i class="eye right"></i><i class="nose"></i><i class="mouth"></i><i class="chin"></i></div>
+            <div class="avatar-neck"></div><div class="avatar-body"><span class="body-core"></span><i class="shoulder left"></i><i class="shoulder right"></i></div>
+            <div class="algorithm-spectrum"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+          </div>
+          <div class="voice-status"><span class="voice-wave"><i></i><i></i><i></i><i></i><i></i></span><div><b id="voiceStatus">Voz lista</b><small id="voiceName">Clara · Español (Argentina)</small></div><button id="stopVoice" class="ghost mini" type="button">Detener</button></div>
+          <div class="voice-controls">
+            <button id="voicePicker" class="stage-control">◉ Voz <small>10 perfiles</small></button>
+            <button id="langPicker" class="stage-control">◎ Idioma <small>Español AR</small></button>
+            <button id="genderPicker" class="stage-control">◈ Avatar <small>Femenino</small></button>
+          </div>
+        </aside>
+      </div>
     </section>
 
-    <section id="panel" class="panel hidden"></section>
+    <section id="panel" class="panel hidden"></section><div id="voicePanel" class="voice-panel hidden" aria-label="Selector de voz">
+  <div class="voice-panel-head"><div><span class="eyebrow">VOICE STUDIO</span><h3>Elegí cómo habla tu IA</h3></div><button id="closeVoice" class="menu-btn" type="button">×</button></div>
+  <div class="voice-tabs"><button class="voice-tab active" data-voice-gender="female">Femeninas</button><button class="voice-tab" data-voice-gender="male">Masculinas</button></div>
+  <div id="voiceList" class="voice-list"></div>
+  <div class="voice-note">Las voces usan el motor de voz disponible en el dispositivo/navegador. La interfaz admite 10 perfiles y selecciona automáticamente la voz compatible más cercana.</div>
+</div>
   </main>
 </div>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 <script>window.AGENTICUANTICO_API_URL="https://agenticweb.agenticuantico.workers.dev";</script>
-<script type="module" src="./app.js?v=20260922-5"></script>
+<script type="module" src="./app.js?v=20260922-6"></script>
 </body>
 </html>
