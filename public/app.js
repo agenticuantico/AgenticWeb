@@ -119,3 +119,70 @@ async function initAvatar3D(){
    renderer.render(scene,camera);requestAnimationFrame(animate)
 
 import "./avatar-webgpu.js";
+
+
+
+/* Cinematic hero interactions: mouse-scrub video, typewriter and entry routing */
+(()=>{
+  const hero=document.getElementById("cinematicHero");
+  if(!hero) return;
+  const video=document.getElementById("heroScrubVideo");
+  const typeEl=document.getElementById("heroTypewriter");
+  const actions=document.getElementById("heroActions");
+  let prevX=null,targetTime=0,seekQueued=false,seeking=false;
+
+  const intro="Estoy lista para conversar, crear, programar y transformar ideas en resultados.";
+  let i=0;
+  window.setTimeout(()=>{
+    const timer=window.setInterval(()=>{
+      if(!typeEl){clearInterval(timer);return}
+      typeEl.textContent=intro.slice(0,++i);
+      if(i>=intro.length){clearInterval(timer);typeEl.classList.add("done")}
+    },38);
+  },600);
+  window.setTimeout(()=>actions?.classList.add("is-visible"),400);
+
+  const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
+  const requestSeek=()=>{
+    if(!video || !Number.isFinite(video.duration) || video.duration<=0 || seeking) return;
+    seeking=true;
+    video.currentTime=clamp(targetTime,0,video.duration);
+  };
+  video?.addEventListener("loadedmetadata",()=>{targetTime=video.currentTime||0});
+  video?.addEventListener("seeked",()=>{
+    seeking=false;
+    if(Math.abs(video.currentTime-targetTime)>.02) requestSeek();
+  });
+  window.addEventListener("mousemove",(e)=>{
+    if(!hero.classList.contains("is-hidden")){
+      if(prevX===null){prevX=e.clientX;return}
+      const delta=e.clientX-prevX; prevX=e.clientX;
+      if(video && Number.isFinite(video.duration) && video.duration>0){
+        targetTime=clamp(targetTime+(delta/window.innerWidth)*.8*video.duration,0,video.duration);
+        requestSeek();
+      }
+    }
+  },{passive:true});
+  window.addEventListener("mouseleave",()=>{prevX=null},{passive:true});
+
+  const enter=()=>{
+    hero.classList.add("is-hidden");
+    document.body.classList.remove("hero-active");
+    setTimeout(()=>hero.remove(),600);
+  };
+  document.querySelectorAll("[data-enter-app]").forEach(b=>b.addEventListener("click",enter));
+  hero.querySelectorAll("[data-copy-email]").forEach(b=>b.addEventListener("click",async()=>{
+    try{
+      await navigator.clipboard.writeText("agenticuantico@gmail.com");
+      const old=b.innerHTML;b.innerHTML="Copiado ✓";
+      setTimeout(()=>b.innerHTML=old,1200);
+    }catch{}
+  }));
+  hero.querySelectorAll("[data-hero-action]").forEach(b=>b.addEventListener("click",()=>{
+    const view=b.dataset.heroAction;
+    enter();
+    const nav=document.querySelector(`.nav-item[data-view="${view}"]`);
+    if(nav) setTimeout(()=>nav.click(),100);
+    else if(view==="chat") document.getElementById("chat")?.scrollIntoView({behavior:"smooth"});
+  }));
+})();
