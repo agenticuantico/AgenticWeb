@@ -73,10 +73,88 @@ form?.addEventListener('submit',async e=>{
   }finally{setBusy(false)}
 });
 document.querySelectorAll('[data-plan]').forEach(btn=>btn.addEventListener('click',async()=>{const plan=btn.dataset.plan;if(plan==='explorer'){location.hash='chat';return}const email=prompt('Ingresá el email que usarás para la suscripción:');if(!email)return;const choice=prompt('Elegí la pasarela: 1 = Mercado Pago, 2 = PayPal','1');const provider=choice==='2'?'paypal':'mercadopago';btn.disabled=true;btn.textContent='Preparando checkout…';try{const r=await fetch(API_BASE+'/v1/billing/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({plan,provider,email})});const d=await r.json().catch(()=>({}));if(!r.ok||!d.checkout_url)throw new Error(d.detail||d.error||'checkout_unavailable');window.location.href=d.checkout_url}catch(e){btn.disabled=false;btn.textContent='Elegir '+plan.charAt(0).toUpperCase()+plan.slice(1);alert('El checkout no está disponible todavía. Configurá las credenciales y los IDs de planes en el backend.')}}));
-const canvas=document.querySelector('#brain-canvas'),ctx=canvas?.getContext('2d');let pts=[];
-function resize(){if(!canvas)return;const r=canvas.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2);canvas.width=r.width*d;canvas.height=r.height*d;ctx.setTransform(d,0,0,d,0,0);pts=Array.from({length:115},()=>({a:Math.random()*Math.PI*2,b:Math.random()*Math.PI*2,r:.25+Math.random()*.65,s:.001+Math.random()*.003}))}
-function draw(t=0){if(!canvas)return;const w=canvas.clientWidth,h=canvas.clientHeight;ctx.clearRect(0,0,w,h);const cx=w/2,cy=h/2,R=Math.min(w,h)*.37;for(const p of pts){p.a+=p.s;const x=cx+Math.cos(p.a+t*.0002)*R*p.r;const y=cy+Math.sin(p.b+p.a*.7)*R*p.r*.72;const glow=1.5+3*(1-p.r);ctx.beginPath();ctx.fillStyle=p.r>.7?'#9b7cff':'#65e7ff';ctx.globalAlpha=.18+.6*(1-p.r);ctx.arc(x,y,glow,0,Math.PI*2);ctx.fill()}ctx.globalAlpha=.12;ctx.strokeStyle='#65e7ff';for(let i=0;i<5;i++){ctx.beginPath();ctx.ellipse(cx,cy,R*(.55+i*.1),R*(.3+i*.08),i*.5,0,Math.PI*2);ctx.stroke()}ctx.globalAlpha=1;requestAnimationFrame(draw)}
-addEventListener('resize',resize);resize();draw();
+const canvas=document.querySelector('#brain-canvas');
+const ctx=canvas?.getContext('2d');
+let nodes=[];
+let rotation={x:-0.08,y:0.25};
+let drag={active:false,x:0,y:0};
+let pulse=0;
+function resize3D(){
+  if(!canvas)return;
+  const r=canvas.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2);
+  canvas.width=Math.max(1,Math.floor(r.width*d));
+  canvas.height=Math.max(1,Math.floor(r.height*d));
+  ctx.setTransform(d,0,0,d,0,0);
+  nodes=Array.from({length:150},()=> {
+    const z=Math.random()*2-1, a=Math.random()*Math.PI*2, s=Math.sqrt(1-z*z);
+    return {x:Math.cos(a)*s,y:z,z:Math.sin(a)*s,phase:Math.random()*Math.PI*2,energy:.35+Math.random()*.65};
+  });
+}
+function project3D(p,w,h,t){
+  const cy=Math.cos(rotation.y),sy=Math.sin(rotation.y),cx=Math.cos(rotation.x),sx=Math.sin(rotation.x);
+  let x=p.x*cy-p.z*sy, z=p.x*sy+p.z*cy;
+  let y=p.y*cx-z*sx; z=p.y*sx+z*cx;
+  const scale=Math.min(w,h)*.34;
+  const perspective=1/(1.65-z*.62);
+  return {x:w/2+x*scale*perspective,y:h/2+y*scale*perspective,z,scale:perspective};
+}
+function draw3D(t=0){
+  if(!canvas)return;
+  const w=canvas.clientWidth,h=canvas.clientHeight;
+  ctx.clearRect(0,0,w,h);
+  const cx=w/2,cy=h/2,R=Math.min(w,h)*.36;
+  const glow=ctx.createRadialGradient(cx,cy,10,cx,cy,R);
+  glow.addColorStop(0,'rgba(101,231,255,.12)');
+  glow.addColorStop(.55,'rgba(155,124,255,.06)');
+  glow.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=glow;ctx.beginPath();ctx.arc(cx,cy,R*1.25,0,Math.PI*2);ctx.fill();
+  const points=nodes.map((p,i)=>{
+    const wobble=.025*Math.sin(t*.001+p.phase);
+    const q={x:p.x*(1+wobble),y:p.y*(1+wobble),z:p.z*(1+wobble)};
+    return {...project3D(q,w,h,t),p,i};
+  }).sort((a,b)=>a.z-b.z);
+  ctx.lineWidth=1;
+  for(let i=0;i<points.length;i+=3){
+    const a=points[i],b=points[(i+7)%points.length];
+    const dx=a.x-b.x,dy=a.y-b.y;
+    if(dx*dx+dy*dy<5200){
+      ctx.strokeStyle='rgba(101,231,255,.12)';
+      ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
+    }
+  }
+  for(const q of points){
+    const active=.5+.5*Math.sin(t*.002+q.p.phase);
+    const size=(1.2+2.6*active)*q.scale;
+    ctx.globalAlpha=Math.max(.18,Math.min(.95,.3+q.p.energy*.7))*q.scale;
+    ctx.fillStyle=q.p.z>.1?'#65e7ff':'#9b7cff';
+    ctx.beginPath();ctx.arc(q.x,q.y,size,0,Math.PI*2);ctx.fill();
+  }
+  ctx.globalAlpha=.7;
+  ctx.strokeStyle='rgba(101,231,255,.18)';
+  ctx.lineWidth=1;
+  for(let i=0;i<3;i++){
+    ctx.beginPath();
+    ctx.ellipse(cx,cy,R*(.72+i*.12),R*(.32+i*.07),rotation.y+i*.65,0,Math.PI*2);
+    ctx.stroke();
+  }
+  if(pulse>0){
+    ctx.globalAlpha=pulse;
+    ctx.strokeStyle='#65e7ff';
+    ctx.lineWidth=2;
+    ctx.beginPath();ctx.arc(cx,cy,R*(1.02+(1-pulse)*.32),0,Math.PI*2);ctx.stroke();
+    pulse=Math.max(0,pulse-.018);
+  }
+  ctx.globalAlpha=1;
+  requestAnimationFrame(draw3D);
+}
+canvas?.addEventListener('pointerdown',e=>{drag.active=true;drag.x=e.clientX;drag.y=e.clientY;canvas.setPointerCapture?.(e.pointerId)});
+canvas?.addEventListener('pointermove',e=>{if(!drag.active)return;rotation.y+=(e.clientX-drag.x)*.006;rotation.x=Math.max(-.8,Math.min(.8,rotation.x+(e.clientY-drag.y)*.006));drag.x=e.clientX;drag.y=e.clientY});
+canvas?.addEventListener('pointerup',()=>{drag.active=false;pulse=1});
+canvas?.addEventListener('pointercancel',()=>{drag.active=false});
+canvas?.addEventListener('wheel',e=>{e.preventDefault();pulse=1},{passive:false});
+addEventListener('resize',resize3D);
+resize3D();
+draw3D();
 let authMode='login';
 document.querySelectorAll('.auth-tab').forEach(tab=>tab.addEventListener('click',()=>{authMode=tab.dataset.auth;document.querySelectorAll('.auth-tab').forEach(x=>x.classList.toggle('active',x===tab));document.querySelector('#auth-submit').textContent=authMode==='login'?'Ingresar':'Crear cuenta';document.querySelector('#password-wrap input').autocomplete=authMode==='login'?'current-password':'new-password'}));
 document.querySelector('#auth-form')?.addEventListener('submit',async e=>{e.preventDefault();const email=document.querySelector('#auth-email').value.trim(),phone=document.querySelector('#auth-phone').value.trim(),password=document.querySelector('#auth-password').value;try{const r=await fetch(API_BASE+(authMode==='login'?'/v1/auth/login':'/v1/auth/register'),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,phone,password})});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.detail||'auth_error');if(d.requires_otp){const code=prompt('Te enviamos un código de seguridad. Ingresalo para continuar:');if(!code)return;const v=await fetch(API_BASE+'/v1/auth/verify-phone',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({challenge_id:d.challenge_id,code})});const vd=await v.json();if(!v.ok)throw new Error(vd.detail||'otp_error')}if(d.session)sessionStorage.setItem('aq_session',d.session);alert(authMode==='login'?'Bienvenido a AgentiCuantico.':'Cuenta creada. Bienvenido.');location.hash='account'}catch(err){alert('No se pudo completar el acceso. Revisá los datos e intentá nuevamente.');console.error(err)}});
