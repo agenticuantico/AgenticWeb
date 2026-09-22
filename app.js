@@ -1,56 +1,13 @@
-const DEFAULT_NATIVE_API = 'https://agenticuantico.dev.ar';
-const isNative = window.location.protocol === 'capacitor:';
-const API_BASE = (window.AGENTICUANTICO_API || (isNative ? DEFAULT_NATIVE_API : window.location.origin)).replace(/\/$/, '');
-const form = document.querySelector('#chat-form');
-const prompt = document.querySelector('#prompt');
-const messages = document.querySelector('#messages');
-const status = document.querySelector('#chat-status');
-const history = [];
-
-function addMessage(role, text) {
-  const item = document.createElement('div');
-  item.className = `message ${role}`;
-  const name = role === 'user' ? 'Tú' : 'AgentiCuantico';
-  item.innerHTML = `<b>${name}</b><p></p>`;
-  item.querySelector('p').textContent = text;
-  messages.appendChild(item);
-  messages.scrollTop = messages.scrollHeight;
-}
-
-function setBusy(busy) {
-  prompt.disabled = busy;
-  form.querySelector('button').disabled = busy;
-  status.textContent = busy ? 'Pensando…' : 'Listo';
-}
-
-form?.addEventListener('submit', async (event) => {
-  event.preventDefault();
-  const text = prompt.value.trim();
-  if (!text || prompt.disabled) return;
-
-  addMessage('user', text);
-  prompt.value = '';
-  setBusy(true);
-
-  try {
-    const response = await fetch(`${API_BASE}/v1/conversations/messages`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: text, history })
-    });
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(data.error || `HTTP ${response.status}`);
-
-    const answer = data.message || 'No se recibió una respuesta.';
-    addMessage('assistant', answer);
-    history.push({ role: 'user', content: text }, { role: 'assistant', content: answer });
-    while (history.length > 12) history.shift();
-    status.textContent = 'Respuesta recibida';
-  } catch (error) {
-    addMessage('assistant', 'No pude procesar tu mensaje en este momento. Intentá nuevamente.');
-    status.textContent = 'Servicio no disponible';
-    console.error('Chat request failed:', error);
-  } finally {
-    setBusy(false);
-  }
-});
+const DEFAULT_NATIVE_API='https://agenticuantico.dev.ar';
+const isNative=window.location.protocol==='capacitor:';
+const API_BASE=(window.AGENTICUANTICO_API||(isNative?DEFAULT_NATIVE_API:window.location.origin)).replace(/\/$/,'');
+const form=document.querySelector('#chat-form'),prompt=document.querySelector('#prompt'),messages=document.querySelector('#messages'),status=document.querySelector('#chat-status'),brainState=document.querySelector('#brain-state');
+const history=[];
+function addMessage(role,text){const item=document.createElement('div');item.className='message '+role;item.innerHTML='<div class="avatar">'+(role==='user'?'TÚ':'AQ')+'</div><div><b>'+(role==='user'?'Tú':'AgentiCuantico')+'</b><p></p></div>';item.querySelector('p').textContent=text;messages.appendChild(item);messages.scrollTop=messages.scrollHeight}
+function setBusy(b){prompt.disabled=b;form.querySelector('button').disabled=b;status.textContent=b?'AgentiCuantico está pensando…':'Listo para conversar';if(brainState)brainState.textContent=b?'PROCESANDO · AGENTES ACTIVOS':'EXPLORANDO · 3 AGENTES'}
+form?.addEventListener('submit',async e=>{e.preventDefault();const text=prompt.value.trim();if(!text||prompt.disabled)return;addMessage('user',text);prompt.value='';setBusy(true);try{const r=await fetch(API_BASE+'/v1/conversations/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text,history})});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||'HTTP '+r.status);const answer=d.message||'No se recibió una respuesta.';addMessage('assistant',answer);history.push({role:'user',content:text},{role:'assistant',content:answer});while(history.length>12)history.shift()}catch(err){addMessage('assistant','No pude conectar con el cerebro en este momento. Verificá que la API esté disponible e intentá nuevamente.');status.textContent='API no disponible';console.error(err)}finally{setBusy(false)}});
+document.querySelectorAll('[data-plan]').forEach(btn=>btn.addEventListener('click',async()=>{const plan=btn.dataset.plan;if(plan==='explorer'){location.hash='chat';return}btn.disabled=true;btn.textContent='Preparando checkout…';try{const r=await fetch(API_BASE+'/v1/billing/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({plan})});const d=await r.json().catch(()=>({}));if(!r.ok||!d.checkout_url)throw new Error(d.error||'checkout_unavailable');window.location.href=d.checkout_url}catch(e){btn.disabled=false;btn.textContent='Elegir '+plan.charAt(0).toUpperCase()+plan.slice(1);alert('El checkout todavía no está configurado para esta cuenta. El plan ya está preparado en la interfaz.')}}));
+const canvas=document.querySelector('#brain-canvas'),ctx=canvas?.getContext('2d');let pts=[];
+function resize(){if(!canvas)return;const r=canvas.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2);canvas.width=r.width*d;canvas.height=r.height*d;ctx.setTransform(d,0,0,d,0,0);pts=Array.from({length:115},()=>({a:Math.random()*Math.PI*2,b:Math.random()*Math.PI*2,r:.25+Math.random()*.65,s:.001+Math.random()*.003}))}
+function draw(t=0){if(!canvas)return;const w=canvas.clientWidth,h=canvas.clientHeight;ctx.clearRect(0,0,w,h);const cx=w/2,cy=h/2,R=Math.min(w,h)*.37;for(const p of pts){p.a+=p.s;const x=cx+Math.cos(p.a+t*.0002)*R*p.r;const y=cy+Math.sin(p.b+p.a*.7)*R*p.r*.72;const glow=1.5+3*(1-p.r);ctx.beginPath();ctx.fillStyle=p.r>.7?'#9b7cff':'#65e7ff';ctx.globalAlpha=.18+.6*(1-p.r);ctx.arc(x,y,glow,0,Math.PI*2);ctx.fill()}ctx.globalAlpha=.12;ctx.strokeStyle='#65e7ff';for(let i=0;i<5;i++){ctx.beginPath();ctx.ellipse(cx,cy,R*(.55+i*.1),R*(.3+i*.08),i*.5,0,Math.PI*2);ctx.stroke()}ctx.globalAlpha=1;requestAnimationFrame(draw)}
+addEventListener('resize',resize);resize();draw();
