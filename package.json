@@ -1,0 +1,17 @@
+{
+  "name": "agenticweb",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AgenticWeb — interfaz web y app Android de AgentiCuantico",
+  "scripts": {
+    "cap:sync": "cap sync",
+    "android:open": "cap open android"
+  },
+  "dependencies": {
+    "@capacitor/android": "7.4.3",
+    "@capacitor/core": "7.4.3"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "7.4.3"
+  }
+}
