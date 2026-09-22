@@ -40,7 +40,7 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          printf '%s' "$HF_TOKEN" | npx --yes wrangler@latest secret put HF_TOKEN --name agenticweb --account-id "$CLOUDFLARE_ACCOUNT_ID"
+          printf '%s' "$HF_TOKEN" | npx --yes wrangler@latest secret put HF_TOKEN --name agenticweb
 
       - name: Deploy Worker + Assets
         uses: cloudflare/wrangler-action@v4
