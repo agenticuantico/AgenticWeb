@@ -6,7 +6,8 @@
   "routes": [
     {
       "pattern": "agenticuantico.dev.ar",
-      "custom_domain": true
+      "custom_domain": true,
+      "zone_name": "agenticuantico.dev.ar"
     }
   ],
   "workers_dev": true,
