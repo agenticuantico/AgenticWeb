@@ -204,3 +204,7 @@ body{overflow:hidden}
 #menuBtn{font-size:18px}
 #menuBtnBottom{font-size:13px;width:32px;height:26px}
 @media(max-width:760px){.top-search{display:none}.top-brand-mobile{display:flex}.top-icon{display:none}.profile-chip{display:none}}
+
+.quantum-anchor-label{position:absolute;z-index:9;left:15px;top:54px;display:flex;align-items:center;gap:6px;padding:7px 9px;border:1px solid #37cfff4a;border-radius:10px;background:#031125b8;backdrop-filter:blur(10px);box-shadow:0 0 24px #19bfff18}.quantum-anchor-label b{font-size:7px;letter-spacing:.12em;color:#9cecff}.quantum-anchor-label small{font-size:6px;color:#5e8bb8}.qa-pulse{width:6px;height:6px;border-radius:50%;background:#5beaff;box-shadow:0 0 10px #5beaff;animation:qaPulse 1.4s ease-in-out infinite}@keyframes qaPulse{50%{transform:scale(1.7);opacity:.55}}
+.reference-stage{perspective:900px}.reference-avatar{transform-style:preserve-3d}.reference-avatar canvas{mix-blend-mode:screen}.reference-avatar:before{content:"";position:absolute;inset:6% 5%;border-radius:50%;background:radial-gradient(circle at 50% 45%,transparent 0 34%,#2de5ff0b 42%,transparent 66%);box-shadow:inset 0 0 90px #1a70ff0b;pointer-events:none;z-index:2}.reference-stage:after{content:"";position:absolute;left:5%;right:5%;bottom:7%;height:1px;background:linear-gradient(90deg,transparent,#42eaff77,#765dff77,transparent);box-shadow:0 0 30px #43dfff55;pointer-events:none}
+@media(max-width:760px){.quantum-anchor-label{left:9px;top:53px}.quantum-anchor-label small{display:none}}
