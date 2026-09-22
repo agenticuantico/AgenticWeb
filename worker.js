@@ -29,8 +29,8 @@ async function proxyToCore(request, env) {
   if (!origin) {
     return json({
       ok: false,
-      error: "core_api_not_configured",
-      message: "El puente con el cerebro todavía no tiene configurado CORE_API_ORIGIN."
+      error: "service_unavailable",
+      message: "El servicio de IA está temporalmente no disponible."
     }, 503);
   }
 
@@ -66,9 +66,8 @@ async function proxyToCore(request, env) {
   } catch (error) {
     return json({
       ok: false,
-      error: "core_api_unreachable",
-      message: "No se pudo contactar al cerebro de AgentiCuantico.",
-      detail: error instanceof Error ? error.message : "upstream_fetch_failed"
+      error: "service_unavailable",
+      message: "El servicio de IA está temporalmente no disponible."
     }, 502);
   }
 }
