@@ -118,7 +118,7 @@ async function initAvatar3D(){
    }
    renderer.render(scene,camera);requestAnimationFrame(animate)
 
-import "./avatar-webgpu.js";
+// WebGPU avatar is optional. The stable WebGL avatar below is the default renderer.
 
 
 
@@ -209,4 +209,26 @@ import "./avatar-webgpu.js";
     const nav=document.querySelector(`.nav-item[data-view="${view}"]`);
     if(nav)window.setTimeout(()=>nav.click(),100);
   }));
+})();
+
+
+/* Premium interaction layer — pointer parallax + accessible motion controls. */
+(()=>{
+  const hero=document.getElementById("cinematicHero");
+  const stage=document.getElementById("robotAvatar");
+  if(!hero) return;
+  let px=0,py=0;
+  const reduce=window.matchMedia("(prefers-reduced-motion: reduce)");
+  window.addEventListener("pointermove",e=>{
+    if(reduce.matches) return;
+    px=(e.clientX/window.innerWidth-.5)*2;
+    py=(e.clientY/window.innerHeight-.5)*2;
+    hero.style.setProperty("--mx",px.toFixed(3));
+    hero.style.setProperty("--my",py.toFixed(3));
+    stage?.style.setProperty("--avatar-mx",px.toFixed(3));
+    stage?.style.setProperty("--avatar-my",py.toFixed(3));
+  },{passive:true});
+  document.addEventListener("visibilitychange",()=>{
+    if(document.hidden) window.speechSynthesis?.pause?.();
+  });
 })();
