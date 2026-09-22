@@ -117,7 +117,5 @@ async function initAvatar3D(){
     m.traverse(o=>{if(o.isMesh&&o.morphTargetDictionary&&o.morphTargetInfluences){for(const [name,idx] of Object.entries(o.morphTargetDictionary)){if(/mouth|jaw|viseme|phoneme|open/i.test(name))o.morphTargetInfluences[idx]=avatar3d.mouthLevel*.78;if(/blink|eye.?close/i.test(name))o.morphTargetInfluences[idx]=m.userData.blink}}})
    }
    renderer.render(scene,camera);requestAnimationFrame(animate)
-  };animate();
- }catch(e){const st=$("avatarRigStatus");if(st)st.textContent="3D · navegador no compatible"}
-}
-;
+
+import "./avatar-webgpu.js";
