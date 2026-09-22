@@ -2,7 +2,13 @@
   "$schema": "https://json.schemastore.org/wrangler.json",
   "name": "agenticweb",
   "main": "worker.js",
-  "compatibility_date": "2026-09-21",
+  "compatibility_date": "2026-09-22",
+  "routes": [
+    {
+      "pattern": "agenticuantico.dev.ar",
+      "custom_domain": true
+    }
+  ],
   "workers_dev": true,
   "assets": {
     "directory": "./public",
