@@ -56,7 +56,7 @@ function speak(text){if(!text||typeof speechSynthesis==="undefined")return;const
 function populateDeviceVoices(){deviceVoices=typeof speechSynthesis!=="undefined"?speechSynthesis.getVoices():[];renderVoiceList()}
 function renderVoiceList(){const box=$("voiceList");if(!box)return;const list=voiceProfiles.filter(v=>v.gender===voiceGender);box.innerHTML=list.map(v=>`<button class="voice-option ${v.id===selectedVoiceId?"active":""}" data-voice="${v.id}"><span class="voice-avatar">${v.gender==="female"?"♀":"♂"}</span><span><b>${esc(v.name)}</b><small>${esc(v.label)}</small></span><i>${v.id===selectedVoiceId?"✓":"▶"}</i></button>`).join("");box.querySelectorAll("[data-voice]").forEach(b=>b.onclick=()=>selectVoice(b.dataset.voice))}
 function selectVoice(id){const p=voiceProfiles.find(v=>v.id===id);if(!p)return;selectedVoiceId=id;voiceGender=p.gender;localStorage.setItem("aq_voice",id);const name=$("voiceName");if(name)name.textContent=p.name+" · "+p.label;const gp=$("genderPicker");if(gp)gp.innerHTML="◈ Avatar <small>"+(p.gender==="female"?"Femenino":"Masculino")+"</small>";renderVoiceList();toast("Voz seleccionada · "+p.name)}
-function openVoicePanel(){voiceGender=currentVoice().gender;voicePanel.classList.remove("hidden");renderVoiceList()}
+function openVoicePanel(){voiceGender=currentVoice().gender;$("voicePanel").classList.remove("hidden");renderVoiceList()}
 function toggleRecognition(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){toast("Este navegador no habilita reconocimiento de voz");return}if(listening){recognition?.stop();return}recognition=new SR();recognition.lang=currentVoice().lang;recognition.interimResults=true;recognition.continuous=false;recognition.onstart=()=>{listening=true;$("voiceInput").classList.add("recording");$("voiceStatus").textContent="Escuchando…";$("avatarState").textContent="Escuchando · hablá ahora"};recognition.onresult=e=>{let final="";for(let i=e.resultIndex;i<e.results.length;i++)final+=e.results[i][0].transcript;$("input").value=final;$("input").dispatchEvent(new Event("input"))};recognition.onerror=()=>{listening=false;$("voiceInput").classList.remove("recording");$("voiceStatus").textContent="Voz lista"};recognition.onend=()=>{listening=false;$("voiceInput").classList.remove("recording");$("voiceStatus").textContent="Voz lista";const t=$("input").value.trim();if(t&&!busy)send(t)};recognition.start()}
 
 function persist(){localStorage.setItem(K.chat,JSON.stringify(history.slice(-20)))}
@@ -196,7 +196,7 @@ window.addEventListener("load",()=>{
  if(typeof speechSynthesis!=="undefined"){populateDeviceVoices();speechSynthesis.addEventListener?.("voiceschanged",populateDeviceVoices)}
  selectVoice(selectedVoiceId);
  $("voiceInput").onclick=toggleRecognition;
- $("stopVoice").onclick=()=>{speechSynthesis?.cancel();setSpeaking(false,"Voz lista")};
+ $("stopVoice").onclick=()=>{window.speechSynthesis?.cancel();setSpeaking(false,"Voz lista")};
  $("voicePicker").onclick=openVoicePanel;$("langPicker").onclick=openVoicePanel;
  $("genderPicker").onclick=()=>{const p=currentVoice();selectVoice(p.gender==="female"?"mateo":"clara")};
  $("closeVoice").onclick=()=>$("voicePanel").classList.add("hidden");
