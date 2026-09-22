@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#05060d">
+<title>AgentiCuantico — Inteligencia Agéntica</title>
+<meta name="description" content="AgentiCuantico: inteligencia agéntica, conversación, programación y creación con una interfaz 3D inmersiva.">
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<div class="scene">
+  <div class="grid"></div>
+  <div class="ambient ambient-a"></div>
+  <div class="ambient ambient-b"></div>
+  <div id="neural-orb" class="neural-orb" aria-hidden="true">
+    <div class="core"></div>
+    <div class="ring ring-1"></div>
+    <div class="ring ring-2"></div>
+    <div class="ring ring-3"></div>
+    <div id="particles"></div>
+  </div>
+</div>
+
+<div class="shell">
+  <aside class="side glass">
+    <div class="brand"><span class="orb"></span><div><b>AgentiCuantico</b><small>INTELLIGENCE OS</small></div></div>
+    <button id="newChat" class="new-chat">＋ Nueva conversación</button>
+    <nav class="nav">
+      <span class="nav-title">ESPACIO</span>
+      <button class="nav-item active">⌁ Chat inteligente</button>
+      <button class="nav-item">◇ Proyectos</button>
+      <button class="nav-item">◌ Agentes</button>
+    </nav>
+    <div class="side-footer">
+      <div class="status-dot"></div>
+      <div><strong>AgentiCuantico</strong><small id="sideStatus">Sistema preparado</small></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar glass">
+      <div class="top-title"><span class="pulse-dot"></span><div><strong>AgentiCuantico</strong><span id="status">Conectando con el cerebro…</span></div></div>
+      <div class="top-actions"><span class="model-pill">QWEN · BRAIN</span><button class="icon-btn" aria-label="Configuración">⋯</button></div>
+    </header>
+
+    <section id="chat" class="chat">
+      <div class="welcome">
+        <div class="eyebrow">AGENTIC INTELLIGENCE</div>
+        <h1>Pensá. Creá.<br><span>Construí con IA.</span></h1>
+        <p>Un cerebro agéntico para conversar, programar, diseñar y convertir objetivos en resultados.</p>
+      </div>
+      <div id="messages" class="messages"></div>
+      <form id="composer" class="composer glass">
+        <textarea id="input" placeholder="¿Qué querés construir hoy?" rows="1" autocomplete="off"></textarea>
+        <button type="submit" class="send" aria-label="Enviar">↑</button>
+      </form>
+      <div class="memory"><span>●</span> Conversación privada en este dispositivo · El cerebro puede mantener contexto sin mostrar información interna.</div>
+    </section>
+  </main>
+</div>
+
+<script>
+window.AGENTICUANTICO_API_URL = "";
+</script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>
