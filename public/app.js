@@ -1,6 +1,8 @@
 const API=(window.AGENTICUANTICO_API_URL||"https://agenticweb.agenticuantico.workers.dev").replace(/\/$/,"");
-const K={chat:"aq_chat_v7",session:"aq_guest_v5",agents:"aq_agents_v4",teams:"aq_teams_v4",profile:"aq_profile_v4"};
-let history=JSON.parse(localStorage.getItem(K.chat)||"[]");
+const K={chat:"aq_chat_v7",conversations:"aq_conversations_v1",active:"aq_active_v1",session:"aq_guest_v6",agents:"aq_agents_v5",teams:"aq_teams_v5",profile:"aq_profile_v5",auth:"aq_auth_v1",improvement:"aq_improvement_consent_v1"};
+let conversations=JSON.parse(localStorage.getItem(K.conversations)||"[]");
+let currentId=localStorage.getItem(K.active)||"";
+let history=[];
 let guest=localStorage.getItem(K.session)||crypto.randomUUID();
 let agents=JSON.parse(localStorage.getItem(K.agents)||"null")||[
 {name:"Asistente",role:"Asistente general",skills:["conversación","organización"],knowledge:["español","productividad"]},
@@ -8,7 +10,8 @@ let agents=JSON.parse(localStorage.getItem(K.agents)||"null")||[
 {name:"Diseñador",role:"Diseñador UI/UX y 3D",skills:["UI/UX","3D","branding"],knowledge:["interfaces","responsive","experiencia de usuario"]}
 ];
 let teams=JSON.parse(localStorage.getItem(K.teams)||"[]");
-let activeAgent=null,activeTeam=null,busy=false,conversation=crypto.randomUUID(),activeModel="Qwen/Qwen3.8-27B";
+let activeAgent=null,activeTeam=null,busy=false,conversation=currentId||crypto.randomUUID(),activeModel="AgentiQ";
+let authToken=localStorage.getItem(K.auth)||"",authUser=null,pendingAttachments=[];
 const voiceProfiles=[
 {id:"clara",name:"Clara",gender:"female",lang:"es-AR",label:"Español (Argentina)",pitch:1.05},
 {id:"luna",name:"Luna",gender:"female",lang:"es-AR",label:"Español (Argentina)",pitch:1.12},
@@ -30,17 +33,8 @@ const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&
 const icon=(name)=>({chat:"<svg viewBox='0 0 24 24'><path d='M5 6.5h14v9H9l-4 3v-12Z'/><path d='M8 10h8M8 13h5'/></svg>",projects:"<svg viewBox='0 0 24 24'><path d='M4 7.5h6l1.5 2H20v9H4z'/><path d='M4 7.5V5h6l1.5 2'/></svg>",agents:"<svg viewBox='0 0 24 24'><circle cx='12' cy='8' r='3'/><path d='M6 19c.6-3.2 2.7-5 6-5s5.4 1.8 6 5'/><path d='M4 12h3M17 12h3'/></svg>",teams:"<svg viewBox='0 0 24 24'><circle cx='8' cy='9' r='2.5'/><circle cx='16' cy='9' r='2.5'/><path d='M3.5 18c.5-2.5 2-4 4.5-4s4 1.5 4.5 4M11.5 18c.5-2.5 2-4 4.5-4s4 1.5 4.5 4'/></svg>",code:"<svg viewBox='0 0 24 24'><path d='m8 7-5 5 5 5M16 7l5 5-5 5M14 4l-4 16'/></svg>",user:"<svg viewBox='0 0 24 24'><circle cx='12' cy='8' r='3'/><path d='M5 20c.7-4 3-6 7-6s6.3 2 7 6'/></svg>",spark:"<svg viewBox='0 0 24 24'><path d='m12 3 1.7 5.3L19 10l-5.3 1.7L12 17l-1.7-5.3L5 10l5.3-1.7Z'/><path d='m19 16 .7 2.3L22 19l-2.3.7L19 22l-.7-2.3L16 19l2.3-.7Z'/></svg>"}[name]||"");
 
 function state(x){$("status").textContent=x;$("sideStatus").textContent=x;const c=document.getElementById("chatContext");if(c)c.textContent=x}
-function modelLabel(model){
- const m=String(model||"Qwen/Qwen3.8-27B").replace(":fastest","");
- const parts=m.split("/");
- const name=parts[parts.length-1];
- return name.replace(/^Qwen/i,"Qwen");
-}
-function updateModelBadge(model){
- activeModel=model||activeModel;
- const pill=document.querySelector(".pill");
- if(pill)pill.textContent=modelLabel(activeModel)+" · HF"; const cm=document.getElementById("contextModel"); if(cm)cm.textContent=modelLabel(activeModel)+" · HF";
-}
+function modelLabel(){return "AgentiQ"}
+function updateModelBadge(){activeModel="AgentiQ";const pill=document.querySelector(".pill");if(pill)pill.textContent="AgentiQ · Cerebro";const cm=document.getElementById("contextModel");if(cm)cm.textContent="AgentiQ · Cerebro";}
 async function loadModelInfo(){
  try{
   const r=await fetch(API+"/v1/public/model",{headers:{"Accept":"application/json"}});
@@ -60,41 +54,31 @@ function selectVoice(id){const p=voiceProfiles.find(v=>v.id===id);if(!p)return;s
 function openVoicePanel(){voiceGender=currentVoice().gender;$("voicePanel").classList.remove("hidden");renderVoiceList()}
 function toggleRecognition(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){toast("Este navegador no habilita reconocimiento de voz");return}if(listening){recognition?.stop();return}recognition=new SR();recognition.lang=currentVoice().lang;recognition.interimResults=true;recognition.continuous=false;recognition.onstart=()=>{listening=true;$("voiceInput").classList.add("recording");$("voiceStatus").textContent="Escuchando…";$("avatarState").textContent="Escuchando · hablá ahora"};recognition.onresult=e=>{let final="";for(let i=e.resultIndex;i<e.results.length;i++){if(e.results[i].isFinal)final+=e.results[i][0].transcript}recognition.__final=(recognition.__final||"")+final};recognition.onerror=()=>{listening=false;$("voiceInput").classList.remove("recording");$("voiceStatus").textContent="Voz lista"};recognition.onend=()=>{listening=false;$("voiceInput").classList.remove("recording");$("voiceStatus").textContent="Voz lista";const t=(recognition.__final||"").trim();recognition.__final="";$("input").value="";if(t&&!busy)send(t,{silentUser:true})};recognition.start()}
 
-function persist(){localStorage.setItem(K.chat,JSON.stringify(history.slice(-20)))}
-function add(role,text,save=true){
- const d=document.createElement("div");d.className="msg "+role;
- d.innerHTML=role==="assistant"?esc(text).replace(/\n/g,"<br>"):esc(text);
- $("messages").appendChild(d);$("messages").scrollTop=$("messages").scrollHeight;
- if(save){history.push({role,content:text});persist()}
- return d
-}
-async function remote(text){
- const c=new AbortController(),t=setTimeout(()=>c.abort(),35000);
+function persist(){const c=conversations.find(x=>x.id===currentId);if(c){c.messages=history.slice(-100);c.updatedAt=Date.now();const first=history.find(x=>x.role==="user"&&x.content);if(first)c.title=String(first.content).replace(/\s+/g," ").slice(0,52)+(String(first.content).length>52?"…":"")}localStorage.setItem(K.conversations,JSON.stringify(conversations.slice(-50)));localStorage.setItem(K.active,currentId)}
+function ensureConversation(){if(!conversations.find(x=>x.id===currentId)){currentId=crypto.randomUUID();conversation=currentId;conversations.push({id:currentId,title:"Nueva conversación",createdAt:Date.now(),updatedAt:Date.now(),messages:[]});persist()}}
+function renderConversationList(){const box=$("conversationList");if(!box)return;const sorted=[...conversations].sort((a,b)=>b.updatedAt-a.updatedAt).slice(0,20);box.innerHTML=sorted.map(c=>'<div class="conversation-row '+(c.id===currentId?"active":"")+'"><button class="conversation-open" data-conversation="'+c.id+'"><span class="conversation-dot"></span><span>'+esc(c.title||"Nueva conversación")+'</span></button><button class="conversation-delete" data-delete-conversation="'+c.id+'" aria-label="Borrar conversación">×</button></div>').join("");box.querySelectorAll("[data-conversation]").forEach(b=>b.onclick=()=>selectConversation(b.dataset.conversation));box.querySelectorAll("[data-delete-conversation]").forEach(b=>b.onclick=()=>deleteConversation(b.dataset.deleteConversation))}
+function selectConversation(id){if(id===currentId)return;persist();const c=conversations.find(x=>x.id===id);if(!c)return;currentId=id;conversation=id;history=(c.messages||[]).slice();$("messages").innerHTML="";ensureConversation();history=(conversations.find(c=>c.id===currentId)?.messages||[]).slice();history.forEach(x=>add(x.role,x.content,false));renderConversationList();renderConversationList();showChat();state("Cerebro listo")}
+function newConversation(){persist();currentId=crypto.randomUUID();conversation=currentId;history=[];conversations.push({id:currentId,title:"Nueva conversación",createdAt:Date.now(),updatedAt:Date.now(),messages:[]});$("messages").innerHTML="";activeAgent=null;activeTeam=null;persist();renderConversationList();showChat();state("Cerebro listo");toast("Nueva conversación")}
+function deleteConversation(id){if(!confirm("¿Borrar esta conversación? Esta acción no se puede deshacer."))return;conversations=conversations.filter(x=>x.id!==id);if(!conversations.length){currentId="";ensureConversation()}if(id===currentId){currentId=conversations[0].id;conversation=currentId;history=(conversations[0].messages||[]).slice();$("messages").innerHTML="";history.forEach(x=>add(x.role,x.content,false))}persist();renderConversationList();toast("Conversación borrada")}
+async function remote(text,attachments=[]){
+ const c=new AbortController(),t=setTimeout(()=>c.abort(),45000);
  try{
-  const r=await fetch(API+"/v1/public/chat",{method:"POST",signal:c.signal,headers:{"Content-Type":"application/json","X-Guest-Session":guest},
-   body:JSON.stringify({conversation_id:conversation,message:text,consent_to_memory:false,history:history.slice(-10),agent:agents.find(a=>a.name===activeAgent)||null,team:teams.find(a=>a.name===activeTeam)||null})});
-  const d=await r.json().catch(()=>({}));
-  if(!r.ok||!d.answer)throw Error(d.message||"ai_unavailable");
-  activeModel=d.model||activeModel; updateModelBadge(activeModel); return d.answer;
+  const r=await fetch(API+"/v1/public/chat",{method:"POST",signal:c.signal,headers:{"Content-Type":"application/json","X-Guest-Session":guest,...(authToken?{"Authorization":"Bearer "+authToken}:{})},
+   body:JSON.stringify({conversation_id:conversation,message:text,consent_to_memory:localStorage.getItem(K.improvement)==="true",history:history.slice(-12),agent:agents.find(a=>a.name===activeAgent)||null,team:teams.find(a=>a.name===activeTeam)||null,attachments:attachments.map(a=>({name:a.name,type:a.type,kind:a.kind,data:a.data}))})});
+  const d=await r.json().catch(()=>({}));if(!r.ok||!d.answer)throw Error(d.message||"ai_unavailable");return d.answer
  }finally{clearTimeout(t)}
 }
 async function send(text,opts={}){
- if(busy)return;
- busy=true;$("send").disabled=true;
- add("user",text);
- const p=add("assistant","Pensando…",false);
- state("Conectando con el cerebro…");
- try{
-  const a=await remote(text);
-  p.innerHTML=esc(a).replace(/\n/g,"<br>");
-  history.push({role:"assistant",content:a});persist(); speak(a);
-  state(activeTeam?"Equipo conectado · Qwen":activeAgent?activeAgent+" · Qwen":"Cerebro conectado · Qwen");
- }catch(e){
-  p.textContent=e.name==="AbortError"?"El cerebro está tardando demasiado. Probá nuevamente.":"No pude conectar con el cerebro. Intentá nuevamente.";
-  state("Cerebro no disponible");toast("No se pudo conectar con el cerebro");
- }finally{busy=false;$("send").disabled=false}
+ if(busy)return;busy=true;$("send").disabled=true;if(!opts.silentUser)add("user",text);else{history.push({role:"user",content:text});persist()}
+ const p=add("assistant","Pensando…",false);state("Conectando con AgentiQ…");const attachments=pendingAttachments.slice();pendingAttachments=[];renderAttachments();
+ try{const a=await remote(text,attachments);p.innerHTML=esc(a).replace(/\n/g,"<br>");history.push({role:"assistant",content:a});persist();speak(a);state(activeTeam?"Equipo conectado · AgentiQ":activeAgent?activeAgent+" · AgentiQ":"Cerebro conectado · AgentiQ")}
+ catch(e){p.textContent=e.name==="AbortError"?"AgentiQ está tardando demasiado. Probá nuevamente.":"No pude conectar con AgentiQ. Intentá nuevamente.";persist();state("Cerebro no disponible");toast("No se pudo conectar con el cerebro")}
+ finally{busy=false;$("send").disabled=false}
 }
 
+function renderAttachments(){const box=$("attachmentTray");if(!box)return;box.innerHTML=pendingAttachments.map((a,i)=>'<div class="attachment-chip"><span>'+ (a.kind==="image"?"▧":"◫") +'</span><b>'+esc(a.name)+'</b><button type="button" data-remove-attachment="'+i+'">×</button></div>').join("");box.classList.toggle("hidden",!pendingAttachments.length);box.querySelectorAll("[data-remove-attachment]").forEach(b=>b.onclick=()=>{pendingAttachments.splice(+b.dataset.removeAttachment,1);renderAttachments()})}
+function readFile(file){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;if(file.type.startsWith("image/"))r.readAsDataURL(file);else if(file.type.startsWith("text/")||/\.(md|json|js|ts|css|html|py|txt|csv|xml|yaml|yml)$/i.test(file.name))r.readAsText(file);else resolve(null)})}
+async function handleFiles(files){for(const file of [...files].slice(0,5)){if(file.size>5*1024*1024){toast("Archivo demasiado grande: "+file.name);continue}const data=await readFile(file);if(data===null){toast("Formato no compatible: "+file.name);continue}pendingAttachments.push({name:file.name,type:file.type,kind:file.type.startsWith("image/")?"image":"file",data})}renderAttachments()}
 function closeMobile(){$("sidebar").classList.remove("open");$("backdrop").classList.add("hidden")}
 function showChat(){
  $("panel").classList.add("hidden");$("chat").classList.remove("hidden");
@@ -157,11 +141,10 @@ function skillsPanel(){
  $("panel").innerHTML=`<div class="head"><div><span class="eyebrow">CAPABILITIES</span><h2>Skills</h2><p>Capacidades reutilizables para tus agentes.</p></div></div><div class="skills">${skills.map((x,i)=>`<div class="skill tilt"><span class="skill-icon">${icon(["code","agents","chat","projects","spark"][i%5])}</span><b>${x}</b><span>Asignable a cualquier agente</span></div>`).join("")}</div>`;
  applyTilt()
 }
-function accountPanel(){
- const p=JSON.parse(localStorage.getItem(K.profile)||"{}");
- $("panel").innerHTML=`<div class="head"><div><span class="eyebrow">CUENTA</span><h2>Registro / perfil</h2><p>Base visual preparada para autenticación segura.</p></div></div><form id="profile" class="card form"><label>Nombre</label><input id="pn" value="${esc(p.name||"")}" placeholder="Tu nombre"><label>Email</label><input id="pe" value="${esc(p.email||"")}" type="email" placeholder="tu@email.com"><button class="primary">Guardar perfil</button></form>`;
- $("profile").onsubmit=e=>{e.preventDefault();localStorage.setItem(K.profile,JSON.stringify({name:$("pn").value,email:$("pe").value}));toast("Perfil guardado")}
-}
+async function loadAuth(){try{const r=await fetch(API+"/v1/auth/config");const d=await r.json();window.__googleClientId=d.client_id||"";setTimeout(setupGoogle,0)}catch{}if(authToken){try{const r=await fetch(API+"/v1/auth/me",{headers:{Authorization:"Bearer "+authToken}});const d=await r.json();if(d.ok)authUser=d.user;else{authToken="";localStorage.removeItem(K.auth)}}catch{}}}
+function setupGoogle(){const box=$("googleButton"),client=window.__googleClientId;if(!box||!client||!window.google?.accounts?.id)return;box.innerHTML="";window.google.accounts.id.initialize({client_id:client,color_scheme:"dark",callback:handleGoogleCredential});window.google.accounts.id.renderButton(box,{theme:"filled_black",size:"large",shape:"pill",text:"continue_with",locale:"es",width:330})}
+async function handleGoogleCredential(response){try{const r=await fetch(API+"/v1/auth/google",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({credential:response.credential})});const d=await r.json();if(!r.ok||!d.ok)throw Error(d.message||"No se pudo iniciar sesión");authToken=d.token;authUser=d.user;localStorage.setItem(K.auth,authToken);localStorage.setItem(K.profile,JSON.stringify({name:authUser.name,email:authUser.email,picture:authUser.picture||""}));toast("Cuenta conectada con Google");accountPanel()}catch(e){toast(e.message||"No se pudo iniciar sesión con Google")}}
+function accountPanel(){const p=JSON.parse(localStorage.getItem(K.profile)||"{}"),u=authUser||p;if(authUser){$("panel").innerHTML='<div class="head"><div><span class="eyebrow">CUENTA</span><h2>Tu cuenta</h2><p>Sesión activa y acceso al espacio completo.</p></div></div><div class="card account-card"><div class="account-user"><div class="account-photo">'+(u.picture?'<img src="'+esc(u.picture)+'" alt="">':"AQ")+'</div><div><b>'+esc(u.name||"Usuario")+'</b><span>'+esc(u.email||"")+'</span></div></div><div class="benefits"><b>Acceso habilitado</b><span>Conversaciones, agentes, equipos, CodQ, adjuntos y estudio de voz.</span></div><label class="consent-row"><input id="improvementConsent" type="checkbox" '+(localStorage.getItem(K.improvement)==="true"?"checked":"")+'><span>Permitir usar mis conversaciones de forma agregada para mejorar AgentiCuantico. Podés cambiar esta opción cuando quieras.</span></label><button class="ghost" id="logout">Cerrar sesión</button></div>';$("improvementConsent").onchange=e=>localStorage.setItem(K.improvement,String(e.target.checked));$("logout").onclick=()=>{authToken="";authUser=null;localStorage.removeItem(K.auth);window.google?.accounts?.id?.disableAutoSelect?.();accountPanel();toast("Sesión cerrada")}}else{$("panel").innerHTML='<div class="head"><div><span class="eyebrow">CUENTA</span><h2>Registro e inicio de sesión</h2><p>Registrate o iniciá sesión con tu cuenta de Google para acceder a los beneficios.</p></div></div><div class="card auth-card"><div class="auth-orb">AQ</div><h3>Tu cuenta de AgentiCuantico</h3><p>Un acceso para conservar tu perfil y configuración de agentes y voz.</p><div id="googleButton" class="google-button"></div><div class="auth-note">Google autentica tu cuenta; AgentiCuantico no necesita tu contraseña de Google.</div><div class="auth-consent"><b>Privacidad</b><span>El historial se guarda localmente. El uso agregado para mejora requiere tu permiso explícito.</span></div></div>';setTimeout(setupGoogle,0)}}
 function projectsPanel(){
  $("panel").innerHTML=`<div class="head"><div><span class="eyebrow">WORKSPACE</span><h2>Proyectos</h2><p>Separá trabajos y conversaciones.</p></div><button class="primary" id="project">＋ Nuevo trabajo</button></div><div class="card empty-state"><span class="hero-icon">◇</span><b>Tu espacio de proyectos</b><small>Iniciá una conversación nueva y usá agentes o equipos para cada objetivo.</small></div>`;
  $("project").onclick=()=>$("newChat").click()
@@ -185,18 +168,18 @@ $("mobileMenu").onclick=()=>{$("sidebar").classList.add("open");$("backdrop").cl
 $("backdrop").onclick=closeMobile;
 $("menuBtn").onclick=e=>{e.stopPropagation();const open=$("quickMenu").classList.toggle("hidden");$("menuBtn").setAttribute("aria-expanded",String(!open))};
 document.addEventListener("click",e=>{if(!$("quickMenu").contains(e.target)&&e.target!==$("menuBtn")){$("quickMenu").classList.add("hidden");$("menuBtn").setAttribute("aria-expanded","false")}});
-$("composer").onsubmit=e=>{e.preventDefault();const t=$("input").value.trim();if(t&&!busy){$("input").value="";send(t)}};
+$("composer").onsubmit=e=>{e.preventDefault();const t=$("input").value.trim();if((t||pendingAttachments.length)&&!busy){$("input").value="";send(t||"Analizá los archivos adjuntos.")}};
 $("input").oninput=()=>{$("input").style.height="auto";$("input").style.height=Math.min($("input").scrollHeight,140)+"px"};
 $("input").onkeydown=e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();$("composer").requestSubmit()}};
-$("newChat").onclick=()=>{conversation=crypto.randomUUID();history=[];localStorage.removeItem(K.chat);$("messages").innerHTML="";activeAgent=null;activeTeam=null;showChat();state("Cerebro listo");toast("Nueva conversación")};
+$("newChat").onclick=newConversation;
 window.addEventListener("load",()=>{
  document.querySelectorAll(".nav-icon[data-icon]").forEach(el=>el.innerHTML=icon(el.dataset.icon));
  history.forEach(x=>add(x.role,x.content,false));
  for(let i=0;i<45;i++){const p=document.createElement("i");p.style.setProperty("--x",(Math.random()*260-130)+"px");p.style.setProperty("--y",(Math.random()*260-130)+"px");p.style.setProperty("--z",(Math.random()*260-130)+"px");$("particles").appendChild(p)}
  applyTilt();
  if(typeof speechSynthesis!=="undefined"){populateDeviceVoices();speechSynthesis.addEventListener?.("voiceschanged",populateDeviceVoices)}
- selectVoice(selectedVoiceId);
- $("voiceInput").onclick=toggleRecognition;
+ selectVoice(selectedVoiceId);loadAuth();
+ $("attachButton").onclick=()=>$("attachInput").click();$("attachInput").onchange=e=>{handleFiles(e.target.files);e.target.value=""};$("voiceInput").onclick=toggleRecognition;
  $("stopVoice").onclick=()=>{window.speechSynthesis?.cancel();setSpeaking(false,"Voz lista")};
  $("voicePicker").onclick=openVoicePanel;$("langPicker").onclick=openVoicePanel;
  $("genderPicker").onclick=()=>{const p=currentVoice();selectVoice(p.gender==="female"?"mateo":"clara")};
