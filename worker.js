@@ -263,7 +263,11 @@ async function autonomousBrainCycle(env) {
 }
 
 export default {
-  async scheduled(controller, env, ctx) {\n    ctx.waitUntil(autonomousBrainCycle(env));\n  },\n\n  async fetch(request, env) {
+  async scheduled(controller, env, ctx) {
+    ctx.waitUntil(autonomousBrainCycle(env));
+  },
+
+  async fetch(request, env) {
     const url = new URL(request.url);
 
     if (isApiPath(url.pathname)) {
