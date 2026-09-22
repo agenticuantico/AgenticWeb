@@ -177,7 +177,39 @@ draw3D();
 let authMode='login';
 document.querySelectorAll('.auth-tab').forEach(tab=>tab.addEventListener('click',()=>{authMode=tab.dataset.auth;document.querySelectorAll('.auth-tab').forEach(x=>x.classList.toggle('active',x===tab));document.querySelector('#auth-submit').textContent=authMode==='login'?'Ingresar':'Crear cuenta';document.querySelector('#password-wrap input').autocomplete=authMode==='login'?'current-password':'new-password'}));
 document.querySelector('#auth-form')?.addEventListener('submit',async e=>{e.preventDefault();const email=document.querySelector('#auth-email').value.trim(),password=document.querySelector('#auth-password').value;try{const r=await fetch(API_BASE+(authMode==='login'?'/v1/auth/login':'/v1/auth/register'),{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({email,password})});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.detail||'auth_error');if(d.requires_otp){const code=prompt('Te enviamos un código de seguridad. Ingresalo para continuar:');if(!code)return;const v=await fetch(API_BASE+'/v1/auth/verify-phone',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({challenge_id:d.challenge_id,code})});const vd=await v.json();if(!v.ok)throw new Error(vd.detail||'otp_error')}if(d.session)sessionStorage.setItem('aq_session',d.session);alert(authMode==='login'?'Bienvenido a AgentiCuantico.':'Cuenta creada. Bienvenido.');location.hash='account'}catch(err){alert('No se pudo completar el acceso. Revisá los datos e intentá nuevamente.');console.error(err)}});
-window.handleGoogleCredential=async response=>{try{const r=await fetch(API_BASE+'/v1/auth/google',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({credential:response.credential})});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.detail||'google_auth_error');if(d.session)sessionStorage.setItem('aq_session',d.session);location.hash='account'}catch(err){alert('No se pudo iniciar sesión con Google.');console.error(err)}};
+window.handleGoogleCredential=async response=>{try{const r=await fetch(API_BASE+'/v1/auth/google',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({credential:response.credential})});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.detail||'google_auth_error');if(d.session)sessionStorage.setItem('aq_session',d.session);location.hash='account'}catch(err){alert('No se pudo iniciar sesión con Google.');console.error('google_auth_failed',err)}};
+
+// Google Identity Services: never render GSI with an empty client_id.
+// The client ID is supplied by the backend environment (GOOGLE_CLIENT_ID).
+async function initGoogleLogin(){
+  const container=document.querySelector('#google-login');
+  if(!container)return;
+  try{
+    const cfgResponse=await fetch(API_BASE+'/v1/auth/config',{credentials:'include',cache:'no-store'});
+    const cfg=await cfgResponse.json().catch(()=>({}));
+    const clientId=String(cfg.google_client_id||'').trim();
+    if(!clientId){
+      container.innerHTML='<span class="muted">Inicio con Google no disponible todavía.</span>';
+      return;
+    }
+    let attempts=0;
+    const render=()=>{
+      if(window.google?.accounts?.id){
+        window.google.accounts.id.initialize({client_id:clientId,callback:window.handleGoogleCredential,auto_select:false,cancel_on_tap_outside:true});
+        container.innerHTML='';
+        window.google.accounts.id.renderButton(container,{type:'standard',theme:'outline',size:'large',text:'continue_with',shape:'rectangular',width:320});
+        return;
+      }
+      if(++attempts<100)setTimeout(render,100);
+      else container.innerHTML='<span class="muted">No se pudo cargar Google Sign-In.</span>';
+    };
+    render();
+  }catch(err){
+    container.innerHTML='<span class="muted">Inicio con Google no disponible.</span>';
+    console.error('google_config_failed',err);
+  }
+}
+initGoogleLogin();
 const passkeyButton=document.querySelector('#passkey-button');
 if(passkeyButton){passkeyButton.disabled=true;passkeyButton.textContent='◉ Passkey / biometría · próximamente';}
 
