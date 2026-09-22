@@ -83,6 +83,26 @@
 <aside class="security-card"><span class="security-icon">◈</span><h3>Protección por capas</h3><p>Correo verificado, código por teléfono, Google y passkeys pueden combinarse para reforzar la cuenta.</p><div class="security-list"><span>✓ Verificación de email</span><span>✓ Código OTP por SMS</span><span>✓ Inicio con Google</span><span>✓ MFA y reautenticación</span><span>✓ Sesiones y dispositivos</span></div></aside>
 </div>
 </section>
+<section id="agent-builder" class="section builder-section">
+<div class="section-heading"><div class="eyebrow">AGENT BUILDER</div><h2>Creá tu propio agente.</h2><p>Definí misión, capacidades, herramientas, memoria, autonomía y presupuesto. Los límites reales los controla el backend según tu plan.</p></div>
+<div class="builder-layout">
+<article class="builder-card">
+<div class="builder-templates"><b>Plantillas rápidas</b><div id="agent-templates"></div></div>
+<form id="agent-builder-form" class="builder-form">
+<div class="builder-row"><label>Nombre<input id="agent-name" required maxlength="60" placeholder="Ej. Mi desarrollador"></label><label>Rol<input id="agent-role" required maxlength="120" placeholder="backend"></label></div>
+<label>Descripción<input id="agent-description" maxlength="500" placeholder="Qué hace este agente"></label>
+<label>Misión<textarea id="agent-mission" required maxlength="1000" placeholder="Objetivo principal del agente"></textarea></label>
+<div class="builder-row"><label>Autonomía<select id="agent-autonomy"><option value="supervised">Supervisado</option><option value="semi_autonomous">Semi-autónomo</option><option value="autonomous">Autónomo</option></select></label><label>Memoria<select id="agent-memory"><option value="session">Sesión</option><option value="project">Proyecto</option><option value="persistent">Persistente</option></select></label></div>
+<label>Habilidades<input id="agent-skills" placeholder="Python, Git, APIs"></label>
+<label>Criterios de éxito<textarea id="agent-success" maxlength="1000" placeholder="Cómo debe demostrar que terminó correctamente"></textarea></label>
+<label>Instrucciones<textarea id="agent-instructions" maxlength="2000" placeholder="Reglas de comportamiento y trabajo"></textarea></label>
+<label>Workspace / proyecto<input id="agent-workspace" maxlength="300" placeholder="AgentiCuantico / AgenticWeb"></label>
+<label>Presupuesto máximo de créditos por agente<input id="agent-credit" type="number" min="0" max="100000" value="0"></label>
+<div class="tool-picker"><b>Herramientas permitidas</b><div id="agent-tools"></div></div>
+<button class="price-button primary" type="submit">Crear agente</button><span id="builder-status" class="builder-status"></span>
+</form></article>
+<aside class="builder-side"><div class="builder-preview"><small>VISTA PREVIA</small><div id="builder-avatar">◈</div><h3 id="preview-name">Tu nuevo agente</h3><span id="preview-role">rol personalizado</span><p id="preview-mission">Definí una misión y el agente aparecerá aquí.</p><div id="preview-meta"></div></div><div class="builder-list"><small>TUS AGENTES</small><div id="my-agents"><span class="muted">Iniciá sesión para cargar tus agentes.</span></div></div></aside>
+</div></section>
 <section id="account" class="section dashboard-section">
 <div class="section-heading"><div class="eyebrow">ESPACIO PERSONAL</div><h2>Tu centro de control.</h2></div>
 <div class="dashboard-grid"><article class="dash-card"><small>PLAN ACTUAL</small><strong id="account-plan">Explorer</strong><span id="account-status">Cuenta gratuita</span></article><article class="dash-card"><small>AGENTES</small><strong>3+</strong><span>Programación · Diseño · Seguridad</span></article><article class="dash-card"><small>SEGURIDAD</small><strong>Activa</strong><span>Controles de sesión y MFA</span></article></div>
