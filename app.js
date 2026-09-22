@@ -3,9 +3,75 @@ const isNative=window.location.protocol==='capacitor:';
 const API_BASE=(window.AGENTICUANTICO_API||(isNative?DEFAULT_NATIVE_API:window.location.origin)).replace(/\/$/,'');
 const form=document.querySelector('#chat-form'),prompt=document.querySelector('#prompt'),messages=document.querySelector('#messages'),status=document.querySelector('#chat-status'),brainState=document.querySelector('#brain-state');
 const history=[];
-function addMessage(role,text){const item=document.createElement('div');item.className='message '+role;item.innerHTML='<div class="avatar">'+(role==='user'?'TÚ':'AQ')+'</div><div><b>'+(role==='user'?'Tú':'AgentiCuantico')+'</b><p></p></div>';item.querySelector('p').textContent=text;messages.appendChild(item);messages.scrollTop=messages.scrollHeight}
-function setBusy(b){prompt.disabled=b;form.querySelector('button').disabled=b;status.textContent=b?'AgentiCuantico está pensando…':'Listo para conversar';if(brainState)brainState.textContent=b?'PROCESANDO · AGENTES ACTIVOS':'EXPLORANDO · 3 AGENTES'}
-form?.addEventListener('submit',async e=>{e.preventDefault();const text=prompt.value.trim();if(!text||prompt.disabled)return;addMessage('user',text);prompt.value='';setBusy(true);try{const r=await fetch(API_BASE+'/v1/conversations/messages',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({message:text,history})});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||'HTTP '+r.status);const answer=d.message||'No se recibió una respuesta.';addMessage('assistant',answer);history.push({role:'user',content:text},{role:'assistant',content:answer});while(history.length>12)history.shift()}catch(err){addMessage('assistant','No pude conectar con el cerebro en este momento. Verificá que la API esté disponible e intentá nuevamente.');status.textContent='API no disponible';console.error(err)}finally{setBusy(false)}});
+let lastMessageId=null;
+
+function addMessage(role,text,meta=''){
+  const item=document.createElement('div');
+  item.className='message '+role;
+  item.innerHTML='<div class="avatar">'+(role==='user'?'TÚ':'AQ')+'</div><div><b>'+(role==='user'?'Tú':'AgentiCuantico')+'</b><p></p>'+(meta?'<small class="message-meta"></small>':'')+'</div>';
+  item.querySelector('p').textContent=text;
+  if(meta)item.querySelector('.message-meta').textContent=meta;
+  messages.appendChild(item);
+  messages.scrollTop=messages.scrollHeight;
+  return item;
+}
+function setBusy(b){
+  prompt.disabled=b;
+  form.querySelector('button').disabled=b;
+  status.textContent=b?'AgentiCuantico está pensando…':'Listo para conversar';
+  if(brainState)brainState.textContent=b?'PROCESANDO · MEMORIA + CEREBRO':'CEREBRO LISTO · MEMORIA ACTIVA';
+}
+function addTyping(){
+  const item=document.createElement('div');
+  item.className='message assistant typing';
+  item.innerHTML='<div class="avatar">AQ</div><div><b>AgentiCuantico</b><p>Estoy pensando<span>.</span><span>.</span><span>.</span></p></div>';
+  messages.appendChild(item);
+  messages.scrollTop=messages.scrollHeight;
+  return item;
+}
+async function sendFeedback(feedback,messageId){
+  try{
+    await fetch(API_BASE+'/v1/conversations/feedback',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({feedback,message_id:messageId})});
+  }catch(_){}
+}
+form?.addEventListener('submit',async e=>{
+  e.preventDefault();
+  const text=prompt.value.trim();
+  if(!text||prompt.disabled)return;
+  addMessage('user',text);
+  prompt.value='';
+  setBusy(true);
+  const typing=addTyping();
+  try{
+    const r=await fetch(API_BASE+'/v1/conversations/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      credentials:'include',
+      body:JSON.stringify({message:text,history:history.slice(-12)})
+    });
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok)throw new Error(d.detail||d.error||('HTTP '+r.status));
+    typing.remove();
+    const answer=d.message||'No recibí contenido del cerebro.';
+    const item=addMessage('assistant',answer,d.model?('Modelo: '+d.model):'');
+    lastMessageId=d.conversation_id||null;
+    const feedback=document.createElement('div');
+    feedback.className='message-feedback';
+    feedback.innerHTML='<button type="button">✓ Útil</button><button type="button">✕ No me sirve</button>';
+    feedback.children[0].onclick=()=>{sendFeedback('positive',lastMessageId);feedback.remove()};
+    feedback.children[1].onclick=()=>{sendFeedback('negative',lastMessageId);feedback.remove()};
+    item.appendChild(feedback);
+    history.push({role:'user',content:text},{role:'assistant',content:answer});
+    while(history.length>12)history.shift();
+    status.textContent=d.guest_memory?'Memoria de esta conversación activa':'Conversación y memoria activas';
+  }catch(err){
+    typing.remove();
+    const detail=String(err.message||'error');
+    addMessage('assistant','No pude llegar al cerebro ahora mismo. '+detail+'. No voy a fingir que recibí tu mensaje. Cuando la API vuelva a estar disponible, podemos continuar.');
+    status.textContent='Conexión con el cerebro no disponible';
+    console.error(err);
+  }finally{setBusy(false)}
+});
 document.querySelectorAll('[data-plan]').forEach(btn=>btn.addEventListener('click',async()=>{const plan=btn.dataset.plan;if(plan==='explorer'){location.hash='chat';return}const email=prompt('Ingresá el email que usarás para la suscripción:');if(!email)return;const choice=prompt('Elegí la pasarela: 1 = Mercado Pago, 2 = PayPal','1');const provider=choice==='2'?'paypal':'mercadopago';btn.disabled=true;btn.textContent='Preparando checkout…';try{const r=await fetch(API_BASE+'/v1/billing/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({plan,provider,email})});const d=await r.json().catch(()=>({}));if(!r.ok||!d.checkout_url)throw new Error(d.detail||d.error||'checkout_unavailable');window.location.href=d.checkout_url}catch(e){btn.disabled=false;btn.textContent='Elegir '+plan.charAt(0).toUpperCase()+plan.slice(1);alert('El checkout no está disponible todavía. Configurá las credenciales y los IDs de planes en el backend.')}}));
 const canvas=document.querySelector('#brain-canvas'),ctx=canvas?.getContext('2d');let pts=[];
 function resize(){if(!canvas)return;const r=canvas.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2);canvas.width=r.width*d;canvas.height=r.height*d;ctx.setTransform(d,0,0,d,0,0);pts=Array.from({length:115},()=>({a:Math.random()*Math.PI*2,b:Math.random()*Math.PI*2,r:.25+Math.random()*.65,s:.001+Math.random()*.003}))}
