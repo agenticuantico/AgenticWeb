@@ -8,7 +8,7 @@
 <link rel="icon" href="./favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="./favicon.svg">
 <link rel="manifest" href="./manifest.json">
-<link rel="stylesheet" href="./styles.css?v=20260922-4">
+<link rel="stylesheet" href="./styles.css?v=20260922-5">
 <title>AgentiCuantico — Intelligence OS</title>
 </head>
 <body>
@@ -34,7 +34,7 @@
       <button class="nav-item" data-view="projects"><span class="nav-icon" data-icon="projects"></span><span>Proyectos</span></button>
       <button class="nav-item" data-view="agents"><span class="nav-icon" data-icon="agents"></span><span>Agentes</span></button>
       <button class="nav-item" data-view="teams"><span class="nav-icon" data-icon="teams"></span><span>Equipos</span></button>
-      <button class="nav-item" data-view="coder"><span class="nav-icon" data-icon="code"></span><span>Agentic Codex</span></button>
+      <button class="nav-item" data-view="coder"><span class="nav-icon" data-icon="code"></span><span>CodQ</span></button>
       <span class="nav-title gap">CUENTA</span>
       <button class="nav-item" data-view="account"><span class="nav-icon" data-icon="user"></span><span>Registro / perfil</span></button>
       <button class="nav-item" data-view="skills"><span class="nav-icon" data-icon="spark"></span><span>Skills</span></button>
@@ -60,21 +60,21 @@
           <button data-quick="chat"><span>✦</span> Nueva conversación</button>
           <button data-quick="agents"><span>◈</span> Explorar agentes</button>
           <button data-quick="teams"><span>◇</span> Abrir equipos</button>
-          <button data-quick="coder"><span>⌘</span> Abrir Agentic Codex</button>
+          <button data-quick="coder"><span>⌘</span> Abrir CodQ</button>
         </div>
       </div>
     </header>
 
     <section id="chat" class="chat">
-      <div class="welcome">
+      <div class="welcome compact">
         <div class="eyebrow">AGENTIC INTELLIGENCE</div>
-        <h1>Pensá. Creá.<br><span>Construí con IA.</span></h1>
-        <p>Un espacio visual, simple y dinámico para conversar, crear agentes, formar equipos y convertir objetivos en resultados.</p>
-        <div class="quick-cards">
-          <button class="hero-card tilt" data-quick="agents"><span class="hero-icon">◈</span><b>Agentes</b><small>Creá especialistas</small></button>
-          <button class="hero-card tilt" data-quick="teams"><span class="hero-icon">◇</span><b>Equipos</b><small>Colaboración multiagente</small></button>
-          <button class="hero-card tilt" data-quick="coder"><span class="hero-icon">⌘</span><b>Codex</b><small>Programación asistida</small></button>
-        </div>
+        <h1>Tu espacio para <span>crear con IA.</span></h1>
+        <p>Conversá con AgentiCuantico y usá agentes, equipos y CodQ cuando los necesites.</p>
+      </div>
+      <div class="chat-context">
+        <div class="context-avatar">AQ</div>
+        <div><b>AgentiCuantico</b><small id="chatContext">Cerebro listo · conversación privada</small></div>
+        <span class="context-model" id="contextModel">Qwen · HF</span>
       </div>
       <div id="messages" class="messages"></div>
       <form id="composer" class="composer glass">
@@ -89,6 +89,6 @@
 </div>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 <script>window.AGENTICUANTICO_API_URL="https://agenticweb.agenticuantico.workers.dev";</script>
-<script type="module" src="./app.js?v=20260922-4"></script>
+<script type="module" src="./app.js?v=20260922-5"></script>
 </body>
 </html>
