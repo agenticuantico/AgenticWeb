@@ -38,11 +38,14 @@ async function callHuggingFace(request, env) {
   const endpoint = String(env.HF_API_URL || "https://router.huggingface.co/v1/chat/completions").trim();
   // Hugging Face automatically selects an available provider. This avoids
   // hard-coding providers that may not serve the model at a given moment.
+  const configuredModels = String(env.HF_MODELS || "").split(",").map(x => x.trim()).filter(Boolean);
   const models = [
-    `${model}:fastest`,
-    "Qwen/Qwen3.6-27B:fastest",
-    "Qwen/Qwen3.5-27B:fastest"
-  ].filter((value, index, list) => list.indexOf(value) === index);
+    ...configuredModels,
+    model,
+    "Qwen/Qwen3.8-27B-FP8",
+    "Qwen/Qwen3.6-27B"
+  ].map(value => value.endsWith(":fastest") ? value : value + ":fastest")
+   .filter((value, index, list) => list.indexOf(value) === index);
 
   if (!token) return null;
 
@@ -82,7 +85,7 @@ async function callHuggingFace(request, env) {
 
   for (const selectedModel of models) {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 20000);
+    const timeout = setTimeout(() => controller.abort(), 30000);
 
     try {
       const upstream = await fetch(endpoint, {
@@ -99,13 +102,13 @@ async function callHuggingFace(request, env) {
           top_p: 0.8,
           max_tokens: 512,
           presence_penalty: 1.5,
-          reasoning_effort: "low",
+          reasoning_effort: "medium",
           stream: false,
           extra_body: {
             top_k: 20,
             chat_template_kwargs: {
-              enable_thinking: false,
-              preserve_thinking: false
+              enable_thinking: true,
+              preserve_thinking: true
             }
           }
         })
@@ -176,7 +179,7 @@ async function handleApi(request, env) {
   }
 
   if (url.pathname === "/health" && request.method === "GET") {
-    return json({ ok: true, service: "agenticweb", provider: "huggingface", model: String(env.HF_MODEL || "Qwen/Qwen3.8-27B"), routing: "fastest" }, 200, request);
+    return json({ ok: true, service: "agenticweb", provider: "huggingface", model: String(env.HF_MODEL || "Qwen/Qwen3.8-27B"), routing: "fastest-with-fallback" }, 200, request);
   }
 
   if (url.pathname === "/v1/public/chat" && request.method === "POST") {
