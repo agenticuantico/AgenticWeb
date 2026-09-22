@@ -10,6 +10,7 @@ on:
       - "index.html"
       - "app.js"
       - "styles.css"
+      - "public/**"
       - ".github/workflows/cloudflare.yml"
   workflow_dispatch:
 
