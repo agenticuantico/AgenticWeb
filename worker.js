@@ -4,17 +4,24 @@ function isApiPath(pathname) {
   return API_PREFIXES.some(prefix => pathname === prefix.replace(/\/$/, "") || pathname.startsWith(prefix));
 }
 
+function applySecurityHeaders(response) {
+  const headers = new Headers(response.headers);
+  headers.set("x-content-type-options", "nosniff");
+  headers.set("x-frame-options", "DENY");
+  headers.set("referrer-policy", "strict-origin-when-cross-origin");
+  headers.set("permissions-policy", "camera=(), microphone=(), geolocation=()");
+  headers.set("strict-transport-security", "max-age=31536000; includeSubDomains");
+  return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+}
+
 function json(data, status = 200) {
-  return new Response(JSON.stringify(data), {
+  return applySecurityHeaders(new Response(JSON.stringify(data), {
     status,
     headers: {
       "content-type": "application/json; charset=utf-8",
-      "cache-control": "no-store",
-      "x-content-type-options": "nosniff",
-      "x-frame-options": "DENY",
-      "referrer-policy": "strict-origin-when-cross-origin"
+      "cache-control": "no-store"
     }
-  });
+  }));
 }
 
 async function proxyToCore(request, env) {
@@ -31,10 +38,10 @@ async function proxyToCore(request, env) {
   try {
     target = new URL(origin + new URL(request.url).pathname + new URL(request.url).search);
     if (target.protocol !== "https:") {
-      return json({ok:false,error:"core_api_requires_https"}, 503);
+      return json({ ok: false, error: "core_api_requires_https" }, 503);
     }
   } catch {
-    return json({ok:false,error:"core_api_origin_invalid"}, 503);
+    return json({ ok: false, error: "core_api_origin_invalid" }, 503);
   }
 
   const headers = new Headers(request.headers);
@@ -55,7 +62,7 @@ async function proxyToCore(request, env) {
     const response = new Response(upstream.body, upstream);
     response.headers.set("cache-control", "no-store");
     response.headers.set("x-agenticweb-core", "connected");
-    return response;
+    return applySecurityHeaders(response);
   } catch (error) {
     return json({
       ok: false,
@@ -74,6 +81,7 @@ export default {
       return proxyToCore(request, env);
     }
 
-    return env.ASSETS.fetch(request);
+    const assetResponse = await env.ASSETS.fetch(request);
+    return applySecurityHeaders(assetResponse);
   }
 };
