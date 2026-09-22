@@ -35,14 +35,6 @@ jobs:
           test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo "::error::Missing GitHub secret CLOUDFLARE_ACCOUNT_ID"; exit 1; }
           test -n "$HF_TOKEN" || { echo "::error::Missing GitHub secret HF_TOKEN"; exit 1; }
 
-      - name: Sync Hugging Face token to Worker
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: |
-          printf '%s' "$HF_TOKEN" | npx --yes wrangler@latest secret put HF_TOKEN --name agenticweb
-
       - name: Deploy Worker + Assets
         uses: cloudflare/wrangler-action@v4
         with:
