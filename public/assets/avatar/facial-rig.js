@@ -42,17 +42,19 @@ export function createFacialRig(root){
  };
  const setAny=(names,value)=>names.forEach(n=>set(n,value));
  const eyeBones=Object.entries(bones).filter(([n])=>/eye(l|r|left|right)/.test(n)).map(([,b])=>b);
- const head=bones.head||bones.headend||bones.neck;
- const spine=bones.spine||bones.spine1||bones.spine2;
+ const handBones=Object.entries(bones).filter(([n])=>/(hand|wrist|thumb|index|middle|ring|pinky|little)/.test(n)).map(([,b])=>b);
+ const findBone=(rx,fallback=null)=>{const hit=Object.entries(bones).find(([n])=>rx.test(n));return hit?hit[1]:fallback};
+ const head=findBone(/(^|)(head|mixamorighead|headend)$/)||findBone(/neck/);
+ const spine=findBone(/(^|)(spine|spine1|spine2|mixamorigtorso|mixamorigspine)/);
  const rig={
-   root,targets,bones,head,spine,eyeBones,available:targets.length>0,
+   root,targets,bones,head,spine,eyeBones,handBones,available:targets.length>0,
    setMouth(level=0,kind="A"){
      const v=Math.max(0,Math.min(1,level));
      set("jawOpen",v*.82); set("mouthClose",Math.max(0,.18-v*.2));
      const map={A:["mouthSmileLeft","mouthSmileRight"],E:["mouthStretchLeft","mouthStretchRight"],I:["mouthSmileLeft","mouthSmileRight"],O:["mouthFunnel","mouthPucker"],U:["mouthPucker","mouthFunnel"],M:["mouthPressLeft","mouthPressRight"]};
      for(const n of ["mouthSmileLeft","mouthSmileRight","mouthStretchLeft","mouthStretchRight","mouthFunnel","mouthPucker","mouthPressLeft","mouthPressRight"])set(n,0);
      setAny(map[kind]||map.A,v*.5);
-     for(const [k,n] of Object.entries(OCULUS)) if(n) set(n,k===kind?v*.72:0);
+     const oculusKind={A:"aa",E:"E",I:"ih",O:"oh",U:"ou",M:"PP"}[kind]||"sil"; for(const [k,n] of Object.entries(OCULUS)) if(n) set(n,k===oculusKind?v*.72:(k==="sil"&&!v?.35:0));
    },
    blink(v=0){set("eyeBlinkLeft",v);set("eyeBlinkRight",v)},
    look(x=0,y=0){
@@ -67,6 +69,17 @@ export function createFacialRig(root){
      for(const [n,b] of Object.entries(bones)){
        if(/upperarm|shoulder|arm/.test(n)) b.rotation.z+=(Math.sin(t*1.7+(n.includes("left")?-1:1))*(speaking?.035:.012)-b.rotation.z)*.05;
      }
+   },
+   updateHands(t,speaking=false,lookX=0,lookY=0){
+     if(!handBones.length)return;
+     const gesture=speaking?.045:.018;
+     handBones.forEach((b,i)=>{
+       const side=/left|l_|\.l|mixamoriglefthand/.test(norm(b.name))?-1:1;
+       const wave=Math.sin(t*1.8+i*.37)*gesture;
+       b.rotation.x+=(Math.sin(t*.9+i*.21)*.012-lookY*.025-b.rotation.x)*.06;
+       b.rotation.y+=(side*lookX*.02-b.rotation.y)*.06;
+       b.rotation.z+=(side*wave-b.rotation.z)*.06;
+     });
    },
    reset(){targets.forEach(m=>m.morphTargetInfluences.fill(0))}
  };
