@@ -23,7 +23,7 @@
 <link rel="apple-touch-icon" href="./favicon.svg">
 <link rel="manifest" href="./manifest.json">
 <link rel="sitemap" type="application/xml" href="/sitemap.xml">
-<link rel="stylesheet" href="./styles.css?v=20260922-8">
+<link rel="stylesheet" href="./styles.css?v=20260922-9">
 <title>AgentiCuantico — Inteligencia agéntica para crear y programar</title>
 <script type="application/ld+json">
 {
@@ -80,7 +80,7 @@
       <span class="orb" aria-hidden="true"></span>
       <div><b>AgentiCuantico</b><small>INTELLIGENCE OS</small></div>
     </div>
-    <button id="newChat" class="new-chat"><span class="nav-icon">＋</span><span>Nueva conversación</span></button>
+    <button id="newChat" class="new-chat"><span class="nav-icon">＋</span><span>Nueva conversación</span></button><section class="conversation-history"><div class="history-heading"><span>CONVERSACIONES</span><button id="clearHistory" type="button">Limpiar</button></div><div id="conversationList"></div></section>
 
     <nav class="nav" aria-label="Espacio de trabajo">
       <span class="nav-title">ESPACIO</span>
@@ -108,7 +108,7 @@
         <div><strong id="title">AgentiCuantico</strong><small id="status">Cerebro listo</small></div>
       </div>
       <div class="actions">
-        <span class="pill">QWEN · BRAIN</span>
+        <span class="pill">AgentiQ · Cerebro</span>
         <button id="menuBtn" class="menu-btn" aria-label="Acciones rápidas" aria-expanded="false">⋯</button>
         <div id="quickMenu" class="quick-menu hidden" role="menu">
           <button data-quick="chat"><span>✦</span> Nueva conversación</button>
@@ -151,21 +151,17 @@
       <div class="chat-context">
         <div class="context-avatar">AQ</div>
         <div><b>AgentiCuantico</b><small id="chatContext">Cerebro listo · conversación privada</small></div>
-        <span class="context-model" id="contextModel">Qwen · HF</span>
+        <span class="context-model" id="contextModel">AgentiQ · Cerebro</span>
       </div>
       <div class="chat-layout">
         <div class="conversation-pane">
           <div id="messages" class="messages"></div>
-          <form id="composer" class="composer glass">
-            <button id="voiceInput" class="voice-btn" type="button" aria-label="Hablar con AgentiCuantico"><span class="mic-glyph" aria-hidden="true">●</span></button>
-            <textarea id="input" rows="1" autocomplete="off" placeholder="Escribí tu mensaje o usá la voz…"></textarea>
-            <button id="send" class="send" type="submit" aria-label="Enviar">↑</button>
-          </form>
-          <div class="memory">● Conversación privada en este dispositivo · No mostramos secretos ni información interna.</div>
+          <div id="attachmentTray" class="attachment-tray hidden"></div><form id="composer" class="composer glass"><input id="attachInput" type="file" hidden multiple accept="image/*,.txt,.md,.json,.js,.ts,.css,.html,.py,.csv,.xml,.yaml,.yml"><button id="attachButton" class="attach-btn" type="button" aria-label="Adjuntar fotos o archivos">＋</button><textarea id="input" rows="1" autocomplete="off" placeholder="Escribí tu mensaje…"></textarea><button id="voiceInput" class="voice-btn" type="button" aria-label="Hablar con AgentiCuantico"><span class="mic-glyph" aria-hidden="true"></span></button><button id="send" class="send" type="submit" aria-label="Enviar">↑</button></form>
+          <div class="memory">● Historial local por conversación · No mostramos secretos ni información interna.</div>
         </div>
         <aside class="brain-stage glass" aria-label="Avatar 3D de AgentiCuantico">
           <div class="stage-top"><div><b id="avatarName">Agente Principal</b><small id="avatarState">En línea · listo para hablar</small></div><span class="stage-live">● LIVE</span></div>
-          <div class="robot-avatar" id="robotAvatar" data-gender="female">
+          <div class="robot-avatar" id="robotAvatar" data-gender="female"><div class="avatar-realistic" aria-hidden="true"><div class="avatar-depth"></div></div>
             <div class="avatar-aura"></div><div class="avatar-head"><i class="ear left"></i><i class="ear right"></i><i class="brow left"></i><i class="brow right"></i><i class="eye left"></i><i class="eye right"></i><i class="nose"></i><i class="mouth"></i><i class="chin"></i></div>
             <div class="avatar-neck"></div><div class="avatar-body"><span class="body-core"></span><i class="shoulder left"></i><i class="shoulder right"></i></div>
             <div class="algorithm-spectrum"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
@@ -181,15 +177,15 @@
     </section>
 
     <section id="panel" class="panel hidden"></section><div id="voicePanel" class="voice-panel hidden" aria-label="Selector de voz">
-  <div class="voice-panel-head"><div><span class="eyebrow">VOICE STUDIO</span><h3>Elegí cómo habla tu IA</h3></div><button id="closeVoice" class="menu-btn" type="button">×</button></div>
+  <div class="voice-panel-head"><div><span class="eyebrow">VOICE STUDIO</span><h3>Elegí una voz realista</h3></div><button id="closeVoice" class="menu-btn" type="button">×</button></div>
   <div class="voice-tabs"><button class="voice-tab active" data-voice-gender="female">Femeninas</button><button class="voice-tab" data-voice-gender="male">Masculinas</button></div>
   <div id="voiceList" class="voice-list"></div>
-  <div class="voice-note">Las voces usan el motor de voz disponible en el dispositivo/navegador. La interfaz admite 10 perfiles y selecciona automáticamente la voz compatible más cercana.</div>
+  <div class="voice-note">Cada perfil busca una voz instalada distinta y aplica parámetros propios. La disponibilidad final depende del navegador/dispositivo; el selector incluye vista previa al cambiar de voz.</div>
 </div>
   </main>
 </div>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 <script>window.AGENTICUANTICO_API_URL="https://agenticweb.agenticuantico.workers.dev";</script>
-<script type="module" src="./app.js?v=20260922-7"></script>
+<script type="module" src="./app.js?v=20260922-8"></script>
 </body>
 </html>
