@@ -4,31 +4,44 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>AgentiCuantico — IA Agéntica</title>
-<meta name="description" content="AgentiCuantico: cerebro de IA agéntica ejecutado localmente en el navegador.">
+<meta name="description" content="AgentiCuantico: asistente de IA agéntica para conversar, programar y crear.">
 <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
 <div class="shell">
-<aside class="side">
-  <div class="brand"><span class="orb"></span><b>AgentiCuantico</b></div>
-  <button id="newChat">＋ Nueva conversación</button>
-  <div class="side-note">Cerebro IA agéntico<br><small>Privacidad primero · ejecución local</small></div>
-</aside>
-<main class="main">
-  <header>
-    <div><strong>AgentiCuantico</strong><span id="status">Iniciando…</span></div>
-    <div class="local-badge">LOCAL</div>
-  </header>
-  <section id="chat" class="chat">
-    <div id="messages" class="messages"></div>
-    <form id="composer">
-      <textarea id="input" placeholder="Escribe un mensaje…" rows="1" autocomplete="off"></textarea>
-      <button type="submit">Enviar</button>
-    </form>
-    <div class="memory">Las conversaciones se guardan solo en este navegador.</div>
-  </section>
-</main>
+  <aside class="side">
+    <div class="brand"><span class="orb"></span><b>AgentiCuantico</b></div>
+    <button id="newChat">＋ Nueva conversación</button>
+    <div class="side-note">
+      IA agéntica<br>
+      <small>Conversación privada en este dispositivo</small>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header>
+      <div>
+        <strong>AgentiCuantico</strong>
+        <span id="status">Iniciando…</span>
+      </div>
+      <div class="local-badge">IA</div>
+    </header>
+
+    <section id="chat" class="chat">
+      <div id="messages" class="messages"></div>
+      <form id="composer" class="composer">
+        <textarea id="input" placeholder="Escribe un mensaje…" rows="1" autocomplete="off"></textarea>
+        <button type="submit">Enviar</button>
+      </form>
+      <div class="memory">La conversación del navegador se conserva localmente. El servidor recibe solo lo necesario para generar la respuesta.</div>
+    </section>
+  </main>
 </div>
+
+<script>
+  // Public configuration only. Never place secrets or tokens here.
+  window.AGENTICUANTICO_API_URL = "https://api.agenticuantico.dev.ar";
+</script>
 <script type="module" src="./app.js"></script>
 </body>
 </html>
