@@ -167,6 +167,52 @@ async function callHuggingFace(request, env) {
   return null;
 }
 
+
+async function codexAnalyze(request, env) {
+  const token = String(env.HF_TOKEN || "").trim();
+  if (!token) return json({ ok:false, error:"ai_unavailable", message:"El motor de IA no está disponible." },502,request);
+  let body;
+  try { body = await request.json(); } catch { return json({ok:false,error:"invalid_request",message:"Solicitud inválida."},400,request); }
+  const repo = typeof body?.repo === "string" ? body.repo.trim() : "agenticuantico/AgenticWeb";
+  const task = typeof body?.task === "string" ? body.task.trim() : "Analizá el proyecto y proponé mejoras concretas.";
+  if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repo) || !repo.toLowerCase().startsWith("agenticuantico/")) {
+    return json({ok:false,error:"repo_not_allowed",message:"Por seguridad, Agentic Codex analiza repositorios del espacio agenticuantico."},403,request);
+  }
+  const ghHeaders = {"Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2026-03-10"};
+  try {
+    const meta = await fetch("https://api.github.com/repos/"+repo,{headers:ghHeaders});
+    if (!meta.ok) return json({ok:false,error:"repo_unavailable",message:"No pude leer el repositorio."},502,request);
+    const m = await meta.json();
+    const tree = await fetch("https://api.github.com/repos/"+repo+"/git/trees/"+encodeURIComponent(m.default_branch||"main")+"?recursive=1",{headers:ghHeaders});
+    if (!tree.ok) return json({ok:false,error:"tree_unavailable",message:"No pude leer la estructura del repositorio."},502,request);
+    const t = await tree.json();
+    const candidates=(t.tree||[]).filter(x=>x.type==="blob" && x.size<120000 && !/(node_modules|\.git|dist|build|coverage)/.test(x.path))
+      .sort((x,y)=>{const score=p=>/(README|worker|wrangler|package|index|app|styles|src)/i.test(p)?0:1;return score(x.path)-score(y.path)}) .slice(0,12);
+    const snippets=[];
+    for(const f of candidates){
+      if(snippets.join("\n").length>28000)break;
+      try{
+        const r=await fetch("https://api.github.com/repos/"+repo+"/contents/"+f.path+"?ref="+encodeURIComponent(m.default_branch||"main"),{headers:{"Accept":"application/vnd.github.raw+json","X-GitHub-Api-Version":"2026-03-10"}});
+        if(r.ok){const txt=await r.text();snippets.push("\n### "+f.path+"\n"+txt.slice(0,5000));}
+      }catch{}
+    }
+    const context = "Repositorio: "+repo+"\nRama: "+(m.default_branch||"main")+"\nDescripción: "+(m.description||"")+"\nEstructura:\n"+candidates.map(x=>x.path).join("\n")+"\nArchivos relevantes:\n"+snippets.join("\n");
+    const messages=[
+      {role:"system",content:"Sos Agentic Codex de AgentiCuantico. Analizá código real proporcionado por el servidor. No inventes archivos ni cambios. Separá diagnóstico, plan, riesgos y pruebas. No expongas secretos."},
+      {role:"user",content:"Objetivo: "+task+"\n\n"+context}
+    ];
+    const model=String(env.HF_MODEL||"Qwen/Qwen3.8-27B").trim()+":fastest";
+    const upstream=await fetch(String(env.HF_API_URL||"https://router.huggingface.co/v1/chat/completions"),{
+      method:"POST",headers:{"Authorization":"Bearer "+token,"Content-Type":"application/json"},
+      body:JSON.stringify({model,messages,temperature:.2,max_tokens:900,stream:false})
+    });
+    if(!upstream.ok)return json({ok:false,error:"ai_unavailable",message:"El motor de análisis no respondió."},502,request);
+    const data=await upstream.json();const answer=data?.choices?.[0]?.message?.content;
+    if(typeof answer!=="string"||!answer.trim())return json({ok:false,error:"empty_analysis",message:"El análisis llegó vacío."},502,request);
+    return json({ok:true,answer:answer.trim(),model:model.replace(":fastest",""),repo,branch:m.default_branch||"main",files:candidates.map(x=>x.path)},200,request);
+  } catch { return json({ok:false,error:"codex_failed",message:"No se pudo completar el análisis del proyecto."},502,request); }
+}
+
 async function handleApi(request, env) {
   const url = new URL(request.url);
 
@@ -196,6 +242,10 @@ async function handleApi(request, env) {
       provider: "Hugging Face Inference Providers",
       endpoint: "OpenAI-compatible chat completions"
     }, 200, request);
+  }
+
+  if (url.pathname === "/v1/public/codex" && request.method === "POST") {
+    return codexAnalyze(request.clone(), env);
   }
 
   if (url.pathname === "/v1/public/chat" && request.method === "POST") {
