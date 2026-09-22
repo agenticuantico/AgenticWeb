@@ -11,3 +11,4 @@ bun.lock
 wrangler.json
 wrangler.jsonc
 capacitor.config.ts
+worker.js
