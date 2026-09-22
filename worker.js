@@ -1,3 +1,5 @@
+import { DurableObject } from "cloudflare:workers";
+
 const API_PREFIXES = ["/v1/", "/health"];
 
 function isApiPath(pathname) {
@@ -290,6 +292,8 @@ async function createSession(user,secret){const payload=textB64url(JSON.stringif
 async function verifySession(token,secret){try{const [p,s]=String(token||"").split(".");if(!p||!s)return null;const expected=await hmacSign(p,secret),actual=fromB64url(s);if(expected.length!==actual.length)return null;for(let i=0;i<expected.length;i++)if(expected[i]!==actual[i])return null;const data=JSON.parse(new TextDecoder().decode(fromB64url(p)));return data.exp>Math.floor(Date.now()/1000)?data:null}catch{return null}}
 async function googleUserFromCredential(credential,env){const client=String(env.GOOGLE_CLIENT_ID||"").trim();if(!client)return null;const r=await fetch("https://oauth2.googleapis.com/tokeninfo?id_token="+encodeURIComponent(credential));if(!r.ok)return null;const d=await r.json();if(d.aud!==client||!(d.iss==="https://accounts.google.com"||d.iss==="accounts.google.com")||d.email_verified!=="true"||!d.sub||!d.email)return null;if(d.exp&&Number(d.exp)<Math.floor(Date.now()/1000))return null;return{sub:String(d.sub),email:String(d.email),name:String(d.name||d.email.split("@")[0]),picture:String(d.picture||"")}}
 
+async function authenticatedUser(request,env){const token=String(request.headers.get("Authorization")||"").replace(/^Bearer\s+/i,"");return verifySession(token,String(env.AUTH_SESSION_SECRET||""))}
+
 async function handleApi(request, env) {
   const url = new URL(request.url);
 
@@ -322,6 +326,15 @@ async function handleApi(request, env) {
 
   if (url.pathname === "/v1/auth/me" && request.method === "GET") {
     const token=String(request.headers.get("Authorization")||"").replace(/^Bearer\\s+/i,"");const user=await verifySession(token,String(env.AUTH_SESSION_SECRET||""));if(!user)return json({ok:false,error:"unauthorized",message:"Sesión no válida."},401,request);return json({ok:true,user},200,request);
+  }
+
+  if (url.pathname === "/v1/user/conversations") {
+    const user=await authenticatedUser(request,env);
+    if(!user)return json({ok:false,error:"unauthorized",message:"Iniciá sesión para sincronizar tus conversaciones."},401,request);
+    const id=env.USER_DATA.idFromName(user.sub),stub=env.USER_DATA.get(id);
+    if(request.method==="GET"){const r=await stub.fetch("https://user-data/conversations");const data=await r.json();return json({ok:true,conversations:data},200,request)}
+    if(request.method==="POST"){const body=await request.json().catch(()=>({}));const r=await stub.fetch("https://user-data/conversations",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body.conversations||[])});return json(await r.json(),200,request)}
+    if(request.method==="DELETE"){const r=await stub.fetch("https://user-data/conversations",{method:"DELETE"});return json(await r.json(),200,request)}
   }
 
   if (url.pathname === "/v1/public/model" && request.method === "GET") {
@@ -414,6 +427,25 @@ async function autonomousBrainCycle(env) {
   }
 
   console.log("agent-cycle: provider unavailable");
+}
+
+
+export class UserData extends DurableObject {
+  async fetch(request) {
+    const url=new URL(request.url);
+    if(url.pathname==="/conversations" && request.method==="GET"){
+      return new Response(JSON.stringify(await this.ctx.storage.get("conversations")||[]),{headers:{"content-type":"application/json"}});
+    }
+    if(url.pathname==="/conversations" && request.method==="POST"){
+      let data=[];try{data=await request.json()}catch{return new Response("invalid",{status:400})}
+      if(!Array.isArray(data))return new Response("invalid",{status:400});
+      data=data.filter(c=>c&&typeof c.id==="string"&&Array.isArray(c.messages)).slice(-50);
+      await this.ctx.storage.put("conversations",data);
+      return new Response(JSON.stringify({ok:true,count:data.length}),{headers:{"content-type":"application/json"}});
+    }
+    if(url.pathname==="/conversations" && request.method==="DELETE"){await this.ctx.storage.delete("conversations");return new Response(JSON.stringify({ok:true}),{headers:{"content-type":"application/json"}})}
+    return new Response("not_found",{status:404});
+  }
 }
 
 export default {
