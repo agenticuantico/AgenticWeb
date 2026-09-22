@@ -1,6 +1,6 @@
 import { pipeline, env } from "https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1/+esm";
 
-const API_BASE=(window.AGENTICUANTICO_API_URL||"https://agenticweb.agenticuantico.workers.dev").replace(/\/$/,"");
+const API_BASE=(window.AGENTICUANTICO_API_URL||"").replace(/\/$/,"");
 const LOCAL_MODEL="onnx-community/Qwen2.5-0.5B-Instruct";
 const STORAGE_KEY="aq_chat_v3", SESSION_KEY="aq_guest_session_v1", MAX_HISTORY=12;
 env.allowLocalModels=false; env.useBrowserCache=true;
