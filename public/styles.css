@@ -93,3 +93,9 @@ button{touch-action:manipulation}
 .robot-avatar[data-gender="female"] .avatar-body{border-radius:48% 48% 12% 12%;background:linear-gradient(145deg,#1e2940,#080d17 48%,#182238)}
 .robot-avatar[data-gender="male"] .avatar-head{background:radial-gradient(circle at 38% 24%,#fff 0 1%,#c6eaff 5%,#586983 18%,#111b2e 55%,#050810 75%)}
 @keyframes micPulse{to{transform:scale(1.08)}}
+
+
+/* Business CTA + SEO conversion surface */
+.business-cta{max-width:760px;margin:14px auto 4px;padding:13px 15px;display:flex;align-items:center;justify-content:space-between;gap:16px;text-align:left;border:1px solid #7d6cff22;border-radius:16px;background:linear-gradient(135deg,#0b1020dd,#090b15d9);box-shadow:0 15px 40px #0004,inset 0 1px #ffffff08}
+.business-kicker,.business-cta b,.business-cta small{display:block}.business-kicker{font-size:8px;letter-spacing:.16em;color:#8c80ff;font-weight:800}.business-cta b{font-size:13px;margin-top:4px}.business-cta small{font-size:10px;color:#77839a;margin-top:3px;line-height:1.4}.business-mail{flex:0 0 auto;text-decoration:none;color:#071018;background:linear-gradient(135deg,#f7f9ff,#8df4ff);border-radius:11px;padding:10px 13px;font-size:10px;font-weight:800;box-shadow:0 8px 24px #0005;transition:.2s}.business-mail:hover{transform:translateY(-1px);box-shadow:0 12px 30px #0007}.business-mail span{font-size:13px;margin-left:3px}
+@media(max-width:760px){.business-cta{align-items:flex-start;flex-direction:column;gap:10px;margin-top:11px;padding:12px}.business-mail{width:100%;text-align:center}.business-cta small{max-width:290px}}
