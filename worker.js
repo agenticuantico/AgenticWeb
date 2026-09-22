@@ -4,8 +4,16 @@ function isApiPath(pathname) {
   return API_PREFIXES.some(prefix => pathname === prefix.replace(/\/$/, "") || pathname.startsWith(prefix));
 }
 
-function applySecurityHeaders(response) {
+function applySecurityHeaders(response, request) {
   const headers = new Headers(response.headers);
+  const origin = request?.headers.get("Origin") || "";
+  if (origin === "https://agenticuantico.dev.ar" || origin === "https://www.agenticuantico.dev.ar") {
+    headers.set("access-control-allow-origin", origin);
+    headers.set("access-control-allow-credentials", "true");
+    headers.set("access-control-allow-methods", "GET,HEAD,POST,OPTIONS,DELETE,PATCH");
+    headers.set("access-control-allow-headers", "Content-Type, X-API-Key, X-User-ID");
+    headers.set("vary", "Origin");
+  }
   headers.set("x-content-type-options", "nosniff");
   headers.set("x-frame-options", "DENY");
   headers.set("referrer-policy", "strict-origin-when-cross-origin");
@@ -25,13 +33,16 @@ function json(data, status = 200) {
 }
 
 async function proxyToCore(request, env) {
+  if (request.method === "OPTIONS") {
+    return applySecurityHeaders(new Response(null, { status: 204 }), request);
+  }
   const origin = String(env.CORE_API_ORIGIN || "").trim().replace(/\/$/, "");
   if (!origin) {
-    return json({
+    return applySecurityHeaders(json({
       ok: false,
       error: "service_unavailable",
       message: "El servicio de IA está temporalmente no disponible."
-    }, 503);
+    }, 503), request);
   }
 
   let target;
@@ -41,7 +52,7 @@ async function proxyToCore(request, env) {
       return json({ ok: false, error: "core_api_requires_https" }, 503);
     }
   } catch {
-    return json({ ok: false, error: "core_api_origin_invalid" }, 503);
+    return applySecurityHeaders(json({ ok: false, error: "service_unavailable", message: "El servicio de IA está temporalmente no disponible." }, 503), request);
   }
 
   const headers = new Headers(request.headers);
@@ -62,13 +73,13 @@ async function proxyToCore(request, env) {
     const response = new Response(upstream.body, upstream);
     response.headers.set("cache-control", "no-store");
     response.headers.set("x-agenticweb-core", "connected");
-    return applySecurityHeaders(response);
+    return applySecurityHeaders(response, request);
   } catch (error) {
-    return json({
+    return applySecurityHeaders(json({
       ok: false,
       error: "service_unavailable",
       message: "El servicio de IA está temporalmente no disponible."
-    }, 502);
+    }, 502), request);
   }
 }
 
@@ -81,6 +92,6 @@ export default {
     }
 
     const assetResponse = await env.ASSETS.fetch(request);
-    return applySecurityHeaders(assetResponse);
+    return applySecurityHeaders(assetResponse, request);
   }
 };
