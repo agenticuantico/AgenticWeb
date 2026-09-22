@@ -126,11 +126,12 @@ function showChat(){
  $("title").textContent=activeTeam||activeAgent||"AgentiCuantico";closeMobile()
 }
 function panel(view){
+ if(view==="home"||view==="chat"){showChat();if(view==="home")toast("Inicio · tu universo de IA");return}
  $("chat").classList.add("hidden");$("panel").classList.remove("hidden");
  document.querySelectorAll(".nav-item").forEach(x=>x.classList.toggle("active",x.dataset.view===view));
- $("title").textContent=({projects:"Proyectos",agents:"Agentes",teams:"Equipos de trabajo",coder:"CodQ",account:"Registro / perfil",skills:"Skills"})[view]||"AgentiCuantico";
+ $("title").textContent=({projects:"Proyectos",agents:"Agentes",teams:"Equipos de trabajo",coder:"CodQ",account:"Registro / perfil",skills:"Skills",memory:"Memoria"})[view]||"AgentiCuantico";
  closeMobile();
- if(view==="agents")agentsPanel();else if(view==="teams")teamsPanel();else if(view==="coder")coderPanel();else if(view==="account")accountPanel();else if(view==="skills")skillsPanel();else projectsPanel()
+ if(view==="agents")agentsPanel();else if(view==="teams")teamsPanel();else if(view==="coder")coderPanel();else if(view==="account")accountPanel();else if(view==="skills")skillsPanel();else if(view==="memory")memoryPanel();else projectsPanel()
 }
 function agentCard(a,i){
  const avatar=a.name.slice(0,1).toUpperCase();
@@ -176,6 +177,11 @@ function coderPanel(){
  async function runCodQ(){const repo=$("cr").value.trim(),task=$("cg").value.trim()||"Analizá el proyecto y prepará la siguiente evolución del workspace CodQ, UI/UX 3D, voz y experiencia de agentes.";run.disabled=true;run.textContent="Analizando…";output.innerHTML="<b>CodQ trabajando…</b><span>Inspeccionando repositorio + preparando plan de implementación.</span>";try{const r=await fetch(API+"/v1/public/codex",{method:"POST",headers:{"Content-Type":"application/json","X-Guest-Session":guest},body:JSON.stringify({repo,task})});const d=await r.json();if(!r.ok||!d.ok)throw Error(d.message||"codex_failed");activeModel=d.model||activeModel;updateModelBadge(activeModel);$("repoMeta").textContent=String(d.repo).split("/").pop();output.innerHTML="<b>CodQ · análisis completado</b><small>"+esc(d.branch)+" · "+d.files.length+" archivos revisados · "+esc(modelLabel(d.model))+"</small><div class='codq-answer'>"+esc(d.answer).replace(/\n/g,"<br>")+"</div>";toast("Plan CodQ generado")}catch(e){output.innerHTML="<b>CodQ no pudo completar el análisis.</b><span>"+esc(e.message)+"</span>";toast("Error de análisis")}finally{run.disabled=false;run.textContent="Ejecutar análisis"}}
  run.onclick=runCodQ;$("copyPlan").onclick=()=>{navigator.clipboard?.writeText($("codqOutput").innerText||"");toast("Plan copiado")};$("applyPatch").onclick=()=>toast("Aplicación protegida: requiere autorización del workspace");document.querySelectorAll("[data-codq-tab]").forEach(b=>b.onclick=()=>{document.querySelectorAll(".tool-tab").forEach(x=>x.classList.remove("active"));b.classList.add("active");toast(b.textContent+" listo")});
 }
+function memoryPanel(){
+ $("panel").innerHTML=`<div class="head"><div><span class="eyebrow">PERSONAL MEMORY</span><h2>Memoria</h2><p>Controlá qué contexto puede conservar AgentiCuantico para tus conversaciones.</p></div></div><div class="card memory-panel"><div class="memory-hero"><span class="hero-icon">◉</span><div><b>Tu conocimiento, bajo tu control</b><small>El sitio no muestra secretos, tokens ni información interna.</small></div></div><label class="consent-row"><input id="memoryConsentPanel" type="checkbox" ${localStorage.getItem(K.improvement)==="true"?"checked":""}><span>Permitir usar mis conversaciones de forma agregada para mejorar AgentiCuantico.</span></label><button class="primary" id="saveMemoryPanel">Guardar preferencia</button></div>`;
+ $("saveMemoryPanel").onclick=()=>{localStorage.setItem(K.improvement,String($("memoryConsentPanel").checked));toast("Preferencia de memoria guardada")}
+}
+
 function skillsPanel(){
  const skills=["Programación","Backend","Frontend","GitHub","Web design","UI/UX","3D","SEO","Datos","Investigación","Automatización","Asistencia"];
  $("panel").innerHTML=`<div class="head"><div><span class="eyebrow">CAPABILITIES</span><h2>Skills</h2><p>Capacidades reutilizables para tus agentes.</p></div></div><div class="skills">${skills.map((x,i)=>`<div class="skill tilt"><span class="skill-icon">${icon(["code","agents","chat","projects","spark"][i%5])}</span><b>${x}</b><span>Asignable a cualquier agente</span></div>`).join("")}</div>`;
@@ -222,10 +228,11 @@ window.addEventListener("load",()=>{
  if(typeof speechSynthesis!=="undefined"){populateDeviceVoices();speechSynthesis.addEventListener?.("voiceschanged",populateDeviceVoices)}
  selectVoice(selectedVoiceId);initAvatar3D();loadAuth();
  $("attachButton").onclick=()=>$("attachInput").click();$("attachInput").onchange=e=>{handleFiles(e.target.files);e.target.value=""};$("voiceInput").onclick=toggleRecognition;
- $("stopVoice").onclick=()=>{window.speechSynthesis?.cancel();setSpeaking(false,"Voz lista")};
- $("voicePicker").onclick=openVoicePanel;$("langPicker").onclick=openVoicePanel;
- $("genderPicker").onclick=()=>{const p=currentVoice();selectVoice(p.gender==="female"?"mateo":"clara")};
- $("closeVoice").onclick=()=>$("voicePanel").classList.add("hidden");
+ $("stopVoice")?.addEventListener("click",()=>{window.speechSynthesis?.cancel();setSpeaking(false,"Voz lista")});
+ $("voiceInputRail")?.addEventListener("click",toggleRecognition);
+ $("closeVoice")?.addEventListener("click",()=>$("voicePanel").classList.add("hidden"));
+ document.querySelectorAll(".language-row").forEach(b=>b.onclick=()=>{document.querySelectorAll(".language-row").forEach(x=>x.classList.remove("active"));b.classList.add("active");toast("Idioma seleccionado · "+b.innerText.trim())});
+ const volume=document.querySelector(".voice-slider input");volume?.addEventListener("input",e=>{window.__voiceVolume=Number(e.target.value)/100});
  document.querySelectorAll(".voice-tab").forEach(b=>b.onclick=()=>{voiceGender=b.dataset.voiceGender;document.querySelectorAll(".voice-tab").forEach(x=>x.classList.toggle("active",x===b));renderVoiceList()});
 
 });
