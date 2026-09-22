@@ -19,6 +19,10 @@ function applySecurityHeaders(response, request) {
   headers.set("referrer-policy", "strict-origin-when-cross-origin");
   headers.set("permissions-policy", "camera=(), microphone=(), geolocation=()");
   headers.set("strict-transport-security", "max-age=31536000; includeSubDomains");
+  headers.set("content-security-policy", "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' https://agenticweb.agenticuantico.workers.dev https://agenticuantico.dev.ar; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'");
+  headers.delete("x-agenticweb-core");
+  headers.delete("server");
+  headers.delete("x-powered-by");
   return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
 }
 
@@ -57,6 +61,9 @@ async function proxyToCore(request, env) {
 
   const headers = new Headers(request.headers);
   headers.delete("host");
+  headers.delete("x-api-key");
+  headers.delete("x-user-id");
+  headers.delete("authorization");
   headers.set("x-agenticweb-proxy", "cloudflare");
   headers.set("x-forwarded-host", new URL(request.url).host);
   headers.set("x-forwarded-proto", "https");
@@ -72,7 +79,6 @@ async function proxyToCore(request, env) {
     const upstream = await fetch(upstreamRequest, { cf: { cacheTtl: 0, cacheEverything: false } });
     const response = new Response(upstream.body, upstream);
     response.headers.set("cache-control", "no-store");
-    response.headers.set("x-agenticweb-core", "connected");
     return applySecurityHeaders(response, request);
   } catch (error) {
     return applySecurityHeaders(json({
