@@ -99,3 +99,11 @@ button{touch-action:manipulation}
 .business-cta{max-width:760px;margin:14px auto 4px;padding:13px 15px;display:flex;align-items:center;justify-content:space-between;gap:16px;text-align:left;border:1px solid #7d6cff22;border-radius:16px;background:linear-gradient(135deg,#0b1020dd,#090b15d9);box-shadow:0 15px 40px #0004,inset 0 1px #ffffff08}
 .business-kicker,.business-cta b,.business-cta small{display:block}.business-kicker{font-size:8px;letter-spacing:.16em;color:#8c80ff;font-weight:800}.business-cta b{font-size:13px;margin-top:4px}.business-cta small{font-size:10px;color:#77839a;margin-top:3px;line-height:1.4}.business-mail{flex:0 0 auto;text-decoration:none;color:#071018;background:linear-gradient(135deg,#f7f9ff,#8df4ff);border-radius:11px;padding:10px 13px;font-size:10px;font-weight:800;box-shadow:0 8px 24px #0005;transition:.2s}.business-mail:hover{transform:translateY(-1px);box-shadow:0 12px 30px #0007}.business-mail span{font-size:13px;margin-left:3px}
 @media(max-width:760px){.business-cta{align-items:flex-start;flex-direction:column;gap:10px;margin-top:11px;padding:12px}.business-mail{width:100%;text-align:center}.business-cta small{max-width:290px}}
+
+
+/* SEO content / engagement */
+.seo-intro{max-width:1100px;margin:16px auto 0;padding:20px;border:1px solid #ffffff10;border-radius:20px;background:linear-gradient(135deg,#0a0e19e8,#080a12dd);display:grid;grid-template-columns:minmax(0,1.8fr) minmax(180px,.7fr);gap:18px;box-shadow:0 18px 55px #0004}
+.seo-intro h2{margin:7px 0 8px;font-size:clamp(20px,3vw,30px);line-height:1.1;letter-spacing:-.02em}.seo-intro p{margin:0;color:#8b96aa;line-height:1.65;font-size:12px;max-width:780px}
+.seo-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}.seo-links a{color:#dffcff;text-decoration:none;border:1px solid #78e9ff24;background:#ffffff06;padding:8px 10px;border-radius:10px;font-size:10px;font-weight:700}.seo-links a:hover{background:#ffffff0d;border-color:#78e9ff45}
+.seo-topics{display:flex;align-content:flex-start;flex-wrap:wrap;gap:7px}.seo-topics span{height:max-content;padding:7px 9px;border-radius:999px;border:1px solid #8b72ff22;background:#ffffff05;color:#9da7bb;font-size:9px}
+@media(max-width:900px){.seo-intro{grid-template-columns:1fr;margin:12px 0}.seo-topics{padding-top:2px}}
