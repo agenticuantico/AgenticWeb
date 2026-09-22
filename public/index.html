@@ -71,16 +71,10 @@
 </head>
 <body>
 <div id="cinematicHero" class="cinematic-hero" aria-label="Presentación de AgentiCuantico">
-  <div class="pin-background" aria-hidden="true">
-    <img id="pinBackgroundImage" src="./assets/background/quantum-world.svg" alt="" decoding="async" fetchpriority="high"
-      data-pinterest-reference-1="https://pin.it/20ePeK3VN"
-      data-pinterest-reference-2="https://pin.it/4gnBz1zqt"
-      data-pinterest-reference-3="https://pin.it/1TKBCZ4Xp">
-  </div>
   <video id="heroScrubVideo" class="hero-video" muted playsinline preload="auto" poster="./favicon.svg" aria-hidden="true">
     <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260826_041744_63efcd78-bf7d-4039-99e2-2461e8a61903.mp4" type="video/mp4">
   </video>
-  <div class="hero-vignette"></div>
+  <div class="hero-vignette"></div><div class="hero-light-sweep" aria-hidden="true"></div>
   <div class="hero-depth-grid" aria-hidden="true"></div>
   <div class="hero-particles" aria-hidden="true"></div>
 
@@ -212,10 +206,10 @@
         <span class="stage-live">● LIVE</span>
       </div>
       <div class="stage-floating-badge">✦ Estoy aquí para lo que necesites…</div><div class="quantum-anchor-label"><span class="qa-pulse"></span><b>QUANTUM HUMAN ANCHOR</b><small>Partículas · WebGL · Human Motion</small></div>
-      <div class="robot-avatar avatar-3d reference-avatar spectrum-avatar" id="robotAvatar" data-gender="female" data-character="spectrum-ai">
+      <div class="robot-avatar avatar-3d reference-avatar spectrum-avatar" id="robotAvatar" data-gender="female" data-character="spectrum-ai" data-avatar-mode="procedural-3d">
         <div class="avatar-aura"></div>
         <canvas id="avatarCanvas" aria-label="Avatar 3D interactivo de AgentiCuantico"></canvas>
-        <div class="avatar-3d-hud"><span class="hud-chip">SPECTRUM · 3D</span><span class="hud-chip" id="avatarRigStatus">RIG · listo</span></div>
+        <div class="avatar-3d-hud"><span class="hud-chip">SPECTRUM · 3D</span><span class="hud-chip" id="avatarRigStatus">WEBGL · activo</span></div>
         <div class="algorithm-spectrum"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
       </div>
       <div class="voice-status reference-speaking"><span class="voice-wave"><i></i><i></i><i></i><i></i><i></i></span><div><b id="voiceStatus">Voz lista</b><small id="voiceName">Clara · Español (Argentina)</small></div><button id="stopVoice" class="ghost mini" type="button">Detener</button></div>
@@ -257,8 +251,7 @@
 </div>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 <script>window.AGENTICUANTICO_API_URL="https://agenticweb.agenticuantico.workers.dev";</script>
-<script type="module" src="./app.js?v=20260922-11"></script>
-<script type="module" src="./avatar-3d.js?v=20260922-01"></script>
+<script type="module" src="./app.js?v=20260922-13"></script>
 <script src="./experience-enhancements.js?v=20260922-01" defer></script>
 </body>
 </html>
