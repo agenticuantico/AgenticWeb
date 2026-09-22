@@ -4,4 +4,6 @@
   X-Frame-Options: DENY
   Permissions-Policy: camera=(), microphone=(), geolocation=()
   Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' https://agenticweb.agenticuantico.workers.dev https://agenticuantico.dev.ar; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'
+
+https://:version.:subdomain.workers.dev/*
   X-Robots-Tag: noindex
