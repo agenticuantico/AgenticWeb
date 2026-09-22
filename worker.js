@@ -87,9 +87,7 @@ async function callHuggingFace(request, env) {
     })
   });
 
-  if (!upstream.ok) {
-    return null;
-  }
+  if (!upstream.ok) return null;
 
   const data = await upstream.json();
   const answer = data?.choices?.[0]?.message?.content;
@@ -97,74 +95,52 @@ async function callHuggingFace(request, env) {
 
   return json({
     ok: true,
-    answer: answer.trim(),
-    model: "qwen",
-    provider: "huggingface"
+    answer: answer.trim()
   }, 200, request);
 }
 
-async function proxyToCore(request, env) {
+async function handleApi(request, env) {
+  const url = new URL(request.url);
+
   if (request.method === "OPTIONS") {
-    return applySecurityHeaders(new Response(null, { status: 204 }), request);
+    return applySecurityHeaders(new Response(null, {
+      status: 204,
+      headers: {
+        "access-control-allow-origin": request.headers.get("Origin") || "https://agenticuantico.dev.ar",
+        "access-control-allow-credentials": "true",
+        "access-control-allow-methods": "GET,HEAD,POST,OPTIONS,DELETE,PATCH",
+        "access-control-allow-headers": "Content-Type, X-Guest-Session, X-API-Key, X-User-ID"
+      }
+    }), request);
   }
 
-  const origin = String(env.CORE_API_ORIGIN || "").trim().replace(/\/$/, "");
-  if (!origin) {
-    return json({ ok: false, error: "service_unavailable", message: "El servicio de IA está temporalmente no disponible." }, 503, request);
+  if (url.pathname === "/v1/public/chat" && request.method === "POST") {
+    try {
+      const response = await callHuggingFace(request.clone(), env);
+      if (response) return response;
+    } catch {
+      // Provider details are intentionally hidden from the public API.
+    }
+    return json({
+      ok: false,
+      error: "ai_unavailable",
+      message: "El servicio de IA está temporalmente no disponible."
+    }, 502, request);
   }
 
-  let target;
-  try {
-    target = new URL(origin + new URL(request.url).pathname + new URL(request.url).search);
-    if (target.protocol !== "https:") throw new Error("invalid protocol");
-  } catch {
-    return json({ ok: false, error: "service_unavailable", message: "El servicio de IA está temporalmente no disponible." }, 503, request);
-  }
-
-  const headers = new Headers(request.headers);
-  headers.delete("host");
-  headers.delete("authorization");
-  headers.set("x-agenticweb-proxy", "cloudflare");
-  headers.set("x-forwarded-host", new URL(request.url).host);
-  headers.set("x-forwarded-proto", "https");
-
-  const upstreamRequest = new Request(target.toString(), {
-    method: request.method,
-    headers,
-    body: ["GET", "HEAD"].includes(request.method) ? undefined : request.body,
-    redirect: "manual"
-  });
-
-  try {
-    const upstream = await fetch(upstreamRequest, { cf: { cacheTtl: 0, cacheEverything: false } });
-    const response = new Response(upstream.body, upstream);
-    response.headers.set("cache-control", "no-store");
-    response.headers.set("x-agenticweb-core", "connected");
-    return applySecurityHeaders(response, request);
-  } catch {
-    return json({ ok: false, error: "service_unavailable", message: "El servicio de IA está temporalmente no disponible." }, 502, request);
-  }
+  return json({
+    ok: false,
+    error: "endpoint_unavailable",
+    message: "El servicio solicitado no está disponible."
+  }, 404, request);
 }
 
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
-    if (request.method === "OPTIONS" && isApiPath(url.pathname)) {
-      return proxyToCore(request, env);
-    }
-
-    if (url.pathname === "/v1/public/chat" && request.method === "POST") {
-      try {
-        const hfResponse = await callHuggingFace(request.clone(), env);
-        if (hfResponse) return hfResponse;
-      } catch {
-        // Fall through to the existing private core API.
-      }
-    }
-
     if (isApiPath(url.pathname)) {
-      return proxyToCore(request, env);
+      return handleApi(request, env);
     }
 
     const assetResponse = await env.ASSETS.fetch(request);
