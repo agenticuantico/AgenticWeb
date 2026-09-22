@@ -17,7 +17,6 @@
   },
   "vars": {
     "HF_MODEL": "Qwen/Qwen3.8-27B",
-    "HF_API_URL": "https://router.huggingface.co/v1/chat/completions",
-    "CORE_API_ORIGIN": "https://agenti-cuanticocore-live-production.up.railway.app"
+    "HF_API_URL": "https://router.huggingface.co/v1/chat/completions"
   }
 }
