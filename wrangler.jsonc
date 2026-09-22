@@ -16,6 +16,14 @@
   "triggers": {
     "crons": ["*/15 * * * *"]
   },
+  "durable_objects": {
+    "bindings": [
+      {"name": "USER_DATA", "class_name": "UserData"}
+    ]
+  },
+  "exports": {
+    "UserData": {"type": "durable-object", "storage": "sqlite"}
+  },
   "observability": {
     "enabled": true
   },
