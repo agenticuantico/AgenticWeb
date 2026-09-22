@@ -33,3 +33,9 @@ El renderer detecta automáticamente `morphTargetDictionary` y `morphTargetInflu
 El puente `window.AgentiCuanticoAvatar.speak(text, options)` sincroniza una línea temporal de visemas aproximados con la reproducción de voz del navegador. Para sincronización fonema-a-fonema de máxima precisión, el backend debe proporcionar audio + timestamps/visemes; el renderer ya acepta esos morph targets.
 
 No se debe distribuir en producción un modelo de terceros sin comprobar su licencia.
+
+## Avatar local prototype
+
+The runtime now prefers `./assets/avatar/agentic-quantico-avatar-small.glb` before falling back to a remote/default avatar. The current prototype is a 2.5D depth-relief GLB based on the provided AgenticCuantico reference and does not contain a true humanoid skeleton or ARKit morph targets.
+
+The facial rig also exposes hand/wrist gesture support for future humanoid GLBs: hand, wrist, thumb, index, middle, ring and little-finger bones are detected and animated during idle/speaking states. A real hand skeleton must exist in the GLB for those controls to move actual fingers.
