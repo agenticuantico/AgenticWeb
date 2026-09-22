@@ -1,6 +1,7 @@
 const DEFAULT_NATIVE_API='https://agenticuantico.dev.ar';
+const PUBLIC_API='https://agenticweb.agenticuantico.workers.dev';
 const isNative=window.location.protocol==='capacitor:';
-const API_BASE=(window.AGENTICUANTICO_API||(isNative?DEFAULT_NATIVE_API:window.location.origin)).replace(/\/$/,'');
+const API_BASE=(window.AGENTICUANTICO_API||(isNative?DEFAULT_NATIVE_API:PUBLIC_API)).replace(/\/$/,'');
 const form=document.querySelector('#chat-form'),prompt=document.querySelector('#prompt'),messages=document.querySelector('#messages'),status=document.querySelector('#chat-status'),brainState=document.querySelector('#brain-state');
 const history=[];
 let lastMessageId=null;
