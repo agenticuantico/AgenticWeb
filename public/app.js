@@ -102,20 +102,16 @@ async function initAvatar3D(){
       group.clear();
       avatar3d.model=g.scene;
       g.scene.traverse(o=>{
-        if(o.isMesh){
-          if(o.morphTargetDictionary&&o.morphTargetInfluences)o.userData.hasFaceMorphs=true;
-          if(o.material){o.material.roughness=Math.min(o.material.roughness??.6,.62);o.material.envMapIntensity=1.25}
-        }
+        if(o.isMesh&&o.morphTargetDictionary&&o.morphTargetInfluences)o.userData.hasFaceMorphs=true;
+        if(o.isMesh&&o.material){o.material.roughness=Math.min(o.material.roughness??.6,.62);o.material.envMapIntensity=1.25}
       });
       const box=new THREE.Box3().setFromObject(g.scene),size=box.getSize(new THREE.Vector3()),center=box.getCenter(new THREE.Vector3());
       const scale=2.65/Math.max(size.y,.001);
       g.scene.scale.setScalar(scale);
       g.scene.position.set(-center.x*scale,-center.y*scale-.35,-center.z*scale);
       group.add(g.scene);
-      $("avatarRigStatus").textContent="GLB · ARKit/visemes listo";
-    },undefined,()=>{
-      $("avatarRigStatus").textContent="3D · fallback WebGL";
-    })
+      $("avatarRigStatus").textContent="GLB · facial rig listo";
+    },undefined,()=>{$("avatarRigStatus").textContent="3D · fallback WebGL"})
   }};
   build("female");if(loadUrl)avatar3d.setGlb(loadUrl);else $("avatarRigStatus").textContent="WEBGL · humanoide";
   canvas.addEventListener("pointermove",e=>{const r=canvas.getBoundingClientRect();avatar3d.mouseX=((e.clientX-r.left)/r.width-.5)*2;avatar3d.mouseY=((e.clientY-r.top)/r.height-.5)*2});
@@ -139,13 +135,48 @@ async function initAvatar3D(){
    animate();
   } catch(error){
    console.error("[AgentiCuantico] Avatar 3D init failed:",error);
-   const status=$("avatarRigStatus"); if(status) status.textContent="3D · fallback visual";
+   const status=$("avatarRigStatus");if(status)status.textContent="3D · fallback visual";
   }
 }
 
-// WebGPU avatar is optional. The stable WebGL avatar below is the default renderer.
+// WebGPU is optional; WebGL remains the stable renderer.
 
 
+
+/* Real-time voice + facial bridge. Uses ARKit/Oculus morph names when the GLB exposes them. */
+window.AgentiCuanticoAvatar={
+  speak(text,opts={}){
+    const value=String(text||"").trim();
+    if(!value||!window.speechSynthesis)return;
+    window.speechSynthesis.cancel();
+    const utter=new SpeechSynthesisUtterance(value);
+    utter.lang=opts.lang||"es-AR";
+    utter.rate=opts.rate||1;
+    utter.pitch=opts.pitch||1.05;
+    const start=performance.now();
+    const duration=Math.max(650,(value.length/13)*1000);
+    const visemes=[
+      ["A",/a/i],["E",/e/i],["I",/i/i],["O",/o/i],["U",/u/i]
+    ];
+    let raf=0;
+    const tick=()=>{
+      if(!avatar3d)return;
+      const elapsed=performance.now()-start;
+      const progress=Math.min(1,elapsed/duration);
+      const ch=value[Math.min(value.length-1,Math.floor(progress*value.length))]||"";
+      let level=/[aeiouáéíóú]/i.test(ch)?0.82:/[bmpfv]/i.test(ch)?0.48:/[szcjx]/i.test(ch)?0.34:0.58;
+      avatar3d.speaking=true;avatar3d.mouthLevel=level;
+      avatar3d.morphText=ch;
+      if(progress<1&& !utter.__ended){raf=requestAnimationFrame(tick)}
+    };
+    utter.onstart=()=>{if(avatar3d)avatar3d.speaking=true;tick()};
+    utter.onend=()=>{utter.__ended=true;cancelAnimationFrame(raf);if(avatar3d){avatar3d.speaking=false;avatar3d.mouthLevel=0}};
+    utter.onerror=utter.onend;
+    window.speechSynthesis.speak(utter);
+    return utter;
+  },
+  stop(){window.speechSynthesis?.cancel();if(avatar3d){avatar3d.speaking=false;avatar3d.mouthLevel=0}}
+};
 
 /* Cinematic hero interactions */
 (()=>{
@@ -237,27 +268,5 @@ async function initAvatar3D(){
 })();
 
 
-/* Premium interaction layer — pointer parallax + accessible motion controls. */
-(()=>{
-  const hero=document.getElementById("cinematicHero");
-  const stage=document.getElementById("robotAvatar");
-  if(!hero) return;
-  let px=0,py=0;
-  const reduce=window.matchMedia("(prefers-reduced-motion: reduce)");
-  window.addEventListener("pointermove",e=>{
-    if(reduce.matches) return;
-    px=(e.clientX/window.innerWidth-.5)*2;
-    py=(e.clientY/window.innerHeight-.5)*2;
-    hero.style.setProperty("--mx",px.toFixed(3));
-    hero.style.setProperty("--my",py.toFixed(3));
-    stage?.style.setProperty("--avatar-mx",px.toFixed(3));
-    stage?.style.setProperty("--avatar-my",py.toFixed(3));
-  },{passive:true});
-  document.addEventListener("visibilitychange",()=>{
-    if(document.hidden) window.speechSynthesis?.pause?.();
-  });
-})();
-
-
-/* Avatar bootstrap: one renderer only. */
-window.addEventListener("load",()=>{ try{ initAvatar3D(); }catch(e){ console.error(e); } },{once:true});
+/* Single avatar bootstrap. */
+window.addEventListener("load",()=>{try{initAvatar3D()}catch(e){console.error(e)}},{once:true});
