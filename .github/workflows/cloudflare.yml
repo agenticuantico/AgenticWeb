@@ -35,6 +35,16 @@ jobs:
           test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo "::error::Missing GitHub secret CLOUDFLARE_ACCOUNT_ID"; exit 1; }
           test -n "$HF_TOKEN" || { echo "::error::Missing GitHub secret HF_TOKEN"; exit 1; }
 
+      - name: Configure Hugging Face secret in Worker
+        uses: cloudflare/wrangler-action@v4
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: secret put HF_TOKEN
+        stdin: true
+
       - name: Deploy Worker + Assets
         uses: cloudflare/wrangler-action@v4
         with:
