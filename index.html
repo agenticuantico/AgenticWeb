@@ -64,13 +64,12 @@
 <section class="final-cta"><div><div class="eyebrow">EL PRÓXIMO PASO EMPIEZA ACÁ</div><h2>¿Qué querés construir?</h2></div><a class="button primary" href="#chat">Empezar conversación ↗</a></section>
 
 <section id="auth" class="section auth-section">
-<div class="section-heading center"><div class="eyebrow">CUENTA AGENTICUANTICO</div><h2>Entrá en tu espacio.</h2><p>Elegí la forma de acceso que te resulte más cómoda. Podés usar correo, teléfono, Google o una passkey cuando esté disponible.</p></div>
+<div class="section-heading center"><div class="eyebrow">CUENTA AGENTICUANTICO</div><h2>Entrá en tu espacio.</h2><p>Usá tu correo y contraseña. También podremos habilitar Google cuando la integración esté configurada. No necesitás registrar un número de teléfono.</p></div>
 <div class="auth-grid">
 <article class="auth-card">
 <div class="auth-tabs"><button class="auth-tab active" data-auth="login">Ingresar</button><button class="auth-tab" data-auth="register">Crear cuenta</button></div>
 <form id="auth-form">
 <label>Correo electrónico<input id="auth-email" type="email" autocomplete="email" required placeholder="vos@ejemplo.com"></label>
-<label id="phone-wrap">Número de teléfono<input id="auth-phone" type="tel" autocomplete="tel" placeholder="+54 9 ..."></label>
 <label id="password-wrap">Contraseña<input id="auth-password" type="password" minlength="8" autocomplete="current-password" placeholder="Tu contraseña"></label>
 <button class="price-button primary" type="submit" id="auth-submit">Ingresar</button>
 </form>
@@ -78,9 +77,9 @@
 <div id="g_id_onload" data-client_id="" data-callback="handleGoogleCredential" data-auto_prompt="false"></div>
 <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="continue_with" data-shape="rectangular"></div>
 <button id="passkey-button" class="price-button glass" type="button">◉ Usar passkey / biometría</button>
-<p class="auth-note">Nunca almacenamos contraseñas en texto plano. Las sesiones y verificaciones se gestionan en el backend.</p>
+<p class="auth-note">No se muestra información interna del cerebro en la interfaz pública. La sesión se gestiona mediante cookies seguras y el backend.</p>
 </article>
-<aside class="security-card"><span class="security-icon">◈</span><h3>Protección por capas</h3><p>Correo verificado, código por teléfono, Google y passkeys pueden combinarse para reforzar la cuenta.</p><div class="security-list"><span>✓ Verificación de email</span><span>✓ Código OTP por SMS</span><span>✓ Inicio con Google</span><span>✓ MFA y reautenticación</span><span>✓ Sesiones y dispositivos</span></div></aside>
+<aside class="security-card"><span class="security-icon">◈</span><h3>Acceso simple y privado</h3><p>La cuenta puede funcionar con correo y contraseña. Google queda como opción adicional cuando esté habilitado.</p><div class="security-list"><span>✓ Contraseña almacenada con hash seguro</span><span>✓ Sesión protegida</span><span>✓ Google opcional</span><span>✓ Passkey opcional en una futura actualización</span><span>✓ Sin teléfono obligatorio</span></div></aside>
 </div>
 </section>
 <section id="agent-builder" class="section builder-section">
