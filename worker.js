@@ -142,7 +142,12 @@ async function callHuggingFace(request, env) {
             const retryData = await retry.json();
             const retryAnswer = retryData?.choices?.[0]?.message?.content;
             if (typeof retryAnswer === "string" && retryAnswer.trim()) {
-              return json({ ok: true, answer: retryAnswer.trim() }, 200, request);
+              return json({
+                ok: true,
+                answer: retryAnswer.trim(),
+                model: selectedModel.replace(/:fastest$/, ""),
+                provider: "Hugging Face Inference Providers"
+              }, 200, request);
             }
           }
         }
@@ -155,7 +160,9 @@ async function callHuggingFace(request, env) {
 
       return json({
         ok: true,
-        answer: answer.trim()
+        answer: answer.trim(),
+        model: selectedModel.replace(/:fastest$/, ""),
+        provider: "Hugging Face Inference Providers"
       }, 200, request);
     } catch {
       continue;
@@ -213,6 +220,52 @@ async function codexAnalyze(request, env) {
   } catch { return json({ok:false,error:"codex_failed",message:"No se pudo completar el análisis del proyecto."},502,request); }
 }
 
+
+async function codexWrite(request, env) {
+  const ghToken = String(env.GH_TOKEN || "").trim();
+  const adminKey = String(env.AGENTIC_ADMIN_KEY || "").trim();
+  const providedKey = String(request.headers.get("X-Admin-Key") || "").trim();
+  if (!ghToken || !adminKey || !providedKey || providedKey !== adminKey) {
+    return json({ok:false,error:"codex_write_disabled",message:"La escritura de repositorios requiere autorización de administrador."},403,request);
+  }
+  let body;
+  try { body = await request.json(); } catch {
+    return json({ok:false,error:"invalid_request",message:"Solicitud inválida."},400,request);
+  }
+  const repo = typeof body?.repo === "string" ? body.repo.trim() : "";
+  const path = typeof body?.path === "string" ? body.path.replace(/^\/+/, "").trim() : "";
+  const content = typeof body?.content === "string" ? body.content : null;
+  const message = typeof body?.message === "string" ? body.message.trim() : "Agentic Codex: actualización";
+  const branch = typeof body?.branch === "string" && body.branch.trim() ? body.branch.trim() : "main";
+  if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repo) || !repo.toLowerCase().startsWith("agenticuantico/")) {
+    return json({ok:false,error:"repo_not_allowed",message:"Repositorio no permitido."},403,request);
+  }
+  if (!path || path.includes("..") || content === null || !message) {
+    return json({ok:false,error:"invalid_request",message:"Faltan repo, archivo, contenido o mensaje de commit."},400,request);
+  }
+  const headers={
+    "Accept":"application/vnd.github+json",
+    "Authorization":"Bearer "+ghToken,
+    "X-GitHub-Api-Version":"2026-03-10",
+    "Content-Type":"application/json"
+  };
+  try {
+    const url="https://api.github.com/repos/"+repo+"/contents/"+path;
+    let sha;
+    const current=await fetch(url+"?ref="+encodeURIComponent(branch),{headers});
+    if(current.ok){const data=await current.json();sha=data.sha;}
+    else if(current.status!==404){return json({ok:false,error:"github_read_failed",message:"No se pudo consultar el archivo."},502,request);}
+    const payload={message,content:btoa(unescape(encodeURIComponent(content))),branch};
+    if(sha)payload.sha=sha;
+    const saved=await fetch(url,{method:"PUT",headers,body:JSON.stringify(payload)});
+    const data=await saved.json().catch(()=>({}));
+    if(!saved.ok)return json({ok:false,error:"github_write_failed",message:"GitHub rechazó la actualización."},502,request);
+    return json({ok:true,repo,path,branch,commit:data?.commit?.sha||null},200,request);
+  } catch {
+    return json({ok:false,error:"codex_write_failed",message:"No se pudo completar la escritura."},502,request);
+  }
+}
+
 async function handleApi(request, env) {
   const url = new URL(request.url);
 
@@ -246,6 +299,10 @@ async function handleApi(request, env) {
 
   if (url.pathname === "/v1/public/codex" && request.method === "POST") {
     return codexAnalyze(request.clone(), env);
+  }
+
+  if (url.pathname === "/v1/public/codex/write" && request.method === "POST") {
+    return codexWrite(request.clone(), env);
   }
 
   if (url.pathname === "/v1/public/chat" && request.method === "POST") {
