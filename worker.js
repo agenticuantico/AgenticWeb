@@ -56,7 +56,9 @@ async function callHuggingFace(request, env) {
     return json({ ok: false, error: "invalid_request", message: "Solicitud inválida." }, 400, request);
   }
 
-  const message = typeof body?.message === "string" ? body.message.trim() : "";\n  const agent = body?.agent && typeof body.agent === "object" ? body.agent : null;\n  const team = body?.team && typeof body.team === "object" ? body.team : null;
+  const message = typeof body?.message === "string" ? body.message.trim() : "";
+  const agent = body?.agent && typeof body.agent === "object" ? body.agent : null;
+  const team = body?.team && typeof body.team === "object" ? body.team : null;
   if (!message) {
     return json({ ok: false, error: "invalid_request", message: "El mensaje no puede estar vacío." }, 400, request);
   }
