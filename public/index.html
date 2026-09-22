@@ -23,7 +23,7 @@
 <link rel="apple-touch-icon" href="./favicon.svg">
 <link rel="manifest" href="./manifest.json"><script src="https://accounts.google.com/gsi/client" async defer></script>
 <link rel="sitemap" type="application/xml" href="/sitemap.xml">
-<link rel="stylesheet" href="./styles.css?v=20260922-9">
+<link rel="stylesheet" href="./styles.css?v=20260922-10">
 <title>AgentiCuantico — Inteligencia agéntica para crear y programar</title>
 <script type="application/ld+json">
 {
@@ -76,29 +76,33 @@
 <div id="backdrop" class="backdrop hidden"></div>
 <div class="shell">
   <aside id="sidebar" class="side glass">
-    <div class="brand">
-      <span class="orb" aria-hidden="true"></span>
-      <div><b>AgentiCuantico</b><small>INTELLIGENCE OS</small></div>
-    </div>
-    <button id="newChat" class="new-chat"><span class="nav-icon">＋</span><span>Nueva conversación</span></button><section class="conversation-history"><div class="history-heading"><span>CONVERSACIONES</span><button id="clearHistory" type="button">Limpiar</button></div><div id="conversationList"></div></section>
-
-    <nav class="nav" aria-label="Espacio de trabajo">
-      <span class="nav-title">ESPACIO</span>
-      <button class="nav-item active" data-view="chat"><span class="nav-icon" data-icon="chat"></span><span>Chat</span></button>
-      <button class="nav-item" data-view="projects"><span class="nav-icon" data-icon="projects"></span><span>Proyectos</span></button>
-      <button class="nav-item" data-view="agents"><span class="nav-icon" data-icon="agents"></span><span>Agentes</span></button>
-      <button class="nav-item" data-view="teams"><span class="nav-icon" data-icon="teams"></span><span>Equipos</span></button>
-      <button class="nav-item" data-view="coder"><span class="nav-icon" data-icon="code"></span><span>CodQ</span></button>
-      <span class="nav-title gap">CUENTA</span>
-      <button class="nav-item" data-view="account"><span class="nav-icon" data-icon="user"></span><span>Registro / perfil</span></button>
-      <button class="nav-item" data-view="skills"><span class="nav-icon" data-icon="spark"></span><span>Skills</span></button>
-    </nav>
-
-    <div class="side-footer">
-      <span class="status-dot"></span>
-      <div><b>AgentiCuantico</b><small id="sideStatus">Cerebro listo</small></div>
-    </div>
-  </aside>
+  <div class="brand brand-reference">
+    <span class="brand-neural" aria-hidden="true"><span></span><i></i><b></b></span>
+    <div><b>AgentiCuantico</b><small>CEREBRO · AGENTES · RESULTADOS</small></div>
+  </div>
+  <button id="newChat" class="new-chat"><span class="nav-icon">＋</span><span>Nueva conversación</span></button>
+  <nav class="nav reference-nav" aria-label="Espacio de trabajo">
+    <button class="nav-item" data-view="home"><span class="nav-icon">⌂</span><span><b>Inicio</b><small>Tu universo de IA</small></span></button>
+    <button class="nav-item active" data-view="chat"><span class="nav-icon" data-icon="chat"></span><span><b>Chat</b><small>Conversar con el cerebro</small></span></button>
+    <button class="nav-item" data-view="agents"><span class="nav-icon" data-icon="agents"></span><span><b>Agentes</b><small>Gestioná tus agentes</small></span></button>
+    <button class="nav-item" data-view="teams"><span class="nav-icon" data-icon="teams"></span><span><b>Equipos</b><small>Trabajo en conjunto</small></span></button>
+    <button class="nav-item" data-view="coder"><span class="nav-icon" data-icon="code"></span><span><b>CodQ</b><small>Programación asistida</small></span></button>
+    <button class="nav-item" data-view="projects"><span class="nav-icon" data-icon="projects"></span><span><b>Proyectos</b><small>Tus desarrollos</small></span></button>
+    <button class="nav-item" data-view="skills"><span class="nav-icon" data-icon="spark"></span><span><b>Skills</b><small>Habilidades y herramientas</small></span></button>
+    <button class="nav-item" data-view="memory"><span class="nav-icon">◉</span><span><b>Memoria</b><small>Tu conocimiento</small></span></button>
+    <button class="nav-item" data-view="account"><span class="nav-icon" data-icon="user"></span><span><b>Perfil</b><small>Cuenta y configuración</small></span></button>
+  </nav>
+  <section class="conversation-history reference-history">
+    <div class="history-heading"><span>HISTORIAL DE CONVERSACIONES</span><button id="clearHistory" type="button">Limpiar</button></div>
+    <div id="conversationList"></div>
+  </section>
+  <div class="side-promo">
+    <div class="promo-art"><span></span><i></i></div>
+    <b>La IA que evoluciona contigo</b>
+    <small>Aprende · Crea · Construye</small>
+    <em>v1.0.0</em>
+  </div>
+</aside>
 
   <main class="main">
     <header class="topbar glass">
@@ -119,74 +123,93 @@
       </div>
     </header>
 
-    <section id="chat" class="chat">
-      <div class="welcome compact">
-        <div class="eyebrow">AGENTIC INTELLIGENCE</div>
-        <h1>Tu espacio para <span>crear con IA.</span></h1>
-        <p>Conversá con AgentiCuantico y usá agentes, equipos y CodQ cuando los necesites. Explorá una nueva forma de trabajar con inteligencia artificial agéntica.</p>
-        <div class="business-cta" aria-label="Contacto comercial">
-          <div>
-            <span class="business-kicker">PARA PERSONAS Y EMPRESAS</span>
-            <b>¿Querés llevar IA agéntica a tu proyecto?</b>
-            <small>Consultas, colaboraciones, soluciones y oportunidades de negocio.</small>
-          </div>
-          <a href="mailto:agenticuantico@gmail.com?subject=Consulta%20Business%20AgentiCuantico" class="business-mail">Contactar por email <span>↗</span></a>
+    <section id="chat" class="chat reference-chat">
+  <div class="chat-layout reference-layout">
+    <div class="conversation-pane reference-conversation">
+      <div class="agent-header glass">
+        <div class="agent-mini-avatar">AQ</div>
+        <div><b>AgentiQ</b><small><span class="status-dot"></span> En línea</small></div>
+        <span class="model-chip">AgentiQ · Modelo propio</span>
+        <span class="webgl-chip">WEBGL · 3D</span>
+      </div>
+      <div id="messages" class="messages reference-messages">
+        <div class="msg assistant reference-welcome"><b>¡Hola! 👋 Soy AgentiQ, tu asistente de IA cuántica.</b><br>Estoy lista para ayudarte con todo lo que necesites. Podés hablarme, escucharme, crear agentes, trabajar en equipo y mucho más.<br><small>¿Qué te gustaría hacer hoy?</small></div>
+      </div>
+      <div id="attachmentTray" class="attachment-tray hidden"></div>
+      <form id="composer" class="composer glass reference-composer">
+        <input id="attachInput" type="file" hidden multiple accept="image/*,.txt,.md,.json,.js,.ts,.css,.html,.py,.csv,.xml,.yaml,.yml">
+        <button id="attachButton" class="attach-btn" type="button" aria-label="Adjuntar fotos o archivos">＋</button>
+        <textarea id="input" rows="1" autocomplete="off" placeholder="Escribí tu mensaje o usá la voz…"></textarea>
+        <button id="voiceInput" class="voice-btn" type="button" aria-label="Hablar con AgentiCuantico"><span class="mic-glyph" aria-hidden="true"></span></button>
+        <button id="send" class="send" type="submit" aria-label="Enviar">➤</button>
+      </form>
+      <div class="reference-quick">
+        <button data-quick="agents">✦ Crear un agente programador</button>
+        <button data-quick="teams">◈ Formar un equipo de trabajo</button>
+        <button data-quick="coder">⌘ Analizar este proyecto</button>
+        <button data-quick="skills">◇ Explorar habilidades</button>
+        <button id="menuBtn" class="menu-btn" aria-label="Más acciones" aria-expanded="false">•••</button>
+        <div id="quickMenu" class="quick-menu hidden" role="menu">
+          <button data-quick="chat"><span>✦</span> Nueva conversación</button>
+          <button data-quick="agents"><span>◈</span> Explorar agentes</button>
+          <button data-quick="teams"><span>◇</span> Abrir equipos</button>
+          <button data-quick="coder"><span>⌘</span> Abrir CodQ</button>
         </div>
       </div>
-      <section class="seo-intro" aria-labelledby="seo-title">
-  <div class="seo-copy">
-    <span class="eyebrow">IA PARA PERSONAS Y EMPRESAS</span>
-    <h2 id="seo-title">Inteligencia artificial agéntica para conversar, crear y programar</h2>
-    <p>AgentiCuantico es una plataforma de IA agéntica con conversación, agentes especializados y un espacio de programación CodQ. Está pensada para transformar ideas en tareas, proyectos y flujos de trabajo asistidos por inteligencia artificial.</p>
-    <div class="seo-links" aria-label="Áreas de AgentiCuantico">
-      <a href="/ia-agentica/">Conocer la IA agéntica</a>
-      <a href="/para-empresas/">Soluciones para empresas</a>
-      <a href="/codq/">Conocer CodQ</a>
+      <div class="memory">● Historial local por conversación · No mostramos secretos ni información interna.</div>
     </div>
-  </div>
-  <div class="seo-topics">
-    <span>Agentes de IA</span><span>Automatización</span><span>Programación con IA</span><span>IA conversacional</span><span>CodQ</span><span>Productividad</span>
+
+    <aside class="brain-stage glass reference-stage" aria-label="Avatar 3D de AgentiCuantico">
+      <div class="stage-top">
+        <div><b id="avatarName">AgentiQ</b><small id="avatarState">En línea · listo para hablar</small></div>
+        <span class="stage-live">● LIVE</span>
+      </div>
+      <div class="stage-floating-badge">✦ Estoy aquí para lo que necesites…</div>
+      <div class="robot-avatar avatar-3d reference-avatar" id="robotAvatar" data-gender="female">
+        <div class="avatar-aura"></div>
+        <canvas id="avatarCanvas" aria-label="Avatar 3D interactivo de AgentiCuantico"></canvas>
+        <div class="avatar-3d-hud"><span class="hud-chip">WEBGL · 3D</span><span class="hud-chip" id="avatarRigStatus">RIG · listo</span></div>
+        <div class="algorithm-spectrum"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+      </div>
+      <div class="voice-status reference-speaking"><span class="voice-wave"><i></i><i></i><i></i><i></i><i></i></span><div><b id="voiceStatus">Voz lista</b><small id="voiceName">Clara · Español (Argentina)</small></div><button id="stopVoice" class="ghost mini" type="button">Detener</button></div>
+    </aside>
+
+    <aside id="voicePanel" class="reference-right glass" aria-label="Centro de voz">
+      <div class="right-section">
+        <div class="right-head"><b>◖ Seleccionar Voz</b><button id="closeVoice" class="menu-btn" type="button" aria-label="Cerrar">×</button></div>
+        <div class="voice-tabs"><button class="voice-tab active" data-voice-gender="female">Femenina</button><button class="voice-tab" data-voice-gender="male">Masculina</button></div>
+        <div id="voiceList" class="voice-list"></div>
+        <button class="more-voices" type="button">＋ Ver más voces</button>
+      </div>
+      <div class="right-section">
+        <div class="right-head"><b>◎ Seleccionar Idioma</b><span>›</span></div>
+        <button class="language-row active"><span>🇦🇷</span><b>Español (Argentina)</b><span>›</span></button>
+        <button class="language-row"><span>🇪🇸</span><b>Español (España)</b><span>›</span></button>
+        <button class="language-row"><span>🇺🇸</span><b>Inglés (Estados Unidos)</b><span>›</span></button>
+        <button class="language-row"><span>🇬🇧</span><b>Inglés (Reino Unido)</b><span>›</span></button>
+        <button class="more-voices" type="button">＋ 7 idiomas más</button>
+      </div>
+      <div class="right-section quick-actions">
+        <div class="right-head"><b>⚙ Acciones Rápidas</b></div>
+        <div class="quick-action-grid">
+          <button data-quick="agents"><span>♙</span><b>Nuevo<br>Agente</b></button>
+          <button data-quick="teams"><span>⌘</span><b>Nuevo<br>Equipo</b></button>
+          <button data-quick="coder"><span>⌘</span><b>CodQ</b></button>
+          <button data-quick="skills"><span>✦</span><b>Skills</b></button>
+        </div>
+      </div>
+      <div class="right-section voice-control">
+        <div class="right-head"><b>♧ Control de voz</b></div>
+        <div class="voice-slider"><button id="voiceInputRail" type="button">●</button><span class="wave-line"></span><input type="range" min="0" max="100" value="72" aria-label="Volumen de voz"></div>
+      </div>
+      <div class="side-promo right-promo"><div class="promo-art"><span></span><i></i></div><b>Crea. Colabora. Evoluciona.</b><small>AgentiCuantico</small></div>
+    </aside>
   </div>
 </section>
-      <div class="chat-context">
-        <div class="context-avatar">AQ</div>
-        <div><b>AgentiCuantico</b><small id="chatContext">Cerebro listo · conversación privada</small></div>
-        <span class="context-model" id="contextModel">AgentiQ · Cerebro</span>
-      </div>
-      <div class="chat-layout">
-        <div class="conversation-pane">
-          <div id="messages" class="messages"></div>
-          <div id="attachmentTray" class="attachment-tray hidden"></div><form id="composer" class="composer glass"><input id="attachInput" type="file" hidden multiple accept="image/*,.txt,.md,.json,.js,.ts,.css,.html,.py,.csv,.xml,.yaml,.yml"><button id="attachButton" class="attach-btn" type="button" aria-label="Adjuntar fotos o archivos">＋</button><textarea id="input" rows="1" autocomplete="off" placeholder="Escribí tu mensaje…"></textarea><button id="voiceInput" class="voice-btn" type="button" aria-label="Hablar con AgentiCuantico"><span class="mic-glyph" aria-hidden="true"></span></button><button id="send" class="send" type="submit" aria-label="Enviar">↑</button></form>
-          <div class="memory">● Historial local por conversación · No mostramos secretos ni información interna.</div>
-        </div>
-        <aside class="brain-stage glass" aria-label="Avatar 3D de AgentiCuantico">
-          <div class="stage-top"><div><b id="avatarName">Agente Principal</b><small id="avatarState">En línea · listo para hablar</small></div><span class="stage-live">● LIVE</span></div>
-          <div class="robot-avatar avatar-3d" id="robotAvatar" data-gender="female">
-            <div class="avatar-aura"></div>
-            <canvas id="avatarCanvas" aria-label="Avatar 3D interactivo de AgentiCuantico"></canvas>
-            <div class="avatar-3d-hud"><span class="hud-chip">WEBGL · 3D</span><span class="hud-chip" id="avatarRigStatus">RIG · listo</span></div>
-            <div class="algorithm-spectrum"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-          </div>
-          <div class="voice-status"><span class="voice-wave"><i></i><i></i><i></i><i></i><i></i></span><div><b id="voiceStatus">Voz lista</b><small id="voiceName">Clara · Español (Argentina)</small></div><button id="stopVoice" class="ghost mini" type="button">Detener</button></div>
-          <div class="voice-controls">
-            <button id="voicePicker" class="stage-control">◉ Voz <small>10 perfiles</small></button>
-            <button id="langPicker" class="stage-control">◎ Idioma <small>Español AR</small></button>
-            <button id="genderPicker" class="stage-control">◈ Avatar <small>Femenino</small></button>
-          </div>
-        </aside>
-      </div>
-    </section>
-
-    <section id="panel" class="panel hidden"></section><div id="voicePanel" class="voice-panel hidden" aria-label="Selector de voz">
-  <div class="voice-panel-head"><div><span class="eyebrow">VOICE STUDIO</span><h3>Elegí una voz realista</h3></div><button id="closeVoice" class="menu-btn" type="button">×</button></div>
-  <div class="voice-tabs"><button class="voice-tab active" data-voice-gender="female">Femeninas</button><button class="voice-tab" data-voice-gender="male">Masculinas</button></div>
-  <div id="voiceList" class="voice-list"></div>
-  <div class="voice-note">Cada perfil busca una voz instalada distinta y aplica parámetros propios. La disponibilidad final depende del navegador/dispositivo; el selector incluye vista previa al cambiar de voz.</div>
-</div>
-  </main>
+<section id="panel" class="panel hidden"></section></main>
 </div>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 <script>window.AGENTICUANTICO_API_URL="https://agenticweb.agenticuantico.workers.dev";</script>
-<script type="module" src="./app.js?v=20260922-8"></script>
+<script type="module" src="./app.js?v=20260922-9"></script>
 </body>
 </html>
