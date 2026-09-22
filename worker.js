@@ -179,7 +179,7 @@ async function handleApi(request, env) {
   }
 
   if (url.pathname === "/health" && request.method === "GET") {
-    return json({ ok: true, service: "agenticweb", provider: "huggingface", model: String(env.HF_MODEL || "Qwen/Qwen3.8-27B"), routing: "fastest-with-fallback" }, 200, request);
+    return json({ ok: true, service: "agenticweb" }, 200, request);
   }
 
   if (url.pathname === "/v1/public/chat" && request.method === "POST") {
