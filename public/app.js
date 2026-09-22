@@ -122,18 +122,21 @@ import "./avatar-webgpu.js";
 
 
 
-/* Cinematic hero interactions: mouse-scrub video, typewriter and entry routing */
+/* Cinematic hero interactions */
 (()=>{
   const hero=document.getElementById("cinematicHero");
   if(!hero) return;
   const video=document.getElementById("heroScrubVideo");
   const pinBg=document.getElementById("pinBackgroundImage");
-  // Offline-first: the committed world asset is always available. Pinterest is only a reference.
-  // Never make the landing page depend on Pinterest being online.
-  if(pinBg) pinBg.addEventListener("error",()=>{pinBg.src="./assets/background/quantum-world.svg";},{once:false});
   const typeEl=document.getElementById("heroTypewriter");
   const actions=document.getElementById("heroActions");
-  let prevX=null,targetTime=0,seekQueued=false,seeking=false;
+  const mobileMenu=document.getElementById("heroMobileMenu");
+  const menuButton=hero.querySelector(".hero-menu");
+  let prevX=null,targetTime=0,seeking=false;
+
+  if(pinBg){
+    pinBg.addEventListener("error",()=>{pinBg.src="./assets/background/quantum-world.svg";},{once:false});
+  }
 
   const intro="Estoy lista para conversar, crear, programar y transformar ideas en resultados.";
   let i=0;
@@ -148,45 +151,62 @@ import "./avatar-webgpu.js";
 
   const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
   const requestSeek=()=>{
-    if(!video || !Number.isFinite(video.duration) || video.duration<=0 || seeking) return;
+    if(!video||!Number.isFinite(video.duration)||video.duration<=0||seeking)return;
     seeking=true;
     video.currentTime=clamp(targetTime,0,video.duration);
   };
   video?.addEventListener("loadedmetadata",()=>{targetTime=video.currentTime||0});
   video?.addEventListener("seeked",()=>{
     seeking=false;
-    if(Math.abs(video.currentTime-targetTime)>.02) requestSeek();
+    if(Math.abs(video.currentTime-targetTime)>.015) requestSeek();
   });
   window.addEventListener("mousemove",(e)=>{
-    if(!hero.classList.contains("is-hidden")){
-      if(prevX===null){prevX=e.clientX;return}
-      const delta=e.clientX-prevX; prevX=e.clientX;
-      if(video && Number.isFinite(video.duration) && video.duration>0){
-        targetTime=clamp(targetTime+(delta/window.innerWidth)*.8*video.duration,0,video.duration);
-        requestSeek();
-      }
+    if(hero.classList.contains("is-hidden"))return;
+    if(prevX===null){prevX=e.clientX;return}
+    const delta=e.clientX-prevX;prevX=e.clientX;
+    if(video&&Number.isFinite(video.duration)&&video.duration>0){
+      targetTime=clamp(targetTime+(delta/window.innerWidth)*.8*video.duration,0,video.duration);
+      requestSeek();
     }
   },{passive:true});
   window.addEventListener("mouseleave",()=>{prevX=null},{passive:true});
 
+  const closeMenu=()=>{
+    mobileMenu?.classList.remove("is-open");
+    mobileMenu?.setAttribute("aria-hidden","true");
+    menuButton?.classList.remove("is-open");
+    menuButton?.setAttribute("aria-expanded","false");
+  };
+  menuButton?.addEventListener("click",()=>{
+    const open=!mobileMenu.classList.contains("is-open");
+    mobileMenu.classList.toggle("is-open",open);
+    mobileMenu.setAttribute("aria-hidden",String(!open));
+    menuButton.classList.toggle("is-open",open);
+    menuButton.setAttribute("aria-expanded",String(open));
+  });
+
   const enter=()=>{
+    closeMenu();
     hero.classList.add("is-hidden");
     document.body.classList.remove("hero-active");
-    setTimeout(()=>hero.remove(),600);
+    window.setTimeout(()=>hero.remove(),600);
   };
-  document.querySelectorAll("[data-enter-app]").forEach(b=>b.addEventListener("click",enter));
+  hero.querySelectorAll("[data-enter-app]").forEach(b=>b.addEventListener("click",enter));
+
   hero.querySelectorAll("[data-copy-email]").forEach(b=>b.addEventListener("click",async()=>{
     try{
       await navigator.clipboard.writeText("agenticuantico@gmail.com");
       const old=b.innerHTML;b.innerHTML="Copiado ✓";
-      setTimeout(()=>b.innerHTML=old,1200);
-    }catch{}
+      window.setTimeout(()=>b.innerHTML=old,1200);
+    }catch{
+      b.setAttribute("aria-label","No se pudo copiar el correo");
+    }
   }));
+
   hero.querySelectorAll("[data-hero-action]").forEach(b=>b.addEventListener("click",()=>{
     const view=b.dataset.heroAction;
-    enter();
+    closeMenu();enter();
     const nav=document.querySelector(`.nav-item[data-view="${view}"]`);
-    if(nav) setTimeout(()=>nav.click(),100);
-    else if(view==="chat") document.getElementById("chat")?.scrollIntoView({behavior:"smooth"});
+    if(nav)window.setTimeout(()=>nav.click(),100);
   }));
 })();
