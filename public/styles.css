@@ -83,3 +83,13 @@ button{touch-action:manipulation}
 
 @media(max-width:1050px){.chat-layout{grid-template-columns:1fr}.brain-stage{min-height:360px;max-height:470px}.codq-grid{grid-template-columns:165px minmax(0,1fr)}.codq-crew{display:none}}
 @media(max-width:760px){.chat-layout{display:flex;flex-direction:column;gap:9px}.brain-stage{order:-1;min-height:245px;max-height:310px;padding:11px;border-radius:19px}.robot-avatar{min-height:170px}.avatar-head{width:130px}.avatar-body{height:65px}.algorithm-spectrum{bottom:68px}.voice-controls{grid-template-columns:repeat(3,1fr)}.stage-control{font-size:9px;padding:7px}.stage-control small{font-size:7px}.voice-status{padding:7px}.chat-layout .messages{height:230px;flex:none}.voice-panel{right:10px;top:70px}.codq-head{flex-direction:column}.codq-head-actions{width:100%;justify-content:space-between}.codq-grid{grid-template-columns:1fr}.codq-files{display:none}.codq-editor{min-height:430px}.codq-toolbar{overflow:auto}.codq-toolbar input{min-width:180px}.tool-tab{white-space:nowrap}}
+
+/* Voice-first polish + feminine 3D avatar */
+.mic-glyph{display:block;width:14px;height:20px;margin:auto;border:2px solid currentColor;border-radius:8px;position:relative;font-size:0}.mic-glyph:before{content:"";position:absolute;left:50%;top:4px;width:4px;height:9px;transform:translateX(-50%);border-radius:4px;background:currentColor}.mic-glyph:after{content:"";position:absolute;left:50%;bottom:-7px;width:12px;height:7px;transform:translateX(-50%);border:1.5px solid currentColor;border-top:0;border-radius:0 0 9px 9px;box-shadow:0 5px 0 -4px currentColor}.voice-btn{display:grid;place-items:center}.voice-btn.recording .mic-glyph{filter:drop-shadow(0 0 7px #74f4ff);animation:micPulse .8s ease-in-out infinite alternate}
+.robot-avatar[data-gender="female"] .avatar-head{background:radial-gradient(circle at 35% 22%,#fff 0 1%,#d7f2ff 5%,#687998 17%,#182237 50%,#070b14 72%);border-radius:46% 46% 43% 43%}
+.robot-avatar[data-gender="female"] .avatar-head:before{box-shadow:inset 0 0 28px #baf5ff18,0 0 20px #795cff14}
+.robot-avatar[data-gender="female"] .avatar-head:after{width:27%;height:34%;right:-12%;top:-5%;border:0;border-radius:55% 55% 45% 45%;background:linear-gradient(140deg,#10192e,#4e5b83 55%,#12182a);box-shadow:-12px 18px 0 -8px #293651,0 0 20px #6f5cff22;transform:rotate(15deg)}
+.robot-avatar[data-gender="female"] .mouth{border-bottom-color:#a4f7ff}
+.robot-avatar[data-gender="female"] .avatar-body{border-radius:48% 48% 12% 12%;background:linear-gradient(145deg,#1e2940,#080d17 48%,#182238)}
+.robot-avatar[data-gender="male"] .avatar-head{background:radial-gradient(circle at 38% 24%,#fff 0 1%,#c6eaff 5%,#586983 18%,#111b2e 55%,#050810 75%)}
+@keyframes micPulse{to{transform:scale(1.08)}}
