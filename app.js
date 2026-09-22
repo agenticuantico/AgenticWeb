@@ -1,4 +1,6 @@
-const API_BASE = (window.AGENTICUANTICO_API || window.location.origin).replace(/\/$/, '');
+const DEFAULT_NATIVE_API = 'https://agenticuantico.dev.ar';
+const isNative = window.location.protocol === 'capacitor:';
+const API_BASE = (window.AGENTICUANTICO_API || (isNative ? DEFAULT_NATIVE_API : window.location.origin)).replace(/\/$/, '');
 const form = document.querySelector('#chat-form');
 const prompt = document.querySelector('#prompt');
 const messages = document.querySelector('#messages');
