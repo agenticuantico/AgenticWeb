@@ -7,7 +7,7 @@
 <title>AgentiCuantico — Inteligencia Agéntica</title>
 <meta name="description" content="AgentiCuantico: inteligencia agéntica, conversación, programación y creación con una interfaz 3D inmersiva.">
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
-<link rel="stylesheet" href="./styles.css">
+<link rel="stylesheet" href="./styles.css?v=20260922">
 </head>
 <body>
 <div class="scene">
@@ -42,10 +42,10 @@
   <main class="main">
     <header class="topbar glass">
       <div class="top-title"><span class="pulse-dot"></span><div><strong>AgentiCuantico</strong><span id="status">Conectando con el cerebro…</span></div></div>
-      <div class="top-actions"><span class="model-pill">QWEN · BRAIN</span><button class="icon-btn" aria-label="Configuración">⋯</button></div>
+      <div class="top-actions"><span class="model-pill">QWEN · BRAIN</span><button id="menuBtn" class="icon-btn" aria-label="Abrir menú">⋯</button></div>
     </header>
 
-    <section id="chat" class="chat">
+    <section id="chat" class="chat view">
       <div class="welcome">
         <div class="eyebrow">AGENTIC INTELLIGENCE</div>
         <h1>Pensá. Creá.<br><span>Construí con IA.</span></h1>
@@ -57,13 +57,13 @@
         <button type="submit" class="send" aria-label="Enviar">↑</button>
       </form>
       <div class="memory"><span>●</span> Conversación privada en este dispositivo · El cerebro puede mantener contexto sin mostrar información interna.</div>
-    </section>
+    </section><section id="panel" class="panel-view hidden"></section>
   </main>
 </div>
 
 <script>
-window.AGENTICUANTICO_API_URL = "";
+window.AGENTICUANTICO_API_URL = "https://agenticweb.agenticuantico.workers.dev";
 </script>
-<script type="module" src="./app.js"></script>
+<script type="module" src="./app.js?v=20260922"></script>
 </body>
 </html>
