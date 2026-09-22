@@ -1,8 +1,4 @@
 /*
-  Cloudflare edge security headers for AgenticWeb.
-  CSP is intentionally not set here until all external assets/providers are enumerated.
-*/
- /*
   X-Content-Type-Options: nosniff
   X-Frame-Options: DENY
   Referrer-Policy: strict-origin-when-cross-origin
