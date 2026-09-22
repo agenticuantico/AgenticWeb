@@ -72,7 +72,7 @@ form?.addEventListener('submit',async e=>{
     if(!r.ok)throw new Error(d.detail||d.error||('HTTP '+r.status));
     typing.remove();
     const answer=d.message||'No recibí contenido del cerebro.';
-    const item=addMessage('assistant',answer,d.model?('Modelo: '+d.model):'');
+    const item=addMessage('assistant',answer);
     lastMessageId=d.conversation_id||null;
     const feedback=document.createElement('div');
     feedback.className='message-feedback';
