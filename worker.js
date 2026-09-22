@@ -36,10 +36,12 @@ async function callHuggingFace(request, env) {
   const token = String(env.HF_TOKEN || "").trim();
   const model = String(env.HF_MODEL || "Qwen/Qwen3.8-27B").trim();
   const endpoint = String(env.HF_API_URL || "https://router.huggingface.co/v1/chat/completions").trim();
-  const providers = ["novita", "cerebras", "ovhcloud", "deepinfra"];
+  // Hugging Face automatically selects an available provider. This avoids
+  // hard-coding providers that may not serve the model at a given moment.
   const models = [
-    model,
-    ...providers.map(provider => `${model}:${provider}`)
+    `${model}:fastest`,
+    "Qwen/Qwen3.6-27B:fastest",
+    "Qwen/Qwen3.5-27B:fastest"
   ].filter((value, index, list) => list.indexOf(value) === index);
 
   if (!token) return null;
@@ -80,7 +82,7 @@ async function callHuggingFace(request, env) {
 
   for (const selectedModel of models) {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 30000);
+    const timeout = setTimeout(() => controller.abort(), 20000);
 
     try {
       const upstream = await fetch(endpoint, {
@@ -95,7 +97,10 @@ async function callHuggingFace(request, env) {
           messages,
           temperature: 0.7,
           top_p: 0.8,
-          max_tokens: 640,
+          max_tokens: 512,
+          temperature: 0.7,
+          top_p: 0.8,
+          presence_penalty: 1.5,
           reasoning_effort: "low",
           stream: false,
           extra_body: {
@@ -108,7 +113,36 @@ async function callHuggingFace(request, env) {
         })
       });
 
-      if (!upstream.ok) continue;
+      if (!upstream.ok) {
+        // Retry with a minimal OpenAI-compatible payload if a provider rejects
+        // an optional generation field, then fail over to the next model.
+        if (upstream.status >= 400 && upstream.status < 500) {
+          const retry = await fetch(endpoint, {
+            method: "POST",
+            signal: controller.signal,
+            headers: {
+              "Authorization": `Bearer ${token}`,
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              model: selectedModel,
+              messages,
+              temperature: 0.7,
+              top_p: 0.8,
+              max_tokens: 512,
+              stream: false
+            })
+          });
+          if (retry.ok) {
+            const retryData = await retry.json();
+            const retryAnswer = retryData?.choices?.[0]?.message?.content;
+            if (typeof retryAnswer === "string" && retryAnswer.trim()) {
+              return json({ ok: true, answer: retryAnswer.trim() }, 200, request);
+            }
+          }
+        }
+        continue;
+      }
 
       const data = await upstream.json();
       const answer = data?.choices?.[0]?.message?.content;
@@ -144,7 +178,7 @@ async function handleApi(request, env) {
   }
 
   if (url.pathname === "/health" && request.method === "GET") {
-    return json({ ok: true, service: "agenticweb", provider: "huggingface", model: String(env.HF_MODEL || "Qwen/Qwen3.8-27B") }, 200, request);
+    return json({ ok: true, service: "agenticweb", provider: "huggingface", model: String(env.HF_MODEL || "Qwen/Qwen3.8-27B"), routing: "fastest" }, 200, request);
   }
 
   if (url.pathname === "/v1/public/chat" && request.method === "POST") {
