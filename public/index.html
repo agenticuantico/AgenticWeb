@@ -70,21 +70,39 @@
 </head>
 <body>
 <div id="cinematicHero" class="cinematic-hero" aria-label="Presentación de AgentiCuantico">
-  <div class="pin-background" aria-hidden="true"><img id="pinBackgroundImage" src="./assets/background/quantum-world.svg" alt="" decoding="async" fetchpriority="high" data-pinterest-reference="https://pin.it/5dDqTJNiq"></div>
-  <video id="heroScrubVideo" class="hero-video" muted playsinline preload="auto" poster="./favicon.svg">
+  <div class="pin-background" aria-hidden="true">
+    <img id="pinBackgroundImage" src="./assets/background/quantum-world.svg" alt="" decoding="async" fetchpriority="high"
+      data-pinterest-reference-1="https://pin.it/20ePeK3VN"
+      data-pinterest-reference-2="https://pin.it/4gnBz1zqt"
+      data-pinterest-reference-3="https://pin.it/1TKBCZ4Xp">
+  </div>
+  <video id="heroScrubVideo" class="hero-video" muted playsinline preload="auto" poster="./favicon.svg" aria-hidden="true">
     <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260826_041744_63efcd78-bf7d-4039-99e2-2461e8a61903.mp4" type="video/mp4">
   </video>
-  <div class="hero-vignette"></div><div class="hero-depth-grid" aria-hidden="true"></div>
+  <div class="hero-vignette"></div>
+  <div class="hero-depth-grid" aria-hidden="true"></div>
+  <div class="hero-particles" aria-hidden="true"></div>
+
   <nav class="hero-nav">
-    <div class="hero-logo">AgentiCuantico<sup>®</sup><span>✳︎</span></div>
+    <div class="hero-logo" aria-label="AgentiCuantico">AgentiCuantico<sup>®</sup><span>✳︎</span></div>
     <div class="hero-nav-links">
-      <button type="button" data-hero-action="chat">Cerebro</button>
-      <button type="button" data-hero-action="agents">Agentes</button>
+      <button type="button" data-hero-action="chat">Cerebro</button><span aria-hidden="true">, </span>
+      <button type="button" data-hero-action="agents">Agentes</button><span aria-hidden="true">, </span>
       <button type="button" data-hero-action="coder">CodQ</button>
     </div>
     <button class="hero-enter" type="button" data-enter-app>Entrar al cerebro</button>
-    <button class="hero-menu" type="button" aria-label="Abrir menú"><i></i><i></i><i></i></button>
+    <button class="hero-menu" type="button" aria-label="Abrir menú" aria-expanded="false">
+      <i></i><i></i><i></i>
+    </button>
   </nav>
+
+  <div id="heroMobileMenu" class="hero-mobile-menu" aria-hidden="true">
+    <button type="button" data-hero-action="chat">Cerebro</button>
+    <button type="button" data-hero-action="agents">Agentes</button>
+    <button type="button" data-hero-action="coder">CodQ</button>
+    <button type="button" data-enter-app>Entrar al cerebro</button>
+  </div>
+
   <div class="hero-content">
     <div class="hero-intro">Hola, soy AgentiQ,<br>la interfaz adaptativa de AgentiCuantico</div>
     <p id="heroTypewriter" class="hero-typewriter"></p>
@@ -93,7 +111,9 @@
       <button type="button" data-hero-action="agents">Explorar agentes</button>
       <button type="button" data-hero-action="coder">Programar con CodQ</button>
       <button type="button" data-enter-app>Ver cómo funciona</button>
-      <button type="button" class="hero-outline" data-copy-email>Contacto: agenticuantico@gmail.com <span>▣</span></button>
+      <button type="button" class="hero-outline" data-copy-email>Contacto: <span class="hero-email">agenticuantico@gmail.com</span>
+        <svg class="copy-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="1.5"></rect><path d="M5 15V5a2 2 0 0 1 2-2h10"></path></svg>
+      </button>
     </div>
   </div>
   <div class="hero-meta"><span>AI · AGENTIC · HUMAN INTERFACE</span><span>WEBGL · 3D · VOICE</span></div>
