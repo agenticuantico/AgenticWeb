@@ -1,0 +1,25 @@
+/* AgentiQ premium interaction layer */
+.aq-enhanced .brain-stage{overflow:hidden;isolation:isolate}
+.aq-enhanced .reference-stage:before{content:"";position:absolute;inset:10%;border-radius:50%;background:radial-gradient(circle,rgba(73,221,255,.12),transparent 62%);filter:blur(16px);pointer-events:none;z-index:0}
+.aq-enhanced #avatarCanvas{background:transparent}
+.aq-enhanced .avatar-3d-hud{z-index:5}
+.aq-enhanced .stage-live{letter-spacing:.14em}
+.aq-enhanced .composer:focus-within{border-color:rgba(85,220,255,.6);box-shadow:0 0 0 1px rgba(85,220,255,.12),0 18px 55px rgba(0,0,0,.24)}
+.aq-enhanced .send{transition:transform .18s ease,filter .18s ease}
+.aq-enhanced .send:hover{transform:translateY(-1px) scale(1.04);filter:brightness(1.15)}
+.aq-enhanced .top-search input{outline:none}
+@media(max-width:1100px){
+ .aq-enhanced .reference-layout{grid-template-columns:minmax(0,1fr) 320px}
+ .aq-enhanced .reference-right{display:none}
+}
+@media(max-width:820px){
+ .aq-enhanced .shell{display:block}
+ .aq-enhanced .side{position:fixed;left:0;top:0;bottom:0;width:min(88vw,330px);z-index:100;transform:translateX(-105%);transition:transform .25s ease}
+ .aq-enhanced .side.open,.aq-enhanced body.nav-open .side{transform:translateX(0)}
+ .aq-enhanced .main{min-width:0}
+ .aq-enhanced .reference-layout{grid-template-columns:1fr}
+ .aq-enhanced .brain-stage{min-height:390px;order:-1}
+ .aq-enhanced .top-search{display:none}
+ .aq-enhanced .topbar{justify-content:space-between}
+}
+@media(prefers-reduced-motion:reduce),.reduced-motion *{animation-duration:.001ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.001ms!important}
