@@ -160,8 +160,11 @@ async function callHuggingFace(request, env) {
     .map(a => ({type:"image_url",image_url:{url:a.data}}));
   const fileText = attachments
     .filter(a => a.kind !== "image")
-    .map(a => "\n[Archivo " + a.name + "]\n" + a.data.slice(0,30000))
-    .join("\n");
+    .map(a => "
+[Archivo " + a.name + "]
+" + a.data.slice(0,30000))
+    .join("
+");
   const userContent = imageParts.length
     ? [{type:"text",text:(message || "Analizá los archivos adjuntos.") + fileText},...imageParts]
     : (message || "Analizá los archivos adjuntos.") + fileText;
@@ -500,16 +503,29 @@ async function codexAnalyze(request, env) {
       .sort((x,y)=>{const score=p=>/(README|worker|wrangler|package|index|app|styles|src)/i.test(p)?0:1;return score(x.path)-score(y.path)}) .slice(0,12);
     const snippets=[];
     for(const f of candidates){
-      if(snippets.join("\n").length>28000)break;
+      if(snippets.join("
+").length>28000)break;
       try{
         const r=await fetch("https://api.github.com/repos/"+repo+"/contents/"+f.path+"?ref="+encodeURIComponent(m.default_branch||"main"),{headers:{"Accept":"application/vnd.github.raw+json","X-GitHub-Api-Version":"2026-03-10"}});
-        if(r.ok){const txt=await r.text();snippets.push("\n### "+f.path+"\n"+txt.slice(0,5000));}
+        if(r.ok){const txt=await r.text();snippets.push("
+### "+f.path+"
+"+txt.slice(0,5000));}
       }catch{}
     }
-    const context = "Repositorio: "+repo+"\nRama: "+(m.default_branch||"main")+"\nDescripción: "+(m.description||"")+"\nEstructura:\n"+candidates.map(x=>x.path).join("\n")+"\nArchivos relevantes:\n"+snippets.join("\n");
+    const context = "Repositorio: "+repo+"
+Rama: "+(m.default_branch||"main")+"
+Descripción: "+(m.description||"")+"
+Estructura:
+"+candidates.map(x=>x.path).join("
+")+"
+Archivos relevantes:
+"+snippets.join("
+");
     const messages=[
       {role:"system",content:"Sos Agentic Codex de AgentiCuantico. Analizá código real proporcionado por el servidor. No inventes archivos ni cambios. Separá diagnóstico, plan, riesgos y pruebas. No expongas secretos."},
-      {role:"user",content:"Objetivo: "+task+"\n\n"+context}
+      {role:"user",content:"Objetivo: "+task+"
+
+"+context}
     ];
     const model=String(env.HF_MODEL||"Qwen/Qwen3.8-27B").trim()+":fastest";
     const upstream=await fetch(String(env.HF_API_URL||"https://router.huggingface.co/v1/chat/completions"),{
@@ -632,7 +648,10 @@ async function handleApi(request, env) {
     return json({ok:false,error:"web_designer_unavailable",message:"El diseñador web no está disponible temporalmente."},502,request);
   }
 
-  if (url.pathname === "/v1/public/web-design/build" && request.method === "POST") {\n    return buildWebDesign(request.clone(), env);\n  }\n
+  if (url.pathname === "/v1/public/web-design/build" && request.method === "POST") {
+    return buildWebDesign(request.clone(), env);
+  }
+
   if (url.pathname === "/v1/public/designer/scan" && request.method === "POST") {
     return designerScan(request.clone(), env);
   }
@@ -645,7 +664,9 @@ async function handleApi(request, env) {
     return designerPublish(request.clone(), env);
   }
 
-\n\n  if (url.pathname === "/v1/public/codex" && request.method === "POST") {
+
+
+  if (url.pathname === "/v1/public/codex" && request.method === "POST") {
     return codexAnalyze(request.clone(), env);
   }
 
