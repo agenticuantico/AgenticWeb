@@ -1,4 +1,4 @@
-/* AgentiCuantico premium runtime — chat, 3D brain, voice, attachments and conversation history. */
+/* AgentiCuantico premium runtime — chat-first UI, 3D neural brain, voice and attachments. */
 (() => {
   "use strict";
 
@@ -150,9 +150,6 @@
     current=c;persistLocal();syncToServer();
   }
 
-  // Hide internal design tooling from the public product.
-  ["openWebStudio","webStudio","aiDesignStudio"].forEach(id=>$(id)?.remove());
-
   if(!conversations.length)createConversation();else if(!getCurrent())activeId=conversations.at(-1).id;
   renderHistory();renderMessages();
   $("newChat")?.addEventListener("click",e=>{e.preventDefault();if(busy){notify("Esperá a que termine la respuesta");return}createConversation();notify("Nueva conversación")});
@@ -256,5 +253,5 @@
   input?.addEventListener("keydown",e=>{e.stopImmediatePropagation();if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();const t=input.value.trim();if(t){input.value="";ask(t)}}},true);
   $("composer")?.addEventListener("submit",e=>{e.preventDefault();const t=input?.value.trim();if(t){input.value="";ask(t)}},true);
 
-  window.addEventListener("load",()=>{loadVoices();window.speechSynthesis?.addEventListener?.("voiceschanged",loadVoices);if(status&&!status.textContent)status.textContent="Voz lista";notify("AgentiQ listo · historial activo")},{once:true});
+  window.addEventListener("load",()=>{loadVoices();window.speechSynthesis?.addEventListener?.("voiceschanged",loadVoices);if(status&&!status.textContent)status.textContent="Voz lista";notify("AgentiQ listo")},{once:true});
 })();
