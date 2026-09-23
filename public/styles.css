@@ -529,3 +529,78 @@ button,input,textarea{font-family:var(--font-body)}
 body.account-open{overflow:hidden}
 @media(max-width:850px){.plans-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.account-modal{padding:22px;border-radius:22px}.plans-head{align-items:start;flex-direction:column}}
 @media(max-width:520px){.account-overlay{padding:0}.account-modal{width:100%;height:100%;max-height:none;border-radius:0;padding:20px 16px}.plans-grid{grid-template-columns:1fr}.account-title h2{font-size:28px}.account-actions{display:grid;grid-template-columns:1fr 1fr}.plan-card.featured{transform:none}}
+
+/* Chat-first redesign — familiar conversational workspace with AgentiCuantico neural identity */
+:root{
+  --chat-bg:#212121;
+  --chat-sidebar:#171717;
+  --chat-panel:#212121;
+  --chat-border:#ffffff12;
+  --chat-muted:#a0a0a0;
+}
+body{background:var(--chat-bg)}
+.scene{background:radial-gradient(circle at 72% 18%,#4b32a51f,transparent 30%),radial-gradient(circle at 25% 80%,#00bcd41a,transparent 30%),#212121}
+.scene .grid{opacity:.08}
+.shell{grid-template-columns:260px 1fr;background:transparent}
+.side{background:#171717f5;border-right:1px solid #ffffff0a;padding:14px 12px}
+.brand{padding:8px 10px 14px}
+.brand small{display:none}
+.new-chat{margin:4px 0 16px;padding:11px 12px;border-radius:9px;background:#212121;border-color:#ffffff12;box-shadow:none}
+.new-chat:hover{background:#2a2a2a;transform:none}
+.nav{gap:2px}
+.nav-item{padding:9px 10px;border-radius:8px;color:#b9b9b9}
+.nav-item span:last-child small{display:none}
+.nav-item:hover{background:#2a2a2a;transform:none;color:#fff}
+.nav-item.active{background:#2b2b2b;border-color:transparent;box-shadow:none;color:#fff}
+.conversation-history{margin-top:12px}
+.history-heading{padding:9px 10px 6px;color:#777;font-size:10px;letter-spacing:.08em}
+.history-heading button{background:none;border:0;color:#777;cursor:pointer}
+.history-row{border-radius:8px}
+.history-open{padding:9px 10px}
+.history-copy small{display:none}
+.side-promo{display:none}
+.main{background:transparent}
+.topbar{height:60px;background:#212121e8;border-bottom:1px solid #ffffff08;backdrop-filter:blur(14px);padding:0 18px}
+.top-search{max-width:520px;background:#2a2a2a!important;border:1px solid #ffffff0b!important}
+.top-actions .top-icon{display:none}
+.profile-chip{background:#2a2a2a;border:1px solid #ffffff0b}
+.chat{width:100%;max-width:none;height:calc(100vh - 60px);padding:0}
+.chat-layout{max-width:1180px;width:100%;margin:0 auto;grid-template-columns:minmax(0,1fr) 360px;gap:0;height:100%}
+.conversation-pane{padding:0 24px;max-width:900px;width:100%;margin:auto}
+.agent-header{margin:14px 0 8px;background:transparent;border:0;box-shadow:none;padding:8px 0}
+.agent-header .model-chip{margin-left:auto}
+.webgl-chip{display:inline-flex!important}
+.messages{padding:12px 2px 24px!important}
+.msg{border:0!important;box-shadow:none!important;background:transparent!important;border-radius:12px;max-width:760px;padding:13px 8px;margin:3px auto 3px 0}
+.msg.user{background:#2f2f2f!important;border:1px solid #ffffff08!important;margin-left:auto;margin-right:0;padding:12px 15px;max-width:min(760px,82%)}
+.msg.assistant{padding-left:48px;position:relative}
+.msg.assistant:before{content:"AQ";position:absolute;left:4px;top:14px;width:28px;height:28px;border-radius:9px;display:grid;place-items:center;background:radial-gradient(circle at 35% 30%,#8ef8ff,#5b4cff 62%,#151522);font-size:8px;font-weight:800;box-shadow:0 0 18px #6d5cff33}
+.reference-welcome{max-width:760px!important;margin:10vh auto!important;text-align:left!important;padding-left:48px!important}
+.reference-welcome:before{top:14px!important}
+.composer{max-width:850px;width:100%;margin:0 auto;border-radius:26px;background:#2f2f2f!important;border:1px solid #ffffff12;box-shadow:0 12px 40px #0005;padding:8px 10px 8px 14px}
+.composer textarea{color:#ececec}
+.attach-btn,.voice-btn{background:transparent;border:0;color:#b8b8b8}
+.send{width:38px;height:38px;border-radius:50%;background:#f3f3f3;color:#171717}
+.memory{color:#777;padding-bottom:14px}
+.brain-stage{margin:14px 18px 14px 0;border-radius:18px;background:radial-gradient(circle at 50% 44%,#39227d44,transparent 48%),#151515ee;border-color:#ffffff0d}
+.quantum-anchor-label{display:none!important}
+.stage-floating-badge{font-size:9px;opacity:.8}
+.ai-design-layer,.ai-design-mount,#webStudio{display:none!important}
+@media(max-width:1000px){
+  .chat-layout{grid-template-columns:minmax(0,1fr) 320px}
+  .brain-stage{margin-right:10px}
+}
+@media(max-width:760px){
+  .shell{grid-template-columns:1fr}
+  .side{background:#171717}
+  .topbar{height:56px}
+  .chat{height:calc(100vh - 56px)}
+  .chat-layout{display:block}
+  .brain-stage{height:220px;min-height:220px;margin:0 10px 8px;order:-1}
+  .conversation-pane{padding:0 10px}
+  .agent-header{padding:5px 2px}
+  .agent-header .model-chip,.webgl-chip{display:none!important}
+  .msg.assistant{padding-left:42px}
+  .msg.user{max-width:90%}
+  .reference-welcome{margin:7vh auto!important}
+}
