@@ -1,6 +1,4 @@
-import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js";
-import {GLTFLoader} from "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/loaders/GLTFLoader.js";
-import {createFacialRig} from "./assets/avatar/facial-rig.js";
+import {initQuantumBrain3D} from "./brain-3d.js";
 
 const API=(window.AGENTICUANTICO_API_URL||"https://agenticweb.agenticuantico.workers.dev").replace(/\/$/,"");
 const K={chat:"aq_chat_v7",conversations:"aq_conversations_v1",active:"aq_active_v1",session:"aq_guest_v6",agents:"aq_agents_v5",teams:"aq_teams_v5",profile:"aq_profile_v5",auth:"aq_auth_v1",improvement:"aq_improvement_consent_v1"};
@@ -38,116 +36,13 @@ const icon=(name)=>({chat:"<svg viewBox='0 0 24 24'><path d='M5 6.5h14v9H9l-4 3v
 
 
 let avatar3d=null;
-function makeAvatarMaterial(color,roughness=.55,metalness=0){return new THREE.MeshStandardMaterial({color,roughness,metalness})}
-function capsule(radius,length,material){const g=new THREE.CapsuleGeometry(radius,length,8,16);return new THREE.Mesh(g,material)}
-function createHumanoid3D(gender="female"){
- const root=new THREE.Group();
- const skin=makeAvatarMaterial(gender==="female"?0xf0b8a0:0xc9947e,.68);
- const dark=makeAvatarMaterial(0x0b1224,.34,.68);
- const hair=makeAvatarMaterial(gender==="female"?0x241638:0x111a2b,.4,.18);
- const white=makeAvatarMaterial(0xf4fbff,.18,.2);
- const iris=makeAvatarMaterial(0x67ddff,.12,.82);
- const lip=makeAvatarMaterial(0xd95f8b,.36,.12);
- const glow=makeAvatarMaterial(0x52eaff,.18,.78);
- const emissive=makeAvatarMaterial(0x4d6cff,.25,.72);
- const torso=new THREE.Mesh(new THREE.CapsuleGeometry(.72,.98,12,24),dark);
- torso.scale.set(1.08,1.08,.64);torso.position.y=-1.05;root.add(torso);root.userData.torso=torso;
- const neck=new THREE.Mesh(new THREE.CylinderGeometry(.18,.23,.34,20),skin);neck.position.y=-.25;root.add(neck);
- const head=new THREE.Mesh(new THREE.SphereGeometry(.78,36,28),skin);head.scale.set(.84,1.08,.78);head.position.y=.58;root.add(head);root.userData.head=head;
- const hairCap=new THREE.Mesh(new THREE.SphereGeometry(.82,36,24,0,Math.PI*2,0,Math.PI*.64),hair);hairCap.scale.set(.88,1.04,.84);hairCap.position.set(0,.78,-.03);root.add(hairCap);
- if(gender==="female"){
-   for(const x of[-.65,.65]){const lock=new THREE.Mesh(new THREE.SphereGeometry(.34,24,18),hair);lock.scale.set(.72,1.65,.58);lock.position.set(x,.4,-.03);root.add(lock)}
-   const back=new THREE.Mesh(new THREE.SphereGeometry(.7,28,18),hair);back.scale.set(1.05,1.45,.5);back.position.set(0,.25,-.42);root.add(back)
- }
- root.userData.eyes=[];
- for(const x of[-.29,.29]){
-   const eye=new THREE.Mesh(new THREE.SphereGeometry(.115,24,16),white);eye.scale.z=.42;eye.position.set(x,.64,.68);root.add(eye);
-   const pupil=new THREE.Mesh(new THREE.SphereGeometry(.058,18,14),iris);pupil.position.set(x,.64,.785);root.add(pupil);root.userData.eyes.push(pupil)
- }
- const nose=new THREE.Mesh(new THREE.CapsuleGeometry(.045,.18,8,12),skin);nose.position.set(0,.39,.72);nose.rotation.x=Math.PI/2;root.add(nose);
- const mouth=new THREE.Mesh(new THREE.TorusGeometry(.15,.029,10,28,Math.PI),lip);mouth.position.set(0,.20,.70);mouth.rotation.z=Math.PI;mouth.scale.set(1,.75,1);root.add(mouth);root.userData.mouth=mouth;
- for(const x of[-.46,.46]){
-   const upper=capsule(.17,.74,dark);upper.position.set(x,-1.0,0);upper.rotation.z=x<0?-.16:.16;root.add(upper);
-   const fore=capsule(.15,.65,dark);fore.position.set(x*1.04,-1.55,.08);fore.rotation.z=x<0?-.08:.08;root.add(fore);
-   const hand=new THREE.Mesh(new THREE.SphereGeometry(.2,18,14),skin);hand.position.set(x*1.1,-1.98,.18);root.add(hand);
-   root.userData.arms??=[];root.userData.arms.push({upper,fore,hand,side:x<0?-1:1})
- }
- const core=new THREE.Mesh(new THREE.SphereGeometry(.15,22,18),glow);core.position.set(0,-.98,.43);root.add(core);
- const coreRing=new THREE.Mesh(new THREE.TorusGeometry(.23,.018,8,32),emissive);coreRing.position.set(0,-.98,.44);root.add(coreRing);
- root.userData.blink=0;root.userData.gender=gender;root.userData.talkPhase=0;
- return root
-}
+
 async function initAvatar3D(){
- const canvas=$("avatarCanvas");if(!canvas)return;
- try{
-  const renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true,powerPreference:"high-performance"});
-  renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.18;
-  const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(30,1,.1,100);camera.position.set(0,.02,6.1);
-  scene.add(new THREE.AmbientLight(0x9ccfff,1.45));
-  const key=new THREE.DirectionalLight(0xffffff,2.8);key.position.set(-2,4,5);scene.add(key);
-  const rim=new THREE.PointLight(0x735cff,18,9);rim.position.set(2,1,-1);scene.add(rim);
-  const cyan=new THREE.PointLight(0x5feeff,14,8);cyan.position.set(-2,.2,2);scene.add(cyan);
-  const particleCount=1450,positions=new Float32Array(particleCount*3),sizes=new Float32Array(particleCount);
-  for(let i=0;i<particleCount;i++){const r=2.2+Math.random()*2.9,theta=Math.random()*Math.PI*2,phi=Math.acos(2*Math.random()-1);positions[i*3]=Math.sin(phi)*Math.cos(theta)*r;positions[i*3+1]=Math.cos(phi)*r*.72;positions[i*3+2]=Math.sin(phi)*Math.sin(theta)*r;sizes[i]=.018+Math.random()*.045}
-  const pg=new THREE.BufferGeometry();pg.setAttribute("position",new THREE.BufferAttribute(positions,3));pg.setAttribute("size",new THREE.BufferAttribute(sizes,1));
-  const pm=new THREE.PointsMaterial({color:0x45dfff,size:.035,transparent:true,opacity:.62,blending:THREE.AdditiveBlending,depthWrite:false});
-  const particles=new THREE.Points(pg,pm);scene.add(particles);
-  const group=new THREE.Group();scene.add(group);
-  const loadUrl=window.AGENTICUANTICO_AVATAR_GLB||localStorage.getItem("aq_avatar_glb")||"https://raw.githubusercontent.com/met4citizen/TalkingHead/main/avatars/mpfb.glb";
-  const build=gender=>{group.clear();avatar3d.model=createHumanoid3D(gender);avatar3d.facialRig=createFacialRig(avatar3d.model);group.add(avatar3d.model)};
-  avatar3d={renderer,scene,camera,group,model:null,facialRig:null,mixer:null,speaking:false,gender:"female",mouthLevel:0,mouseX:0,mouseY:0,
-   setSpeaking(v){this.speaking=!!v},setMouth(v){this.mouthLevel=Math.max(0,Math.min(1,v))},
-   setGender(g){this.gender=g;build(g)},
-   setGlb(url){
-    new GLTFLoader().load(url,g=>{
-      group.clear();
-      avatar3d.model=g.scene;
-      avatar3d.facialRig=createFacialRig(g.scene);
-      avatar3d.mixer=g.animations?.length?new THREE.AnimationMixer(g.scene):null;
-      if(avatar3d.mixer)g.animations.forEach(clip=>avatar3d.mixer.clipAction(clip).play());
-      g.scene.traverse(o=>{
-        if(o.isMesh&&o.morphTargetDictionary&&o.morphTargetInfluences)o.userData.hasFaceMorphs=true;
-        if(o.isMesh&&o.material){o.material.roughness=Math.min(o.material.roughness??.6,.62);o.material.envMapIntensity=1.25}
-      });
-      const box=new THREE.Box3().setFromObject(g.scene),size=box.getSize(new THREE.Vector3()),center=box.getCenter(new THREE.Vector3());
-      const scale=2.65/Math.max(size.y,.001);
-      g.scene.scale.setScalar(scale);
-      g.scene.position.set(-center.x*scale,-center.y*scale-.35,-center.z*scale);
-      group.add(g.scene);
-      const morphCount=(avatar3d.facialRig?.targets||[]).length; const boneCount=Object.keys(avatar3d.facialRig?.bones||{}).length; const handCount=(avatar3d.facialRig?.handBones||[]).length; $("avatarRigStatus").textContent=`GLB · ${morphCount?"ARKit/Oculus facial":"sin morphs"} · ${boneCount} huesos · ${handCount?"manos activas":"manos proxy"}`;
-    },undefined,()=>{$("avatarRigStatus").textContent="3D · fallback WebGL"})
-  }};
-  build("female");if(loadUrl)avatar3d.setGlb(loadUrl);else $("avatarRigStatus").textContent="WEBGL · humanoide";
-  canvas.addEventListener("pointermove",e=>{const r=canvas.getBoundingClientRect();avatar3d.mouseX=((e.clientX-r.left)/r.width-.5)*2;avatar3d.mouseY=((e.clientY-r.top)/r.height-.5)*2});
-  const resize=()=>{const w=canvas.clientWidth||500,h=canvas.clientHeight||420;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()};new ResizeObserver(resize).observe(canvas);resize();
-  const clock=new THREE.Clock(),animate=()=>{
-   const dt=Math.min(clock.getDelta(),.05),t=clock.elapsedTime,m=avatar3d.model;
-   particles.rotation.y=t*.035;particles.rotation.x=Math.sin(t*.17)*.05;
-   if(avatar3d.mixer)avatar3d.mixer.update(dt);
-   if(m){
-    m.rotation.y+=((avatar3d.mouseX*.11+Math.sin(t*.42)*.035)-m.rotation.y)*.035;
-    m.rotation.x+=((avatar3d.mouseY*.035)-m.rotation.x)*.035;
-    m.position.y=Math.sin(t*1.15)*.025;
-    const talk=avatar3d.speaking?.35+.65*(.5+.5*Math.sin(t*20)):0;
-    avatar3d.mouthLevel=avatar3d.speaking?talk:Math.max(0,avatar3d.mouthLevel-.06);
-    const mouth=m.userData.mouth;if(mouth)mouth.scale.y=.72+avatar3d.mouthLevel*2.1;
-    if(m.userData.eyes)for(const eye of m.userData.eyes){eye.position.x+=(Math.max(-.04,Math.min(.04,avatar3d.mouseX*.035))-(eye.position.x-(eye===m.userData.eyes[0]?-0.29:0.29)))*.08}
-    if(m.userData.arms)for(const a of m.userData.arms){const wave=avatar3d.speaking?Math.sin(t*2.1+a.side)*.07:Math.sin(t*.8+a.side)*.025;a.upper.rotation.z=a.side*(.13+wave);a.fore.rotation.z=a.side*(.08-wave*.7);a.hand.position.y=-1.98+Math.sin(t*1.6+a.side)*.018}
-    if(avatar3d.facialRig){avatar3d.facialRig.updateBody(t,avatar3d.speaking,avatar3d.mouseX*.85,avatar3d.mouseY*.65);avatar3d.facialRig.look(avatar3d.mouseX*.85,avatar3d.mouseY*.65);avatar3d.facialRig.setMouth(avatar3d.mouthLevel,String(avatar3d.morphText||"A").toUpperCase());avatar3d.facialRig.updateHands(t,avatar3d.speaking,avatar3d.mouseX*.6,avatar3d.mouseY*.35)}
-    const blink=Math.sin(t*.43)*.5+.5;if(blink>.985){m.userData.blink=Math.min(1,m.userData.blink+.18)}else m.userData.blink=Math.max(0,m.userData.blink-.25);
-    m.traverse(o=>{if(o.isMesh&&o.morphTargetDictionary&&o.morphTargetInfluences){for(const [name,idx] of Object.entries(o.morphTargetDictionary)){if(!avatar3d.facialRig?.available && /mouth|jaw|viseme|phoneme|open/i.test(name))o.morphTargetInfluences[idx]=avatar3d.mouthLevel*.78;if(!avatar3d.facialRig?.available && /blink|eye.?close/i.test(name))o.morphTargetInfluences[idx]=m.userData.blink}}})
-   }
-   renderer.render(scene,camera);requestAnimationFrame(animate)};
-   animate();
-  } catch(error){
-   console.error("[AgentiCuantico] Avatar 3D init failed:",error);
-   const status=$("avatarRigStatus");if(status)status.textContent="3D · fallback visual";
-  }
+  const canvas=document.getElementById("avatarCanvas");
+  if(!canvas)return;
+  avatar3d=initQuantumBrain3D(canvas);
+  window.__aqBrain=avatar3d;
 }
-
-// WebGPU is optional; WebGL remains the stable renderer.
-
-
 
 /* Real-time voice + facial bridge. Uses ARKit/Oculus morph names when the GLB exposes them. */
 window.AgentiCuanticoAvatar={
@@ -275,4 +170,4 @@ window.AgentiCuanticoAvatar={
 
 
 /* Single avatar bootstrap. */
-window.addEventListener("load",()=>{try{initAvatar3D()}catch(e){console.error(e)}},{once:true});
+window.addEventListener("load",()=>{try{initAvatar3D()}catch(e){console.error("[AgentiCuantico] bootstrap:",e)}},{once:true});
