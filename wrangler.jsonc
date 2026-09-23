@@ -29,11 +29,19 @@
       {
         "name": "USER_DATA",
         "class_name": "UserData"
+      },
+      {
+        "name": "AUTH_DATA",
+        "class_name": "AuthData"
       }
     ]
   },
   "exports": {
     "UserData": {
+      "type": "durable-object",
+      "storage": "sqlite"
+    },
+    "AuthData": {
       "type": "durable-object",
       "storage": "sqlite"
     }
@@ -48,7 +56,17 @@
     "HF_ASTRA_MODEL": "P0x0/Astra-v1-12B-GGUF",
     "HF_WEB_DESIGN_MODEL": "Qwen/Qwen3-Coder-30B-A3B-Instruct:fastest",
     "HF_DESIGNER_MODEL": "Qwen/Qwen3-Coder-Next:novita",
-    "CF_AI_MODEL": "@cf/zai-org/glm-4.7-flash"
+    "CF_AI_MODEL": "@cf/zai-org/glm-4.7-flash",
+    "GOOGLE_CLIENT_ID": "",
+    "PLAN_STARTER_ARS": "4999",
+    "PLAN_PRO_ARS": "9999",
+    "PLAN_ULTRA_ARS": "19999",
+    "PLAN_BUSINESS_ARS": "39999",
+    "PAYPAL_BASE_URL": "https://api-m.paypal.com",
+    "PAYPAL_PLAN_STARTER": "",
+    "PAYPAL_PLAN_PRO": "",
+    "PAYPAL_PLAN_ULTRA": "",
+    "PAYPAL_PLAN_BUSINESS": ""
   },
   "ai": {
     "binding": "AI"
