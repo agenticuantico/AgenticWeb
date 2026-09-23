@@ -26,7 +26,7 @@
 <link rel="preconnect" href="https://db.onlinewebfonts.com">
 <link rel="stylesheet" href="https://db.onlinewebfonts.com/c/5ac3fe7c6abd2f62067f266d89671492?family=HelveticaNowDisplay-Medium">
 <link rel="stylesheet" href="https://db.onlinewebfonts.com/c/1aa3377e489837a26d019bba501e779d?family=HelveticaNowDisplayW01-Rg">
-<link rel="stylesheet" href="./styles.css?v=20260923-04">
+<link rel="stylesheet" href="./styles.css?v=20260923-05">
 <link rel="stylesheet" href="./experience-enhancements.css?v=20260923-01">
 <title>AgentiCuantico — Inteligencia agéntica para crear y programar</title>
 <script type="application/ld+json">
@@ -120,7 +120,25 @@
   </div>
 </div>
 
-<div id="backdrop" class="backdrop hidden"></div>
+<section id="aiDesignLayer" class="ai-design-layer" aria-label="Experiencia AgentiCuantico">
+  <div class="ai-design-noise" aria-hidden="true"></div>
+  <div class="ai-design-copy">
+    <span class="ai-kicker">AGENTICUANTICO · NEURAL DESIGN ENGINE</span>
+    <h1>Inteligencia que <em>piensa</em>, diseña y evoluciona.</h1>
+    <p>Un cerebro neuronal 3D conectado a un estudio creativo capaz de convertir tus instrucciones en experiencias web reales.</p>
+    <div class="ai-design-actions">
+      <button type="button" id="aiDesignChat">Hablar con AgentiQ</button>
+      <button type="button" id="aiDesignStudio" class="ghost">Abrir Web Studio</button>
+    </div>
+    <div class="ai-design-metrics"><span><b>3D</b><small>Neural Core</small></span><span><b>BUILD</b><small>GitHub → Cloudflare</small></span><span><b>AI</b><small>Qwen Coder</small></span></div>
+  </div>
+  <div class="ai-design-brain">
+    <div class="ai-orbit orbit-a"></div><div class="ai-orbit orbit-b"></div>
+    <canvas id="brain-canvas" aria-label="Cerebro neuronal 3D interactivo"></canvas>
+    <div class="ai-brain-label"><span></span>NEURAL CORE <b>ONLINE</b></div>
+  </div>
+</section>
+<div id="aiDesignMount" class="ai-design-mount" aria-live="polite"></div><div id="backdrop" class="backdrop hidden"></div>
 <div class="shell">
   <aside id="sidebar" class="side glass">
   <div class="brand brand-reference">
@@ -250,7 +268,7 @@
 </section>
 <section id="webStudio" class="web-studio glass hidden">
   <div class="studio-head"><div><b>AgentiQ Web Studio</b><small>STARK-WEB · UI/UX · Frontend · 3D</small></div><span id="webDesignStatus">Listo para diseñar</span></div>
-  <textarea id="webDesignPrompt" placeholder="Describí el sitio: landing premium 3D para una IA cuántica, hero cinematográfico, cerebro WebGL, animaciones suaves…"></textarea>
+  <textarea id="webDesignPrompt" placeholder="Describí qué querés que AgentiQ diseñe o modifique en tu sitio…"></textarea><div class="studio-build-row"><input id="webBuildKey" type="password" autocomplete="off" placeholder="Clave de publicación (solo administrador)"><button id="webDesignPublish" class="studio-publish" type="button">🚀 Publicar en GitHub</button></div>
   <div class="studio-presets"><button data-design-prompt="Landing premium 3D para AgentiCuantico, estética futurista, cerebro neuronal WebGL, hero cinematográfico y responsive.">Neural 3D</button><button data-design-prompt="Dashboard SaaS premium oscuro, glassmorphism, microinteracciones, gráficos y navegación elegante.">SaaS premium</button><button data-design-prompt="Portfolio creativo inmersivo con WebGL, tipografía editorial y transiciones cinematográficas.">Creative 3D</button></div>
   <button id="webDesignRun" class="studio-run">✦ Generar diseño</button>
   <iframe id="webDesignPreview" sandbox="allow-scripts" title="Vista previa del diseño generado"></iframe>
@@ -262,8 +280,8 @@
 <script>window.AGENTICUANTICO_API_URL="https://agenticweb.agenticuantico.workers.dev";</script>
 <script type="module" src="./app.js?v=20260923-01"></script>
 <script src="./premium-runtime.js?v=20260923-03"></script>
-<script src="./web-design-studio.js?v=20260923-02"></script>
+<script src="./web-design-studio.js?v=20260923-03"></script>
 <script>addEventListener("DOMContentLoaded",()=>document.getElementById("openWebStudio")?.addEventListener("click",()=>document.getElementById("webStudio")?.classList.toggle("hidden")));</script>
 <script src="./experience-enhancements.js?v=20260923-01" defer></script>
-</body>
+<script src="./ai-design-layer.js?v=20260923-01"></script>\n</body>
 </html>
