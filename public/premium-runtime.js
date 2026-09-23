@@ -13,7 +13,7 @@
   const ACTIVE_KEY="aq_active_v2";
   const AUTH_KEY="aq_auth_v1";
   const SESSION_KEY="aq_guest_v6";
-  let busy=false,listening=false,recognition=null,selectedVoice=null,browserVoices=[],voiceEnabled=localStorage.getItem("aq_voice_enabled")==="1",pendingUploads=[];
+  let busy=false,listening=false,recognition=null,selectedVoice=null,browserVoices=[],voiceEnabled=localStorage.getItem("aq_voice_enabled")==="1",pendingUploads=[],activeRequest=null;
   let conversations=loadLocal();
   let activeId=localStorage.getItem(ACTIVE_KEY)||"";
   let current=null;
@@ -158,6 +158,9 @@
 
   const setThinking=v=>{brain()?.setThinking?.(v);brain()?.setThinkingState?.();if(status)status.textContent=v?"AgentiQ está razonando…":"Voz lista"};
   const setDisabled=v=>{if(send)send.disabled=v;if(input)input.disabled=v};
+  function cancelGeneration(){if(activeRequest){activeRequest.abort();activeRequest=null;notify("Generación cancelada");}busy=false;setDisabled(false);setThinking(false);}
+  function ensureStopButton(){if($("stopGeneration")||!$("composer"))return;const b=document.createElement("button");b.id="stopGeneration";b.type="button";b.className="voice-btn";b.title="Detener generación";b.textContent="■";b.style.display="none";$("composer").appendChild(b);b.onclick=cancelGeneration;}
+  ensureStopButton();
 
   function renderAttachments(files){
     if(!tray)return;tray.classList.toggle("hidden",!files.length);
@@ -207,7 +210,7 @@
     try{
       const history=c.messages.slice(-14).filter(m=>m.role==="user"||m.role==="assistant").map(m=>({role:m.role,content:m.content}));
       const payload={message:prompt,history,attachments:filePayloads,conversation_id:c.id,model:"AgentiQ",guest_session:guestId()};
-      const requestOptions={method:"POST",headers:{"content-type":"application/json","accept":"application/json"},body:JSON.stringify(payload)};
+      const requestOptions={method:"POST",headers:{"content-type":"application/json","accept":"application/json"},body:JSON.stringify(payload),signal:(activeRequest=new AbortController()).signal};
       let res=await fetch(API+"/v1/public/chat",requestOptions);
       if((res.status===405||res.status===404||res.status===502)&&API!==API_FALLBACK)res=await fetch(API_FALLBACK+"/v1/public/chat",requestOptions);
       let data={};try{data=await res.json()}catch{}
@@ -223,7 +226,7 @@
       appendMessage("assistant",fallback);
       saveTurn("assistant",fallback);
       notify("AgentiQ no respondió: "+detail);
-    }finally{busy=false;setDisabled(false);setThinking(false);input?.focus()}
+    }finally{activeRequest=null;busy=false;setDisabled(false);setThinking(false);if($("stopGeneration"))$("stopGeneration").style.display="none";input?.focus()}
   }
 
   function syncVoiceToggle(){
@@ -286,12 +289,12 @@
       const c=ensureCurrent();
       const history=c.messages.slice(-14).filter(m=>m.role==="user"||m.role==="assistant").map(m=>({role:m.role,content:m.content}));
       const payloadFiles=[];\n      for(let i=0;i<files.length;i++){payloadFiles.push(await filePayload(files[i],uploads[i]));}\n      const payload={message:"Analizá los archivos que acabo de subir.",history,attachments:payloadFiles,conversation_id:c.id,model:"AgentiQ",guest_session:guestId()};
-      const r=await fetch(API+"/v1/public/chat",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(payload)});
+      const r=await fetch(API+"/v1/public/chat",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(payload),signal:(activeRequest=new AbortController()).signal});
       const d=await r.json().catch(()=>({}));
       if(r.ok&&d.answer){appendMessage("assistant",d.answer,d.model||"AgentiQ");saveTurn("assistant",d.answer);if(voiceEnabled)speak(d.answer)}
       else notify(d.message||"El archivo quedó almacenado, pero el motor no pudo analizarlo todavía.");
     }catch(err){notify(String(err.message||err))}
-    finally{busy=false;setDisabled(false);setThinking(false);attach.value="";pendingUploads=[];setTimeout(()=>renderAttachments([]),700)}
+    finally{activeRequest=null;busy=false;setDisabled(false);setThinking(false);if($("stopGeneration"))$("stopGeneration").style.display="none";attach.value="";pendingUploads=[];setTimeout(()=>renderAttachments([]),700)}
   },true);
   imageButton?.addEventListener("click",async e=>{
     e.preventDefault(); if(busy)return;
