@@ -38,14 +38,16 @@ jobs:
         run: npm install --no-save wrangler@4.136.3
 
       - name: Configure Hugging Face secret in Worker (optional)
-        if: ${{ secrets.HF_TOKEN != '' }}
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          printf '%s' "$HF_TOKEN" | npx wrangler secret put HF_TOKEN --name agenticweb
-
+          if [ -n "$HF_TOKEN" ]; then
+            printf '%s' "$HF_TOKEN" | npx wrangler secret put HF_TOKEN --name agenticweb
+          else
+            echo "HF_TOKEN no configurado; se mantendrá el fallback de Cloudflare Workers AI."
+          fi
       - name: Deploy Worker + Assets
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
