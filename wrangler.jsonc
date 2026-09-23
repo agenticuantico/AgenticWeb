@@ -70,5 +70,11 @@
   },
   "ai": {
     "binding": "AI"
-  }
+  },
+  "r2_buckets": [
+    {
+      "binding": "UPLOADS",
+      "bucket_name": "agenticuantico-uploads"
+    }
+  ]
 }
