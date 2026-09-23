@@ -506,20 +506,10 @@ async function codexAnalyze(request, env) {
         if(r.ok){const txt=await r.text();snippets.push("\n### "+f.path+"\n"+txt.slice(0,5000));}
       }catch{}
     }
-    const context = "Repositorio: "+repo+"
-Rama: "+(m.default_branch||"main")+"
-Descripción: "+(m.description||"")+"
-Estructura:
-"+candidates.map(x=>x.path).join("
-")+"
-Archivos relevantes:
-"+snippets.join("
-");
+    const context = "Repositorio: "+repo+"\nRama: "+(m.default_branch||"main")+"\nDescripción: "+(m.description||"")+"\nEstructura:\n"+candidates.map(x=>x.path).join("\n")+"\nArchivos relevantes:\n"+snippets.join("\n");
     const messages=[
       {role:"system",content:"Sos Agentic Codex de AgentiCuantico. Analizá código real proporcionado por el servidor. No inventes archivos ni cambios. Separá diagnóstico, plan, riesgos y pruebas. No expongas secretos."},
-      {role:"user",content:"Objetivo: "+task+"
-
-"+context}
+      {role:"user",content:"Objetivo: "+task+"\n\n"+context}
     ];
     const model=String(env.HF_MODEL||"Qwen/Qwen3.8-27B").trim()+":fastest";
     const upstream=await fetch(String(env.HF_API_URL||"https://router.huggingface.co/v1/chat/completions"),{
