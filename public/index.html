@@ -26,7 +26,7 @@
 <link rel="preconnect" href="https://db.onlinewebfonts.com">
 <link rel="stylesheet" href="https://db.onlinewebfonts.com/c/5ac3fe7c6abd2f62067f266d89671492?family=HelveticaNowDisplay-Medium">
 <link rel="stylesheet" href="https://db.onlinewebfonts.com/c/1aa3377e489837a26d019bba501e779d?family=HelveticaNowDisplayW01-Rg">
-<link rel="stylesheet" href="./styles.css?v=20260923-05">
+<link rel="stylesheet" href="./styles.css?v=20260923-06">
 <link rel="stylesheet" href="./experience-enhancements.css?v=20260923-01">
 <title>AgentiCuantico — Inteligencia agéntica para crear y programar</title>
 <script type="application/ld+json">
@@ -266,13 +266,58 @@
     </aside>
   </div>
 </section>
-<section id="webStudio" class="web-studio glass hidden">
-  <div class="studio-head"><div><b>AgentiQ Web Studio</b><small>STARK-WEB · UI/UX · Frontend · 3D</small></div><span id="webDesignStatus">Listo para diseñar</span></div>
-  <textarea id="webDesignPrompt" placeholder="Describí qué querés que AgentiQ diseñe o modifique en tu sitio…"></textarea><div class="studio-build-row"><input id="webBuildKey" type="password" autocomplete="off" placeholder="Clave de publicación (solo administrador)"><button id="webDesignPublish" class="studio-publish" type="button">🚀 Publicar en GitHub</button></div>
-  <div class="studio-presets"><button data-design-prompt="Landing premium 3D para AgentiCuantico, estética futurista, cerebro neuronal WebGL, hero cinematográfico y responsive.">Neural 3D</button><button data-design-prompt="Dashboard SaaS premium oscuro, glassmorphism, microinteracciones, gráficos y navegación elegante.">SaaS premium</button><button data-design-prompt="Portfolio creativo inmersivo con WebGL, tipografía editorial y transiciones cinematográficas.">Creative 3D</button></div>
-  <button id="webDesignRun" class="studio-run">✦ Generar diseño</button>
-  <iframe id="webDesignPreview" sandbox="allow-scripts" title="Vista previa del diseño generado"></iframe>
-  <details><summary>Ver código generado</summary><textarea id="webDesignCode" readonly></textarea></details>
+<section id="webStudio" class="web-studio glass hidden" aria-label="AgentiQ Web Studio y Designer Agent">
+  <div class="studio-head">
+    <div><b>AgentiQ Web Studio</b><small>DESIGNER AGENT · REPO ANALYSIS · UI/UX · 3D · GITHUB</small></div>
+    <span id="webDesignStatus">Listo para diseñar</span>
+  </div>
+
+  <div class="designer-toolbar">
+    <button id="designerScan" class="studio-tool">1 · Analizar repositorio</button>
+    <button id="designerPlan" class="studio-tool" disabled>2 · Generar plan</button>
+    <button id="designerPublish" class="studio-publish" disabled>3 · Publicar en GitHub</button>
+    <span id="designerStats">AgenticWeb · main</span>
+  </div>
+
+  <textarea id="webDesignPrompt" class="designer-prompt" placeholder="Indicá el rediseño completo. Ejemplo: convertí AgenticWeb en una experiencia premium 3D, con cerebro neuronal espectral, chat moderno, motion, responsive, accesibilidad y rendimiento móvil. Conservá toda la funcionalidad existente."></textarea>
+
+  <div class="studio-build-row designer-key-row">
+    <input id="webBuildKey" type="password" autocomplete="off" placeholder="Clave de administrador">
+    <button id="designerRefresh" class="studio-tool" type="button">↻ Escanear de nuevo</button>
+  </div>
+
+  <div class="studio-presets">
+    <button data-design-prompt="Rediseño integral premium 3D de AgenticWeb: cerebro neuronal espectral vivo, partículas, conexiones, pulsos al hablar/pensar, UI de chat moderna, responsive móvil, accesibilidad, microinteracciones y rendimiento. Conservá chat, voz, adjuntos, login y backend.">Neural 3D integral</button>
+    <button data-design-prompt="Rediseño visual cinematográfico de la landing y dashboard: jerarquía editorial, glassmorphism sobrio, motion, navegación clara, cerebro 3D y experiencia premium. No rompas ninguna función existente.">Cinematic UI</button>
+    <button data-design-prompt="Auditoría y mejora profunda de UX/UI, responsive, accesibilidad, performance y arquitectura visual 3D. Eliminá duplicaciones y bloqueos visuales sin tocar secretos.">UX + Performance</button>
+  </div>
+
+  <div class="designer-grid">
+    <section class="designer-card">
+      <div class="designer-card-head"><b>Plan de cambios</b><span id="designerPlanMeta">Sin análisis</span></div>
+      <div id="designerSummary" class="designer-summary">Analizá el repositorio para comenzar.</div>
+      <div id="designerFiles" class="designer-files"></div>
+      <details class="designer-details"><summary>Arquitectura propuesta</summary><pre id="designerArchitecture"></pre></details>
+      <details class="designer-details"><summary>Pruebas previstas</summary><pre id="designerTests"></pre></details>
+    </section>
+    <section class="designer-card designer-preview-card">
+      <div class="designer-card-head"><b>Vista previa conceptual</b><span>Sin publicar</span></div>
+      <iframe id="designerPreview" sandbox="allow-scripts" title="Vista previa del rediseño"></iframe>
+    </section>
+  </div>
+
+  <details class="designer-details designer-code-details">
+    <summary>Ver cambios multiarchivo generados</summary>
+    <div id="designerChanges"></div>
+  </details>
+
+  <div class="studio-footer">
+    <span id="designerPublishStatus">Nada publicado todavía.</span>
+    <button id="webDesignRun" class="studio-run" type="button">✦ Web Studio rápido</button>
+  </div>
+
+  <iframe id="webDesignPreview" sandbox="allow-scripts" title="Vista previa rápida del diseño generado"></iframe>
+  <details class="legacy-code"><summary>Ver código generado por Web Studio rápido</summary><textarea id="webDesignCode" readonly></textarea></details>
 </section>
 <section id="panel" class="panel hidden"></section></main>
 </div>
@@ -280,7 +325,8 @@
 <script>window.AGENTICUANTICO_API_URL="https://agenticweb.agenticuantico.workers.dev";</script>
 <script type="module" src="./app.js?v=20260923-01"></script>
 <script src="./premium-runtime.js?v=20260923-03"></script>
-<script src="./web-design-studio.js?v=20260923-03"></script>
+<script src="./web-design-studio.js?v=20260923-04"></script>
+<script src="./designer-agent.js?v=20260923-01"></script>
 <script>addEventListener("DOMContentLoaded",()=>document.getElementById("openWebStudio")?.addEventListener("click",()=>document.getElementById("webStudio")?.classList.toggle("hidden")));</script>
 <script src="./experience-enhancements.js?v=20260923-01" defer></script>
 <script src="./ai-design-layer.js?v=20260923-01"></script>\n</body>
