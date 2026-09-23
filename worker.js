@@ -500,13 +500,10 @@ async function codexAnalyze(request, env) {
       .sort((x,y)=>{const score=p=>/(README|worker|wrangler|package|index|app|styles|src)/i.test(p)?0:1;return score(x.path)-score(y.path)}) .slice(0,12);
     const snippets=[];
     for(const f of candidates){
-      if(snippets.join("
-").length>28000)break;
+      if(snippets.join("\n").length>28000)break;
       try{
         const r=await fetch("https://api.github.com/repos/"+repo+"/contents/"+f.path+"?ref="+encodeURIComponent(m.default_branch||"main"),{headers:{"Accept":"application/vnd.github.raw+json","X-GitHub-Api-Version":"2026-03-10"}});
-        if(r.ok){const txt=await r.text();snippets.push("
-### "+f.path+"
-"+txt.slice(0,5000));}
+        if(r.ok){const txt=await r.text();snippets.push("\n### "+f.path+"\n"+txt.slice(0,5000));}
       }catch{}
     }
     const context = "Repositorio: "+repo+"
