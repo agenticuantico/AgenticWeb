@@ -160,11 +160,8 @@ async function callHuggingFace(request, env) {
     .map(a => ({type:"image_url",image_url:{url:a.data}}));
   const fileText = attachments
     .filter(a => a.kind !== "image")
-    .map(a => "
-[Archivo " + a.name + "]
-" + a.data.slice(0,30000))
-    .join("
-");
+    .map(a => "\n[Archivo " + a.name + "]\n" + a.data.slice(0,30000))
+    .join("\n");
   const userContent = imageParts.length
     ? [{type:"text",text:(message || "Analizá los archivos adjuntos.") + fileText},...imageParts]
     : (message || "Analizá los archivos adjuntos.") + fileText;
