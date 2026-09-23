@@ -285,7 +285,7 @@
       notify("Subida completada: "+labels);
       const c=ensureCurrent();
       const history=c.messages.slice(-14).filter(m=>m.role==="user"||m.role==="assistant").map(m=>({role:m.role,content:m.content}));
-      const payload={message:"Analizá los archivos que acabo de subir.",history,attachments:uploads.map(x=>({name:x.name,kind:x.kind,data:x.kind==="image"&&x.size<=6*1024*1024?"":("Archivo almacenado en "+x.url),storage_key:x.key,url:x.url})),conversation_id:c.id,model:"AgentiQ",guest_session:guestId()};
+      const payloadFiles=[];\n      for(let i=0;i<files.length;i++){payloadFiles.push(await filePayload(files[i],uploads[i]));}\n      const payload={message:"Analizá los archivos que acabo de subir.",history,attachments:payloadFiles,conversation_id:c.id,model:"AgentiQ",guest_session:guestId()};
       const r=await fetch(API+"/v1/public/chat",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(payload)});
       const d=await r.json().catch(()=>({}));
       if(r.ok&&d.answer){appendMessage("assistant",d.answer,d.model||"AgentiQ");saveTurn("assistant",d.answer);if(voiceEnabled)speak(d.answer)}
@@ -308,7 +308,8 @@
       saveTurn("assistant","Imagen generada a partir de: "+prompt.trim());
     }catch(err){thinking.remove();notify(String(err.message||err))}
     finally{busy=false;setDisabled(false);setThinking(false)}
-  });\n  send?.addEventListener("click",e=>{e.preventDefault();e.stopImmediatePropagation();const t=input?.value.trim();if(t){input.value="";ask(t)}},true);
+  });
+  send?.addEventListener("click",e=>{e.preventDefault();e.stopImmediatePropagation();const t=input?.value.trim();if(t){input.value="";ask(t)}},true);
   input?.addEventListener("keydown",e=>{e.stopImmediatePropagation();if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();const t=input.value.trim();if(t){input.value="";ask(t)}}},true);
   $("composer")?.addEventListener("submit",e=>{e.preventDefault();const t=input?.value.trim();if(t){input.value="";ask(t)}},true);
 
