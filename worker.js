@@ -558,7 +558,7 @@ async function codexWrite(request, env) {
     const current=await fetch(url+"?ref="+encodeURIComponent(branch),{headers});
     if(current.ok){const data=await current.json();sha=data.sha;}
     else if(current.status!==404){return json({ok:false,error:"github_read_failed",message:"No se pudo consultar el archivo."},502,request);}
-    const payload={message,content:btoa(unescape(encodeURIComponent(content))),branch};
+    const payload={message,content:utf8Base64(content),branch};
     if(sha)payload.sha=sha;
     const saved=await fetch(url,{method:"PUT",headers,body:JSON.stringify(payload)});
     const data=await saved.json().catch(()=>({}));
