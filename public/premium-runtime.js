@@ -131,14 +131,14 @@
       listening=false;mic.classList.remove("active");setThinking(false);
       if(input?.value.trim())ask(input.value.trim());
     };
-    mic.onclick=()=>{if(listening){recognition.stop();return}try{recognition.start()}catch{}};
+    mic.addEventListener("click",e=>{e.preventDefault();e.stopImmediatePropagation();if(listening){recognition.stop();return}try{recognition.start()}catch{}},true);
   }else if(mic){
-    mic.onclick=()=>notify("Este navegador no habilita reconocimiento de voz. Probá Chrome/Edge con permiso de micrófono.");
+    mic.addEventListener("click",e=>{e.preventDefault();e.stopImmediatePropagation();notify("Este navegador no habilita reconocimiento de voz. Probá Chrome/Edge con permiso de micrófono.");},true);
   }
   stop?.addEventListener("click",()=>{window.speechSynthesis?.cancel();if(listening)recognition?.stop();brain()?.setSpeaking?.(false);if(status)status.textContent="Voz detenida"});
 
-  $("attachButton")?.addEventListener("click",()=>attach?.click());
-  attach?.addEventListener("change",async()=>{
+  $("attachButton")?.addEventListener("click",e=>{e.preventDefault();e.stopImmediatePropagation();attach?.click()},true);
+  attach?.addEventListener("change",async e=>{e.stopImmediatePropagation();
     const files=[...(attach.files||[])];
     renderAttachments(files);
     if(!files.length)return;
@@ -147,8 +147,8 @@
     attach.value="";
     setTimeout(()=>renderAttachments([]),300);
   });
-  send?.addEventListener("click",()=>{const t=input?.value.trim();if(t){input.value="";ask(t)}});
-  input?.addEventListener("keydown",e=>{
+  send?.addEventListener("click",e=>{e.preventDefault();e.stopImmediatePropagation();const t=input?.value.trim();if(t){input.value="";ask(t)}},true);
+  input?.addEventListener("keydown",e=>{e.stopImmediatePropagation();
     if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();const t=input.value.trim();if(t){input.value="";ask(t)}}
   });
 
