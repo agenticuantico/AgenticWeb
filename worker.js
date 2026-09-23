@@ -337,18 +337,18 @@ async function designerScan(request,env){
     if(!treeR.ok)return json({ok:false,error:"tree_unavailable",message:"No pude leer el árbol completo del repositorio."},502,request);
     const tree=await treeR.json();
     const files=(tree.tree||[]).filter(x=>x.type==="blob"&&!DESIGNER_BLOCKED_PATH.test(x.path)).map(x=>({path:x.path,size:x.size||0,sha:x.sha})).slice(0,5000);
-    const textCandidates=files.filter(x=>DESIGNER_ALLOWED_EXTENSIONS.test(x.path)&&x.size<180000)
+    const textCandidates=files.filter(x=>DESIGNER_ALLOWED_EXTENSIONS.test(x.path)&&x.size<220000)
       .sort((a,b)=>{const score=p=>/(^|\/)(README|worker|wrangler|package|index|app|styles|brain|design|experience)/i.test(p)?0:1;return score(a.path)-score(b.path)})
-      .slice(0,28);
+      .slice(0,60);
     const contents=[];
-    let budget=72000;
+    let budget=180000;
     for(const f of textCandidates){
       if(budget<=0)break;
       try{
         const r=await fetch("https://api.github.com/repos/"+repo+"/contents/"+f.path+"?ref="+encodeURIComponent(branch),{headers:{...headers,"Accept":"application/vnd.github.raw+json"}});
         if(!r.ok)continue;
         const txt=await r.text();
-        const clipped=txt.slice(0,Math.min(txt.length,budget,9000));
+        const clipped=txt.slice(0,Math.min(txt.length,budget,12000));
         contents.push({path:f.path,content:clipped,truncated:clipped.length<txt.length});
         budget-=clipped.length;
       }catch{}
@@ -368,8 +368,8 @@ async function designerPlan(request,env){
   const configured=String(env.HF_DESIGNER_MODEL||"Qwen/Qwen3-Coder-Next:novita").split(",").map(x=>x.trim()).filter(Boolean);
   const models=[...configured,"Qwen/Qwen3-Coder-Next:novita","Qwen/Qwen3-Coder-Next:fastest","Qwen/Qwen3-Coder-30B-A3B-Instruct:fastest"].filter((v,i,a)=>a.indexOf(v)===i);
   const system=[
-    "Sos el Designer Agent de AgentiCuantico: arquitecto de producto, diseñador UI/UX, especialista frontend, motion y 3D/WebGL.",
-    "Tu misión es rediseñar un repositorio real sin romper funcionalidades existentes.",
+    "Sos el Designer Agent de AgentiCuantico: arquitecto de producto, diseñador UI/UX, director creativo, especialista frontend, motion, Three.js/WebGL, parallax y optimización móvil.",
+    "Tu misión es rediseñar un repositorio real sin romper funcionalidades existentes, eliminar redundancias y corregir errores.",
     "Analizá la estructura completa entregada y el contenido de los archivos relevantes. Priorizá cambios visuales y de experiencia, manteniendo chat, voz, autenticación, adjuntos, backend y rutas funcionales.",
     "Para 3D usá Three.js/WebGL procedural y aprovechá brain-3d.js existente cuando corresponda. No dependas de assets externos innecesarios.",
     "No inventes APIs ni afirmes que un archivo existe si no aparece en el snapshot.",
