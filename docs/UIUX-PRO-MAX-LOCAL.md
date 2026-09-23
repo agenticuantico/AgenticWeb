@@ -10,7 +10,7 @@ From the repository root:
 bash scripts/install-uiux-pro-max.sh
 ```
 
-The script uses the current `ui-ux-pro-max-cli` package and installs the Claude Code skill into the project. The upstream project documents `npx ui-ux-pro-max-cli init --ai claude` as the current installation path. citeturn0search0
+The script uses the current `ui-ux-pro-max-cli` package and installs the Claude Code skill into the project. The upstream project documents `npx ui-ux-pro-max-cli init --ai claude` as the current installation path.
 
 ## What is local
 
@@ -26,7 +26,7 @@ The production website does not call UI/UX Pro Max. It only ships the resulting 
 
 ## 3D direction
 
-Neural OS v3 adds a progressive Three.js neural-core renderer. Three.js supports ES modules and WebGLRenderer; the implementation caps pixel ratio and falls back to the existing avatar canvas when the enhanced renderer cannot initialize. citeturn1search1turn1search6
+Neural OS v3 adds a progressive Three.js neural-core renderer. Three.js supports ES modules and WebGLRenderer; the implementation caps pixel ratio and falls back to the existing avatar canvas when the enhanced renderer cannot initialize.
 
 ## Claude workflow
 
