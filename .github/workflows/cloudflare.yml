@@ -71,11 +71,13 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           AUTH_SESSION_SECRET: ${{ secrets.AUTH_SESSION_SECRET }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
           MERCADOPAGO_ACCESS_TOKEN: ${{ secrets.MERCADOPAGO_ACCESS_TOKEN }}
           PAYPAL_CLIENT_ID: ${{ secrets.PAYPAL_CLIENT_ID }}
           PAYPAL_CLIENT_SECRET: ${{ secrets.PAYPAL_CLIENT_SECRET }}
         run: |
           if [ -n "$AUTH_SESSION_SECRET" ]; then printf '%s' "$AUTH_SESSION_SECRET" | npx wrangler secret put AUTH_SESSION_SECRET --name agenticweb; else echo "AUTH_SESSION_SECRET no configurado: se usará AGENTIC_ADMIN_KEY como respaldo de sesión."; fi
+          if [ -n "$GOOGLE_CLIENT_ID" ]; then printf '%s' "$GOOGLE_CLIENT_ID" | npx wrangler secret put GOOGLE_CLIENT_ID --name agenticweb; else echo "GOOGLE_CLIENT_ID no configurado: Google login quedará deshabilitado."; fi
           if [ -n "$MERCADOPAGO_ACCESS_TOKEN" ]; then printf '%s' "$MERCADOPAGO_ACCESS_TOKEN" | npx wrangler secret put MERCADOPAGO_ACCESS_TOKEN --name agenticweb; else echo "Mercado Pago no configurado."; fi
           if [ -n "$PAYPAL_CLIENT_ID" ]; then printf '%s' "$PAYPAL_CLIENT_ID" | npx wrangler secret put PAYPAL_CLIENT_ID --name agenticweb; else echo "PayPal Client ID no configurado."; fi
           if [ -n "$PAYPAL_CLIENT_SECRET" ]; then printf '%s' "$PAYPAL_CLIENT_SECRET" | npx wrangler secret put PAYPAL_CLIENT_SECRET --name agenticweb; else echo "PayPal Client Secret no configurado."; fi
