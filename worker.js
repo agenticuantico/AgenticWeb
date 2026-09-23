@@ -93,12 +93,12 @@ async function callWebDesigner(request, env) {
   const token=String(env.HF_TOKEN||"").trim();
   if(!token)return null;
   const endpoint=String(env.HF_API_URL||"https://router.huggingface.co/v1/chat/completions").trim();
-  const configured=String(env.HF_WEB_DESIGN_MODEL||"Situus/STARK-WEB-12B-v1.7").split(",").map(x=>x.trim()).filter(Boolean);
-  const models=[...configured,"Qwen/Qwen3.8-27B","Qwen/Qwen3.6-27B"].filter((v,i,a)=>a.indexOf(v)===i);
+  const configured=String(env.HF_WEB_DESIGN_MODEL||"Qwen/Qwen3-Coder-30B-A3B-Instruct:fastest").split(",").map(x=>x.trim()).filter(Boolean);
+  const models=[...configured,"Qwen/Qwen3-Coder-30B-A3B-Instruct:fastest","Qwen/Qwen3.8-27B:fastest"].filter((v,i,a)=>a.indexOf(v)===i);
   const body=await request.json().catch(()=>({}));
   const prompt=String(body.prompt||"").trim();
   if(!prompt)return json({ok:false,error:"invalid_request",message:"Describí el sitio que querés crear."},400,request);
-  const system="Sos AgentiQ Web Studio BUILD, un diseñador UI/UX premium y frontend engineer especializado en experiencias cinematográficas, 3D y WebGL. Inspirate en la categoría visual de sitios de diseño moderno, pero NO copies código, textos, marcas ni assets propietarios. Generá un único HTML autocontenido con CSS y JavaScript inline. Debe ser responsive, accesible, performant y funcionar sin APIs externas. Usá Canvas/WebGL procedural para profundidad y 3D cuando aporte valor; agregá microinteracciones, scroll motion, iluminación, glassmorphism sobrio, tipografía editorial y composición premium. El resultado debe parecer un producto terminado, no un wireframe. No incluy secretos, tokens ni explicaciones. Respondé SOLO con HTML completo.";
+  const system="Sos AgentiQ Web Studio BUILD, un diseñador UI/UX premium y frontend engineer especializado en experiencias cinematográficas, 3D y WebGL. Inspirate en la categoría visual de sitios de diseño moderno, pero NO copies código, textos, marcas ni assets propietarios. Generá un único HTML autocontenido con CSS y JavaScript inline. Debe ser responsive, accesible, performant y funcionar sin APIs externas. Usá Canvas/WebGL procedural para profundidad y 3D cuando aporte valor; agregá microinteracciones, scroll motion, iluminación, glassmorphism sobrio, tipografía editorial y composición premium. El resultado debe parecer un producto terminado, no un wireframe. No incluy secretos, tokens ni explicaciones. Respondé SOLO con un fragmento HTML autocontenido de una sección visual. Incluí <style> inline y no dependas de recursos externos. No uses <html>, <head> ni <body>. Debe poder insertarse directamente dentro de un contenedor del sitio."];
   for(const model of models){
     try{
       const upstream=await fetch(endpoint,{method:"POST",headers:{"Authorization":"Bearer "+token,"Content-Type":"application/json"},body:JSON.stringify({model,messages:[{role:"system",content:system},{role:"user",content:prompt}],temperature:.65,max_tokens:7000,stream:false})});
@@ -272,6 +272,32 @@ async function callHuggingFace(request, env) {
 }
 
 
+
+async function buildWebDesign(request, env) {
+  const adminKey=String(env.AGENTIC_ADMIN_KEY||"").trim();
+  const provided=String(request.headers.get("X-Admin-Key")||"").trim();
+  const ghToken=String(env.GH_TOKEN||"").trim();
+  if(!adminKey||!ghToken||provided!==adminKey) return json({ok:false,error:"publish_not_authorized",message:"La publicación requiere autorización de administrador."},403,request);
+  const generated=await callWebDesigner(request.clone(),env);
+  if(!generated) return json({ok:false,error:"web_designer_unavailable",message:"El diseñador no pudo generar el cambio."},502,request);
+  const data=await generated.json();
+  const html=String(data.html||"").trim();
+  if(!html) return json({ok:false,error:"empty_design",message:"El diseño generado llegó vacío."},502,request);
+  const repo="agenticuantico/AgenticWeb",path="public/generated-design.html",branch="main";
+  const headers={"Accept":"application/vnd.github+json","Authorization":"Bearer "+ghToken,"X-GitHub-Api-Version":"2026-03-10","Content-Type":"application/json"};
+  try {
+    const url="https://api.github.com/repos/"+repo+"/contents/"+path;
+    const current=await fetch(url+"?ref="+encodeURIComponent(branch),{headers});
+    let sha=null;if(current.ok){const c=await current.json();sha=c.sha;}else if(current.status!==404)return json({ok:false,error:"github_read_failed",message:"No se pudo consultar el diseño actual."},502,request);
+    const payload={message:"AI Web Studio: actualizar diseño público",content:btoa(unescape(encodeURIComponent(html))),branch};
+    if(sha)payload.sha=sha;
+    const saved=await fetch(url,{method:"PUT",headers,body:JSON.stringify(payload)});
+    const result=await saved.json().catch(()=>({}));
+    if(!saved.ok)return json({ok:false,error:"github_write_failed",message:"GitHub rechazó el diseño generado."},502,request);
+    return json({ok:true,html,model:data.model,provider:data.provider,commit:result?.commit?.sha||null,repo,path,branch},200,request);
+  } catch { return json({ok:false,error:"github_write_failed",message:"No se pudo publicar el diseño en GitHub."},502,request); }
+}
+
 async function codexAnalyze(request, env) {
   const token = String(env.HF_TOKEN || "").trim();
   if (!token) return json({ ok:false, error:"ai_unavailable", message:"El motor de IA no está disponible." },502,request);
@@ -426,7 +452,7 @@ async function handleApi(request, env) {
     return json({ok:false,error:"web_designer_unavailable",message:"El diseñador web no está disponible temporalmente."},502,request);
   }
 
-  if (url.pathname === "/v1/public/codex" && request.method === "POST") {
+  if (url.pathname === "/v1/public/web-design/build" && request.method === "POST") {\n    return buildWebDesign(request.clone(), env);\n  }\n\n  if (url.pathname === "/v1/public/codex" && request.method === "POST") {
     return codexAnalyze(request.clone(), env);
   }
 
