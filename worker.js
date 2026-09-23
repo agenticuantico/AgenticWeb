@@ -99,8 +99,9 @@ async function callHuggingFace(request, env) {
     ...configuredModels,
     model,
     "Qwen/Qwen3.8-27B-FP8",
-    "Qwen/Qwen3.6-27B"
-  ].map(value => value.endsWith(":fastest") ? value : value + ":fastest")
+    "Qwen/Qwen3.6-27B",
+    String(env.HF_ASTRA_MODEL || "").trim()
+  ].filter(Boolean).map(value => value.endsWith(":fastest") ? value : value + ":fastest")
    .filter((value, index, list) => list.indexOf(value) === index);
 
   if (!token) return null;
