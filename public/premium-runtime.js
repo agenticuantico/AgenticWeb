@@ -18,6 +18,7 @@
   const hideInternalStudio = () => {
     document.getElementById("openWebStudio")?.remove();
     document.getElementById("webStudio")?.remove();
+    document.getElementById("aiDesignStudio")?.remove();
   };
   hideInternalStudio();
 
