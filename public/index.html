@@ -136,6 +136,7 @@
     <button class="nav-item" data-view="coder"><span class="nav-icon" data-icon="code"></span><span><b>CodQ</b><small>Programación asistida</small></span></button>
     <button class="nav-item" data-view="projects"><span class="nav-icon" data-icon="projects"></span><span><b>Proyectos</b><small>Tus desarrollos</small></span></button>
     <button class="nav-item" data-view="skills"><span class="nav-icon" data-icon="spark"></span><span><b>Skills</b><small>Habilidades y herramientas</small></span></button>
+    <button class="nav-item" id="openWebStudio"><span class="nav-icon">✦</span><span><b>Web Studio</b><small>Diseño 3D con IA</small></span></button>
     <button class="nav-item" data-view="memory"><span class="nav-icon">◉</span><span><b>Memoria</b><small>Tu conocimiento</small></span></button>
     <button class="nav-item" data-view="account"><span class="nav-icon" data-icon="user"></span><span><b>Perfil</b><small>Cuenta y configuración</small></span></button>
   </nav>
@@ -262,6 +263,7 @@
 <script type="module" src="./app.js?v=20260923-01"></script>
 <script src="./premium-runtime.js?v=20260923-03"></script>
 <script src="./web-design-studio.js?v=20260923-01"></script>
+<script>addEventListener("DOMContentLoaded",()=>document.getElementById("openWebStudio")?.addEventListener("click",()=>document.getElementById("webStudio")?.classList.toggle("hidden")));</script>
 <script src="./experience-enhancements.js?v=20260923-01" defer></script>
 </body>
 </html>
