@@ -687,7 +687,21 @@ async function billingVerify(request,env){
 }
 async function billingWebhook(request,env){
   const provider=new URL(request.url).searchParams.get("provider")||"";
-  const body=await request.json().catch(()=>({}));
+  const raw=await request.text();
+  const body=JSON.parse(raw||"{}");
+  if(provider==="paypal"){
+    const pp=await paypalAccessToken(env);
+    const webhookId=String(env.PAYPAL_WEBHOOK_ID||"").trim();
+    const transmissionId=request.headers.get("paypal-transmission-id");
+    const transmissionTime=request.headers.get("paypal-transmission-time");
+    const transmissionSig=request.headers.get("paypal-transmission-sig");
+    const certUrl=request.headers.get("paypal-cert-url");
+    const authAlgo=request.headers.get("paypal-auth-algo");
+    if(!pp||!webhookId||!transmissionId||!transmissionTime||!transmissionSig||!certUrl||!authAlgo)return json({ok:false,error:"webhook_not_configured"},401,request);
+    const verify=await fetch(pp.base+"/v1/notifications/verify-webhook-signature",{method:"POST",headers:{Authorization:"Bearer "+pp.token,"Content-Type":"application/json"},body:JSON.stringify({auth_algo:authAlgo,cert_url:certUrl,transmission_id:transmissionId,transmission_sig:transmissionSig,transmission_time:transmissionTime,webhook_id:webhookId,webhook_event:body})});
+    const vd=await verify.json().catch(()=>({}));
+    if(!verify.ok||vd.verification_status!=="SUCCESS")return json({ok:false,error:"invalid_webhook"},401,request);
+  }
   try{
     if(provider==="mercadopago"){
       const id=String(body?.data?.id||body?.id||"");const token=String(env.MERCADOPAGO_ACCESS_TOKEN||"").trim();if(!id||!token)return json({ok:true},200,request);
