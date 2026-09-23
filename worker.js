@@ -739,7 +739,7 @@ async function handleApi(request, env) {
   }
 
   if (url.pathname === "/v1/auth/me" && request.method === "GET") {
-    const token=String(request.headers.get("Authorization")||"").replace(/^Bearer\\s+/i,"");const session=await verifySession(token,String(env.AUTH_SESSION_SECRET||""));if(!session)return json({ok:false,error:"unauthorized",message:"Sesión no válida."},401,request);
+    const token=String(request.headers.get("Authorization")||"").replace(/^Bearer\\s+/i,"");const session=await verifySession(token,authSecret(env));if(!session)return json({ok:false,error:"unauthorized",message:"Sesión no válida."},401,request);
     const user=await getUserRecord(env,session.sub)||session;return json({ok:true,user:cleanUser(user),plan:publicPlan(user)},200,request);
   }
 
@@ -751,7 +751,7 @@ async function handleApi(request, env) {
     const existing=await stub.fetch("https://auth/email?email="+encodeURIComponent(email));if(existing.ok)return json({ok:false,error:"email_exists",message:"Ese correo ya está registrado."},409,request);
     const sub="local_"+(crypto.randomUUID?.()||Date.now());const pass=await makePasswordRecord(password);
     const user={sub,email,name:name||email.split("@")[0],picture:"",provider:"password",password:pass,plan:"free",planName:"Sin plan",planExpiresAt:0,createdAt:Date.now()};
-    await putUserRecord(env,user);const token=await createSession(user,String(env.AUTH_SESSION_SECRET));return json({ok:true,token,user:cleanUser(user),plan:publicPlan(user)},201,request);
+    await putUserRecord(env,user);const token=await createSession(user,authSecret(env));return json({ok:true,token,user:cleanUser(user),plan:publicPlan(user)},201,request);
   }
 
   if (url.pathname === "/v1/auth/login" && request.method === "POST") {
