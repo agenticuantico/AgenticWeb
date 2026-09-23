@@ -247,12 +247,21 @@
     </aside>
   </div>
 </section>
+<section id="webStudio" class="web-studio glass hidden">
+  <div class="studio-head"><div><b>AgentiQ Web Studio</b><small>STARK-WEB · UI/UX · Frontend · 3D</small></div><span id="webDesignStatus">Listo para diseñar</span></div>
+  <textarea id="webDesignPrompt" placeholder="Describí el sitio: landing premium 3D para una IA cuántica, hero cinematográfico, cerebro WebGL, animaciones suaves…"></textarea>
+  <div class="studio-presets"><button data-design-prompt="Landing premium 3D para AgentiCuantico, estética futurista, cerebro neuronal WebGL, hero cinematográfico y responsive.">Neural 3D</button><button data-design-prompt="Dashboard SaaS premium oscuro, glassmorphism, microinteracciones, gráficos y navegación elegante.">SaaS premium</button><button data-design-prompt="Portfolio creativo inmersivo con WebGL, tipografía editorial y transiciones cinematográficas.">Creative 3D</button></div>
+  <button id="webDesignRun" class="studio-run">✦ Generar diseño</button>
+  <iframe id="webDesignPreview" sandbox="allow-scripts" title="Vista previa del diseño generado"></iframe>
+  <details><summary>Ver código generado</summary><textarea id="webDesignCode" readonly></textarea></details>
+</section>
 <section id="panel" class="panel hidden"></section></main>
 </div>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 <script>window.AGENTICUANTICO_API_URL="https://agenticweb.agenticuantico.workers.dev";</script>
 <script type="module" src="./app.js?v=20260923-01"></script>
 <script src="./premium-runtime.js?v=20260923-03"></script>
+<script src="./web-design-studio.js?v=20260923-01"></script>
 <script src="./experience-enhancements.js?v=20260923-01" defer></script>
 </body>
 </html>
