@@ -321,13 +321,52 @@
 </section>
 <section id="panel" class="panel hidden"></section></main>
 </div>
-<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<div id="accountOverlay" class="account-overlay hidden" aria-hidden="true">
+  <div class="account-modal" role="dialog" aria-modal="true" aria-labelledby="accountTitle">
+    <button id="accountClose" class="account-close" type="button" aria-label="Cerrar">×</button>
+    <div class="account-brand"><span class="account-core">AQ</span><div><b>AgentiCuantico</b><small>NEURAL ACCOUNT</small></div></div>
+    <div id="authView">
+      <div class="account-title"><span>Tu acceso al cerebro</span><h2 id="accountTitle">Entrá a AgentiCuantico</h2><p>Guardá conversaciones, administrá tu plan y usá el modelo avanzado durante tu período activo.</p></div>
+      <div id="googleButton" class="google-button"></div>
+      <div class="account-divider"><span>o continuá con correo</span></div>
+      <form id="authForm" class="auth-form">
+        <label id="nameField"><span>Nombre</span><input id="authName" autocomplete="name" placeholder="Tu nombre"></label>
+        <label><span>Correo electrónico</span><input id="authEmail" type="email" autocomplete="email" required placeholder="tu@email.com"></label>
+        <label><span>Clave</span><input id="authPassword" type="password" minlength="8" autocomplete="current-password" required placeholder="Mínimo 8 caracteres"></label>
+        <button id="authSubmit" class="account-primary" type="submit">Ingresar</button>
+      </form>
+      <button id="authMode" class="account-link" type="button">¿No tenés cuenta? Registrate</button>
+      <p id="authMessage" class="auth-message" aria-live="polite"></p>
+      <small class="account-consent">Al continuar aceptás los términos y la política de privacidad de AgentiCuantico. Google solo comparte los datos que autorices mediante su pantalla de consentimiento.</small>
+    </div>
+    <div id="accountDashboard" class="account-dashboard hidden">
+      <div class="account-user">
+        <img id="accountAvatar" alt="" class="account-avatar"><div><b id="accountName"></b><small id="accountEmail"></small></div>
+      </div>
+      <div class="plan-status-card">
+        <div><span class="plan-eyebrow">PLAN ACTIVO</span><h3 id="accountPlanName">Sin plan</h3><p id="accountPlanModel">AgentiQ Basic</p></div>
+        <span id="accountPlanBadge" class="plan-badge">FREE</span>
+        <div class="plan-progress"><span id="planProgress"></span></div>
+        <small id="accountPlanExpiry">Elegí un plan para activar el modelo avanzado.</small>
+      </div>
+      <div class="account-actions">
+        <button id="openPlans" class="account-primary" type="button">Ver planes</button>
+        <button id="accountLogout" class="account-secondary" type="button">Cerrar sesión</button>
+      </div>
+      <section class="plans-section">
+        <div class="plans-head"><div><span>AGENTIQ MEMBERSHIP</span><h3>Elegí tu nivel de inteligencia</h3></div><small>30 días · renovación mensual</small></div>
+        <div id="plansGrid" class="plans-grid"></div>
+      </section>
+    </div>
+  </div>
+</div><div id="toast" class="toast" role="status" aria-live="polite"></div>
 <script>window.AGENTICUANTICO_API_URL="https://agenticweb.agenticuantico.workers.dev";</script>
 <script type="module" src="./app.js?v=20260923-01"></script>
 <script src="./premium-runtime.js?v=20260923-03"></script>
 <script src="./web-design-studio.js?v=20260923-04"></script>
 <script src="./designer-agent.js?v=20260923-01"></script>
 <script>addEventListener("DOMContentLoaded",()=>document.getElementById("openWebStudio")?.addEventListener("click",()=>document.getElementById("webStudio")?.classList.toggle("hidden")));</script>
+<script src="./account-billing.js?v=20260923-01" defer></script>
 <script src="./experience-enhancements.js?v=20260923-01" defer></script>
 <script src="./ai-design-layer.js?v=20260923-01"></script>\n<script src="./cinematic-parallax.js?v=20260923-01"></script>
 </body>
