@@ -273,6 +273,186 @@ async function callHuggingFace(request, env) {
 
 
 
+
+
+function utf8Base64(text){
+  const bytes=new TextEncoder().encode(String(text||""));
+  let binary="";
+  const chunk=0x8000;
+  for(let i=0;i<bytes.length;i+=chunk){
+    binary+=String.fromCharCode(...bytes.subarray(i,i+chunk));
+  }
+  return btoa(binary);
+}
+
+function parseModelJson(text){
+  let value=String(text||"").trim();
+  value=value.replace(/^\s*\`\`\`(?:json)?\s*/i,"").replace(/\s*\`\`\`\s*$/,"");
+  try{return JSON.parse(value)}catch{}
+  const start=value.indexOf("{"), end=value.lastIndexOf("}");
+  if(start>=0&&end>start){try{return JSON.parse(value.slice(start,end+1))}catch{}}
+  return null;
+}
+
+function designerAuthorized(request,env){
+  const key=String(env.AGENTIC_ADMIN_KEY||"").trim();
+  const provided=String(request.headers.get("X-Admin-Key")||"").trim();
+  return !!key&&!!provided&&provided===key;
+}
+
+function designerGhHeaders(env){
+  return {
+    "Accept":"application/vnd.github+json",
+    "Authorization":"Bearer "+String(env.GH_TOKEN||"").trim(),
+    "X-GitHub-Api-Version":"2026-03-10",
+    "Content-Type":"application/json"
+  };
+}
+
+const DESIGNER_ALLOWED_EXTENSIONS=/\.(html?|css|js|mjs|cjs|ts|tsx|jsx|json|md|svg|txt|yml|yaml|toml|jsonc)$/i;
+const DESIGNER_BLOCKED_PATH=/(^|\/)(\.git|node_modules|dist|build|coverage|\.env)(\/|$)|(^|\/)(\.env\.|secrets?)(\/|$)/i;
+
+function designerAllowedPath(path){
+  const p=String(path||"").replace(/^\/+/,"").trim();
+  if(!p||DESIGNER_BLOCKED_PATH.test(p))return false;
+  return p.startsWith("public/") || p==="worker.js" || p==="wrangler.jsonc" || p==="package.json" || p==="package-lock.json" || p.startsWith("src/");
+}
+
+async function designerScan(request,env){
+  if(!designerAuthorized(request,env)||!String(env.GH_TOKEN||"").trim())return json({ok:false,error:"designer_not_authorized",message:"El Designer Agent requiere autorización de administrador."},403,request);
+  let body=await request.json().catch(()=>({}));
+  const repo=typeof body?.repo==="string"?body.repo.trim():"agenticuantico/AgenticWeb";
+  if(repo.toLowerCase()!=="agenticuantico/agenticweb")return json({ok:false,error:"repo_not_allowed",message:"El Designer Agent está limitado a agenticuantico/AgenticWeb."},403,request);
+  const branch=typeof body?.branch==="string"&&body.branch.trim()?body.branch.trim():"main";
+  const headers=designerGhHeaders(env);
+  try{
+    const metaR=await fetch("https://api.github.com/repos/"+repo,{headers});
+    if(!metaR.ok)return json({ok:false,error:"repo_unavailable",message:"No pude leer el repositorio."},502,request);
+    const meta=await metaR.json();
+    const refR=await fetch("https://api.github.com/repos/"+repo+"/git/ref/heads/"+encodeURIComponent(branch),{headers});
+    if(!refR.ok)return json({ok:false,error:"branch_unavailable",message:"No pude leer la rama "+branch+"."},502,request);
+    const ref=await refR.json();
+    const baseSha=ref.object?.sha||null;
+    const treeR=await fetch("https://api.github.com/repos/"+repo+"/git/trees/"+encodeURIComponent(baseSha)+"?recursive=1",{headers});
+    if(!treeR.ok)return json({ok:false,error:"tree_unavailable",message:"No pude leer el árbol completo del repositorio."},502,request);
+    const tree=await treeR.json();
+    const files=(tree.tree||[]).filter(x=>x.type==="blob"&&!DESIGNER_BLOCKED_PATH.test(x.path)).map(x=>({path:x.path,size:x.size||0,sha:x.sha})).slice(0,5000);
+    const textCandidates=files.filter(x=>DESIGNER_ALLOWED_EXTENSIONS.test(x.path)&&x.size<180000)
+      .sort((a,b)=>{const score=p=>/(^|\/)(README|worker|wrangler|package|index|app|styles|brain|design|experience)/i.test(p)?0:1;return score(a.path)-score(b.path)})
+      .slice(0,28);
+    const contents=[];
+    let budget=72000;
+    for(const f of textCandidates){
+      if(budget<=0)break;
+      try{
+        const r=await fetch("https://api.github.com/repos/"+repo+"/contents/"+f.path+"?ref="+encodeURIComponent(branch),{headers:{...headers,"Accept":"application/vnd.github.raw+json"}});
+        if(!r.ok)continue;
+        const txt=await r.text();
+        const clipped=txt.slice(0,Math.min(txt.length,budget,9000));
+        contents.push({path:f.path,content:clipped,truncated:clipped.length<txt.length});
+        budget-=clipped.length;
+      }catch{}
+    }
+    return json({ok:true,repo,branch,baseSha,description:meta.description||"",defaultBranch:meta.default_branch||"main",files,contents,stats:{files:files.length,textFiles:textCandidates.length,contentChars:contents.reduce((n,x)=>n+x.content.length,0)}},200,request);
+  }catch{return json({ok:false,error:"designer_scan_failed",message:"No se pudo completar el análisis del repositorio."},502,request)}
+}
+
+async function designerPlan(request,env){
+  if(!designerAuthorized(request,env)||!String(env.HF_TOKEN||"").trim())return json({ok:false,error:"designer_not_authorized",message:"El Designer Agent requiere autorización y HF_TOKEN."},403,request);
+  let body=await request.json().catch(()=>({}));
+  const repo=String(body?.repo||"agenticuantico/AgenticWeb").trim();
+  const task=String(body?.task||"Rediseñá AgenticWeb como una experiencia premium 3D de IA.").trim();
+  const snapshot=body?.snapshot&&typeof body.snapshot==="object"?body.snapshot:null;
+  if(repo.toLowerCase()!=="agenticuantico/agenticweb"||!snapshot?.baseSha||!Array.isArray(snapshot?.files))return json({ok:false,error:"invalid_snapshot",message:"Primero ejecutá el escaneo del repositorio."},400,request);
+  const endpoint=String(env.HF_API_URL||"https://router.huggingface.co/v1/chat/completions").trim();
+  const configured=String(env.HF_DESIGNER_MODEL||"Qwen/Qwen3-Coder-Next:novita").split(",").map(x=>x.trim()).filter(Boolean);
+  const models=[...configured,"Qwen/Qwen3-Coder-Next:novita","Qwen/Qwen3-Coder-Next:fastest","Qwen/Qwen3-Coder-30B-A3B-Instruct:fastest"].filter((v,i,a)=>a.indexOf(v)===i);
+  const system=[
+    "Sos el Designer Agent de AgentiCuantico: arquitecto de producto, diseñador UI/UX, especialista frontend, motion y 3D/WebGL.",
+    "Tu misión es rediseñar un repositorio real sin romper funcionalidades existentes.",
+    "Analizá la estructura completa entregada y el contenido de los archivos relevantes. Priorizá cambios visuales y de experiencia, manteniendo chat, voz, autenticación, adjuntos, backend y rutas funcionales.",
+    "Para 3D usá Three.js/WebGL procedural y aprovechá brain-3d.js existente cuando corresponda. No dependas de assets externos innecesarios.",
+    "No inventes APIs ni afirmes que un archivo existe si no aparece en el snapshot.",
+    "No modifiques secretos, tokens, .env, workflows, permisos ni infraestructura sensible.",
+    "Máximo 8 archivos modificados. Solo devolvé archivos permitidos por el sistema. Para cada archivo modificado devolvé el contenido COMPLETO final, no parches.",
+    "Generá también un preview_html autocontenido que represente visualmente la nueva dirección de diseño; no necesita ejecutar la app real.",
+    "Respondé ÚNICAMENTE JSON válido con esta forma: {summary:string,architecture:string[],changes:[{path:string,action:'modify'|'create',reason:string,content:string}],preview_html:string,tests:string[]}.",
+    "Si un archivo no necesita cambios, no lo incluyas. No incluyas markdown fences."
+  ].join(" ");
+  const context={
+    repo,branch:snapshot.branch||"main",baseSha:snapshot.baseSha,task,
+    tree:snapshot.files.slice(0,5000).map(x=>x.path),
+    files:snapshot.contents.slice(0,28)
+  };
+  const messages=[{role:"system",content:system},{role:"user",content:JSON.stringify(context)}];
+  for(const model of models){
+    const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),55000);
+    try{
+      const r=await fetch(endpoint,{method:"POST",signal:controller.signal,headers:{"Authorization":"Bearer "+String(env.HF_TOKEN).trim(),"Content-Type":"application/json"},body:JSON.stringify({
+        model,messages,temperature:.45,top_p:.85,max_tokens:14000,stream:false,
+        response_format:{type:"json_object"}
+      })});
+      if(!r.ok)continue;
+      const data=await r.json();
+      const raw=data?.choices?.[0]?.message?.content;
+      const plan=parseModelJson(raw);
+      if(!plan||!Array.isArray(plan.changes)||typeof plan.summary!=="string")continue;
+      plan.changes=plan.changes.filter(x=>x&&designerAllowedPath(x.path)&&typeof x.content==="string").slice(0,8).map(x=>({path:String(x.path),action:x.action==="create"?"create":"modify",reason:String(x.reason||"Mejora de diseño"),content:x.content}));
+      if(!plan.changes.length)continue;
+      plan.preview_html=typeof plan.preview_html==="string"?plan.preview_html:"";
+      plan.architecture=Array.isArray(plan.architecture)?plan.architecture.slice(0,12).map(String):[];
+      plan.tests=Array.isArray(plan.tests)?plan.tests.slice(0,12).map(String):[];
+      return json({ok:true,model,provider:"Hugging Face Inference Providers",repo,branch:snapshot.branch||"main",baseSha:snapshot.baseSha,plan},200,request);
+    }catch{}finally{clearTimeout(timeout)}
+  }
+  return json({ok:false,error:"designer_model_unavailable",message:"El modelo de diseño no pudo generar un plan válido."},502,request);
+}
+
+async function designerPublish(request,env){
+  if(!designerAuthorized(request,env)||!String(env.GH_TOKEN||"").trim())return json({ok:false,error:"designer_not_authorized",message:"La publicación requiere autorización de administrador."},403,request);
+  const body=await request.json().catch(()=>({}));
+  const repo=String(body?.repo||"agenticuantico/AgenticWeb").trim();
+  const branch=String(body?.branch||"main").trim();
+  const baseSha=String(body?.baseSha||"").trim();
+  const plan=body?.plan&&typeof body.plan==="object"?body.plan:null;
+  if(repo.toLowerCase()!=="agenticuantico/agenticweb"||branch!=="main"||!plan||!baseSha||!Array.isArray(plan.changes)||!plan.changes.length)return json({ok:false,error:"invalid_publish_plan",message:"El plan de diseño no es válido."},400,request);
+  if(plan.changes.length>8)return json({ok:false,error:"too_many_files",message:"El plan supera el límite de archivos."},400,request);
+  let total=0;
+  for(const f of plan.changes){
+    if(!designerAllowedPath(f.path)||typeof f.content!=="string"||f.content.length>250000)return json({ok:false,error:"unsafe_file","message":"El plan contiene un archivo no permitido o demasiado grande."},400,request);
+    total+=f.content.length;if(total>1200000)return json({ok:false,error:"plan_too_large",message:"El plan es demasiado grande para una publicación segura."},400,request);
+  }
+  const headers=designerGhHeaders(env);
+  try{
+    const refR=await fetch("https://api.github.com/repos/"+repo+"/git/ref/heads/main",{headers});
+    if(!refR.ok)return json({ok:false,error:"branch_unavailable",message:"No se pudo comprobar main."},502,request);
+    const ref=await refR.json();const currentSha=ref.object?.sha;
+    if(currentSha!==baseSha)return json({ok:false,error:"base_changed",message:"El repositorio cambió desde el análisis. Volvé a escanear antes de publicar.",currentSha,baseSha},409,request);
+    const treeR=await fetch("https://api.github.com/repos/"+repo+"/git/commits/"+encodeURIComponent(currentSha),{headers});
+    if(!treeR.ok)return json({ok:false,error:"commit_unavailable",message:"No se pudo obtener el commit base."},502,request);
+    const commit=await treeR.json();const baseTree=commit.tree?.sha;
+    if(!baseTree)return json({ok:false,error:"tree_unavailable",message:"No se pudo obtener el árbol base."},502,request);
+    const tree=await fetch("https://api.github.com/repos/"+repo+"/git/trees",{method:"POST",headers,body:JSON.stringify({
+      base_tree:baseTree,
+      tree:plan.changes.map(f=>({path:f.path,mode:"100644",type:"blob",content:f.content}))
+    })});
+    if(!tree.ok)return json({ok:false,error:"tree_write_failed",message:"GitHub no pudo crear el árbol de cambios."},502,request);
+    const treeData=await tree.json();
+    const newCommitR=await fetch("https://api.github.com/repos/"+repo+"/git/commits",{method:"POST",headers,body:JSON.stringify({
+      message:"AI Designer: rediseño multiarchivo de AgenticWeb",
+      tree:treeData.sha,
+      parents:[currentSha],
+      author:{name:"AgentiCuantico Designer Agent",email:"agenticuantico@gmail.com"},
+      committer:{name:"AgentiCuantico Designer Agent",email:"agenticuantico@gmail.com"}
+    })});
+    if(!newCommitR.ok)return json({ok:false,error:"commit_write_failed",message:"GitHub no pudo crear el commit."},502,request);
+    const newCommit=await newCommitR.json();
+    const updateR=await fetch("https://api.github.com/repos/"+repo+"/git/refs/heads/main",{method:"PATCH",headers,body:JSON.stringify({sha:newCommit.sha,force:false})});
+    if(!updateR.ok)return json({ok:false,error:"ref_update_failed",message:"GitHub no pudo actualizar main. El commit quedó creado pero no fue publicado en la rama."},502,request);
+    return json({ok:true,repo,branch:"main",commit:newCommit.sha,files:plan.changes.map(x=>x.path),url:"https://github.com/"+repo+"/commit/"+newCommit.sha},200,request);
+  }catch{return json({ok:false,error:"designer_publish_failed",message:"No se pudo publicar el rediseño en GitHub."},502,request)}
+}
+
 async function buildWebDesign(request, env) {
   const adminKey=String(env.AGENTIC_ADMIN_KEY||"").trim();
   const provided=String(request.headers.get("X-Admin-Key")||"").trim();
@@ -289,7 +469,7 @@ async function buildWebDesign(request, env) {
     const url="https://api.github.com/repos/"+repo+"/contents/"+path;
     const current=await fetch(url+"?ref="+encodeURIComponent(branch),{headers});
     let sha=null;if(current.ok){const c=await current.json();sha=c.sha;}else if(current.status!==404)return json({ok:false,error:"github_read_failed",message:"No se pudo consultar el diseño actual."},502,request);
-    const payload={message:"AI Web Studio: actualizar diseño público",content:btoa(unescape(encodeURIComponent(html))),branch};
+    const payload={message:"AI Web Studio: actualizar diseño público",content:utf8Base64(html),branch};
     if(sha)payload.sha=sha;
     const saved=await fetch(url,{method:"PUT",headers,body:JSON.stringify(payload)});
     const result=await saved.json().catch(()=>({}));
@@ -452,7 +632,20 @@ async function handleApi(request, env) {
     return json({ok:false,error:"web_designer_unavailable",message:"El diseñador web no está disponible temporalmente."},502,request);
   }
 
-  if (url.pathname === "/v1/public/web-design/build" && request.method === "POST") {\n    return buildWebDesign(request.clone(), env);\n  }\n\n  if (url.pathname === "/v1/public/codex" && request.method === "POST") {
+  if (url.pathname === "/v1/public/web-design/build" && request.method === "POST") {\n    return buildWebDesign(request.clone(), env);\n  }\n
+  if (url.pathname === "/v1/public/designer/scan" && request.method === "POST") {
+    return designerScan(request.clone(), env);
+  }
+
+  if (url.pathname === "/v1/public/designer/plan" && request.method === "POST") {
+    return designerPlan(request.clone(), env);
+  }
+
+  if (url.pathname === "/v1/public/designer/publish" && request.method === "POST") {
+    return designerPublish(request.clone(), env);
+  }
+
+\n\n  if (url.pathname === "/v1/public/codex" && request.method === "POST") {
     return codexAnalyze(request.clone(), env);
   }
 
