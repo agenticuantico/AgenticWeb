@@ -576,6 +576,130 @@ function textB64url(text){return b64url(new TextEncoder().encode(text))}
 async function hmacSign(value,secret){const key=await crypto.subtle.importKey("raw",new TextEncoder().encode(secret),{name:"HMAC",hash:"SHA-256"},false,["sign"]);return new Uint8Array(await crypto.subtle.sign("HMAC",key,new TextEncoder().encode(value)))}
 async function createSession(user,secret){const payload=textB64url(JSON.stringify({sub:user.sub,email:user.email,name:user.name,picture:user.picture||"",exp:Math.floor(Date.now()/1000)+604800}));const sig=b64url(await hmacSign(payload,secret));return payload+"."+sig}
 async function verifySession(token,secret){try{const [p,s]=String(token||"").split(".");if(!p||!s)return null;const expected=await hmacSign(p,secret),actual=fromB64url(s);if(expected.length!==actual.length)return null;for(let i=0;i<expected.length;i++)if(expected[i]!==actual[i])return null;const data=JSON.parse(new TextDecoder().decode(fromB64url(p)));return data.exp>Math.floor(Date.now()/1000)?data:null}catch{return null}}
+
+
+// ===== Auth, plans & billing =================================================
+const PLANS = [
+  {id:"starter",name:"Neural Start",priceARS:Number(envSafe("PLAN_STARTER_ARS","4999")),model:"AgentiQ Advanced",description:"Para comenzar a trabajar con el cerebro 3D.",features:["Chat avanzado","Cerebro 3D","Historial de conversaciones","Voz y archivos"],paypalEnv:"PAYPAL_PLAN_STARTER"},
+  {id:"pro",name:"Neural Pro",priceARS:Number(envSafe("PLAN_PRO_ARS","9999")),model:"AgentiQ Advanced",description:"Más potencia para crear y programar.",features:["Modelo avanzado","CodQ","Agentes especializados","Memoria de trabajo"],paypalEnv:"PAYPAL_PLAN_PRO"},
+  {id:"ultra",name:"Neural Ultra",priceARS:Number(envSafe("PLAN_ULTRA_ARS","19999")),model:"AgentiQ Advanced+",description:"Para proyectos exigentes y uso intensivo.",features:["Modelo avanzado+","Agentes múltiples","Diseño 3D","Mayor contexto"],paypalEnv:"PAYPAL_PLAN_ULTRA"},
+  {id:"business",name:"Neural Business",priceARS:Number(envSafe("PLAN_BUSINESS_ARS","39999")),model:"AgentiQ Advanced+",description:"Espacio premium para equipos.",features:["Modelo avanzado+","Equipos","Prioridad","Panel de cuenta"],paypalEnv:"PAYPAL_PLAN_BUSINESS"}
+];
+function envSafe(name,fallback){return typeof globalThis!=="undefined" && globalThis.__aqEnv?.[name] || fallback}
+function planById(id){return PLANS.find(p=>p.id===String(id))||null}
+function cleanUser(u){
+  if(!u)return null;
+  return {sub:u.sub,email:u.email,name:u.name||u.email,picture:u.picture||"",provider:u.provider||"password",plan:u.plan||"free",planName:u.planName||"Sin plan",planExpiresAt:Number(u.planExpiresAt)||0,subscription:u.subscription||null,createdAt:u.createdAt||0};
+}
+async function authStore(env){
+  if(!env.AUTH_DATA)return null;
+  return env.AUTH_DATA.get(env.AUTH_DATA.idFromName("global"));
+}
+async function getUserRecord(env,sub){
+  const stub=await authStore(env); if(!stub)return null;
+  const r=await stub.fetch("https://auth/user?sub="+encodeURIComponent(sub));
+  if(!r.ok)return null; return await r.json().catch(()=>null);
+}
+async function putUserRecord(env,user){
+  const stub=await authStore(env); if(!stub)return null;
+  const r=await stub.fetch("https://auth/user",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(user)});
+  return r.json().catch(()=>({ok:false}));
+}
+function planActive(user){return !!user && Number(user.planExpiresAt||0)>Date.now() && user.plan && user.plan!=="free"}
+function publicPlan(user){
+  const p=planById(user?.plan);
+  return {id:user?.plan||"free",name:user?.planName||"Sin plan",model:p?.model||"AgentiQ Basic",expiresAt:Number(user?.planExpiresAt)||0,active:planActive(user)};
+}
+async function passwordHash(password,saltBytes){
+  const key=await crypto.subtle.importKey("raw",new TextEncoder().encode(password),"PBKDF2",false,["deriveBits"]);
+  return new Uint8Array(await crypto.subtle.deriveBits({name:"PBKDF2",salt:saltBytes,iterations:120000,hash:"SHA-256"},key,256));
+}
+function bytesB64(bytes){let s="";for(const b of bytes)s+=String.fromCharCode(b);return btoa(s)}
+function b64Bytes(text){const raw=atob(text);return new Uint8Array([...raw].map(c=>c.charCodeAt(0)))}
+async function makePasswordRecord(password){
+  const salt=crypto.getRandomValues(new Uint8Array(16)), hash=await passwordHash(password,salt);
+  return {salt:bytesB64(salt),hash:bytesB64(hash),iterations:120000};
+}
+async function verifyPassword(password,record){
+  if(!record?.salt||!record?.hash)return false;
+  const hash=await passwordHash(password,b64Bytes(record.salt));
+  const expected=b64Bytes(record.hash); if(hash.length!==expected.length)return false;
+  let diff=0;for(let i=0;i<hash.length;i++)diff|=hash[i]^expected[i];return diff===0;
+}
+function validEmail(email){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)}
+async function paypalAccessToken(env){
+  const id=String(env.PAYPAL_CLIENT_ID||"").trim(),secret=String(env.PAYPAL_CLIENT_SECRET||"").trim();
+  if(!id||!secret)return null;
+  const base=String(env.PAYPAL_BASE_URL||"https://api-m.paypal.com").replace(/\/$/,"");
+  const basic=btoa(id+":"+secret);
+  const r=await fetch(base+"/v1/oauth2/token",{method:"POST",headers:{Authorization:"Basic "+basic,"Content-Type":"application/x-www-form-urlencoded"},body:"grant_type=client_credentials"});
+  if(!r.ok)return null;const d=await r.json().catch(()=>({}));return d.access_token?{token:d.access_token,base}:null;
+}
+async function activateUserPlan(env,sub,planId,provider,subscriptionId){
+  const user=await getUserRecord(env,sub); if(!user)return false;
+  const plan=planById(planId); if(!plan)return false;
+  const now=Date.now(), current=Number(user.planExpiresAt)||0, expires=Math.max(now,current)+30*24*60*60*1000;
+  user.plan=plan.id;user.planName=plan.name;user.planExpiresAt=expires;user.subscription={provider,id:subscriptionId,status:"active",updatedAt:now};
+  await putUserRecord(env,user);return true;
+}
+async function billingCheckout(request,env){
+  const user=await authenticatedUser(request,env);if(!user)return json({ok:false,error:"unauthorized",message:"Iniciá sesión para contratar un plan."},401,request);
+  const body=await request.json().catch(()=>({}));const plan=planById(body?.plan);const provider=String(body?.provider||"mercadopago").toLowerCase();
+  if(!plan)return json({ok:false,error:"invalid_plan",message:"Plan no válido."},400,request);
+  const returnBase="https://agenticuantico.dev.ar/?billing=return&plan="+encodeURIComponent(plan.id);
+  if(provider==="mercadopago"){
+    const token=String(env.MERCADOPAGO_ACCESS_TOKEN||"").trim();if(!token)return json({ok:false,error:"payment_not_configured",message:"Mercado Pago todavía no está configurado."},503,request);
+    const payload={reason:"AgentiCuantico "+plan.name,external_reference:user.sub+":"+plan.id,payer_email:user.email,back_url:returnBase,auto_recurring:{frequency:1,frequency_type:"months",transaction_amount:plan.priceARS,currency_id:"ARS"}};
+    const r=await fetch("https://api.mercadopago.com/preapproval",{method:"POST",headers:{Authorization:"Bearer "+token,"Content-Type":"application/json"},body:JSON.stringify(payload)});
+    const d=await r.json().catch(()=>({}));if(!r.ok||!d.init_point)return json({ok:false,error:"mercadopago_failed",message:"Mercado Pago no pudo crear la suscripción."},502,request);
+    return json({ok:true,provider:"mercadopago",checkout_url:d.init_point,subscription_id:d.id,plan:plan.id},200,request);
+  }
+  if(provider==="paypal"){
+    const pp=await paypalAccessToken(env);if(!pp)return json({ok:false,error:"payment_not_configured",message:"PayPal todavía no está configurado."},503,request);
+    const planId=String(env[plan.paypalEnv]||"").trim();if(!planId)return json({ok:false,error:"paypal_plan_not_configured",message:"Falta configurar el plan de PayPal para "+plan.name+"."},503,request);
+    const r=await fetch(pp.base+"/v1/billing/subscriptions",{method:"POST",headers:{Authorization:"Bearer "+pp.token,"Content-Type":"application/json","PayPal-Request-Id":crypto.randomUUID()},body:JSON.stringify({plan_id:planId,custom_id:user.sub+":"+plan.id,subscriber:{email_address:user.email},application_context:{brand_name:"AgentiCuantico",user_action:"SUBSCRIBE_NOW",return_url:returnBase+"&provider=paypal",cancel_url:"https://agenticuantico.dev.ar/?billing=cancelled"}})});
+    const d=await r.json().catch(()=>({}));const approve=(d.links||[]).find(x=>x.rel==="approve")?.href;
+    if(!r.ok||!approve)return json({ok:false,error:"paypal_failed",message:"PayPal no pudo crear la suscripción."},502,request);
+    return json({ok:true,provider:"paypal",checkout_url:approve,subscription_id:d.id,plan:plan.id},200,request);
+  }
+  return json({ok:false,error:"invalid_provider",message:"Pasarela no soportada."},400,request);
+}
+async function billingVerify(request,env){
+  const user=await authenticatedUser(request,env);if(!user)return json({ok:false,error:"unauthorized"},401,request);
+  const url=new URL(request.url),provider=String(url.searchParams.get("provider")||"").toLowerCase(),id=String(url.searchParams.get("id")||"").trim();
+  if(!id)return json({ok:false,error:"missing_id"},400,request);
+  if(provider==="mercadopago"){
+    const token=String(env.MERCADOPAGO_ACCESS_TOKEN||"").trim();if(!token)return json({ok:false,error:"payment_not_configured"},503,request);
+    const r=await fetch("https://api.mercadopago.com/preapproval/"+encodeURIComponent(id),{headers:{Authorization:"Bearer "+token}});const d=await r.json().catch(()=>({}));
+    const ref=String(d.external_reference||"");if(!ref.startsWith(user.sub+":"))return json({ok:false,error:"payment_owner_mismatch"},403,request);
+    const plan=ref.split(":").slice(1).join(":");if(["authorized","active"].includes(String(d.status||"").toLowerCase()))await activateUserPlan(env,user.sub,plan,"mercadopago",id);
+    return json({ok:true,status:d.status,plan:publicPlan(await getUserRecord(env,user.sub))},200,request);
+  }
+  if(provider==="paypal"){
+    const pp=await paypalAccessToken(env);if(!pp)return json({ok:false,error:"payment_not_configured"},503,request);
+    const r=await fetch(pp.base+"/v1/billing/subscriptions/"+encodeURIComponent(id),{headers:{Authorization:"Bearer "+pp.token,Accept:"application/json"}});const d=await r.json().catch(()=>({}));
+    const custom=String(d.custom_id||"");if(!custom.startsWith(user.sub+":"))return json({ok:false,error:"payment_owner_mismatch"},403,request);
+    const plan=custom.split(":").slice(1).join(":");if(["ACTIVE","APPROVED"].includes(String(d.status||"")))await activateUserPlan(env,user.sub,plan,"paypal",id);
+    return json({ok:true,status:d.status,plan:publicPlan(await getUserRecord(env,user.sub))},200,request);
+  }
+  return json({ok:false,error:"invalid_provider"},400,request);
+}
+async function billingWebhook(request,env){
+  const provider=new URL(request.url).searchParams.get("provider")||"";
+  const body=await request.json().catch(()=>({}));
+  try{
+    if(provider==="mercadopago"){
+      const id=String(body?.data?.id||body?.id||"");const token=String(env.MERCADOPAGO_ACCESS_TOKEN||"").trim();if(!id||!token)return json({ok:true},200,request);
+      const r=await fetch("https://api.mercadopago.com/preapproval/"+encodeURIComponent(id),{headers:{Authorization:"Bearer "+token}});const d=await r.json().catch(()=>({}));const ref=String(d.external_reference||"");
+      if(["authorized","active"].includes(String(d.status||"").toLowerCase())&&ref.includes(":")){const [sub,...parts]=ref.split(":");await activateUserPlan(env,sub,parts.join(":"),"mercadopago",id)}
+    }else if(provider==="paypal"){
+      const resource=body?.resource||{};const custom=String(resource.custom_id||"");const subId=String(resource.id||"");const status=String(resource.status||"").toUpperCase();
+      if(["ACTIVE","APPROVED"].includes(status)&&custom.includes(":")){const [sub,...parts]=custom.split(":");await activateUserPlan(env,sub,parts.join(":"),"paypal",subId)}
+    }
+  }catch{}
+  return json({ok:true},200,request);
+}
+
 async function googleUserFromCredential(credential,env){const client=String(env.GOOGLE_CLIENT_ID||"").trim();if(!client)return null;const r=await fetch("https://oauth2.googleapis.com/tokeninfo?id_token="+encodeURIComponent(credential));if(!r.ok)return null;const d=await r.json();if(d.aud!==client||!(d.iss==="https://accounts.google.com"||d.iss==="accounts.google.com")||d.email_verified!=="true"||!d.sub||!d.email)return null;if(d.exp&&Number(d.exp)<Math.floor(Date.now()/1000))return null;return{sub:String(d.sub),email:String(d.email),name:String(d.name||d.email.split("@")[0]),picture:String(d.picture||"")}}
 
 async function authenticatedUser(request,env){const token=String(request.headers.get("Authorization")||"").replace(/^Bearer\s+/i,"");return verifySession(token,String(env.AUTH_SESSION_SECRET||env.HF_TOKEN||""))}
@@ -606,13 +730,46 @@ async function handleApi(request, env) {
   if (url.pathname === "/v1/auth/google" && request.method === "POST") {
     if(!String(env.GOOGLE_CLIENT_ID||"").trim()||!String(env.AUTH_SESSION_SECRET||"").trim()) return json({ok:false,error:"auth_not_configured",message:"El acceso con Google todavía no está configurado."},503,request);
     let body;try{body=await request.json()}catch{return json({ok:false,error:"invalid_request",message:"Solicitud inválida."},400,request)}
-    const user=await googleUserFromCredential(String(body?.credential||""),env);if(!user)return json({ok:false,error:"google_auth_failed",message:"No se pudo validar la cuenta de Google."},401,request);
-    const token=await createSession(user,String(env.AUTH_SESSION_SECRET));return json({ok:true,token,user},200,request);
+    const google=await googleUserFromCredential(String(body?.credential||""),env);if(!google)return json({ok:false,error:"google_auth_failed",message:"No se pudo validar la cuenta de Google."},401,request);
+    let user=await getUserRecord(env,google.sub);
+    if(!user){user={...google,provider:"google",plan:"free",planName:"Sin plan",planExpiresAt:0,createdAt:Date.now()};await putUserRecord(env,user)}
+    else {user={...user,...google,provider:"google"};await putUserRecord(env,user)}
+    const token=await createSession(user,String(env.AUTH_SESSION_SECRET));return json({ok:true,token,user:cleanUser(user),plan:publicPlan(user)},200,request);
   }
 
   if (url.pathname === "/v1/auth/me" && request.method === "GET") {
-    const token=String(request.headers.get("Authorization")||"").replace(/^Bearer\\s+/i,"");const user=await verifySession(token,String(env.AUTH_SESSION_SECRET||""));if(!user)return json({ok:false,error:"unauthorized",message:"Sesión no válida."},401,request);return json({ok:true,user},200,request);
+    const token=String(request.headers.get("Authorization")||"").replace(/^Bearer\\s+/i,"");const session=await verifySession(token,String(env.AUTH_SESSION_SECRET||""));if(!session)return json({ok:false,error:"unauthorized",message:"Sesión no válida."},401,request);
+    const user=await getUserRecord(env,session.sub)||session;return json({ok:true,user:cleanUser(user),plan:publicPlan(user)},200,request);
   }
+
+  if (url.pathname === "/v1/auth/register" && request.method === "POST") {
+    if(!String(env.AUTH_SESSION_SECRET||"").trim())return json({ok:false,error:"auth_not_configured"},503,request);
+    const body=await request.json().catch(()=>({}));const email=String(body?.email||"").trim().toLowerCase(),name=String(body?.name||"").trim().slice(0,80),password=String(body?.password||"");
+    if(!validEmail(email)||password.length<8)return json({ok:false,error:"invalid_credentials",message:"Usá un correo válido y una clave de al menos 8 caracteres."},400,request);
+    const stub=await authStore(env);if(!stub)return json({ok:false,error:"auth_store_unavailable"},503,request);
+    const existing=await stub.fetch("https://auth/email?email="+encodeURIComponent(email));if(existing.ok)return json({ok:false,error:"email_exists",message:"Ese correo ya está registrado."},409,request);
+    const sub="local_"+(crypto.randomUUID?.()||Date.now());const pass=await makePasswordRecord(password);
+    const user={sub,email,name:name||email.split("@")[0],picture:"",provider:"password",password:pass,plan:"free",planName:"Sin plan",planExpiresAt:0,createdAt:Date.now()};
+    await putUserRecord(env,user);const token=await createSession(user,String(env.AUTH_SESSION_SECRET));return json({ok:true,token,user:cleanUser(user),plan:publicPlan(user)},201,request);
+  }
+
+  if (url.pathname === "/v1/auth/login" && request.method === "POST") {
+    const body=await request.json().catch(()=>({}));const email=String(body?.email||"").trim().toLowerCase(),password=String(body?.password||"");
+    const stub=await authStore(env);if(!stub)return json({ok:false,error:"auth_store_unavailable"},503,request);
+    const r=await stub.fetch("https://auth/email?email="+encodeURIComponent(email));if(!r.ok)return json({ok:false,error:"invalid_credentials",message:"Correo o clave incorrectos."},401,request);
+    const user=await r.json().catch(()=>null);if(!await verifyPassword(password,user?.password))return json({ok:false,error:"invalid_credentials",message:"Correo o clave incorrectos."},401,request);
+    const token=await createSession(user,String(env.AUTH_SESSION_SECRET));return json({ok:true,token,user:cleanUser(user),plan:publicPlan(user)},200,request);
+  }
+
+  if (url.pathname === "/v1/auth/logout" && request.method === "POST") return json({ok:true},200,request);
+
+  if (url.pathname === "/v1/billing/plans" && request.method === "GET") {
+    return json({ok:true,plans:PLANS.map(p=>({id:p.id,name:p.name,priceARS:p.priceARS,model:p.model,description:p.description,features:p.features,durationDays:30}))},200,request);
+  }
+
+  if (url.pathname === "/v1/billing/checkout" && request.method === "POST") return billingCheckout(request,env);
+  if (url.pathname === "/v1/billing/verify" && request.method === "GET") return billingVerify(request,env);
+  if (url.pathname === "/v1/billing/webhook" && request.method === "POST") return billingWebhook(request,env);
 
   if (url.pathname === "/v1/user/conversations") {
     const user=await authenticatedUser(request,env);
@@ -752,6 +909,30 @@ async function autonomousBrainCycle(env) {
   console.log("agent-cycle: provider unavailable");
 }
 
+
+export class AuthData extends DurableObject {
+  async fetch(request) {
+    const url=new URL(request.url);
+    if(url.pathname==="/email"&&request.method==="GET"){
+      const email=String(url.searchParams.get("email")||"").toLowerCase();
+      const sub=await this.ctx.storage.get("email:"+email);if(!sub)return new Response("not_found",{status:404});
+      const user=await this.ctx.storage.get("user:"+sub);if(!user)return new Response("not_found",{status:404});
+      return new Response(JSON.stringify(user),{headers:{"content-type":"application/json"}});
+    }
+    if(url.pathname==="/user"&&request.method==="GET"){
+      const sub=String(url.searchParams.get("sub")||"");const user=await this.ctx.storage.get("user:"+sub);if(!user)return new Response("not_found",{status:404});
+      return new Response(JSON.stringify(user),{headers:{"content-type":"application/json"}});
+    }
+    if(url.pathname==="/user"&&request.method==="POST"){
+      const user=await request.json().catch(()=>null);if(!user?.sub||!user?.email)return new Response("invalid",{status:400});
+      const previous=await this.ctx.storage.get("user:"+user.sub);
+      await this.ctx.storage.put("user:"+user.sub,user);
+      await this.ctx.storage.put("email:"+String(user.email).toLowerCase(),user.sub);
+      return new Response(JSON.stringify({ok:true}),{headers:{"content-type":"application/json"}});
+    }
+    return new Response("not_found",{status:404});
+  }
+}
 
 export class UserData extends DurableObject {
   async fetch(request) {
