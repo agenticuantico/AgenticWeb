@@ -26,6 +26,12 @@
       }
     ]
   },
+  "migrations": [
+    {
+      "tag": "v1-user-data-sqlite",
+      "new_sqlite_classes": ["UserData"]
+    }
+  ],
   "exports": {
     "UserData": {
       "type": "durable-object",
