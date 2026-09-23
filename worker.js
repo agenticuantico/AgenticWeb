@@ -719,6 +719,47 @@ async function googleUserFromCredential(credential,env){const client=String(env.
 
 async function authenticatedUser(request,env){const token=String(request.headers.get("Authorization")||"").replace(/^Bearer\s+/i,"");return verifySession(token,authSecret(env))}
 
+function safeUploadName(name){
+  return String(name||"archivo").replace(/[^a-zA-Z0-9._-]+/g,"-").replace(/^-+|-+$/g,"").slice(0,120)||"archivo";
+}
+async function handleUpload(request, env){
+  if(!env.UPLOADS)return json({ok:false,error:"storage_not_configured",message:"El almacenamiento de archivos todavía no está configurado en Cloudflare R2."},503,request);
+  const type=String(request.headers.get("X-File-Type")||"application/octet-stream").slice(0,120);
+  const name=safeUploadName(request.headers.get("X-File-Name")||"archivo");
+  const size=Number(request.headers.get("Content-Length")||0);
+  const max=100*1024*1024;
+  if(size<=0||size>max)return json({ok:false,error:"file_too_large",message:"El archivo debe pesar entre 1 byte y 100 MB."},413,request);
+  const allowed=/^(image|video|audio)\\//i.test(type)||/^application\\/pdf$/i.test(type)||/^(text|application)\\//i.test(type);
+  if(!allowed)return json({ok:false,error:"file_type_not_allowed",message:"Este tipo de archivo no está habilitado."},415,request);
+  const session=String(request.headers.get("X-Guest-Session")||"guest").replace(/[^a-zA-Z0-9_-]/g,"").slice(0,80)||"guest";
+  const key="uploads/"+session+"/"+crypto.randomUUID()+"-"+name;
+  try{
+    await env.UPLOADS.put(key,request.body,{httpMetadata:{contentType:type,contentDisposition:"inline; filename=\\""+name+"\\"",cacheControl:"private, max-age=3600"},customMetadata:{originalName:name,contentType:type,uploadedAt:new Date().toISOString(),session}});
+    return json({ok:true,key,name,type,size,url:"/v1/uploads/"+encodeURIComponent(key)},201,request);
+  }catch(error){
+    return json({ok:false,error:"upload_failed",message:"No se pudo guardar el archivo."},502,request);
+  }
+}
+async function handleUploadedObject(request, env, key){
+  if(!env.UPLOADS)return json({ok:false,error:"storage_not_configured"},503,request);
+  const object=await env.UPLOADS.get(key,{range:request.headers});
+  if(!object)return json({ok:false,error:"not_found",message:"Archivo no encontrado."},404,request);
+  const headers=new Headers();
+  object.writeHttpMetadata(headers); headers.set("etag",object.httpEtag); headers.set("cache-control","private, max-age=3600");
+  return new Response(object.body,{status:200,headers});
+}
+async function generateImage(request, env){
+  if(!env.AI||typeof env.AI.run!=="function")return json({ok:false,error:"image_generation_unavailable",message:"La generación de imágenes no está disponible en este momento."},503,request);
+  const body=await request.json().catch(()=>({})); const prompt=String(body?.prompt||"").trim();
+  if(!prompt)return json({ok:false,error:"invalid_request",message:"Describí la imagen que querés generar."},400,request);
+  const model=String(env.CF_IMAGE_MODEL||"@cf/black-forest-labs/flux-2-klein-4b").trim();
+  try{
+    const result=await env.AI.run(model,{prompt,seed:Math.floor(Math.random()*2147483647)});
+    const image=String(result?.image||""); if(!image)throw new Error("empty");
+    return json({ok:true,image:"data:image/jpeg;base64,"+image,model,provider:"Cloudflare Workers AI"},200,request);
+  }catch{return json({ok:false,error:"image_generation_failed",message:"No se pudo generar la imagen."},502,request);}
+}
+
 async function handleApi(request, env) {
   const url = new URL(request.url);
 
@@ -800,8 +841,15 @@ async function handleApi(request, env) {
     }
   }
 
+  if (url.pathname === "/v1/uploads" && request.method === "POST") return handleUpload(request, env);
+  if (url.pathname.startsWith("/v1/uploads/") && request.method === "GET") {
+    const key=decodeURIComponent(url.pathname.slice("/v1/uploads/".length));
+    return handleUploadedObject(request,env,key);
+  }
+  if (url.pathname === "/v1/public/image-generation" && request.method === "POST") return generateImage(request,env);
+
   if (url.pathname === "/v1/public/model" && request.method === "GET") {
-    return json({ok:true,display_name:"AgentiQ",capabilities:["conversación","visión","archivos","agentes","CodQ"]},200,request);
+    return json({ok:true,display_name:"AgentiQ",capabilities:["conversación","visión","archivos","imágenes","agentes","CodQ","GitHub","Cloudflare","Hugging Face"]},200,request);
   }
 
   if (url.pathname === "/v1/public/web-design" && request.method === "POST") {
