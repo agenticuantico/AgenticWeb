@@ -587,6 +587,7 @@ const PLANS = [
 ];
 function envSafe(name,fallback){return typeof globalThis!=="undefined" && globalThis.__aqEnv?.[name] || fallback}
 function planById(id){return PLANS.find(p=>p.id===String(id))||null}
+function authSecret(env){return String(env.AUTH_SESSION_SECRET||env.AGENTIC_ADMIN_KEY||"").trim()}
 function cleanUser(u){
   if(!u)return null;
   return {sub:u.sub,email:u.email,name:u.name||u.email,picture:u.picture||"",provider:u.provider||"password",plan:u.plan||"free",planName:u.planName||"Sin plan",planExpiresAt:Number(u.planExpiresAt)||0,subscription:u.subscription||null,createdAt:u.createdAt||0};
@@ -702,7 +703,7 @@ async function billingWebhook(request,env){
 
 async function googleUserFromCredential(credential,env){const client=String(env.GOOGLE_CLIENT_ID||"").trim();if(!client)return null;const r=await fetch("https://oauth2.googleapis.com/tokeninfo?id_token="+encodeURIComponent(credential));if(!r.ok)return null;const d=await r.json();if(d.aud!==client||!(d.iss==="https://accounts.google.com"||d.iss==="accounts.google.com")||d.email_verified!=="true"||!d.sub||!d.email)return null;if(d.exp&&Number(d.exp)<Math.floor(Date.now()/1000))return null;return{sub:String(d.sub),email:String(d.email),name:String(d.name||d.email.split("@")[0]),picture:String(d.picture||"")}}
 
-async function authenticatedUser(request,env){const token=String(request.headers.get("Authorization")||"").replace(/^Bearer\s+/i,"");return verifySession(token,String(env.AUTH_SESSION_SECRET||env.HF_TOKEN||""))}
+async function authenticatedUser(request,env){const token=String(request.headers.get("Authorization")||"").replace(/^Bearer\s+/i,"");return verifySession(token,authSecret(env))}
 
 async function handleApi(request, env) {
   const url = new URL(request.url);
@@ -728,13 +729,13 @@ async function handleApi(request, env) {
   }
 
   if (url.pathname === "/v1/auth/google" && request.method === "POST") {
-    if(!String(env.GOOGLE_CLIENT_ID||"").trim()||!String(env.AUTH_SESSION_SECRET||"").trim()) return json({ok:false,error:"auth_not_configured",message:"El acceso con Google todavía no está configurado."},503,request);
+    if(!String(env.GOOGLE_CLIENT_ID||"").trim()||!authSecret(env).trim()) return json({ok:false,error:"auth_not_configured",message:"El acceso con Google todavía no está configurado."},503,request);
     let body;try{body=await request.json()}catch{return json({ok:false,error:"invalid_request",message:"Solicitud inválida."},400,request)}
     const google=await googleUserFromCredential(String(body?.credential||""),env);if(!google)return json({ok:false,error:"google_auth_failed",message:"No se pudo validar la cuenta de Google."},401,request);
     let user=await getUserRecord(env,google.sub);
     if(!user){user={...google,provider:"google",plan:"free",planName:"Sin plan",planExpiresAt:0,createdAt:Date.now()};await putUserRecord(env,user)}
     else {user={...user,...google,provider:"google"};await putUserRecord(env,user)}
-    const token=await createSession(user,String(env.AUTH_SESSION_SECRET));return json({ok:true,token,user:cleanUser(user),plan:publicPlan(user)},200,request);
+    const token=await createSession(user,authSecret(env));return json({ok:true,token,user:cleanUser(user),plan:publicPlan(user)},200,request);
   }
 
   if (url.pathname === "/v1/auth/me" && request.method === "GET") {
@@ -743,7 +744,7 @@ async function handleApi(request, env) {
   }
 
   if (url.pathname === "/v1/auth/register" && request.method === "POST") {
-    if(!String(env.AUTH_SESSION_SECRET||"").trim())return json({ok:false,error:"auth_not_configured"},503,request);
+    if(!authSecret(env))return json({ok:false,error:"auth_not_configured"},503,request);
     const body=await request.json().catch(()=>({}));const email=String(body?.email||"").trim().toLowerCase(),name=String(body?.name||"").trim().slice(0,80),password=String(body?.password||"");
     if(!validEmail(email)||password.length<8)return json({ok:false,error:"invalid_credentials",message:"Usá un correo válido y una clave de al menos 8 caracteres."},400,request);
     const stub=await authStore(env);if(!stub)return json({ok:false,error:"auth_store_unavailable"},503,request);
