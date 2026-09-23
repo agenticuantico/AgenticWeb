@@ -394,3 +394,19 @@ body.aq-neural-os.aq-error .aq-status-dot{background:#ff8b8b;box-shadow:0 0 15px
   body.aq-neural-os *::before,
   body.aq-neural-os *::after{animation-duration:.001ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.001ms!important}
 }
+
+body.aq-neural-os .aq-three-core{
+  position:absolute;
+  left:50%;top:50%;
+  width:100%;height:100%;
+  transform:translate(-50%,-50%);
+  display:block;
+  pointer-events:none;
+  filter:drop-shadow(0 0 24px rgba(80,215,255,.12));
+}
+body.aq-neural-os.aq-three-active #avatarCanvas{opacity:0!important}
+body.aq-neural-os.aq-three-active .avatar-aura{opacity:.72}
+@media (prefers-reduced-motion:reduce){
+  body.aq-neural-os .aq-three-core{display:none}
+  body.aq-neural-os.aq-three-active #avatarCanvas{opacity:1!important}
+}
