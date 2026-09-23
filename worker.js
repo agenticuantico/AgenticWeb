@@ -88,6 +88,24 @@ async function callCloudflareAI(request, env) {
   return null;
 }
 
+
+async function callWebDesigner(request, env) {
+  const token=String(env.HF_TOKEN||"").trim();
+  if(!token)return null;
+  const model=String(env.HF_WEB_DESIGN_MODEL||"Situus/STARK-WEB-12B-v1.7").trim();
+  const endpoint=String(env.HF_API_URL||"https://router.huggingface.co/v1/chat/completions").trim();
+  const body=await request.json().catch(()=>({}));
+  const prompt=String(body.prompt||"").trim();
+  if(!prompt)return json({ok:false,error:"invalid_request",message:"Describí el sitio que querés crear."},400,request);
+  const system="Sos AgentiQ Web Studio, diseñador UI/UX premium y frontend engineer especializado en experiencias web cinematográficas, 3D y WebGL. Tomá como referencia de nivel visual sitios modernos de diseño digital, pero NO copies código, textos, marcas ni assets propietarios. Generá un único documento HTML autocontenido con CSS y JavaScript inline. Debe ser responsive, accesible, rápido y ejecutable dentro de un iframe sandbox. Priorizá composición editorial premium, profundidad, glassmorphism sobrio, microinteracciones, motion, gradientes, tipografía elegante y 3D procedural con Canvas/WebGL cuando aporte valor. No uses secretos ni llamadas a APIs externas. Respondé SOLO con HTML completo.";
+  const upstream=await fetch(endpoint,{method:"POST",headers:{"Authorization":"Bearer "+token,"Content-Type":"application/json"},body:JSON.stringify({model,messages:[{role:"system",content:system},{role:"user",content:prompt}],temperature:.65,max_tokens:6000,stream:false})});
+  if(!upstream.ok)return null;
+  const data=await upstream.json();
+  const html=data?.choices?.[0]?.message?.content;
+  if(typeof html!=="string"||!html.trim())return null;
+  return json({ok:true,html:html.replace(/^\s*\`\`\`html\s*/i,"").replace(/\s*\`\`\`\s*$/,""),model,provider:"Hugging Face Inference Providers"},200,request);
+}
+
 async function callHuggingFace(request, env) {
   const token = String(env.HF_TOKEN || "").trim();
   const model = String(env.HF_MODEL || "Qwen/Qwen3.8-27B").trim();
@@ -394,6 +412,11 @@ async function handleApi(request, env) {
 
   if (url.pathname === "/v1/public/model" && request.method === "GET") {
     return json({ok:true,display_name:"AgentiQ",capabilities:["conversación","visión","archivos","agentes","CodQ"]},200,request);
+  }
+
+  if (url.pathname === "/v1/public/web-design" && request.method === "POST") {
+    try { const response=await callWebDesigner(request.clone(),env); if(response)return response; } catch {}
+    return json({ok:false,error:"web_designer_unavailable",message:"El diseñador web no está disponible temporalmente."},502,request);
   }
 
   if (url.pathname === "/v1/public/codex" && request.method === "POST") {
