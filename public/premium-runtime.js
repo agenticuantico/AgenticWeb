@@ -27,7 +27,8 @@
   if (!("attachments" in window)) window.attachments = [];
   if (!("recognition" in window)) window.recognition = null;
 
-  const API=(window.AGENTICUANTUICO_API_URL||"https://agenticweb.agenticuantico.workers.dev").replace(/\/$/,"");
+  const API=(window.AGENTICUANTUICO_API_URL||location.origin).replace(/\/$/,"");
+  const API_FALLBACK="https://agenticweb.agenticuantico.workers.dev";
   const $=id=>document.getElementById(id);
   const input=$("input"), send=$("send"), messages=$("messages"), attach=$("attachInput");
   const mic=$("voiceInput"), stop=$("stopVoice"), status=$("voiceStatus"), voiceName=$("voiceName");
@@ -107,18 +108,20 @@
         }))
         .filter(x=>x.content&&x.content!=="Procesando…");
 
-      const res=await fetch(API+"/v1/public/chat",{
-        method:"POST",
-        headers:{"content-type":"application/json","accept":"application/json"},
-        body:JSON.stringify({
-          message:prompt,
-          history,
-          attachments:filePayloads,
-          conversation_id:window.crypto?.randomUUID?.()||String(Date.now()),
-          model:"AgentiQ"
-        })
-      });
-
+      const payload={
+        message:prompt,
+        history,
+        attachments:filePayloads,
+        conversation_id:window.crypto?.randomUUID?.()||String(Date.now()),
+        model:"AgentiQ"
+      };
+      const requestOptions={method:"POST",headers:{"content-type":"application/json","accept":"application/json"},body:JSON.stringify(payload)};
+      let res=await fetch(API+"/v1/public/chat",requestOptions);
+      // If the custom domain is still serving the old asset route, retry the API
+      // directly on the Worker endpoint instead of leaving the user with 405.
+      if((res.status===405||res.status===404||res.status===502) && API!==API_FALLBACK){
+        res=await fetch(API_FALLBACK+"/v1/public/chat",requestOptions);
+      }
       let data={};try{data=await res.json()}catch{}
       if(!res.ok||!data.answer)throw new Error(data.error||data.message||("HTTP "+res.status));
 
