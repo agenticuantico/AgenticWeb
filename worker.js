@@ -620,7 +620,12 @@ async function handleApi(request, env) {
     const id=env.USER_DATA.idFromName(user.sub),stub=env.USER_DATA.get(id);
     if(request.method==="GET"){const r=await stub.fetch("https://user-data/conversations");const data=await r.json();return json({ok:true,conversations:data},200,request)}
     if(request.method==="POST"){const body=await request.json().catch(()=>({}));const r=await stub.fetch("https://user-data/conversations",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body.conversations||[])});return json(await r.json(),200,request)}
-    if(request.method==="DELETE"){const r=await stub.fetch("https://user-data/conversations",{method:"DELETE"});return json(await r.json(),200,request)}
+    if(request.method==="DELETE"){
+      const id=String(url.searchParams.get("id")||"").trim();
+      const target="https://user-data/conversations"+(id?("?id="+encodeURIComponent(id)):"");
+      const r=await stub.fetch(target,{method:"DELETE"});
+      return json(await r.json(),r.status,request);
+    }
   }
 
   if (url.pathname === "/v1/public/model" && request.method === "GET") {
@@ -761,7 +766,17 @@ export class UserData extends DurableObject {
       await this.ctx.storage.put("conversations",data);
       return new Response(JSON.stringify({ok:true,count:data.length}),{headers:{"content-type":"application/json"}});
     }
-    if(url.pathname==="/conversations" && request.method==="DELETE"){await this.ctx.storage.delete("conversations");return new Response(JSON.stringify({ok:true}),{headers:{"content-type":"application/json"}})}
+    if(url.pathname==="/conversations" && request.method==="DELETE"){
+      const id=String(url.searchParams.get("id")||"").trim();
+      if(!id){
+        await this.ctx.storage.delete("conversations");
+        return new Response(JSON.stringify({ok:true,deleted:"all"}),{headers:{"content-type":"application/json"}});
+      }
+      const current=await this.ctx.storage.get("conversations")||[];
+      const next=Array.isArray(current)?current.filter(c=>c?.id!==id):[];
+      await this.ctx.storage.put("conversations",next);
+      return new Response(JSON.stringify({ok:true,deleted:id,count:next.length}),{headers:{"content-type":"application/json"}});
+    }
     return new Response("not_found",{status:404});
   }
 }
