@@ -21,7 +21,7 @@ Esta rama reúne la capa visual inmersiva y la base de media/voz del producto.
 
 ## Generación
 - Imagen: Cloudflare Workers AI mediante el binding `AI` y `CF_IMAGE_MODEL`.
-- Video: queda preparado como capacidad de proveedor, pero no se inventa un endpoint si el proveedor/modelo no está configurado. Hugging Face documenta text-to-video mediante Inference Providers y modelos como Wan/LTX/Hunyuan; la integración de producción debe usar su cliente oficial o un worker/sidecar que gestione el trabajo asíncrono. citeturn0search0turn0search2
+- Video: queda preparado como capacidad de proveedor, pero no se inventa un endpoint si el proveedor/modelo no está configurado. Hugging Face documenta text-to-video mediante Inference Providers y modelos como Wan/LTX/Hunyuan; la integración de producción debe usar su cliente oficial o un worker/sidecar que gestione el trabajo asíncrono.
 
 ## Cloudflare
 Crear el bucket antes de desplegar:
