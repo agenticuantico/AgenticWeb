@@ -120,25 +120,7 @@
   </div>
 </div>
 
-<section id="aiDesignLayer" class="ai-design-layer" aria-label="Experiencia AgentiCuantico">
-  <div class="ai-design-noise" aria-hidden="true"></div>
-  <div class="ai-design-copy">
-    <span class="ai-kicker">AGENTICUANTICO · NEURAL DESIGN ENGINE</span>
-    <h1>Inteligencia que <em>piensa</em>, diseña y evoluciona.</h1>
-    <p>Un cerebro neuronal 3D conectado a un estudio creativo capaz de convertir tus instrucciones en experiencias web reales.</p>
-    <div class="ai-design-actions">
-      <button type="button" id="aiDesignChat">Hablar con AgentiQ</button>
-      <button type="button" id="aiDesignStudio" class="ghost">Abrir Web Studio</button>
-    </div>
-    <div class="ai-design-metrics"><span><b>3D</b><small>Neural Core</small></span><span><b>BUILD</b><small>GitHub → Cloudflare</small></span><span><b>AI</b><small>Qwen Coder</small></span></div>
-  </div>
-  <div class="ai-design-brain">
-    <div class="ai-orbit orbit-a"></div><div class="ai-orbit orbit-b"></div>
-    <canvas id="brain-canvas" aria-label="Cerebro neuronal 3D interactivo"></canvas>
-    <div class="ai-brain-label"><span></span>NEURAL CORE <b>ONLINE</b></div>
-  </div>
-</section>
-<div id="aiDesignMount" class="ai-design-mount" aria-live="polite"></div><div id="backdrop" class="backdrop hidden"></div>
+<div id="backdrop" class="backdrop hidden"></div>
 <div class="shell">
   <aside id="sidebar" class="side glass">
   <div class="brand brand-reference">
@@ -154,12 +136,11 @@
     <button class="nav-item" data-view="coder"><span class="nav-icon" data-icon="code"></span><span><b>CodQ</b><small>Programación asistida</small></span></button>
     <button class="nav-item" data-view="projects"><span class="nav-icon" data-icon="projects"></span><span><b>Proyectos</b><small>Tus desarrollos</small></span></button>
     <button class="nav-item" data-view="skills"><span class="nav-icon" data-icon="spark"></span><span><b>Skills</b><small>Habilidades y herramientas</small></span></button>
-    <button class="nav-item" id="openWebStudio"><span class="nav-icon">✦</span><span><b>Web Studio</b><small>Diseño 3D con IA</small></span></button>
     <button class="nav-item" data-view="memory"><span class="nav-icon">◉</span><span><b>Memoria</b><small>Tu conocimiento</small></span></button>
     <button class="nav-item" data-view="account"><span class="nav-icon" data-icon="user"></span><span><b>Perfil</b><small>Cuenta y configuración</small></span></button>
   </nav>
   <section class="conversation-history reference-history">
-    <div class="history-heading"><span>HISTORIAL DE CONVERSACIONES</span><button id="clearHistory" type="button">Limpiar</button></div>
+    <div class="history-heading"><span>CONVERSACIONES RECIENTES</span><button id="clearHistory" type="button">Limpiar</button></div>
     <div id="conversationList"></div>
   </section>
   <div class="side-promo">
@@ -197,7 +178,7 @@
         <div class="agent-mini-avatar">AQ</div>
         <div><b>AgentiQ</b><small><span class="status-dot"></span> En línea</small></div>
         <span class="model-chip">AgentiQ · Motor agéntico</span>
-        <span class="webgl-chip">NEURAL CORE · 3D</span>
+        <span class="webgl-chip">CEREBRO · 3D</span>
       </div>
       <div id="messages" class="messages reference-messages">
         <div class="msg assistant reference-welcome"><b>¡Hola! 👋 Soy AgentiQ, tu asistente de IA cuántica.</b><br>Estoy lista para ayudarte con todo lo que necesites. Podés hablarme, escucharme, crear agentes, trabajar en equipo y mucho más.<br><small>¿Qué te gustaría hacer hoy?</small></div>
@@ -216,7 +197,7 @@
         <button data-quick="coder">⌘ Analizar este proyecto</button>
         <button data-quick="skills">◇ Explorar habilidades</button>
         </div>
-      <div class="memory">● Historial local por conversación · No mostramos secretos ni información interna.</div>
+      <div class="memory">Conversaciones guardadas en tu cuenta o en este dispositivo · Nunca mostramos secretos del sistema.</div>
     </div>
 
     <aside class="brain-stage glass reference-stage" aria-label="Avatar 3D de AgentiCuantico">
@@ -266,59 +247,6 @@
     </aside>
   </div>
 </section>
-<section id="webStudio" class="web-studio glass hidden" aria-label="AgentiQ Web Studio y Designer Agent">
-  <div class="studio-head">
-    <div><b>AgentiQ Web Studio</b><small>DESIGNER AGENT · REPO ANALYSIS · UI/UX · 3D · GITHUB</small></div>
-    <span id="webDesignStatus">Listo para diseñar</span>
-  </div>
-
-  <div class="designer-toolbar">
-    <button id="designerScan" class="studio-tool">1 · Analizar repositorio</button>
-    <button id="designerPlan" class="studio-tool" disabled>2 · Generar plan</button>
-    <button id="designerPublish" class="studio-publish" disabled>3 · Publicar en GitHub</button>
-    <span id="designerStats">AgenticWeb · main</span>
-  </div>
-
-  <textarea id="webDesignPrompt" class="designer-prompt" placeholder="Indicá el rediseño completo. Ejemplo: convertí AgenticWeb en una experiencia premium 3D, con cerebro neuronal espectral, chat moderno, motion, responsive, accesibilidad y rendimiento móvil. Conservá toda la funcionalidad existente."></textarea>
-
-  <div class="studio-build-row designer-key-row">
-    <input id="webBuildKey" type="password" autocomplete="off" placeholder="Clave de administrador">
-    <button id="designerRefresh" class="studio-tool" type="button">↻ Escanear de nuevo</button>
-  </div>
-
-  <div class="studio-presets">
-    <button data-design-prompt="Rediseño integral premium 3D de AgenticWeb: cerebro neuronal espectral vivo, partículas, conexiones, pulsos al hablar/pensar, UI de chat moderna, responsive móvil, accesibilidad, microinteracciones y rendimiento. Conservá chat, voz, adjuntos, login y backend.">Neural 3D integral</button>
-    <button data-design-prompt="Rediseño visual cinematográfico de la landing y dashboard: jerarquía editorial, glassmorphism sobrio, motion, navegación clara, cerebro 3D y experiencia premium. No rompas ninguna función existente.">Cinematic UI</button>
-    <button data-design-prompt="Auditoría y mejora profunda de UX/UI, responsive, accesibilidad, performance y arquitectura visual 3D. Eliminá duplicaciones y bloqueos visuales sin tocar secretos.">UX + Performance</button>
-  </div>
-
-  <div class="designer-grid">
-    <section class="designer-card">
-      <div class="designer-card-head"><b>Plan de cambios</b><span id="designerPlanMeta">Sin análisis</span></div>
-      <div id="designerSummary" class="designer-summary">Analizá el repositorio para comenzar.</div>
-      <div id="designerFiles" class="designer-files"></div>
-      <details class="designer-details"><summary>Arquitectura propuesta</summary><pre id="designerArchitecture"></pre></details>
-      <details class="designer-details"><summary>Pruebas previstas</summary><pre id="designerTests"></pre></details>
-    </section>
-    <section class="designer-card designer-preview-card">
-      <div class="designer-card-head"><b>Vista previa conceptual</b><span>Sin publicar</span></div>
-      <iframe id="designerPreview" sandbox="allow-scripts" title="Vista previa del rediseño"></iframe>
-    </section>
-  </div>
-
-  <details class="designer-details designer-code-details">
-    <summary>Ver cambios multiarchivo generados</summary>
-    <div id="designerChanges"></div>
-  </details>
-
-  <div class="studio-footer">
-    <span id="designerPublishStatus">Nada publicado todavía.</span>
-    <button id="webDesignRun" class="studio-run" type="button">✦ Web Studio rápido</button>
-  </div>
-
-  <iframe id="webDesignPreview" sandbox="allow-scripts" title="Vista previa rápida del diseño generado"></iframe>
-  <details class="legacy-code"><summary>Ver código generado por Web Studio rápido</summary><textarea id="webDesignCode" readonly></textarea></details>
-</section>
 <section id="panel" class="panel hidden"></section></main>
 </div>
 <div id="accountOverlay" class="account-overlay hidden" aria-hidden="true">
@@ -363,11 +291,8 @@
 <script>window.AGENTICUANTICO_API_URL="https://agenticweb.agenticuantico.workers.dev";</script>
 <script type="module" src="./app.js?v=20260923-01"></script>
 <script src="./premium-runtime.js?v=20260923-03"></script>
-<script src="./web-design-studio.js?v=20260923-04"></script>
-<script src="./designer-agent.js?v=20260923-01"></script>
-<script>addEventListener("DOMContentLoaded",()=>document.getElementById("openWebStudio")?.addEventListener("click",()=>document.getElementById("webStudio")?.classList.toggle("hidden")));</script>
 <script src="./account-billing.js?v=20260923-01" defer></script>
 <script src="./experience-enhancements.js?v=20260923-01" defer></script>
-<script src="./ai-design-layer.js?v=20260923-01"></script>\n<script src="./cinematic-parallax.js?v=20260923-01"></script>
+<script src="./cinematic-parallax.js?v=20260923-01"></script>
 </body>
 </html>
