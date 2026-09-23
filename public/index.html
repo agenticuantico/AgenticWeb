@@ -28,6 +28,7 @@
 <link rel="stylesheet" href="https://db.onlinewebfonts.com/c/1aa3377e489837a26d019bba501e779d?family=HelveticaNowDisplayW01-Rg">
 <link rel="stylesheet" href="./styles.css?v=20260923-07">
 <link rel="stylesheet" href="./experience-enhancements.css?v=20260923-01">
+<link rel="stylesheet" href="./immersive-neural-redesign.css?v=20260923-01">
 <title>AgentiCuantico — Inteligencia agéntica para crear y programar</title>
 <script type="application/ld+json">
 {
@@ -185,10 +186,10 @@
       </div>
       <div id="attachmentTray" class="attachment-tray hidden"></div>
       <form id="composer" class="composer glass reference-composer">
-        <input id="attachInput" type="file" hidden multiple accept="image/*,.txt,.md,.json,.js,.ts,.css,.html,.py,.csv,.xml,.yaml,.yml">
-        <button id="attachButton" class="attach-btn" type="button" aria-label="Adjuntar fotos o archivos">＋</button>
+        <input id="attachInput" type="file" hidden multiple accept="image/*,video/*,audio/*,application/pdf,.txt,.md,.json,.js,.ts,.css,.html,.py,.csv,.xml,.yaml,.yml,.zip,.doc,.docx,.xls,.xlsx,.ppt,.pptx">
+        <button id="attachButton" class="attach-btn" type="button" aria-label="Subir foto, video, audio, PDF o archivo">＋</button><button id="imageGenerateButton" class="attach-btn" type="button" aria-label="Generar imagen con IA" title="Generar imagen con IA">✦</button>
         <textarea id="input" rows="1" autocomplete="off" placeholder="Escribí tu mensaje o usá la voz…"></textarea>
-        <button id="voiceInput" class="voice-btn" type="button" aria-label="Hablar con AgentiCuantico"><span class="mic-glyph" aria-hidden="true"></span></button>
+        <button id="voiceInput" class="voice-btn" type="button" aria-label="Hablar con AgentiCuantico"><span class="mic-glyph" aria-hidden="true"></span></button><button id="voiceModeToggle" class="voice-btn" type="button" aria-label="Activar o desactivar voz de respuesta" aria-pressed="false" title="Voz de respuesta: desactivada">🔇</button>
         <button id="send" class="send" type="submit" aria-label="Enviar">➤</button>
       </form>
       <div class="reference-quick">
@@ -218,7 +219,7 @@
     <aside id="voicePanel" class="reference-right glass" aria-label="Centro de voz">
       <div class="right-section">
         <div class="right-head"><b>◖ Seleccionar Voz</b><button id="closeVoice" class="menu-btn" type="button" aria-label="Cerrar">×</button></div>
-        <div class="voice-tabs"><button class="voice-tab active" data-voice-gender="female">Femenina</button><button class="voice-tab" data-voice-gender="male">Masculina</button></div>
+        <div class="voice-tabs"><button class="voice-tab active" data-voice-gender="female">Femenina</button><button class="voice-tab" data-voice-gender="male">Masculina</button></div><div class="voice-preview-row"><button id="previewVoice" class="more-voices" type="button">▶ Escuchar voz seleccionada</button><button id="voiceModePanel" class="more-voices" type="button" aria-pressed="false">🔇 Voz automática: OFF</button></div>
         <div id="voiceList" class="voice-list"></div>
         <button class="more-voices" type="button">＋ Ver más voces</button>
       </div>
@@ -294,5 +295,6 @@
 <script src="./account-billing.js?v=20260923-01" defer></script>
 <script src="./experience-enhancements.js?v=20260923-01" defer></script>
 <script src="./cinematic-parallax.js?v=20260923-01"></script>
+<script src="./immersive-neural-redesign.js?v=20260923-01"></script>
 </body>
 </html>

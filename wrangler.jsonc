@@ -66,9 +66,16 @@
     "PAYPAL_PLAN_STARTER": "",
     "PAYPAL_PLAN_PRO": "",
     "PAYPAL_PLAN_ULTRA": "",
-    "PAYPAL_PLAN_BUSINESS": ""
+    "PAYPAL_PLAN_BUSINESS": "",
+    "CF_IMAGE_MODEL": "@cf/black-forest-labs/flux-2-klein-4b"
   },
   "ai": {
     "binding": "AI"
-  }
+  },
+  "r2_buckets": [
+    {
+      "binding": "UPLOADS",
+      "bucket_name": "agenticuantico-uploads"
+    }
+  ]
 }

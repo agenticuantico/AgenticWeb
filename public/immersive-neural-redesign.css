@@ -1,0 +1,127 @@
+/* AgentiCuantico — Immersive Neural Interface
+   Full visual layer: the existing application logic remains intact. */
+:root{
+  --void:#020309;--ink:#f7fbff;--dim:#8793a8;--hair:#ffffff12;
+  --cyan:#6ff6ff;--violet:#8c72ff;--blue:#4b8cff;--mint:#73ffd6;
+  --glass:rgba(7,10,18,.58);--ease:cubic-bezier(.16,1,.3,1);
+}
+html,body{background:var(--void)!important}
+body{font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important}
+.scene{opacity:.95!important;background:
+ radial-gradient(ellipse at 50% 42%,rgba(83,68,255,.13),transparent 33%),
+ radial-gradient(ellipse at 80% 20%,rgba(54,226,255,.09),transparent 28%),
+ #020309!important}
+.scene .grid{opacity:.16;transform:perspective(900px) rotateX(68deg) scale(1.4);background-size:80px 80px}
+.scene .ambient{filter:blur(130px);opacity:.18}
+.shell{display:block!important;min-height:100svh}
+.side,.topbar,.reference-right{display:none!important}
+.main{width:100%;height:100svh;min-height:0}
+.chat.reference-chat{width:100%;height:100svh;padding:0!important;margin:0!important}
+.chat-layout.reference-layout{height:100%;display:block!important;position:relative;overflow:hidden}
+.conversation-pane.reference-conversation{
+ position:absolute;z-index:20;left:clamp(18px,5vw,76px);bottom:clamp(18px,4vh,42px);
+ width:min(700px,calc(100vw - 36px));height:auto;display:flex;flex-direction:column;
+ pointer-events:none;
+}
+.conversation-pane>*{pointer-events:auto}
+.agent-header{width:max-content;max-width:calc(100% - 70px);padding:9px 14px!important;border-radius:999px!important;
+ background:rgba(3,7,14,.54)!important;border-color:rgba(255,255,255,.09)!important;
+ box-shadow:0 12px 50px #0008!important;backdrop-filter:blur(24px)!important}
+.agent-header .model-chip,.agent-header .webgl-chip{display:none}
+.agent-header .agent-mini-avatar{width:30px;height:30px;font-size:10px}
+.agent-header b{font-size:12px;letter-spacing:.04em}
+.agent-header small{font-size:9px}
+.reference-messages{
+ max-height:min(48vh,560px);flex:none;overflow:auto;padding:12px 5px 15px;
+ mask-image:linear-gradient(to bottom,transparent 0,#000 9%,#000 92%,transparent);
+ scrollbar-width:none;
+}
+.reference-messages::-webkit-scrollbar{display:none}
+.reference-messages .msg{max-width:min(620px,92%);font-size:14px;line-height:1.6;
+ border-radius:22px!important;background:rgba(5,9,17,.68)!important;
+ border:1px solid rgba(255,255,255,.09)!important;box-shadow:0 18px 70px #0008!important;
+ backdrop-filter:blur(22px)}
+.reference-messages .msg.user{background:linear-gradient(135deg,rgba(67,73,150,.55),rgba(14,20,38,.78))!important}
+.reference-welcome{display:none}
+.reference-composer{
+ position:relative;display:flex;align-items:flex-end;padding:8px!important;gap:5px!important;
+ border-radius:28px!important;background:rgba(5,8,15,.72)!important;
+ border:1px solid rgba(255,255,255,.13)!important;box-shadow:0 20px 80px #0009,0 0 0 1px #ffffff05 inset!important;
+ backdrop-filter:blur(30px)!important;
+}
+.reference-composer:before{content:"";position:absolute;inset:-1px;border-radius:inherit;padding:1px;
+ background:linear-gradient(90deg,transparent,rgba(111,246,255,.28),rgba(140,114,255,.28),transparent);
+ -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
+.reference-composer textarea{min-height:48px;padding:14px 10px!important;font-size:14px}
+.reference-composer .attach-btn,.reference-composer .voice-btn,.reference-composer .send{
+ width:46px!important;height:46px!important;border-radius:18px!important;flex:0 0 46px;z-index:2}
+.reference-composer .attach-btn,.reference-composer .voice-btn{background:rgba(255,255,255,.04)!important;border:1px solid #ffffff0d!important;color:#aeb9cc!important}
+.reference-composer .send{background:linear-gradient(145deg,#efffff,#b7d9ff)!important}
+.reference-quick{display:flex;gap:7px;overflow:auto;padding:9px 2px 0;scrollbar-width:none}
+.reference-quick button{white-space:nowrap;border:1px solid #ffffff0b;background:#ffffff04;color:#7f8da5;border-radius:999px;padding:7px 10px;font-size:10px}
+.memory{font-size:8px!important;opacity:.55;padding:6px!important}
+.brain-stage.reference-stage{
+ position:absolute;inset:0;z-index:2;border:0!important;background:transparent!important;box-shadow:none!important;
+ display:flex;align-items:center;justify-content:center;overflow:hidden;
+}
+.stage-top{position:absolute;top:28px;left:clamp(20px,5vw,76px);z-index:8}
+.stage-top b{font-size:clamp(13px,1.3vw,17px);font-weight:650;letter-spacing:.03em}
+.stage-top small{display:block;color:#66748c;font-size:9px;letter-spacing:.12em;text-transform:uppercase;margin-top:5px}
+.stage-live{position:absolute;left:0;top:43px;font-size:8px;letter-spacing:.18em;color:var(--mint);white-space:nowrap}
+.stage-floating-badge{position:absolute;top:31px;right:clamp(20px,5vw,76px);font-size:9px;letter-spacing:.16em;color:#7d899d;text-transform:uppercase}
+.quantum-anchor-label{position:absolute;z-index:7;right:clamp(22px,6vw,92px);bottom:28%;text-align:left;display:grid;gap:4px;opacity:.8}
+.quantum-anchor-label b{font-size:9px;letter-spacing:.18em;color:#b5c0d3}
+.quantum-anchor-label small{font-size:8px;color:#5e6c83}
+.qa-pulse{width:5px;height:5px;border-radius:50%;background:var(--cyan);box-shadow:0 0 18px var(--cyan);position:absolute;left:-13px;top:2px}
+.robot-avatar.reference-avatar{
+ width:min(760px,72vw)!important;height:min(760px,72vw)!important;max-width:none!important;max-height:none!important;
+ position:absolute!important;left:50%;top:48%;transform:translate(-50%,-50%)!important;
+ background:transparent!important;border:0!important;box-shadow:none!important;overflow:visible!important;
+}
+.robot-avatar.reference-avatar:before{content:"";position:absolute;inset:13%;border-radius:50%;background:
+ radial-gradient(circle,rgba(98,227,255,.10),transparent 42%),
+ conic-gradient(from 20deg,transparent 0 20%,rgba(111,246,255,.12) 21% 21.5%,transparent 22% 48%,rgba(140,114,255,.13) 49% 49.5%,transparent 50%);
+ filter:blur(2px);animation:aqOrbit 18s linear infinite;pointer-events:none}
+.robot-avatar .avatar-aura{opacity:.8!important;filter:blur(30px)!important}
+.robot-avatar canvas{position:absolute!important;inset:0!important;width:100%!important;height:100%!important}
+.avatar-3d-hud{position:absolute!important;left:50%;bottom:18%;transform:translateX(-50%);display:flex;gap:6px;opacity:.55}
+.hud-chip{font-size:7px!important;letter-spacing:.16em!important;border:1px solid #ffffff12!important;background:#02050b88!important;border-radius:999px!important;padding:6px 8px!important;backdrop-filter:blur(10px)}
+.algorithm-spectrum{opacity:.22!important}
+.reference-speaking{
+ position:absolute!important;right:clamp(22px,5vw,76px);bottom:28px;width:190px!important;
+ border:1px solid #ffffff0b!important;background:#04070d99!important;border-radius:999px!important;
+ padding:8px 12px!important;backdrop-filter:blur(20px)!important}
+.reference-speaking .voice-wave{transform:scale(.7)}
+.reference-speaking b{font-size:9px!important}.reference-speaking small{font-size:8px!important;color:#68768e!important}
+.cinematic-hero{display:none!important}
+#panel{display:none!important}
+#backdrop{display:none!important}
+.toast{background:#eefaff!important;border:1px solid #ffffff66!important;color:#05070d!important}
+@keyframes aqOrbit{to{transform:rotate(360deg)}}
+
+/* Ambient interface chrome: deliberately asymmetrical, editorial, not a dashboard. */
+.chat.reference-chat:after{content:"AGENTICUANTICO / NEURAL OPERATING SPACE";position:absolute;right:clamp(20px,5vw,76px);bottom:18px;
+ color:#3e4a60;font-size:7px;letter-spacing:.25em;z-index:4;pointer-events:none}
+.chat.reference-chat:before{content:"";position:absolute;inset:0;pointer-events:none;z-index:1;
+ background:radial-gradient(circle at 50% 48%,transparent 0 28%,rgba(2,3,9,.12) 52%,rgba(2,3,9,.62) 100%),
+ repeating-linear-gradient(90deg,transparent 0 120px,#ffffff02 121px,#ffffff02 122px,transparent 123px);opacity:.45}
+@media(max-width:900px){
+ .stage-floating-badge{display:none}.quantum-anchor-label{right:18px;bottom:33%}
+ .robot-avatar.reference-avatar{width:92vw!important;height:92vw!important;top:43%}
+ .conversation-pane.reference-conversation{bottom:12px;width:calc(100vw - 24px);left:12px}
+ .reference-messages{max-height:32vh}
+ .reference-speaking{display:none!important}
+ .chat.reference-chat:after{display:none}
+ .stage-top{top:16px;left:18px}
+}
+@media(max-width:560px){
+ .robot-avatar.reference-avatar{width:112vw!important;height:112vw!important;top:34%}
+ .quantum-anchor-label{bottom:48%;right:14px;transform:scale(.85);transform-origin:right}
+ .reference-messages{max-height:24vh}
+ .reference-quick{display:none}
+ .agent-header{margin-bottom:2px}
+ .reference-composer textarea{font-size:13px}
+}
+@media(prefers-reduced-motion:reduce){
+ .robot-avatar.reference-avatar:before{animation:none}
+}

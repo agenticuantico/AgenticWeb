@@ -7,13 +7,13 @@
   const API_FALLBACK="https://agenticweb.agenticuantico.workers.dev";
   const $=id=>document.getElementById(id);
   const input=$("input"),send=$("send"),messages=$("messages"),attach=$("attachInput");
-  const mic=$("voiceInput"),stop=$("stopVoice"),status=$("voiceStatus"),voiceName=$("voiceName"),tray=$("attachmentTray");
+  const mic=$("voiceInput"),stop=$("stopVoice"),status=$("voiceStatus"),voiceName=$("voiceName"),tray=$("attachmentTray"),voiceToggle=$("voiceModeToggle"),voicePanelToggle=$("voiceModePanel"),previewVoice=$("previewVoice"),imageButton=$("imageGenerateButton");
   const brain=()=>window.__aqBrain;
   const HISTORY_KEY="aq_conversations_v2";
   const ACTIVE_KEY="aq_active_v2";
   const AUTH_KEY="aq_auth_v1";
   const SESSION_KEY="aq_guest_v6";
-  let busy=false,listening=false,recognition=null,selectedVoice=null,browserVoices=[];
+  let busy=false,listening=false,recognition=null,selectedVoice=null,browserVoices=[],voiceEnabled=localStorage.getItem("aq_voice_enabled")==="1",pendingUploads=[],activeRequest=null;
   let conversations=loadLocal();
   let activeId=localStorage.getItem(ACTIVE_KEY)||"";
   let current=null;
@@ -158,10 +158,28 @@
 
   const setThinking=v=>{brain()?.setThinking?.(v);brain()?.setThinkingState?.();if(status)status.textContent=v?"AgentiQ está razonando…":"Voz lista"};
   const setDisabled=v=>{if(send)send.disabled=v;if(input)input.disabled=v};
+  function cancelGeneration(){if(activeRequest){activeRequest.abort();activeRequest=null;notify("Generación cancelada");}busy=false;setDisabled(false);setThinking(false);}
+  function ensureStopButton(){if($("stopGeneration")||!$("composer"))return;const b=document.createElement("button");b.id="stopGeneration";b.type="button";b.className="voice-btn";b.title="Detener generación";b.textContent="■";b.style.display="none";$("composer").appendChild(b);b.onclick=cancelGeneration;}
+  ensureStopButton();
 
   function renderAttachments(files){
     if(!tray)return;tray.classList.toggle("hidden",!files.length);
-    tray.innerHTML=files.map(f=>'<span class="attachment-chip">◉ '+escapeHTML(f.name)+' <small>'+Math.ceil(f.size/1024)+' KB</small></span>').join("");
+    tray.innerHTML=files.map(f=>'<span class="attachment-chip">↑ '+escapeHTML(f.name)+' <small>'+formatSize(f.size)+'</small></span>').join("");
+  }
+  function formatSize(bytes){
+    const n=Number(bytes||0); if(n<1024)return n+" B"; if(n<1048576)return (n/1024).toFixed(1)+" KB"; if(n<1073741824)return (n/1048576).toFixed(1)+" MB"; return (n/1073741824).toFixed(2)+" GB";
+  }
+  function fileKind(file){
+    const t=String(file.type||"").toLowerCase();
+    if(t.startsWith("image/"))return "image"; if(t.startsWith("video/"))return "video"; if(t.startsWith("audio/"))return "audio"; if(t==="application/pdf")return "pdf"; return "file";
+  }
+  async function uploadFile(file){
+    if(file.size>100*1024*1024)throw new Error(file.name+" supera el límite de 100 MB.");
+    const headers={"X-File-Name":file.name,"X-File-Type":file.type||"application/octet-stream","X-Guest-Session":guestId(),"Content-Type":file.type||"application/octet-stream"};
+    const r=await api("/v1/uploads",{method:"POST",headers,body:file});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok||!d.ok)throw new Error(d.message||"No se pudo subir "+file.name);
+    return {...d,kind:fileKind(file),size:file.size};
   }
   async function fileToText(file){
     const type=file.type||"";
@@ -169,15 +187,15 @@
     if(type.startsWith("image/"))return "[Imagen adjunta: "+file.name+", "+file.type+", "+file.size+" bytes].";
     return "[Archivo adjunto: "+file.name+", tipo "+(file.type||"desconocido")+", "+file.size+" bytes].";
   }
-  async function filePayload(file){
-    if((file.type||"").startsWith("image/")){
+  async function filePayload(file,uploaded){
+    if((file.type||"").startsWith("image/") && file.size<=6*1024*1024){
       const data=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsDataURL(file)});
-      return {name:file.name,kind:"image",data:String(data)};
+      return {name:file.name,kind:"image",data:String(data),storage_key:uploaded?.key||"",url:uploaded?.url||""};
     }
-    return {name:file.name,kind:"file",data:await fileToText(file)};
+    return {name:file.name,kind:fileKind(file),data:await fileToText(file),storage_key:uploaded?.key||"",url:uploaded?.url||""};
   }
 
-  async function ask(text,files=[]){
+  async function ask(text,files=[],uploads=[]){
     text=String(text||"").trim();
     if((!text&&!files.length)||busy)return;
     const c=ensureCurrent();
@@ -192,7 +210,7 @@
     try{
       const history=c.messages.slice(-14).filter(m=>m.role==="user"||m.role==="assistant").map(m=>({role:m.role,content:m.content}));
       const payload={message:prompt,history,attachments:filePayloads,conversation_id:c.id,model:"AgentiQ",guest_session:guestId()};
-      const requestOptions={method:"POST",headers:{"content-type":"application/json","accept":"application/json"},body:JSON.stringify(payload)};
+      const requestOptions={method:"POST",headers:{"content-type":"application/json","accept":"application/json"},body:JSON.stringify(payload),signal:(activeRequest=new AbortController()).signal};
       let res=await fetch(API+"/v1/public/chat",requestOptions);
       if((res.status===405||res.status===404||res.status===502)&&API!==API_FALLBACK)res=await fetch(API_FALLBACK+"/v1/public/chat",requestOptions);
       let data={};try{data=await res.json()}catch{}
@@ -200,7 +218,7 @@
       thinking.remove();
       appendMessage("assistant",data.answer,data.model?String(data.model):"AgentiQ");
       saveTurn("assistant",data.answer);
-      speak(data.answer);
+      if(voiceEnabled)speak(data.answer);
     }catch(err){
       thinking.remove();
       const detail=String(err?.message||err||"error de conexión");
@@ -208,9 +226,18 @@
       appendMessage("assistant",fallback);
       saveTurn("assistant",fallback);
       notify("AgentiQ no respondió: "+detail);
-    }finally{busy=false;setDisabled(false);setThinking(false);input?.focus()}
+    }finally{activeRequest=null;busy=false;setDisabled(false);setThinking(false);if($("stopGeneration"))$("stopGeneration").style.display="none";input?.focus()}
   }
 
+  function syncVoiceToggle(){
+    const label=voiceEnabled?"🔊 Voz automática: ON":"🔇 Voz automática: OFF";
+    [voiceToggle,voicePanelToggle].forEach(el=>{if(!el)return;el.textContent=label;el.setAttribute("aria-pressed",String(voiceEnabled));el.title=voiceEnabled?"La IA reproducirá las respuestas automáticamente":"La IA responderá sin reproducir voz automáticamente"});
+  }
+  function toggleVoice(){
+    voiceEnabled=!voiceEnabled;localStorage.setItem("aq_voice_enabled",voiceEnabled?"1":"0");syncVoiceToggle();
+    if(!voiceEnabled){window.speechSynthesis?.cancel();brain()?.setSpeaking?.(false);if(status)status.textContent="Voz automática desactivada"}
+    else if(status)status.textContent="Voz automática activada";
+  }
   function loadVoices(){
     if(!("speechSynthesis" in window))return;
     browserVoices=window.speechSynthesis.getVoices()||[];
@@ -234,7 +261,7 @@
     u.onerror=()=>{brain()?.setSpeaking?.(false);if(status)status.textContent="Voz no disponible en este navegador"};
     window.speechSynthesis.speak(u);
   }
-  window.AgentiCuanticoVoice={speak,stop:()=>window.speechSynthesis?.cancel(),loadVoices};
+  window.AgentiCuanticoVoice={speak,stop:()=>window.speechSynthesis?.cancel(),loadVoices,toggle:toggleVoice,isEnabled:()=>voiceEnabled};\n  voiceToggle?.addEventListener("click",toggleVoice); voicePanelToggle?.addEventListener("click",toggleVoice);\n  previewVoice?.addEventListener("click",()=>{loadVoices();speak("Hola, soy AgentiQ. Esta es una vista previa de la voz seleccionada.");});\n  syncVoiceToggle();
 
   const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(mic&&SpeechRecognition){
@@ -248,7 +275,43 @@
 
   stop?.addEventListener("click",()=>{window.speechSynthesis?.cancel();if(listening)recognition?.stop();brain()?.setSpeaking?.(false);if(status)status.textContent="Voz detenida"});
   $("attachButton")?.addEventListener("click",e=>{e.preventDefault();e.stopImmediatePropagation();attach?.click()},true);
-  attach?.addEventListener("change",async e=>{e.stopImmediatePropagation();const files=[...(attach.files||[])];renderAttachments(files);if(files.length)await ask("",files);attach.value="";setTimeout(()=>renderAttachments([]),300)},true);
+  attach?.addEventListener("change",async e=>{
+    e.stopImmediatePropagation(); const files=[...(attach.files||[])]; if(!files.length)return;
+    renderAttachments(files); busy=true;setDisabled(true);setThinking(true);
+    try{
+      const uploads=[];
+      for(const file of files){uploads.push(await uploadFile(file));}
+      pendingUploads.push(...uploads);
+      const labels=uploads.map(x=>x.name).join(", ");
+      appendMessage("user","Archivo subido: "+labels);
+      saveTurn("user","Archivo subido: "+labels);
+      notify("Subida completada: "+labels);
+      const c=ensureCurrent();
+      const history=c.messages.slice(-14).filter(m=>m.role==="user"||m.role==="assistant").map(m=>({role:m.role,content:m.content}));
+      const payloadFiles=[];\n      for(let i=0;i<files.length;i++){payloadFiles.push(await filePayload(files[i],uploads[i]));}\n      const payload={message:"Analizá los archivos que acabo de subir.",history,attachments:payloadFiles,conversation_id:c.id,model:"AgentiQ",guest_session:guestId()};
+      const r=await fetch(API+"/v1/public/chat",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(payload),signal:(activeRequest=new AbortController()).signal});
+      const d=await r.json().catch(()=>({}));
+      if(r.ok&&d.answer){appendMessage("assistant",d.answer,d.model||"AgentiQ");saveTurn("assistant",d.answer);if(voiceEnabled)speak(d.answer)}
+      else notify(d.message||"El archivo quedó almacenado, pero el motor no pudo analizarlo todavía.");
+    }catch(err){notify(String(err.message||err))}
+    finally{activeRequest=null;busy=false;setDisabled(false);setThinking(false);if($("stopGeneration"))$("stopGeneration").style.display="none";attach.value="";pendingUploads=[];setTimeout(()=>renderAttachments([]),700)}
+  },true);
+  imageButton?.addEventListener("click",async e=>{
+    e.preventDefault(); if(busy)return;
+    const prompt=window.prompt("¿Qué imagen querés generar?");
+    if(!prompt?.trim())return;
+    busy=true;setDisabled(true);setThinking(true);const thinking=appendMessage("assistant","Generando imagen…");
+    try{
+      const r=await fetch(API+"/v1/public/image-generation",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({prompt:prompt.trim()})});
+      const d=await r.json().catch(()=>({})); if(!r.ok||!d.image)throw new Error(d.message||"Generación no disponible");
+      thinking.remove();
+      const el=document.createElement("div");el.className="msg assistant";
+      el.innerHTML="<b>Imagen generada</b><br><img src='"+escapeHTML(d.image)+"' alt='Imagen generada por AgentiQ' style='display:block;max-width:100%;border-radius:16px;margin-top:10px'><small>"+escapeHTML(d.model||"Cloudflare Workers AI")+"</small>";
+      messages.appendChild(el);messages.scrollTop=messages.scrollHeight;
+      saveTurn("assistant","Imagen generada a partir de: "+prompt.trim());
+    }catch(err){thinking.remove();notify(String(err.message||err))}
+    finally{busy=false;setDisabled(false);setThinking(false)}
+  });
   send?.addEventListener("click",e=>{e.preventDefault();e.stopImmediatePropagation();const t=input?.value.trim();if(t){input.value="";ask(t)}},true);
   input?.addEventListener("keydown",e=>{e.stopImmediatePropagation();if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();const t=input.value.trim();if(t){input.value="";ask(t)}}},true);
   $("composer")?.addEventListener("submit",e=>{e.preventDefault();const t=input?.value.trim();if(t){input.value="";ask(t)}},true);
