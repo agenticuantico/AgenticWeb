@@ -14,15 +14,23 @@
     ]
   },
   "triggers": {
-    "crons": ["*/15 * * * *"]
+    "crons": [
+      "*/15 * * * *"
+    ]
   },
   "durable_objects": {
     "bindings": [
-      {"name": "USER_DATA", "class_name": "UserData"}
+      {
+        "name": "USER_DATA",
+        "class_name": "UserData"
+      }
     ]
   },
   "exports": {
-    "UserData": {"type": "durable-object", "storage": "sqlite"}
+    "UserData": {
+      "type": "durable-object",
+      "storage": "sqlite"
+    }
   },
   "observability": {
     "enabled": true
@@ -30,6 +38,10 @@
   "vars": {
     "HF_MODEL": "Qwen/Qwen3.8-27B",
     "HF_API_URL": "https://router.huggingface.co/v1/chat/completions",
-    "HF_MODELS": "Qwen/Qwen3.8-27B,Qwen/Qwen3.8-27B-FP8,Qwen/Qwen3.6-27B"
+    "HF_MODELS": "Qwen/Qwen3.8-27B,Qwen/Qwen3.8-27B-FP8,Qwen/Qwen3.6-27B",
+    "CF_AI_MODEL": "@cf/zai-org/glm-4.7-flash"
+  },
+  "ai": {
+    "binding": "AI"
   }
 }
