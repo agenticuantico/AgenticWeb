@@ -1,10 +1,32 @@
 /* AgentiCuantico premium interaction runtime.
- * This module is intentionally independent from app.js so chat, voice and uploads
- * remain usable even if an optional visual/3D module fails.
+ * Chat/voice/uploads remain usable even if optional visual modules fail.
+ * The public domain is the product/chat surface; Web Studio is kept out of it.
  */
 (() => {
   "use strict";
-  const API=(window.AGENTICUANTICO_API_URL||"https://agenticweb.agenticuantico.workers.dev").replace(/\/$/,"");
+
+  // Production API: same-origin Worker on agenticuantico.dev.ar.
+  // Keep workers.dev only as a local/degraded fallback.
+  const productionOrigin = /^https?:$/i.test(location.protocol) ? location.origin : "";
+  window.AGENTICUANTUICO_API_URL = productionOrigin && productionOrigin !== "null"
+    ? productionOrigin
+    : "https://agenticweb.agenticuantico.workers.dev";
+
+  // Web Studio/Designer are internal tooling, not part of the public product UI.
+  // Keep backend endpoints available for future protected administration, but never
+  // expose the Studio controls from the public site.
+  const hideInternalStudio = () => {
+    document.getElementById("openWebStudio")?.remove();
+    document.getElementById("webStudio")?.remove();
+  };
+  hideInternalStudio();
+
+  // The legacy runtime referenced these names as globals under strict mode.
+  // Define them explicitly so voice and attachment flows cannot throw ReferenceError.
+  if (!("attachments" in window)) window.attachments = [];
+  if (!("recognition" in window)) window.recognition = null;
+
+  const API=(window.AGENTICUANTUICO_API_URL||"https://agenticweb.agenticuantico.workers.dev").replace(/\/$/,"");
   const $=id=>document.getElementById(id);
   const input=$("input"), send=$("send"), messages=$("messages"), attach=$("attachInput");
   const mic=$("voiceInput"), stop=$("stopVoice"), status=$("voiceStatus"), voiceName=$("voiceName");
@@ -43,7 +65,7 @@
       return text.slice(0,120000);
     }
     if(type.startsWith("image/")){
-      return "[Imagen adjunta: "+file.name+", "+file.type+", "+file.size+" bytes]. Analizá esta imagen si el modelo visual está habilitado; si no, explicá claramente que se recibió la imagen pero este canal textual no puede inspeccionarla.";
+      return "[Imagen adjunta: "+file.name+", "+file.type+", "+file.size+" bytes].";
     }
     return "[Archivo adjunto: "+file.name+", tipo "+(file.type||"desconocido")+", "+file.size+" bytes].";
   }
@@ -55,34 +77,56 @@
     }
     return {name:file.name,kind:"file",data:await fileToText(file)};
   }
+
   async function ask(text,files=[]){
     text=String(text||"").trim();
     if((!text&&files.length===0)||busy)return;
-    const fileContext=[];
+
+    const filePayloads=[];
     for(const f of files){
-      try{fileContext.push("### "+f.name+"\n"+await fileToText(f));}
-      catch(e){fileContext.push("### "+f.name+"\nNo se pudo leer el archivo en el navegador.");}
+      try{filePayloads.push(await filePayload(f));}
+      catch(e){filePayloads.push({name:f.name,kind:"file",data:"No se pudo leer el archivo en el navegador."});}
     }
+
+    const fileContext=filePayloads
+      .filter(f=>f.kind!=="image")
+      .map(f=>"### "+f.name+"\n"+String(f.data).slice(0,30000));
     const prompt=[text,...fileContext].filter(Boolean).join("\n\n");
+
     addMessage("user",text||("Analizá "+files.map(f=>f.name).join(", ")));
     busy=true;setDisabled(true);setThinking(true);
     const thinking=addMessage("assistant","Procesando…");
+
     try{
-      const history=[...messages.querySelectorAll(".msg")].slice(-12).map(el=>({
-        role:el.classList.contains("user")?"user":"assistant",
-        content:el.textContent.replace(/^Procesando…$/,"").trim()
-      })).filter(x=>x.content&&x.content!=="Procesando…");
+      const history=[...messages.querySelectorAll(".msg")]
+        .slice(-14)
+        .map(el=>({
+          role:el.classList.contains("user")?"user":"assistant",
+          content:el.textContent.replace(/^Procesando…$/,"").trim()
+        }))
+        .filter(x=>x.content&&x.content!=="Procesando…");
+
       const res=await fetch(API+"/v1/public/chat",{
-        method:"POST",headers:{"content-type":"application/json"},
-        body:JSON.stringify({message:prompt,history,attachments,conversation_id:crypto.randomUUID(),model:"AgentiQ"})
+        method:"POST",
+        headers:{"content-type":"application/json","accept":"application/json"},
+        body:JSON.stringify({
+          message:prompt,
+          history,
+          attachments:filePayloads,
+          conversation_id:window.crypto?.randomUUID?.()||String(Date.now()),
+          model:"AgentiQ"
+        })
       });
+
       let data={};try{data=await res.json()}catch{}
-      if(!res.ok||!data.answer)throw new Error(data.error||("HTTP "+res.status));
+      if(!res.ok||!data.answer)throw new Error(data.error||data.message||("HTTP "+res.status));
+
       thinking.innerHTML=escapeHTML(data.answer).replace(/\n/g,"<br>");
       speak(data.answer);
     }catch(err){
-      thinking.innerHTML=escapeHTML("No pude completar la respuesta. El motor está reintentando. Detalle: "+err.message);
-      notify("El motor no respondió; revisá la conexión.");
+      const detail=String(err?.message||err||"error de conexión");
+      thinking.innerHTML=escapeHTML("No pude completar la respuesta. Verificá la conexión del motor e intentá nuevamente.");
+      notify("AgentiQ no respondió: "+detail);
     }finally{
       busy=false;setDisabled(false);setThinking(false);input?.focus();
     }
@@ -97,12 +141,15 @@
     if(voiceName)voiceName.textContent=(selectedVoice?.name||"Voz del dispositivo")+" · "+(selectedVoice?.lang||"");
     const list=$("voiceList");
     if(list){
-      const female=/female|woman|mujer|clara|luna|samantha|monica|paulina|helena|zira/i;
       const names=[...browserVoices].filter(v=>/^es|^en/i.test(v.lang)).slice(0,20);
       list.innerHTML=names.map((v,i)=>'<button type="button" class="voice-option" data-voice-index="'+i+'"><b>'+escapeHTML(v.name)+'</b><small>'+escapeHTML(v.lang)+'</small></button>').join("");
-      list.querySelectorAll("[data-voice-index]").forEach((b,i)=>b.onclick=()=>{selectedVoice=names[i];if(voiceName)voiceName.textContent=selectedVoice.name+" · "+selectedVoice.lang;});
+      list.querySelectorAll("[data-voice-index]").forEach((b,i)=>b.onclick=()=>{
+        selectedVoice=names[i];
+        if(voiceName)voiceName.textContent=selectedVoice.name+" · "+selectedVoice.lang;
+      });
     }
   }
+
   function speak(text){
     if(!("speechSynthesis" in window)||!text)return;
     window.speechSynthesis.cancel();
@@ -119,6 +166,7 @@
   const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(mic&&SpeechRecognition){
     recognition=new SpeechRecognition();
+    window.recognition=recognition;
     recognition.lang="es-AR";recognition.continuous=false;recognition.interimResults=true;
     recognition.onstart=()=>{listening=true;mic.classList.add("active");if(status)status.textContent="Escuchando…";setThinking(true)};
     recognition.onresult=e=>{
@@ -135,26 +183,27 @@
   }else if(mic){
     mic.addEventListener("click",e=>{e.preventDefault();e.stopImmediatePropagation();notify("Este navegador no habilita reconocimiento de voz. Probá Chrome/Edge con permiso de micrófono.");},true);
   }
-  stop?.addEventListener("click",()=>{window.speechSynthesis?.cancel();if(listening)recognition?.stop();brain()?.setSpeaking?.(false);if(status)status.textContent="Voz detenida"});
 
+  stop?.addEventListener("click",()=>{window.speechSynthesis?.cancel();if(listening)recognition?.stop();brain()?.setSpeaking?.(false);if(status)status.textContent="Voz detenida"});
   $("attachButton")?.addEventListener("click",e=>{e.preventDefault();e.stopImmediatePropagation();attach?.click()},true);
-  attach?.addEventListener("change",async e=>{e.stopImmediatePropagation();
+  attach?.addEventListener("change",async e=>{
+    e.stopImmediatePropagation();
     const files=[...(attach.files||[])];
     renderAttachments(files);
     if(!files.length)return;
-    // Selecting files is an action: process immediately instead of waiting for Send.
     await ask("",files);
     attach.value="";
     setTimeout(()=>renderAttachments([]),300);
   },true);
   send?.addEventListener("click",e=>{e.preventDefault();e.stopImmediatePropagation();const t=input?.value.trim();if(t){input.value="";ask(t)}},true);
-  input?.addEventListener("keydown",e=>{e.stopImmediatePropagation();
+  input?.addEventListener("keydown",e=>{
+    e.stopImmediatePropagation();
     if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();const t=input.value.trim();if(t){input.value="";ask(t)}}
   },true);
 
   window.addEventListener("load",()=>{
-    loadVoices();window.speechSynthesis?.addEventListener?.("voiceschanged",loadVoices);
-    // Make every visible send/mic control usable even when the legacy app failed.
+    loadVoices();
+    window.speechSynthesis?.addEventListener?.("voiceschanged",loadVoices);
     if(status&&!status.textContent)status.textContent="Voz lista";
     notify("AgentiQ listo");
   },{once:true});
