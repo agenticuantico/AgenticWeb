@@ -51,7 +51,7 @@ export function initQuantumBrain3D(canvas){
   if(!canvas) return null;
   try{
     const renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true,powerPreference:"high-performance"});
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.7));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.55));
     renderer.outputColorSpace=THREE.SRGBColorSpace;
     renderer.toneMapping=THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure=1.15;
@@ -64,15 +64,15 @@ export function initQuantumBrain3D(canvas){
     root.rotation.z=-.04;
     scene.add(root);
 
-    const cyan=sampleHemisphere(-1,390);
-    const violet=sampleHemisphere(1,390);
+    const cyan=sampleHemisphere(-1,480);
+    const violet=sampleHemisphere(1,480);
     const all=[...cyan,...violet];
 
     const left=makePoints(cyan,0x42eaff,.045,.88);
     const right=makePoints(violet,0x8c68ff,.045,.86);
     root.add(left,right);
 
-    const pairs=buildConnections(all,.47,230);
+    const pairs=buildConnections(all,.5,360);
     const linePositions=new Float32Array(pairs.length*6);
     pairs.forEach(([a,b],i)=>{
       const p=all[a],q=all[b];
@@ -84,6 +84,25 @@ export function initQuantumBrain3D(canvas){
       color:0x62dfff,transparent:true,opacity:.22,blending:THREE.AdditiveBlending,depthWrite:false
     }));
     root.add(lines);
+
+
+    const shell=new THREE.Mesh(
+      new THREE.SphereGeometry(1.92,48,32),
+      new THREE.MeshBasicMaterial({color:0x58eaff,transparent:true,opacity:.018,wireframe:true,blending:THREE.AdditiveBlending,depthWrite:false})
+    );
+    shell.scale.set(1,.82,.58); root.add(shell);
+
+    const dustCount=360,dustPositions=new Float32Array(dustCount*3);
+    for(let i=0;i<dustCount;i++){
+      const r=2.2+Math.random()*2.4,a=Math.random()*Math.PI*2,b=Math.acos(2*Math.random()-1);
+      dustPositions[i*3]=Math.sin(b)*Math.cos(a)*r;
+      dustPositions[i*3+1]=Math.cos(b)*r*.6;
+      dustPositions[i*3+2]=Math.sin(b)*Math.sin(a)*r;
+    }
+    const dustGeo=new THREE.BufferGeometry();
+    dustGeo.setAttribute("position",new THREE.BufferAttribute(dustPositions,3));
+    const dust=new THREE.Points(dustGeo,new THREE.PointsMaterial({color:0x72eaff,size:.018,transparent:true,opacity:.3,blending:THREE.AdditiveBlending,depthWrite:false}));
+    scene.add(dust);
 
     const core=new THREE.Mesh(
       new THREE.SphereGeometry(.23,24,18),
@@ -134,7 +153,7 @@ export function initQuantumBrain3D(canvas){
     }
     root.add(ringGroup);
 
-    const pulseCount=42;
+    const pulseCount=72;
     const pulsePositions=new Float32Array(pulseCount*3);
     const pulsePhase=new Float32Array(pulseCount);
     for(let i=0;i<pulseCount;i++){pulsePhase[i]=Math.random();pulsePositions[i*3]=0;pulsePositions[i*3+1]=0;pulsePositions[i*3+2]=0}
@@ -174,18 +193,22 @@ export function initQuantumBrain3D(canvas){
     const clock=new THREE.Clock();
     const animate=()=>{
       const dt=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;
-      const speed=controller.thinking?1.8:1;
-      root.rotation.y+=((controller.mouseX*.18+Math.sin(t*.25)*.08)-root.rotation.y)*.035;
-      root.rotation.x+=((controller.mouseY*.08+Math.sin(t*.31)*.025)-root.rotation.x)*.035;
+      const speed=controller.thinking?2.05:controller.speaking?1.45:1;
+      root.rotation.y+=((controller.mouseX*.22+Math.sin(t*.25)*.08)-root.rotation.y)*.035;
+      root.rotation.x+=((controller.mouseY*.10+Math.sin(t*.31)*.025)-root.rotation.x)*.035;
+      root.position.y=Math.sin(t*.62)*.035;
+      shell.rotation.y-=dt*.08;
+      dust.rotation.y+=dt*.018;
       left.rotation.y=Math.sin(t*.22)*.018;
       right.rotation.y=-Math.sin(t*.22)*.018;
       ringGroup.rotation.y+=dt*.16*speed;
       ringGroup.rotation.x=Math.sin(t*.18)*.18;
-      core.scale.setScalar(1+Math.sin(t*2.4)*.08+(controller.thinking?.16:0));
+      core.scale.setScalar(1+Math.sin(t*2.4)*.08+(controller.thinking?.20:0)+(controller.speaking?.08:0));
+      shell.material.opacity=.012+(controller.thinking?.035:.006);
       coreRing.rotation.z+=dt*.9*speed;
       chip.rotation.z=Math.sin(t*.7)*.05;
       lines.material.opacity=.16+(controller.thinking?.2:.06)+Math.sin(t*2.1)*.035;
-      pulseMat.opacity=controller.thinking?.98:.72;
+      pulseMat.opacity=controller.thinking?.98:controller.speaking?.9:.68;
 
       const pa=pulses.geometry.attributes.position.array;
       for(let i=0;i<pulseCount;i++){
