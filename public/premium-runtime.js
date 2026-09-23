@@ -48,6 +48,13 @@
     return "[Archivo adjunto: "+file.name+", tipo "+(file.type||"desconocido")+", "+file.size+" bytes].";
   }
 
+  async function filePayload(file){
+    if((file.type||"").startsWith("image/")){
+      const data=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsDataURL(file)});
+      return {name:file.name,kind:"image",data:String(data)};
+    }
+    return {name:file.name,kind:"file",data:await fileToText(file)};
+  }
   async function ask(text,files=[]){
     text=String(text||"").trim();
     if((!text&&files.length===0)||busy)return;
@@ -67,7 +74,7 @@
       })).filter(x=>x.content&&x.content!=="Procesando…");
       const res=await fetch(API+"/v1/public/chat",{
         method:"POST",headers:{"content-type":"application/json"},
-        body:JSON.stringify({message:prompt,history,conversation_id:crypto.randomUUID(),model:"AgentiQ"})
+        body:JSON.stringify({message:prompt,history,attachments,conversation_id:crypto.randomUUID(),model:"AgentiQ"})
       });
       let data={};try{data=await res.json()}catch{}
       if(!res.ok||!data.answer)throw new Error(data.error||("HTTP "+res.status));
