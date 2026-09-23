@@ -146,11 +146,11 @@
     await ask("",files);
     attach.value="";
     setTimeout(()=>renderAttachments([]),300);
-  });
+  },true);
   send?.addEventListener("click",e=>{e.preventDefault();e.stopImmediatePropagation();const t=input?.value.trim();if(t){input.value="";ask(t)}},true);
   input?.addEventListener("keydown",e=>{e.stopImmediatePropagation();
     if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();const t=input.value.trim();if(t){input.value="";ask(t)}}
-  });
+  },true);
 
   window.addEventListener("load",()=>{
     loadVoices();window.speechSynthesis?.addEventListener?.("voiceschanged",loadVoices);
