@@ -41,6 +41,7 @@
     "HF_MODELS": "Qwen/Qwen3-VL-30B-A3B-Instruct,Qwen/Qwen3.8-27B,Qwen/Qwen3.8-27B-FP8,Qwen/Qwen3.6-27B",
     "HF_ASTRA_MODEL": "P0x0/Astra-v1-12B-GGUF",
     "HF_WEB_DESIGN_MODEL": "Qwen/Qwen3-Coder-30B-A3B-Instruct:fastest",
+    "HF_DESIGNER_MODEL": "Qwen/Qwen3-Coder-Next:novita",
     "CF_AI_MODEL": "@cf/zai-org/glm-4.7-flash"
   },
   "ai": {
