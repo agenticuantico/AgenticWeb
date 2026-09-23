@@ -23,3 +23,13 @@
  .aq-enhanced .topbar{justify-content:space-between}
 }
 @media(prefers-reduced-motion:reduce),.reduced-motion *{animation-duration:.001ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.001ms!important}
+
+/* Cinematic parallax layer */
+.aq-immersive .ai-design-layer{perspective:1200px;transform-style:preserve-3d}
+.aq-immersive .ai-design-copy{transform:translate3d(var(--parallax-x,0px),var(--parallax-y,0px),24px);transition:transform .18s ease-out}
+.aq-immersive .ai-design-brain{transform:translate3d(calc(var(--parallax-x,0px)*-.65),calc(var(--parallax-y,0px)*-.65),0) scale(1.01);transition:transform .18s ease-out;filter:drop-shadow(0 25px 90px rgba(72,221,255,.12))}
+.aq-immersive .brain-stage{box-shadow:0 30px 100px rgba(0,0,0,.38),inset 0 0 80px rgba(75,224,255,.035)}
+.aq-immersive .ai-design-metrics span{transform:translateZ(20px);transition:transform .25s ease}
+.aq-immersive .ai-design-metrics span:hover{transform:translateY(-5px) translateZ(32px)}
+@media(max-width:820px){.aq-immersive .ai-design-copy,.aq-immersive .ai-design-brain{transform:none}}
+@media(prefers-reduced-motion:reduce){.aq-immersive .ai-design-copy,.aq-immersive .ai-design-brain{transition:none;transform:none!important}}
