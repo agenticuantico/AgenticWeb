@@ -398,3 +398,6 @@ button,input,textarea{font-family:var(--font-body)}
 .reference-avatar canvas{touch-action:none;cursor:grab}
 .reference-avatar canvas:active{cursor:grabbing}
 .quantum-anchor-label b{color:#a8efff}
+
+/* Premium interaction controls */
+.attachment-tray{display:flex;gap:7px;flex-wrap:wrap;margin:0 8px 8px}.attachment-chip{font-size:10px;color:#b9c7dc;border:1px solid #ffffff12;background:#ffffff07;padding:6px 9px;border-radius:9px}.attachment-chip small{color:#66738b;margin-left:4px}.voice-option{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px;border:1px solid transparent;border-radius:10px;background:transparent;color:#dce4f2;text-align:left;cursor:pointer}.voice-option:hover{background:#ffffff08;border-color:#ffffff10}.voice-option small{color:#6f7b91}.voice-btn.active{background:#7d6cff!important;box-shadow:0 0 24px #7d6cff66}.msg-meta{display:block;margin-top:7px;color:#68748b;font-size:9px}
