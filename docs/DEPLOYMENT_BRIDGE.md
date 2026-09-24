@@ -1,63 +1,57 @@
-# AgenticWeb → AgentiCuantico bridge
+# AgentiCuantico Neural Core — deployment
 
-AgenticWeb is the public interface. The AgentiCuantico API remains the operational brain.
+AgenticWeb publica una única aplicación: **AgentiCuantico Neural Core**.
 
-## Request path
+## Flujo actual
 
 ```
-Browser / APK
+Browser
   ↓
 https://agenticuantico.dev.ar
   ↓
-Cloudflare Worker
-  ↓ /v1/* and /health
-CORE_API_ORIGIN
+Cloudflare Worker + Assets
   ↓
-AgentiCuantico FastAPI
+/v1/public/chat
   ↓
-brain → memory → model → verification
+Qwen configurado en el Worker
 ```
 
-The Cloudflare Worker never contains the model secret or database. It only forwards the request to the configured core API origin.
+La interfaz no expone el nombre del proveedor/modelo.
 
-## Cloudflare configuration
+## Frontend
 
-Set the Worker environment variable:
+La fuente publicada es exclusivamente `public/`.
 
-- `CORE_API_ORIGIN` = the HTTPS origin where the AgentiCuantico FastAPI service is actually running.
+El deployment genera:
 
-Do not put the origin in `app.js`, HTML, or public repository files.
+`public/assets/AgentiCuantico_brain_PBR.glb`
 
-The Worker returns a structured `503 core_api_not_configured` response until this value is configured. This is intentional: it prevents the public site from silently pointing at an invented or insecure backend.
+con `scripts/generate_brain_glb.py` antes de ejecutar Wrangler.
 
-## Core maintenance
+## Cloudflare
 
-The core exposes:
+El workflow oficial es:
 
-- `GET /health`
-- `POST /v1/maintenance/improvement`
+`.github/workflows/cloudflare.yml`
 
-The maintenance endpoint requires `X-Maintenance-Key` in production. Set:
+Utiliza los secretos de GitHub para Cloudflare y el token de IA. Las claves privadas no se escriben en HTML, CSS ni JavaScript público.
 
-- `AGENTICUANTICO_MAINTENANCE_KEY`
+## Chat
 
-The daily GitHub Actions workflow can call the endpoint with the repository secrets:
+La ruta pública utilizada por la UI es:
 
-- `AQ_MAINTENANCE_URL`
-- `AQ_MAINTENANCE_KEY`
+`POST /v1/public/chat`
 
-The improvement cycle evaluates the current behavior and records explicit feedback-driven improvement actions. It does not silently modify neural model weights.
+La UI solamente recibe la respuesta de conversación y estados de error. No se muestra información interna del proveedor.
 
-## Verification
+## Veracidad funcional
 
-```
-GET https://agenticuantico.dev.ar/health
-POST https://agenticuantico.dev.ar/v1/conversations/messages
-Content-Type: application/json
+Una función se considera implementada solamente cuando existe la conexión real correspondiente. Las capacidades aún no conectadas al backend se presentan como **READY FOR BACKEND** y no se simulan.
 
-{"message":"Hola","history":[]}
-```
+## Dominio
 
-A successful chat response should contain `message`, `model`, `verified`, and `guest_memory`.
+El dominio objetivo es:
 
-If the core is unavailable, the UI reports the connection error instead of pretending that the brain answered.
+`https://agenticuantico.dev.ar`
+
+El repositorio ya no contiene una segunda publicación de GitHub Pages ni una homepage alternativa.
