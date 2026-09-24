@@ -182,11 +182,11 @@ async function loadGLBBrain(root,THREE,controller){
       const model=g.scene; model.name="AgentiCuanticoGLBBrain";
       const box=new THREE.Box3().setFromObject(model), size=box.getSize(new THREE.Vector3()), center=box.getCenter(new THREE.Vector3());
       model.position.sub(center); const scale=3.25/Math.max(size.x,size.y,size.z); model.scale.setScalar(scale);
-      model.traverse(o=>{if(o.isMesh){o.material=o.material.clone();o.material.transparent=true;o.material.opacity=.34;o.material.metalness=.55;o.material.roughness=.25;o.material.emissive=new THREE.Color(0x071d35);o.material.emissiveIntensity=.45}});
+      model.traverse(o=>{if(o.isMesh){o.material=o.material.clone();o.material.transparent=true;o.material.opacity=.62;o.material.metalness=.58;o.material.roughness=.22;o.material.emissive=new THREE.Color(0x071d35);o.material.emissiveIntensity=.8}});
       root.add(model); controller.glbBrain=model; controller.glbLoaded=true; controller.onGLBState?.(true);
       [left,right,lines,shell,core,coreRing,chip].forEach(o=>{if(o)o.visible=false;});
     },undefined,onError);
-    load(primary,()=>{});
+    load(primary,()=>{controller.onGLBState?.(false);});
   }catch(e){}
 }
 
