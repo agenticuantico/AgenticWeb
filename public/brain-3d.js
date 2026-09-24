@@ -174,14 +174,16 @@ async function loadGLBBrain(root,THREE,controller){
   try{
     const {GLTFLoader}=await import("https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/loaders/GLTFLoader.js");
     const loader=new GLTFLoader();
-    const url="https://raw.githubusercontent.com/itayinbarr/brainproject/main/brain-atlas/models/brain.glb";
-    loader.load(url,g=>{
+    const primary=window.AGENTICUANTICO_GLB_URL||"/assets/AgentiCuantico_brain_PBR.glb";
+    const fallback="https://raw.githubusercontent.com/itayinbarr/brainproject/main/brain-atlas/models/brain.glb";
+    const load=(url,onError)=>loader.load(url,g=>{
       const model=g.scene; model.name="AgentiCuanticoGLBBrain";
       const box=new THREE.Box3().setFromObject(model), size=box.getSize(new THREE.Vector3()), center=box.getCenter(new THREE.Vector3());
       model.position.sub(center); const scale=3.25/Math.max(size.x,size.y,size.z); model.scale.setScalar(scale);
       model.traverse(o=>{if(o.isMesh){o.material=o.material.clone();o.material.transparent=true;o.material.opacity=.34;o.material.metalness=.55;o.material.roughness=.25;o.material.emissive=new THREE.Color(0x071d35);o.material.emissiveIntensity=.45}});
-      root.add(model); controller.glbBrain=model; controller.glbLoaded=true;
-    },undefined,()=>{});
+      root.add(model); controller.glbBrain=model; controller.glbLoaded=true;\n      [left,right,lines,shell,core,coreRing,chip,ringGroup,pulses].forEach(o=>{if(o)o.visible=false;});
+    },undefined,onError);
+    load(primary,()=>{if(primary!==fallback)load(fallback,()=>{});});
   }catch(e){}
 }
 \n    const controller={
