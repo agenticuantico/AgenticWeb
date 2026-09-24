@@ -51,7 +51,7 @@
 
   <div class="attachment-strip" id="attachment-strip" hidden>
     <div class="file-card"><span class="file-icon">+</span><div><strong id="file-name">archivo</strong><small id="file-meta"></small></div><button id="remove-file" type="button" aria-label="Quitar archivo">×</button></div>
-    <div class="file-state" id="file-state">READY FOR BACKEND · archivo preparado, análisis todavía no conectado</div>
+    <div class="file-state" id="file-state">READY · archivo adjunto preparado para análisis</div>
   </div>
 
   <form class="composer" id="ai-form">
@@ -146,7 +146,7 @@ document.getElementById("new-chat").onclick=()=>{history.length=0;messages.inner
 const attachBtn=document.getElementById("attach-btn"),fileInput=document.getElementById("file-input"),strip=document.getElementById("attachment-strip"),removeFile=document.getElementById("remove-file"),fileName=document.getElementById("file-name"),fileMeta=document.getElementById("file-meta"),fileState=document.getElementById("file-state");
 function showFile(file){
  const check=validateFile(file);if(!check.ok){fileState.textContent=check.reason==="size"?"ERROR · máximo 100 MB":"ERROR · archivo inválido";strip.hidden=false;currentFile=null;return;}
- currentFile=file;fileName.textContent=file.name;fileMeta.textContent=(file.type||"tipo desconocido")+" · "+formatBytes(file.size);fileState.textContent="READY FOR BACKEND · archivo seleccionado, análisis todavía no conectado";strip.hidden=false;setState(AI_STATES.UPLOADING);
+ currentFile=file;fileName.textContent=file.name;fileMeta.textContent=(file.type||"tipo desconocido")+" · "+formatBytes(file.size);fileState.textContent="READY · archivo adjunto preparado para análisis";strip.hidden=false;setState(AI_STATES.UPLOADING);
  setTimeout(()=>setState(AI_STATES.READY),250);
 }
 attachBtn.addEventListener("click",()=>fileInput.click());
