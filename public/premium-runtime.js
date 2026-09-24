@@ -191,7 +191,7 @@
     const thinking=appendMessage("assistant","Procesando…");
     try{
       const history=c.messages.slice(-14).filter(m=>m.role==="user"||m.role==="assistant").map(m=>({role:m.role,content:m.content}));
-      const payload={message:prompt,history,attachments:filePayloads,conversation_id:c.id,model:"AgentiQ",guest_session:guestId()};
+      const selectedAgent=window.__aqActiveAgent||null;\n      const selectedTeam=window.__aqActiveTeam||null;\n      const payload={message:prompt,history,attachments:filePayloads,conversation_id:c.id,model:"AgentiQ",guest_session:guestId(),agent:selectedAgent,team:selectedTeam};
       const requestOptions={method:"POST",headers:{"content-type":"application/json","accept":"application/json"},body:JSON.stringify(payload)};
       let res=await fetch(API+"/v1/public/chat",requestOptions);
       if((res.status===405||res.status===404||res.status===502)&&API!==API_FALLBACK)res=await fetch(API_FALLBACK+"/v1/public/chat",requestOptions);
