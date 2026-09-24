@@ -48,6 +48,7 @@ export function createVoiceController({ onState, onTranscript, onSpeakStart, onS
   let recognition = null;
   let enabled = false;
   let preferredVoice = null;
+  let preferredVoiceName = "";
 
   const getVoices = () => window.speechSynthesis?.getVoices?.() || [];
   const pickVoice = (lang = "es-AR") => {
@@ -58,12 +59,12 @@ export function createVoiceController({ onState, onTranscript, onSpeakStart, onS
       || null;
   };
 
-  const loadVoice = lang => { preferredVoice = pickVoice(lang); };
+  const loadVoice = (lang, name = "") => { preferredVoiceName = name || ""; preferredVoice = preferredVoiceName ? (getVoices().find(v => v.name === preferredVoiceName) || pickVoice(lang)) : pickVoice(lang); };
 
   const speak = (text, { lang = "es-AR", rate = 1, volume = 1 } = {}) => {
     if (!window.speechSynthesis || !text) return false;
     window.speechSynthesis.cancel();
-    preferredVoice = pickVoice(lang);
+    preferredVoice = preferredVoiceName ? (getVoices().find(v => v.name === preferredVoiceName) || pickVoice(lang)) : pickVoice(lang);
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = preferredVoice?.lang || lang;
     utterance.voice = preferredVoice;
@@ -122,7 +123,7 @@ export function createVoiceController({ onState, onTranscript, onSpeakStart, onS
   };
 
   window.speechSynthesis?.addEventListener?.("voiceschanged", () => {
-    preferredVoice = pickVoice("es-AR");
+    preferredVoice = preferredVoiceName ? (getVoices().find(v => v.name === preferredVoiceName) || pickVoice("es-AR")) : pickVoice("es-AR");
   });
 
   loadVoice("es-AR");
