@@ -119,15 +119,7 @@ async function callHuggingFace(request, env) {
   const endpoint = String(env.HF_API_URL || "https://router.huggingface.co/v1/chat/completions").trim();
   // Hugging Face automatically selects an available provider. This avoids
   // hard-coding providers that may not serve the model at a given moment.
-  const configuredModels = String(env.HF_MODELS || "").split(",").map(x => x.trim()).filter(Boolean);
-  const models = [
-    ...configuredModels,
-    model,
-    "Qwen/Qwen3.8-27B-FP8",
-    "Qwen/Qwen3.6-27B",
-    String(env.HF_ASTRA_MODEL || "").trim()
-  ].filter(Boolean).map(value => value.endsWith(":fastest") ? value : value + ":fastest")
-   .filter((value, index, list) => list.indexOf(value) === index);
+  const models = [model.endsWith(":fastest") ? model : model + ":fastest"];
 
   if (!token) return null;
 
