@@ -5,11 +5,7 @@ on:
     branches: [main]
     paths:
       - "worker.js"
-      - "_worker.js"
       - "wrangler.jsonc"
-      - "index.html"
-      - "app.js"
-      - "styles.css"
       - "public/**"
       - ".github/workflows/cloudflare.yml"
   workflow_dispatch:
@@ -54,7 +50,7 @@ jobs:
           else
             echo "HF_TOKEN no configurado; se mantendrá el fallback de Cloudflare Workers AI."
           fi
-      - name: Configure Designer Agent secrets (optional)
+      - name: Configure GitHub/CodQ secrets (optional)
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -64,14 +60,13 @@ jobs:
           if [ -n "$GH_TOKEN" ]; then
             printf '%s' "$GH_TOKEN" | npx wrangler secret put GH_TOKEN --name agenticweb
           else
-            echo "GH_TOKEN no configurado: Designer Agent no podrá publicar en GitHub."
+            echo "GH_TOKEN no configurado: CodQ de escritura quedará deshabilitado."
           fi
           if [ -n "$AGENTIC_ADMIN_KEY" ]; then
             printf '%s' "$AGENTIC_ADMIN_KEY" | npx wrangler secret put AGENTIC_ADMIN_KEY --name agenticweb
           else
-            echo "AGENTIC_ADMIN_KEY no configurado: Designer Agent quedará protegido."
+            echo "AGENTIC_ADMIN_KEY no configurado: la escritura administrativa de CodQ quedará deshabilitada."
           fi
-
       - name: Configure Auth + Billing secrets (optional)
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
