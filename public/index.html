@@ -134,7 +134,7 @@ async function sendMessage(text){
    pending.textContent=answer;history.push({role:"user",content:text},{role:"assistant",content:answer});
    if(voiceMode&&voice.speechSupported){setState(AI_STATES.SPEAKING);voice.speak(answer,{lang:lang.value,rate:rate.value});}
    else setState(AI_STATES.DONE);
- }catch(err){pending.textContent="AgentiCuantico no pudo responder ahora. Verificá la conexión e intentá nuevamente.";setState(AI_STATES.ERROR);}
+ }catch(err){pending.textContent=err?.message==="unsupported_file_format"?"Este formato todavía no está habilitado para análisis. Podés usar imágenes o archivos de texto por ahora.":"AgentiCuantico no pudo responder ahora. Verificá la conexión e intentá nuevamente.";setState(err?.message==="unsupported_file_format"?"DONE":"ERROR");}
 }
 form.addEventListener("submit",async e=>{e.preventDefault();const text=input.value.trim();if(!text)return;input.value="";resizeInput();await sendMessage(text);});
 document.querySelectorAll(".quick-prompts button").forEach(b=>b.addEventListener("click",()=>{input.value=b.dataset.prompt;input.focus();resizeInput();}));
