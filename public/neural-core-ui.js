@@ -30,7 +30,8 @@ export class AIProvider {
         conversation_id: conversationId,
         message,
         consent_to_memory: false,
-        history: history.slice(-10)
+        history: history.slice(-10),
+        ...(attachment ? { attachments: [attachment] } : {})
       })
     });
 
@@ -53,8 +54,11 @@ export function createVoiceController({ onState, onTranscript, onSpeakStart, onS
   const getVoices = () => window.speechSynthesis?.getVoices?.() || [];
   const guessGender = v => { const n=String(v?.name||"").toLowerCase(); if(/female|woman|mujer|femen|sofia|sara|lucia|paola|camila|valentina|ana|helena|emma|olivia|aria|ava|zira/.test(n)) return "female"; if(/male|man|hombre|mascul|jorge|diego|carlos|miguel|juan|mateo|alex|daniel|thomas|george|david/.test(n)) return "male"; return "any"; };\n\n  const pickVoice = (lang = "es-AR", gender = "any") => {
     const voices = getVoices();
-    return voices.find(v => v.lang?.toLowerCase() === lang.toLowerCase())
-      || voices.find(v => v.lang?.toLowerCase().startsWith(lang.slice(0, 2).toLowerCase()))
+    const same = voices.filter(v => v.lang?.toLowerCase().startsWith(lang.slice(0,2).toLowerCase()));
+    const pool = gender === "any" ? same : same.filter(v => guessGender(v) === gender);
+    return pool.find(v => v.lang?.toLowerCase() === lang.toLowerCase())
+      || pool[0]
+      || same[0]
       || voices[0]
       || null;
   };
