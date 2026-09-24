@@ -173,5 +173,5 @@ export async function prepareAttachment(file){
   if(type.startsWith("text/")||/\.(json|xml|csv|md|js|ts|tsx|jsx|py|java|cpp|c|html|css)$/i.test(file.name)){
     return {name:file.name,type,kind:"text",data:(await file.text()).slice(0,120000)};
   }
-  return {name:file.name,type,kind:"file",data:"Archivo recibido: "+file.name+" ("+formatBytes(file.size)+"). El procesamiento específico de este formato requiere el pipeline de archivos del backend."};
+  throw new Error("unsupported_file_format");
 }
