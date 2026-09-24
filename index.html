@@ -48,7 +48,7 @@ window.AGENTICUANTICO_GLB_URL="/assets/AgentiCuantico_brain_PBR.glb";
         <button id="new-chat" type="button" title="Nueva conversación">＋</button>
       </div>
     </div>
-    <div id="ai-messages" class="messages">
+    <div class="quick-prompts" aria-label="Acciones rápidas"><button type="button" data-prompt="Ayúdame a crear una idea paso a paso">Crear una idea</button><button type="button" data-prompt="Analiza este problema y propón una solución">Analizar</button><button type="button" data-prompt="Ayúdame a programar esta tarea">Programar</button></div><div id="ai-messages" class="messages">
       <div class="msg assistant">Hola. Soy AgentiCuantico. Estoy listo para conversar, analizar ideas o ayudarte con una tarea.</div>
     </div>
     <form class="composer" id="ai-form">
@@ -68,6 +68,7 @@ window.AGENTICUANTICO_GLB_URL="/assets/AgentiCuantico_brain_PBR.glb";
 
 <footer><span>AI · AGENTIC · HUMAN INTERFACE</span><span>WEBGL · 3D · VOICE</span></footer>
 
+<script>document.querySelector(".menu-btn")?.addEventListener("click",()=>document.querySelector(".desktop-nav")?.classList.toggle("open"));</script>
 <script type="module">
 import { initQuantumBrain3D } from "./public/brain-3d.js";
 const brain=initQuantumBrain3D(document.getElementById("brain-canvas"));
@@ -81,6 +82,7 @@ async function ask(text){
  try{const r=await fetch(api()+"/v1/public/chat",{method:"POST",signal:c.signal,headers:{"Content-Type":"application/json","X-Guest-Session":session},body:JSON.stringify({conversation_id:conversation,message:text,consent_to_memory:false,history:history.slice(-10)})});if(!r.ok)throw Error("HTTP "+r.status);const d=await r.json();if(!d.answer)throw Error("empty");return d.answer}finally{clearTimeout(timer)}
 }
 form.addEventListener("submit",async e=>{e.preventDefault();const text=input.value.trim();if(!text)return;input.value="";add("user",text);const pending=add("assistant","Pensando…");status.textContent="Cerebro · razonando";brain?.setThinking(true);try{const answer=await ask(text);pending.textContent=answer;history.push({role:"user",content:text},{role:"assistant",content:answer});status.textContent="Cerebro 3D conectado"}catch(err){pending.textContent="No pude responder ahora. Verificá la conexión del cerebro e intentá nuevamente.";status.textContent="Cerebro · reconexión"}finally{brain?.setThinking(false)}});
+document.querySelectorAll(".quick-prompts button").forEach(b=>b.addEventListener("click",()=>{input.value=b.dataset.prompt;input.focus();}));
 input.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();form.requestSubmit()}});
 document.getElementById("new-chat").onclick=()=>{history.length=0;messages.innerHTML='<div class="msg assistant">Nueva conversación iniciada. ¿Qué quieres explorar?</div>';input.focus();};
 </script>
