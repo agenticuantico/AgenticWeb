@@ -28,3 +28,18 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;background:rad
  .experience{padding:80px 12px 34px}.intro{max-width:94vw}.intro h1{font-size:clamp(36px,11vw,52px)}.intro p{font-size:12px}.brain-wrap{width:100vw;height:55vh;min-height:340px;max-height:470px;margin-top:0}.brain-label{bottom:5px}.chat-shell{width:calc(100vw - 20px);border-radius:20px;padding:8px}.chat-head{padding:4px 5px 9px}.chat-actions select{max-width:120px}.quick-prompts{padding-left:5px}.messages{max-height:36vh;min-height:90px;padding:10px 5px}.msg{max-width:92%;font-size:12px}.composer{gap:5px;padding:7px;border-radius:16px}.composer-left{gap:3px}.tool-btn,.voice-btn{width:40px;height:40px;flex-basis:40px}.send{width:44px;height:44px}.voice-panel{grid-template-columns:1fr 1fr}.voice-panel>div{grid-column:1/-1}.chat-meta{font-size:7px}.chat-meta span:last-child{display:none}.features{grid-template-columns:1fr 1fr;width:calc(100vw - 20px)}.features div{padding:13px}.features b{font-size:8px}.features span{font-size:8px}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.001ms!important}}
+
+/* Neural Core visual system — final layer */
+.world-layer{position:fixed;inset:0;z-index:-6;pointer-events:none;background:
+linear-gradient(180deg,rgba(2,5,13,.48),rgba(2,5,13,.18) 45%,rgba(2,5,13,.78)),
+url("/assets/background/quantum-world.svg") center/cover no-repeat;filter:saturate(1.12) contrast(1.05);transform:scale(1.04);animation:worldFloat 24s ease-in-out infinite alternate}
+.world-layer:after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 48% 38%,rgba(66,214,255,.09),transparent 32%),radial-gradient(circle at 72% 52%,rgba(152,75,255,.13),transparent 36%);mix-blend-mode:screen}
+.topbar{border-bottom:1px solid rgba(150,210,255,.045)}
+.intro h1{font-family:"Space Grotesk",Sora,system-ui,sans-serif}
+.brain-wrap{filter:drop-shadow(0 0 42px rgba(54,187,255,.08))}
+.brain-wrap canvas{touch-action:none}
+.chat-shell{box-shadow:0 32px 110px rgba(0,0,0,.55),0 0 70px rgba(50,173,255,.11),inset 0 1px rgba(255,255,255,.12)}
+.voice-panel{grid-template-columns:1.35fr repeat(4,1fr)}
+@keyframes worldFloat{from{transform:scale(1.04) translate3d(-1%,0,0)}to{transform:scale(1.1) translate3d(1.5%,-.8%,0)}}
+@media(max-width:700px){.world-layer{background-position:24% center}.voice-panel{grid-template-columns:1fr 1fr}.voice-panel>div{grid-column:1/-1}}
+@media(prefers-reduced-motion:reduce){.world-layer{animation:none!important}}
