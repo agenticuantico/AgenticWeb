@@ -1,164 +1,42 @@
 <!doctype html>
-<html lang="es">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#02050d">
-<meta name="description" content="AgentiCuantico — inteligencia agéntica, conversación multimodal y una interfaz neuronal 3D inmersiva.">
-<link rel="canonical" href="https://agenticuantico.dev.ar/">
-<meta property="og:title" content="AgentiCuantico — Neural AI">
-<meta property="og:description" content="Inteligencia agéntica, conversación multimodal y una interfaz neuronal 3D inmersiva.">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://agenticuantico.dev.ar/">
-<meta name="twitter:card" content="summary_large_image">
-<link rel="manifest" href="/manifest.json">
-<title>AgentiCuantico — Neural AI</title>
-<link rel="stylesheet" href="./styles.css">
-<script>window.AGENTICUANTICO_GLB_URL="/assets/AgentiCuantico_brain_PBR.glb";</script>
-</head>
+<html lang="es"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#02030a"><meta name="description" content="AgentiCuantico Neural Core — inteligencia artificial con cerebro 3D, conversación Qwen, voz y experiencia multimodal.">
+<link rel="canonical" href="https://agenticuantico.dev.ar/"><title>AgentiCuantico · Neural Core</title><link rel="stylesheet" href="./styles.css">
+<script>window.AGENTICUANTICO_GLB_URL="/assets/AgentiCuantico_brain_PBR.glb";</script></head>
 <body>
-<div class="space" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div><div class="world-layer" aria-hidden="true"></div>
-<div class="ambient ambient-a" aria-hidden="true"></div><div class="ambient ambient-b" aria-hidden="true"></div>
-<header class="topbar">
-  <a class="brand" href="/" aria-label="AgentiCuantico"><span class="brand-mark">✳</span><span>AgentiCuantico</span><sup>®</sup></a>
-  <nav class="desktop-nav" aria-label="Principal"><a href="#brain">Cerebro</a><a href="#chat">Conversación</a><a href="#features">Capacidades</a></nav>
-  <button class="menu-btn" type="button" aria-label="Abrir menú" aria-expanded="false"><span></span><span></span><span></span></button>
-</header>
-
-<main class="experience">
-<section class="intro" id="brain">
-  <div class="eyebrow"><span class="pulse-dot"></span> NEURAL CORE · ONLINE</div>
-  <h1>Tu inteligencia,<br><strong>en movimiento.</strong></h1>
-  <p>Conversá, creá y explorá con un núcleo neuronal 3D diseñado para sentirse vivo.</p>
-  <a class="hero-cta" href="#chat" id="start-chat">Entrar al núcleo <span>↘</span></a>
+<canvas id="world-canvas" class="world-canvas" aria-hidden="true"></canvas><div class="vignette" aria-hidden="true"></div>
+<header class="topbar"><a class="brand" href="/" aria-label="AgentiCuantico Neural Core"><span class="brand-symbol">✦</span><span>AgentiCuantico</span><small>NEURAL CORE</small></a><nav class="nav" aria-label="Navegación principal"><a href="#core">Core</a><a href="#chat">Chat</a><a href="#voice">Voz</a></nav><button class="menu" id="menu" aria-label="Abrir navegación" aria-expanded="false"><i></i><i></i><i></i></button></header>
+<main>
+<section class="hero" id="core">
+<div class="hero-copy"><div class="status"><span></span> SISTEMA ONLINE · NEURAL CORE</div><h1>Inteligencia que<br><em>cobra vida.</em></h1><p>Un espacio de conversación donde el cerebro 3D, la voz y Qwen trabajan como una sola interfaz.</p><div class="hero-actions"><a class="primary" href="#chat">Entrar al Core <span>↘</span></a><button class="ghost" id="focus-brain" type="button">Explorar cerebro</button></div><div class="metrics"><span><b>3D</b> GLB neuronal</span><span><b>QWEN</b> motor IA</span><span><b>VOICE</b> selección local</span></div></div>
+<div class="brain-stage" aria-label="Cerebro neuronal 3D interactivo"><div class="stage-grid"></div><div class="brain-glow"></div><canvas id="brain-canvas"></canvas><div class="stage-orbit orbit-a"></div><div class="stage-orbit orbit-b"></div><div class="brain-caption"><span id="brain-state">READY</span><small>AGENTIC NEURAL CORE</small></div></div>
+<aside class="system-card"><div class="card-top"><span>CORE STATUS</span><b id="core-status">READY</b></div><div class="core-pulse"><span></span><i></i><i></i><i></i></div><div class="system-lines"><div><span>Motor</span><strong id="motor-status">QWEN · CONNECTED</strong></div><div><span>3D</span><strong id="glb-status">GLB · LOADING</strong></div><div><span>Audio</span><strong id="voice-status">DEVICE VOICE</strong></div><div><span>Privacy</span><strong>SESSION ONLY</strong></div></div><div class="signal"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div></aside>
 </section>
-
-<section class="brain-wrap" aria-label="Cerebro neuronal 3D">
-  <div class="brain-aura"></div><canvas id="brain-canvas"></canvas>
-  <div class="brain-label"><span>AGENTIC CORE</span><small id="brain-state">Cerebro neuronal · listo</small></div>
-</section>
-
-<section class="chat-shell glass" id="chat" aria-label="Conversación con AgentiCuantico">
-  <div class="chat-head">
-    <div class="chat-title"><span class="mini-core"></span><div><strong>AgentiCuantico</strong><small id="ai-status">READY · Cerebro conectado</small></div></div>
-    <div class="chat-actions">
-      
-      <button id="new-chat" type="button" title="Nueva conversación" aria-label="Nueva conversación">＋</button>
-    </div>
-  </div>
-  <div class="quick-prompts" aria-label="Acciones rápidas"><button type="button" data-prompt="Ayúdame a crear una idea paso a paso">Crear una idea</button><button type="button" data-prompt="Analiza este problema y propón una solución">Analizar</button><button type="button" data-prompt="Ayúdame a programar esta tarea">Programar</button></div>
-  <div id="ai-messages" class="messages" aria-live="polite"><div class="msg assistant">Hola. Soy AgentiCuantico. Estoy listo para conversar, analizar ideas o ayudarte a crear.</div></div>
-
-  <div class="attachment-strip" id="attachment-strip" hidden>
-    <div class="file-card"><span class="file-icon">+</span><div><strong id="file-name">archivo</strong><small id="file-meta"></small></div><button id="remove-file" type="button" aria-label="Quitar archivo">×</button></div>
-    <div class="file-state" id="file-state">READY · archivo adjunto preparado para análisis</div>
-  </div>
-
-  <form class="composer" id="ai-form">
-    <div class="composer-left">
-      <button class="tool-btn" id="attach-btn" type="button" aria-label="Adjuntar archivo" title="Adjuntar archivo">+</button>
-      <input id="file-input" type="file" hidden accept=".pdf,.doc,.docx,.txt,.csv,.xls,.xlsx,.json,.xml,.zip,.jpg,.jpeg,.png,.webp,.gif,.svg,.mp4,.mov,.webm,.mp3,.wav,.m4a,.js,.ts,.tsx,.jsx,.py,.java,.cpp,.c,.html,.css,.md">
-      <textarea id="ai-input" rows="1" placeholder="Escribe a AgentiCuantico…" autocomplete="off"></textarea>
-    </div>
-    <button class="voice-btn" id="voice-btn" type="button" aria-label="Activar micrófono" title="Voz">◉</button>
-    <button class="send" type="submit" aria-label="Enviar">↑</button>
-  </form>
-  <div class="voice-panel" id="voice-panel" hidden>
-    <div><span class="voice-live" id="voice-live">● LISTO</span><small>Voz del dispositivo · respuesta escrita siempre visible</small></div>
-    <label>Idioma <select id="voice-language" aria-label="Idioma de voz"><option value="es-AR" selected>🇦🇷 Español · Argentina</option><option value="en-US">🇺🇸 English · United States</option><option value="pt-BR">🇧🇷 Português · Brasil</option><option value="fr-FR">🇫🇷 Français · France</option><option value="it-IT">🇮🇹 Italiano · Italia</option><option value="de-DE">🇩🇪 Deutsch · Deutschland</option><option value="es-ES">🇪🇸 Español · España</option></select></label>
-    <label>Género <select id="voice-gender" aria-label="Género de voz"><option value="female">♀ Femenina</option><option value="male">♂ Masculina</option><option value="any">◉ Automática</option></select></label><label>Voz <select id="voice-select" aria-label="Voz disponible"><option value="">Automática</option></select></label>
-    <label>Velocidad <input id="voice-rate" type="range" min=".7" max="1.2" step=".05" value="1" aria-label="Velocidad"></label>
-  </div>
-  <div class="chat-meta"><span><b>●</b> memoria desactivada</span><span id="capability-note">TEXTO · VOZ · MULTIMODAL</span></div>
-</section>
-
-<section class="features" id="features">
-  <div><b>IA AGÉNTICA</b><span>Orquestación preparada para agentes y herramientas</span></div>
-  <div><b>3D NEURAL</b><span>Cerebro GLB + espectro neuronal inmersivo</span></div>
-  <div><b>VOICE</b><span>Voces por idioma y género según el dispositivo</span></div>
-  <div><b>PRIVACY</b><span>Memoria no activada sin consentimiento</span></div>
-</section>
-</main>
-<footer><span>AI · AGENTIC · HUMAN INTERFACE</span><span>WEBGL · 3D · VOICE</span></footer>
-
-<script>
-const menu=document.querySelector(".menu-btn"),nav=document.querySelector(".desktop-nav");
-menu?.addEventListener("click",()=>{const open=nav?.classList.toggle("open");menu.setAttribute("aria-expanded",String(!!open));});
-</script>
+<section class="chat-section" id="chat"><div class="section-head"><div><span class="kicker">NEURAL CONVERSATION</span><h2>Hablá con el Core.</h2></div><button id="new-chat" class="icon-btn" type="button" title="Nueva conversación">＋</button></div>
+<div class="chat-shell"><div class="chat-toolbar"><div class="model-chip"><span></span><strong>AgentiCuantico</strong><small>Qwen · visión · archivos</small></div><div class="live-pill" id="ai-status">READY</div></div>
+<div class="quick-prompts"><button data-prompt="Ayúdame a convertir una idea en un plan concreto.">Planificar</button><button data-prompt="Analiza este problema y proponé una solución paso a paso.">Analizar</button><button data-prompt="Ayúdame a programar una solución limpia y segura.">Programar</button></div>
+<div id="ai-messages" class="messages" aria-live="polite"><div class="msg assistant"><span class="msg-orb"></span><div>Hola. Soy <b>AgentiCuantico</b>. El Core está listo para conversar, analizar imágenes y trabajar con archivos compatibles.</div></div></div>
+<div class="attachment" id="attachment-strip" hidden><div><b id="file-name">archivo</b><small id="file-meta"></small></div><button id="remove-file" type="button">×</button></div>
+<form class="composer" id="ai-form"><button class="tool-btn" id="attach-btn" type="button" title="Adjuntar archivo" aria-label="Adjuntar archivo">＋</button><input id="file-input" type="file" hidden accept=".txt,.md,.csv,.json,.xml,.js,.ts,.tsx,.jsx,.py,.java,.cpp,.c,.html,.css,.jpg,.jpeg,.png,.webp,.gif,.svg"><textarea id="ai-input" rows="1" placeholder="Escribí un mensaje al Core…" autocomplete="off"></textarea><button class="voice-btn" id="voice-btn" type="button" aria-label="Abrir controles de voz" title="Voz">◉</button><button class="send-btn" type="submit" aria-label="Enviar">↑</button></form>
+<div class="voice-panel" id="voice-panel" hidden><div class="voice-head"><div><span class="kicker">VOICE ENGINE</span><strong>Configurá cómo querés escuchar al Core.</strong></div><span id="voice-live">● LISTO</span></div><div class="voice-grid" id="voice">
+<label>País / idioma<select id="voice-language"><option value="es-AR">🇦🇷 Español · Argentina</option><option value="es-MX">🇲🇽 Español · México</option><option value="es-ES">🇪🇸 Español · España</option><option value="en-US">🇺🇸 English · United States</option><option value="en-GB">🇬🇧 English · United Kingdom</option><option value="pt-BR">🇧🇷 Português · Brasil</option><option value="fr-FR">🇫🇷 Français · France</option><option value="it-IT">🇮🇹 Italiano · Italia</option><option value="de-DE">🇩🇪 Deutsch · Deutschland</option><option value="ja-JP">🇯🇵 日本語 · Japan</option><option value="ko-KR">🇰🇷 한국어 · Korea</option></select></label>
+<label>Género<select id="voice-gender"><option value="any">◉ Automática</option><option value="female">♀ Femenina</option><option value="male">♂ Masculina</option></select></label><label>Voz disponible<select id="voice-select"><option value="">Automática</option></select></label><label>Velocidad<input id="voice-rate" type="range" min=".7" max="1.2" step=".05" value="1"></label></div><small class="voice-note">La disponibilidad de voces depende del navegador y del dispositivo. El género es una preferencia cuando el sistema expone una voz identificable; si no, se usa selección automática.</small></div>
+<div class="chat-foot"><span>● memoria no activada</span><span>TEXT · VISION · FILES · VOICE</span></div></div></section>
+<section class="capabilities"><article><span>01</span><b>CEREBRO 3D</b><p>GLB PBR generado en el deploy, con fallback procedural y estados visuales del Core.</p></article><article><span>02</span><b>QWEN</b><p>Motor principal en Cloudflare Workers AI, sin depender de un proveedor externo para el chat.</p></article><article><span>03</span><b>VOICE</b><p>Reconocimiento y síntesis del dispositivo con idioma, país, voz, género preferido y velocidad.</p></article><article><span>04</span><b>MULTIMODAL</b><p>Imágenes y texto compatibles se preparan para análisis dentro de la sesión actual.</p></article></section>
+</main><footer><span>AGENTICUANTICO / NEURAL CORE</span><span>WEBGL · GLB · QWEN · VOICE</span></footer>
 <script type="module">
-import { initQuantumBrain3D } from "./brain-3d.js";
-import { AIProvider, AI_STATES, createVoiceController, validateFile, formatBytes, prepareAttachment } from "./neural-core-ui.js";
-
-const brain=initQuantumBrain3D(document.getElementById("brain-canvas"));
-const messages=document.getElementById("ai-messages"),input=document.getElementById("ai-input"),form=document.getElementById("ai-form"),status=document.getElementById("ai-status"),brainState=document.getElementById("brain-state");
-const session=sessionStorage.getItem("aq_session")||crypto.randomUUID(),conversation=sessionStorage.getItem("aq_conversation")||crypto.randomUUID();
-sessionStorage.setItem("aq_session",session);sessionStorage.setItem("aq_conversation",conversation);
-const history=[];const provider=new AIProvider();
-let currentState=AI_STATES.READY,currentFile=null,voiceMode=false;
-
-const stateText={READY:"READY",LISTENING:"LISTENING · escuchando",UPLOADING:"UPLOADING · archivo recibido",PROCESSING:"PROCESSING · procesando",ANALYZING:"ANALYZING · analizando",THINKING:"THINKING · razonando",GENERATING:"GENERATING · generando",SPEAKING:"SPEAKING · hablando",DONE:"DONE · listo",ERROR:"ERROR · revisar conexión"};
-function setState(state){
- currentState=state;const label=stateText[state]||state;
- status.textContent=label;
- if(brainState)brainState.textContent=label;
- if(brain?.setState)brain.setState(state);
- else if(brain?.setThinking)brain.setThinking(state==="THINKING"||state==="PROCESSING"||state==="ANALYZING"||state==="GENERATING");
-}
-function add(role,text){const d=document.createElement("div");d.className="msg "+role;d.textContent=text;messages.appendChild(d);messages.scrollTop=messages.scrollHeight;return d}
-async function ask(text){
- const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),30000);
- try{const attachment=currentFile?await prepareAttachment(currentFile):null;return await provider.chat({message:text,history,conversationId:conversation,session,attachment,signal:controller.signal});}
- finally{clearTimeout(timer)}
-}
-const voice=createVoiceController({ getGender:()=>voiceGender?.value||"any",
- onState:setState,
- onTranscript:(text,final)=>{if(text){input.value=text;resizeInput();if(final)form.requestSubmit();}},
- onSpeakStart:()=>setState(AI_STATES.SPEAKING),
- onSpeakEnd:()=>setState(AI_STATES.DONE)
-});
-const voiceBtn=document.getElementById("voice-btn"),voicePanel=document.getElementById("voice-panel"),lang=document.getElementById("voice-language"),voiceGender=document.getElementById("voice-gender"),voiceSelect=document.getElementById("voice-select"),rate=document.getElementById("voice-rate");
-function populateVoices(){if(!voiceSelect||!window.speechSynthesis)return;const voices=window.speechSynthesis.getVoices();const wanted=lang.value.toLowerCase(),gender=voiceGender?.value||"any";const matches=voices.filter(v=>v.lang?.toLowerCase().startsWith(wanted.slice(0,2))&&((gender==="any")||(typeof voice.guessGender==="function"&&voice.guessGender(v)===gender)));voiceSelect.innerHTML='<option value="">Automática</option>';matches.forEach(v=>{const o=document.createElement("option");o.value=v.name;o.textContent=v.name+" · "+v.lang;voiceSelect.appendChild(o);});}
-populateVoices();window.speechSynthesis?.addEventListener("voiceschanged",populateVoices);
-lang.addEventListener("change",()=>{populateVoices();voice.loadVoice(lang.value,voiceSelect.value,voiceGender?.value||"any");});voiceGender?.addEventListener("change",()=>{populateVoices();voice.loadVoice(lang.value,voiceSelect.value,voiceGender.value);});
-voiceSelect.addEventListener("change",()=>voice.loadVoice(lang.value,voiceSelect.value,voiceGender?.value||"any"));
-voiceBtn.addEventListener("click",()=>{
- if(!voice.recognitionSupported){voicePanel.hidden=false;document.getElementById("voice-live").textContent="● VOZ NO DISPONIBLE · READY FOR BACKEND";return;}
- voiceMode=!voiceMode;voicePanel.hidden=!voiceMode;voiceBtn.classList.toggle("active",voiceMode);
- if(voiceMode){voice.startListening({lang:lang.value});}else{voice.stopListening();voice.stopSpeaking();setState(AI_STATES.READY);}
-});
-async function sendMessage(text){
- if(!text.trim())return;
- add("user",text);const pending=add("assistant","Pensando…");setState(AI_STATES.THINKING);
- try{
-   const answer=await ask(text);
-   pending.textContent=answer;history.push({role:"user",content:text},{role:"assistant",content:answer});
-   if(voiceMode&&voice.speechSupported){setState(AI_STATES.SPEAKING);voice.speak(answer,{lang:lang.value,rate:rate.value});}
-   else setState(AI_STATES.DONE);
- }catch(err){pending.textContent=err?.message==="unsupported_file_format"?"Este formato todavía no está habilitado para análisis. Podés usar imágenes o archivos de texto por ahora.":"AgentiCuantico no pudo responder ahora. Verificá la conexión e intentá nuevamente.";setState(err?.message==="unsupported_file_format"?"DONE":"ERROR");}
-}
-form.addEventListener("submit",async e=>{e.preventDefault();const text=input.value.trim();if(!text)return;input.value="";resizeInput();await sendMessage(text);});
-document.querySelectorAll(".quick-prompts button").forEach(b=>b.addEventListener("click",()=>{input.value=b.dataset.prompt;input.focus();resizeInput();}));
-function resizeInput(){input.style.height="auto";input.style.height=Math.min(input.scrollHeight,150)+"px"}
-input.addEventListener("input",resizeInput);
-input.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();form.requestSubmit()}});
-document.getElementById("new-chat").onclick=()=>{history.length=0;messages.innerHTML='<div class="msg assistant">Nueva conversación iniciada. ¿Qué quieres explorar?</div>';setState(AI_STATES.READY);input.focus();};
-
-const attachBtn=document.getElementById("attach-btn"),fileInput=document.getElementById("file-input"),strip=document.getElementById("attachment-strip"),removeFile=document.getElementById("remove-file"),fileName=document.getElementById("file-name"),fileMeta=document.getElementById("file-meta"),fileState=document.getElementById("file-state");
-function showFile(file){
- const check=validateFile(file);if(!check.ok){fileState.textContent=check.reason==="size"?"ERROR · máximo 100 MB":"ERROR · archivo inválido";strip.hidden=false;currentFile=null;return;}
- currentFile=file;fileName.textContent=file.name;fileMeta.textContent=(file.type||"tipo desconocido")+" · "+formatBytes(file.size);fileState.textContent="READY · archivo adjunto preparado para análisis";strip.hidden=false;setState(AI_STATES.UPLOADING);
- setTimeout(()=>setState(AI_STATES.READY),250);
-}
-attachBtn.addEventListener("click",()=>fileInput.click());
-fileInput.addEventListener("change",()=>showFile(fileInput.files?.[0]));
-removeFile.addEventListener("click",()=>{currentFile=null;fileInput.value="";strip.hidden=true;setState(AI_STATES.READY);});
-["dragenter","dragover"].forEach(type=>form.addEventListener(type,e=>{e.preventDefault();form.classList.add("drop-active");}));
-["dragleave","drop"].forEach(type=>form.addEventListener(type,e=>{e.preventDefault();form.classList.remove("drop-active");}));
-form.addEventListener("drop",e=>showFile(e.dataTransfer?.files?.[0]));
-
-document.getElementById("start-chat")?.addEventListener("click",()=>setTimeout(()=>input.focus(),250));
-
-setState(AI_STATES.READY);
-</script>
-</body>
-</html>
+import{initNeuralWorld}from"./world-3d.js";import{initQuantumBrain3D}from"./brain-3d.js";import{AIProvider,AI_STATES,createVoiceController,validateFile,formatBytes,prepareAttachment}from"./neural-core-ui.js";
+initNeuralWorld(document.getElementById("world-canvas"));const brain=initQuantumBrain3D(document.getElementById("brain-canvas"));const messages=document.getElementById("ai-messages"),input=document.getElementById("ai-input"),form=document.getElementById("ai-form"),status=document.getElementById("ai-status"),brainState=document.getElementById("brain-state"),coreStatus=document.getElementById("core-status"),glbStatus=document.getElementById("glb-status"),voiceStatus=document.getElementById("voice-status");const session=sessionStorage.getItem("aq_session")||crypto.randomUUID(),conversation=sessionStorage.getItem("aq_conversation")||crypto.randomUUID();sessionStorage.setItem("aq_session",session);sessionStorage.setItem("aq_conversation",conversation);const history=[],provider=new AIProvider();let currentFile=null,voiceMode=false;
+const stateText={READY:"READY",LISTENING:"LISTENING · ESCUCHANDO",UPLOADING:"UPLOADING · ARCHIVO",PROCESSING:"PROCESSING · PROCESANDO",ANALYZING:"ANALYZING · ANALIZANDO",THINKING:"THINKING · RAZONANDO",GENERATING:"GENERATING · GENERANDO",SPEAKING:"SPEAKING · HABLANDO",DONE:"DONE · LISTO",ERROR:"ERROR · CONEXIÓN"};function setState(s){const label=stateText[s]||s;status.textContent=label;coreStatus.textContent=label;if(brainState)brainState.textContent=label;brain?.setState?.(s)}
+function add(role,text){const d=document.createElement("div");d.className="msg "+role;d.innerHTML=role==="assistant"?"<span class='msg-orb'></span><div></div>":"<div></div>";d.querySelector("div").textContent=text;messages.appendChild(d);messages.scrollTop=messages.scrollHeight;return d.querySelector("div")}
+function resize(){input.style.height="auto";input.style.height=Math.min(input.scrollHeight,150)+"px"}input.addEventListener("input",resize);
+const ask=async text=>{const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),45000);try{return await provider.chat({message:text,history,conversationId:conversation,session,attachment:currentFile?await prepareAttachment(currentFile):null,signal:controller.signal})}finally{clearTimeout(timer)}};
+const lang=document.getElementById("voice-language"),voiceGender=document.getElementById("voice-gender"),voiceSelect=document.getElementById("voice-select"),rate=document.getElementById("voice-rate"),voicePanel=document.getElementById("voice-panel"),voiceBtn=document.getElementById("voice-btn");
+const voice=createVoiceController({getGender:()=>voiceGender.value,onState:setState,onTranscript:(text,final)=>{if(text){input.value=text;resize();if(final)form.requestSubmit()}},onSpeakStart:()=>setState(AI_STATES.SPEAKING),onSpeakEnd:()=>setState(AI_STATES.DONE)});
+function populateVoices(){if(!voiceSelect||!voice.speechSupported)return;const wanted=lang.value.toLowerCase(),gender=voiceGender.value,voices=voice.getVoices().filter(v=>v.lang?.toLowerCase().startsWith(wanted.slice(0,2))),matches=gender==="any"?voices:voices.filter(v=>voice.guessGender(v)===gender);voiceSelect.innerHTML="<option value=''>Automática</option>";matches.forEach(v=>{const o=document.createElement("option");o.value=v.name;o.textContent=v.name+" · "+v.lang;voiceSelect.appendChild(o)});voiceStatus.textContent=voices.length?"DEVICE VOICE · "+voices.length:"VOICE · AUTOMÁTICA"}populateVoices();window.speechSynthesis?.addEventListener("voiceschanged",populateVoices);lang.onchange=()=>{populateVoices();voice.loadVoice(lang.value,voiceSelect.value,voiceGender.value)};voiceGender.onchange=()=>{populateVoices();voice.loadVoice(lang.value,voiceSelect.value,voiceGender.value)};voiceSelect.onchange=()=>voice.loadVoice(lang.value,voiceSelect.value,voiceGender.value);
+voiceBtn.onclick=()=>{voiceMode=!voiceMode;voicePanel.hidden=!voiceMode;voiceBtn.classList.toggle("active",voiceMode);if(!voiceMode){voice.stopListening();voice.stopSpeaking();setState(AI_STATES.READY)}else if(!voice.recognitionSupported){document.getElementById("voice-live").textContent="● ESCUCHA NO DISPONIBLE EN ESTE NAVEGADOR"}else voice.startListening({lang:lang.value})};
+document.getElementById("attach-btn").onclick=()=>document.getElementById("file-input").click();document.getElementById("file-input").onchange=e=>{const f=e.target.files?.[0];if(!f)return;const c=validateFile(f);if(!c.ok){alert(c.reason==="size"?"El archivo supera el límite de 100 MB.":"Archivo inválido.");return}currentFile=f;document.getElementById("attachment-strip").hidden=false;document.getElementById("file-name").textContent=f.name;document.getElementById("file-meta").textContent=formatBytes(f.size);setState(AI_STATES.UPLOADING)};document.getElementById("remove-file").onclick=()=>{currentFile=null;document.getElementById("file-input").value="";document.getElementById("attachment-strip").hidden=true;setState(AI_STATES.READY)};
+async function send(text){if(!text.trim())return;add("user",text);const pending=add("assistant","Pensando…");setState(AI_STATES.THINKING);try{const answer=await ask(text);pending.textContent=answer;history.push({role:"user",content:text},{role:"assistant",content:answer});if(voiceMode&&voice.speechSupported)voice.speak(answer,{lang:lang.value,rate:rate.value});else setState(AI_STATES.DONE)}catch(err){pending.textContent=err?.message==="unsupported_file_format"?"Este tipo de archivo todavía no está habilitado para análisis. Usá una imagen o texto compatible.":"No pude conectar con el Core ahora. Revisá la conexión e intentá nuevamente.";setState(AI_STATES.ERROR)}currentFile=null;document.getElementById("attachment-strip").hidden=true;document.getElementById("file-input").value=""}
+form.onsubmit=e=>{e.preventDefault();const text=input.value.trim();input.value="";resize();send(text)};document.querySelectorAll("[data-prompt]").forEach(b=>b.onclick=()=>{input.value=b.dataset.prompt;resize();input.focus()});document.getElementById("new-chat").onclick=()=>{messages.innerHTML="<div class='msg assistant'><span class='msg-orb'></span><div>Nueva sesión iniciada. ¿Qué querés construir?</div></div>";history.length=0;setState(AI_STATES.READY)};document.getElementById("focus-brain").onclick=()=>document.getElementById("brain-canvas").scrollIntoView({behavior:"smooth",block:"center"});if(brain)brain.onGLBState=loaded=>{glbStatus.textContent=loaded?"GLB · ONLINE":"3D · FALLBACK"};
+</script></body></html>
