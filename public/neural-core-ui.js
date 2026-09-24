@@ -18,7 +18,7 @@ export class AIProvider {
     this.endpoint = endpoint;
   }
 
-  async chat({ message, history, conversationId, session, signal }) {
+  async chat({ message, history, conversationId, session, attachment, signal }) {
     const response = await fetch(this.endpoint() + "/v1/public/chat", {
       method: "POST",
       signal,
@@ -51,7 +51,7 @@ export function createVoiceController({ onState, onTranscript, onSpeakStart, onS
   let preferredVoiceName = "";
 
   const getVoices = () => window.speechSynthesis?.getVoices?.() || [];
-  const pickVoice = (lang = "es-AR") => {
+  const guessGender = v => { const n=String(v?.name||"").toLowerCase(); if(/female|woman|mujer|femen|sofia|sara|lucia|paola|camila|valentina|ana|helena|emma|olivia|aria|ava|zira/.test(n)) return "female"; if(/male|man|hombre|mascul|jorge|diego|carlos|miguel|juan|mateo|alex|daniel|thomas|george|david/.test(n)) return "male"; return "any"; };\n\n  const pickVoice = (lang = "es-AR", gender = "any") => {
     const voices = getVoices();
     return voices.find(v => v.lang?.toLowerCase() === lang.toLowerCase())
       || voices.find(v => v.lang?.toLowerCase().startsWith(lang.slice(0, 2).toLowerCase()))
@@ -59,7 +59,7 @@ export function createVoiceController({ onState, onTranscript, onSpeakStart, onS
       || null;
   };
 
-  const loadVoice = (lang, name = "") => { preferredVoiceName = name || ""; preferredVoice = preferredVoiceName ? (getVoices().find(v => v.name === preferredVoiceName) || pickVoice(lang)) : pickVoice(lang); };
+  const loadVoice = (lang, name = "", gender = "any") => { preferredVoiceName=name||""; preferredVoice=preferredVoiceName?(getVoices().find(v=>v.name===preferredVoiceName)||pickVoice(lang,gender)):pickVoice(lang,gender); };
 
   const speak = (text, { lang = "es-AR", rate = 1, volume = 1 } = {}) => {
     if (!window.speechSynthesis || !text) return false;
@@ -158,4 +158,14 @@ export function formatBytes(bytes) {
     value /= 1024;
   }
   return value.toFixed(1) + " TB";
+}
+
+async function toDataUrl(file){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result));r.onerror=reject;r.readAsDataURL(file)})}
+export async function prepareAttachment(file){
+  const type=file.type||"application/octet-stream";
+  if(type.startsWith("image/")) return {name:file.name,type,kind:"image",data:await toDataUrl(file)};
+  if(type.startsWith("text/")||/\.(json|xml|csv|md|js|ts|tsx|jsx|py|java|cpp|c|html|css)$/i.test(file.name)){
+    return {name:file.name,type,kind:"text",data:(await file.text()).slice(0,120000)};
+  }
+  return {name:file.name,type,kind:"file",data:"Archivo recibido: "+file.name+" ("+formatBytes(file.size)+"). El procesamiento específico de este formato requiere el pipeline de archivos del backend."};
 }
