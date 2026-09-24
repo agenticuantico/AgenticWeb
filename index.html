@@ -86,8 +86,8 @@ const menu=document.querySelector(".menu-btn"),nav=document.querySelector(".desk
 menu?.addEventListener("click",()=>{const open=nav?.classList.toggle("open");menu.setAttribute("aria-expanded",String(!!open));});
 </script>
 <script type="module">
-import { initQuantumBrain3D } from "./brain-3d.js";
-import { AIProvider, AI_STATES, createVoiceController, validateFile, formatBytes } from "./neural-core-ui.js";
+import { initQuantumBrain3D } from "./public/brain-3d.js";
+import { AIProvider, AI_STATES, createVoiceController, validateFile, formatBytes } from "./public/neural-core-ui.js";
 
 const brain=initQuantumBrain3D(document.getElementById("brain-canvas"));
 const messages=document.getElementById("ai-messages"),input=document.getElementById("ai-input"),form=document.getElementById("ai-form"),status=document.getElementById("ai-status"),brainState=document.getElementById("brain-state");
