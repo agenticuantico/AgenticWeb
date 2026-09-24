@@ -171,7 +171,8 @@ export function initQuantumBrain3D(canvas){
 
     const controller={
       renderer,scene,camera,root,speaking:false,thinking:false,listening:false,mouthLevel:0,mouseX:0,mouseY:0,
-      setSpeaking(v){this.speaking=!!v},\n      setListening(v){this.listening=!!v},
+      setSpeaking(v){this.speaking=!!v},
+      setListening(v){this.listening=!!v},
       setMouth(v){this.mouthLevel=Math.max(0,Math.min(1,v))},
       setThinking(v){this.thinking=!!v}
     };
@@ -229,7 +230,7 @@ export function initQuantumBrain3D(canvas){
 
     const setStatus=()=>{
       const s=document.getElementById("avatarRigStatus");
-      if(s)s.textContent=controller.thinking?"NEURAL CORE · RAZONANDO":"NEURAL CORE · ACTIVO";
+      if(s)s.textContent=controller.thinking?"NEURAL CORE · RAZONANDO":controller.listening?"NEURAL CORE · ESCUCHANDO":"NEURAL CORE · ACTIVO";
       const state=document.getElementById("avatarState");
       if(state)state.textContent=controller.thinking?"Razonamiento agéntico · activo":controller.listening?"Escuchando al usuario · activo":"Cerebro neuronal · listo";
     };
