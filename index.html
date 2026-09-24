@@ -1,66 +1,11 @@
 <!doctype html>
-<html lang="es">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#030611">
-<title>AgentiCuantico — Inteligencia Agéntica</title>
-<meta name="description" content="AgentiCuantico: inteligencia agéntica, conversación, programación y creación con una interfaz 3D inmersiva.">
-<link rel="stylesheet" href="./styles.css">
-</head>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#02060f"><title>AgentiCuantico — Inteligencia Agéntica</title><meta name="description" content="AgentiCuantico — cerebro neuronal 3D y conversación con IA."><link rel="stylesheet" href="./styles.css"></head>
 <body>
-<div class="scene" aria-hidden="true">
-  <div class="grid"></div>
-  <div class="ambient ambient-a"></div>
-  <div class="ambient ambient-b"></div>
-  <div id="brain-stage" class="brain-stage">
-    <div class="brain-vignette"></div>
-    <canvas id="brain-canvas"></canvas>
-    <div class="brain-glow"></div>
-  </div>
-</div>
-
-<div class="shell">
-  <aside class="side glass">
-    <div class="brand"><span class="orb"></span><div><b>AgentiCuantico</b><small>INTELLIGENCE OS</small></div></div>
-    <button id="newChat" class="new-chat" type="button">＋ Nueva conversación</button>
-    <nav class="nav" aria-label="Espacio">
-      <span class="nav-title">ESPACIO</span>
-      <button class="nav-item active" type="button">⌁ Chat inteligente</button>
-      <button class="nav-item" type="button">◇ Proyectos</button>
-      <button class="nav-item" type="button">◌ Agentes</button>
-    </nav>
-    <div class="side-footer">
-      <div class="status-dot"></div>
-      <div><strong>AgentiCuantico</strong><small id="sideStatus">Sistema preparado</small></div>
-    </div>
-  </aside>
-
-  <main class="main">
-    <header class="topbar glass">
-      <div class="top-title"><span class="pulse-dot"></span><div><strong>AgentiCuantico</strong><span id="status">Inicializando cerebro 3D…</span></div></div>
-      <div class="top-actions"><span class="model-pill">NEURAL · 3D</span><button class="icon-btn" aria-label="Más opciones" type="button">⋯</button></div>
-    </header>
-
-    <section id="chat" class="chat">
-      <div class="welcome">
-        <div class="eyebrow">AGENTIC INTELLIGENCE</div>
-        <h1>Pensá. Creá.<br><span>Construí con IA.</span></h1>
-        <p>Un cerebro agéntico visualizado como una red neuronal viva: conexiones, impulsos y actividad en tiempo real.</p>
-      </div>
-      <div id="messages" class="messages"></div>
-      <form id="composer" class="composer glass">
-        <textarea id="input" placeholder="¿Qué querés construir hoy?" rows="1" autocomplete="off"></textarea>
-        <button type="submit" class="send" aria-label="Enviar">↑</button>
-      </form>
-      <div class="memory"><span>●</span> Conversación privada en este dispositivo · La visualización no expone datos internos.</div>
-    </section>
-  </main>
-</div>
-
-<script>
-window.AGENTICUANTICO_API_URL = "";
-</script>
-<script type="module" src="./app.js"></script>
-</body>
-</html>
+<video class="art" autoplay muted loop playsinline preload="auto" aria-hidden="true" poster="https://d2ol7oe51mr4n9.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/130837c4-0244-4f37-9c61-8d801d93fd29.jpg" src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260912_104303_0c6d60b2-9353-408e-9449-585108a22fb5.mp4"></video><div class="veil"></div>
+<header class="bar"><a class="brand" href="#"><svg viewBox="0 0 23 17" aria-hidden="true"><path d="M8.15 .9 4.55 .9 .5 9.3h3.6Z"/><path d="M17 0h-3.6L6.15 16.4h3.6Z"/><path d="M22.9 0h-3.6L15 7.6h3.6Z"/><path d="M22.6 6.9H19l-4.95 9.5h3.6Z"/></svg><span id="word">AGENTICUANTICO</span></a><input class="navtoggle" type="checkbox" id="nav-open"><label class="scrim" for="nav-open"></label><label class="burger" for="nav-open" aria-label="Menú"><svg viewBox="0 0 22 14"><path class="b1" d="M1 1h20"/><path class="b2" d="M1 7h20"/><path class="b3" d="M1 13h20"/></svg></label><div class="navpanel"><nav class="menu"><a href="#">About</a><a href="#chat">AI Chat</a><a href="#">Agentes</a></nav><a class="login" href="#">Acceso / Iniciar sesión →</a><a class="pill" href="#chat">Hablar con la IA</a></div></header>
+<main class="hero" id="chat"><div class="hero-copy"><div class="eyebrow">QUANTUM AGENTIC INTELLIGENCE · 3D NEURAL CORE</div><h1 class="title"><span>Inteligencia que piensa.</span><span>Agentes que construyen.</span></h1><p class="sub"><span>Conversá con el cerebro de AgentiCuantico</span><span>y convertí ideas en acciones.</span></p></div>
+<div class="brain-stage" aria-hidden="true"><div class="brain-vignette"></div><canvas id="brain-canvas"></canvas><div class="brain-glow"></div></div>
+<section class="chat-card glass" aria-label="Conversación con AgentiCuantico"><div class="chat-head"><div><strong>AgentiCuantico</strong><small id="status">Cerebro 3D iniciando…</small></div><select id="model-select" aria-label="Modelo"><option>NEURAL · 3D</option><option>QWEN · LOCAL</option><option>AGENTIC · AUTO</option></select></div><div id="messages" class="messages"></div><form id="composer" class="composer"><textarea id="input" placeholder="Escribí un mensaje para la IA…" rows="1" autocomplete="off"></textarea><button class="send" type="submit" aria-label="Enviar">↑</button></form><div class="memory"><span>●</span> Sesión privada · cerebro visual activo</div></section>
+<ul class="feats"><li>〉 <span>Conversación con IA</span></li><li>〉 <span>Cerebro neuronal 3D</span></li><li>〉 <span>Agentes autónomos</span></li><li>〉 <span>Arquitectura privada</span></li></ul></main>
+<footer class="foot"><span>AgentiCuantico · inteligencia agéntica de nueva generación.</span><span>2026</span></footer>
+<script>(function(){var q=matchMedia&&matchMedia('(prefers-reduced-motion: reduce)'),v=document.querySelector('video.art');if(!q||!v)return;function s(){if(q.matches)v.pause();else{var p=v.play();if(p)p.catch(function(){})}}s();q.addEventListener?q.addEventListener('change',s):q.addListener(s)})();setTimeout(function(){document.documentElement.classList.add('is-entered')},4000);</script><script type="module" src="./app.js"></script></body></html>
