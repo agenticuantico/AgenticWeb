@@ -1006,6 +1006,22 @@ export class UserData extends DurableObject {
       await this.ctx.storage.put("conversations",next);
       return new Response(JSON.stringify({ok:true,deleted:id,count:next.length}),{headers:{"content-type":"application/json"}});
     }
+    if(url.pathname==="/teams" && request.method==="GET"){
+      return new Response(JSON.stringify({teams:await this.ctx.storage.get("teams")||[]}),{headers:{"content-type":"application/json"}});
+    }
+    if(url.pathname==="/teams" && request.method==="POST"){
+      const body=await request.json().catch(()=>({}));const team=body?.team;
+      if(!team?.id||!team?.name)return new Response(JSON.stringify({ok:false,error:"invalid_team"}),{status:400,headers:{"content-type":"application/json"}});
+      const current=await this.ctx.storage.get("teams")||[];
+      const next=[...current.filter(x=>x?.id!==team.id),team].slice(-50);
+      await this.ctx.storage.put("teams",next);
+      return new Response(JSON.stringify({ok:true,team,count:next.length}),{headers:{"content-type":"application/json"}});
+    }
+    if(url.pathname==="/teams" && request.method==="DELETE"){
+      const id=String(url.searchParams.get("id")||"");const current=await this.ctx.storage.get("teams")||[];
+      const next=current.filter(x=>x?.id!==id);await this.ctx.storage.put("teams",next);
+      return new Response(JSON.stringify({ok:true,deleted:id,count:next.length}),{headers:{"content-type":"application/json"}});
+    }
     return new Response("not_found",{status:404});
   }
 }
