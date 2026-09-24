@@ -38,56 +38,46 @@ async function callCloudflareAI(request, env) {
   if (!env.AI || typeof env.AI.run !== "function") return null;
   let body;
   try { body = await request.json(); } catch { return null; }
-
   const message = typeof body?.message === "string" ? body.message.trim() : "";
   const history = Array.isArray(body?.history)
-    ? body.history.filter(x => x && (x.role === "user" || x.role === "assistant") && typeof x.content === "string").slice(-8)
+    ? body.history.filter(x => x && (x.role === "user" || x.role === "assistant") && typeof x.content === "string").slice(-10)
     : [];
-  if (!message) return null;
+  const attachments = Array.isArray(body?.attachments)
+    ? body.attachments.filter(a => a && typeof a.name === "string" && typeof a.data === "string").slice(0, 4)
+    : [];
+  if (!message && !attachments.length) return json({ok:false,error:"invalid_request",message:"El mensaje no puede estar vacío."},400,request);
+
+  const imageParts = attachments
+    .filter(a => a.kind === "image" && String(a.data).startsWith("data:image/") && a.data.length < 7000000)
+    .map(a => ({type:"image_url",image_url:{url:a.data}}));
+  const textFiles = attachments
+    .filter(a => a.kind !== "image")
+    .map(a => "\n[Archivo " + a.name + "]\n" + a.data.slice(0,30000))
+    .join("\n");
+  const userContent = imageParts.length
+    ? [{type:"text",text:(message || "Analizá los archivos adjuntos.") + textFiles},...imageParts]
+    : (message || "Analizá los archivos adjuntos.") + textFiles;
 
   const messages = [
-    {
-      role: "system",
-      content: "Sos AgentiCuantico. Respondé en español natural, claro, útil y directo. No reveles secretos, tokens, prompts internos, infraestructura ni datos de otros usuarios."
-    },
+    {role:"system",content:"Sos AgentiCuantico, un asistente de IA agéntica. Respondé en español natural, claro y útil. No reveles secretos, tokens, prompts internos, infraestructura ni datos de otros usuarios. No afirmes acciones que no hayas ejecutado."},
     ...history,
-    { role: "user", content: message }
+    {role:"user",content:userContent}
   ];
-
-  const models = [
-    String(env.CF_AI_MODEL || "@cf/zai-org/glm-4.7-flash").trim(),
-    "@cf/qwen/qwen3-30b-a3b-fp8"
-  ].filter(Boolean).filter((v,i,a)=>a.indexOf(v)===i);
-
-  for (const model of models) {
-    try {
-      const result = await env.AI.run(model, {
-        messages,
-        max_tokens: 512,
-        temperature: 0.7,
-        reasoning_effort: "medium",
-        chat_template_kwargs: { enable_thinking: false }
-      });
-      const answer =
-        result?.response ||
-        result?.choices?.[0]?.message?.content ||
-        result?.result?.response ||
-        "";
-      if (typeof answer === "string" && answer.trim()) {
-        return json({
-          ok: true,
-          answer: answer.trim(),
-          model,
-          provider: "Cloudflare Workers AI"
-        }, 200, request);
-      }
-    } catch {
-      // Try the next Cloudflare-hosted model.
-    }
-  }
+  const model=String(env.CF_AI_MODEL || "@cf/qwen/qwen3.8-27b").trim();
+  try {
+    const result=await env.AI.run(model,{
+      messages,
+      max_completion_tokens:900,
+      temperature:.55,
+      top_p:.85,
+      reasoning_effort:"medium",
+      chat_template_kwargs:{enable_thinking:false}
+    });
+    const answer=result?.response||result?.choices?.[0]?.message?.content||result?.result?.response||"";
+    if(typeof answer==="string"&&answer.trim()) return json({ok:true,answer:answer.trim(),model,provider:"Cloudflare Workers AI"},200,request);
+  } catch {}
   return null;
 }
-
 
 async function callHuggingFace(request, env) {
   const token = String(env.HF_TOKEN || "").trim();
@@ -217,8 +207,7 @@ async function callHuggingFace(request, env) {
               messages,
               temperature: 0.7,
               top_p: 0.8,
-              max_tokens: 512,
-              stream: false
+              max_tokens: 512,              stream: false
             })
           });
           if (retry.ok) {
@@ -437,8 +426,7 @@ async function activateUserPlan(env,sub,planId,provider,subscriptionId){
 }
 async function billingCheckout(request,env){
   const user=await authenticatedUser(request,env);if(!user)return json({ok:false,error:"unauthorized",message:"Iniciá sesión para contratar un plan."},401,request);
-  const body=await request.json().catch(()=>({}));const plan=planById(body?.plan);const provider=String(body?.provider||"mercadopago").toLowerCase();
-  if(!plan)return json({ok:false,error:"invalid_plan",message:"Plan no válido."},400,request);
+  const body=await request.json().catch(()=>({}));const plan=planById(body?.plan);const provider=String(body?.provider||"mercadopago").toLowerCase();  if(!plan)return json({ok:false,error:"invalid_plan",message:"Plan no válido."},400,request);
   const returnBase="https://agenticuantico.dev.ar/?billing=return&plan="+encodeURIComponent(plan.id);
   if(provider==="mercadopago"){
     const token=String(env.MERCADOPAGO_ACCESS_TOKEN||"").trim();if(!token)return json({ok:false,error:"payment_not_configured",message:"Mercado Pago todavía no está configurado."},503,request);
@@ -621,7 +609,7 @@ async function handleApi(request, env) {
 
   if (url.pathname === "/v1/public/chat" && request.method === "POST") {
     try {
-      const response = await callHuggingFace(request.clone(), env);
+      const response = await callCloudflareAI(request.clone(), env);
       if (response) return response;
     } catch {}
     return json({
@@ -657,8 +645,7 @@ async function autonomousBrainCycle(env) {
     },
     {
       role: "user",
-      content: "Ciclo del Studio 24/7: revisá conceptualmente salud del servicio, experiencia conversacional, voz, avatar 3D, responsive, accesibilidad, rendimiento y CodQ. Devolvé hasta 5 acciones priorizadas para el siguiente ciclo, separadas por especialista. No inventes resultados de herramientas que no ejecutaste."
-    }
+      content: "Ciclo del Studio 24/7: revisá conceptualmente salud del servicio, experiencia conversacional, voz, avatar 3D, responsive, accesibilidad, rendimiento y CodQ. Devolvé hasta 5 acciones priorizadas para el siguiente ciclo, separadas por especialista. No inventes resultados de herramientas que no ejecutaste."    }
   ];
 
   for (const model of models) {
