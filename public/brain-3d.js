@@ -181,12 +181,14 @@ async function loadGLBBrain(root,THREE,controller){
       const box=new THREE.Box3().setFromObject(model), size=box.getSize(new THREE.Vector3()), center=box.getCenter(new THREE.Vector3());
       model.position.sub(center); const scale=3.25/Math.max(size.x,size.y,size.z); model.scale.setScalar(scale);
       model.traverse(o=>{if(o.isMesh){o.material=o.material.clone();o.material.transparent=true;o.material.opacity=.34;o.material.metalness=.55;o.material.roughness=.25;o.material.emissive=new THREE.Color(0x071d35);o.material.emissiveIntensity=.45}});
-      root.add(model); controller.glbBrain=model; controller.glbLoaded=true;\n      [left,right,lines,shell,core,coreRing,chip,ringGroup,pulses].forEach(o=>{if(o)o.visible=false;});
+      root.add(model); controller.glbBrain=model; controller.glbLoaded=true;
+      [left,right,lines,shell,core,coreRing,chip,ringGroup,pulses].forEach(o=>{if(o)o.visible=false;});
     },undefined,onError);
     load(primary,()=>{if(primary!==fallback)load(fallback,()=>{});});
   }catch(e){}
 }
-\n    const controller={
+
+    const controller={
       renderer,scene,camera,root,speaking:false,thinking:false,listening:false,mouthLevel:0,mouseX:0,mouseY:0,
       setSpeaking(v){this.speaking=!!v},
       setListening(v){this.listening=!!v},
@@ -194,7 +196,9 @@ async function loadGLBBrain(root,THREE,controller){
       setThinking(v){this.thinking=!!v}
     };
 
-    loadGLBBrain(root,THREE,controller);\n\n    canvas.addEventListener("pointermove",e=>{
+    loadGLBBrain(root,THREE,controller);
+
+    canvas.addEventListener("pointermove",e=>{
       const r=canvas.getBoundingClientRect();
       controller.mouseX=((e.clientX-r.left)/Math.max(r.width,1)-.5)*2;
       controller.mouseY=((e.clientY-r.top)/Math.max(r.height,1)-.5)*2;
