@@ -139,8 +139,26 @@ async function callHuggingFace(request, env) {
   }
 
   const message = typeof body?.message === "string" ? body.message.trim() : "";
-  const agent = body?.agent && typeof body.agent === "object" ? body.agent : null;
-  const team = body?.team && typeof body.team === "object" ? body.team : null;
+  let agent = body?.agent && typeof body.agent === "object" ? {
+    name:String(body.agent.name||"").slice(0,80),role:String(body.agent.role||"").slice(0,160),
+    skills:Array.isArray(body.agent.skills)?body.agent.skills.slice(0,12).map(x=>String(x).slice(0,80)):[],
+    knowledge:Array.isArray(body.agent.knowledge)?body.agent.knowledge.slice(0,12).map(x=>String(x).slice(0,120)):[]
+  } : null;
+  let team = body?.team && typeof body.team === "object" ? {
+    id:String(body.team.id||"").slice(0,100),name:String(body.team.name||"").slice(0,80),
+    goal:String(body.team.goal||"").slice(0,500),members:Array.isArray(body.team.members)?body.team.members.slice(0,10).map(x=>String(x).slice(0,80)):[]
+  } : null;
+  if(team){
+    const session=await authenticatedUser(request,env);
+    if(!session)return json({ok:false,error:"team_auth_required",message:"Iniciá sesión para usar equipos."},401,request);
+    const record=await getUserRecord(env,session.sub);
+    if(!planActive(record))return json({ok:false,error:"plan_required",message:"El chat grupal requiere un plan pago."},403,request);
+    const stub=env.USER_DATA.idFromName(session.sub),saved=await stub.fetch("https://user-data/teams");
+    const list=(await saved.json().catch(()=>({teams:[]}))).teams||[];
+    const stored=list.find(x=>x.id===team.id);
+    if(!stored)return json({ok:false,error:"team_not_found",message:"El equipo no existe en tu espacio."},404,request);
+    team=stored;
+  }
   const hasAttachments = Array.isArray(body?.attachments) && body.attachments.length > 0;
   if (!message && !hasAttachments) {
     return json({ ok: false, error: "invalid_request", message: "El mensaje no puede estar vacío." }, 400, request);
@@ -785,6 +803,21 @@ async function handleApi(request, env) {
   if (url.pathname === "/v1/billing/checkout" && request.method === "POST") return billingCheckout(request,env);
   if (url.pathname === "/v1/billing/verify" && request.method === "GET") return billingVerify(request,env);
   if (url.pathname === "/v1/billing/webhook" && request.method === "POST") return billingWebhook(request,env);
+
+  if (url.pathname === "/v1/user/teams") {
+    const user=await authenticatedUser(request,env);
+    if(!user)return json({ok:false,error:"unauthorized",message:"Iniciá sesión para administrar tus equipos."},401,request);
+    const id=env.USER_DATA.idFromName(user.sub),stub=env.USER_DATA.get(id);
+    if(request.method==="GET"){const r=await stub.fetch("https://user-data/teams");const data=await r.json();return json({ok:true,teams:data.teams||[]},200,request)}
+    if(request.method==="POST"){
+      if(!planActive(await getUserRecord(env,user.sub)))return json({ok:false,error:"plan_required",message:"Los equipos requieren un plan pago."},403,request);
+      const body=await request.json().catch(()=>({}));const team=body?.team;
+      if(!team||typeof team.name!=="string"||!team.name.trim())return json({ok:false,error:"invalid_team",message:"Equipo inválido."},400,request);
+      const r=await stub.fetch("https://user-data/teams",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({team:{id:String(team.id||crypto.randomUUID()),name:team.name.trim().slice(0,80),goal:String(team.goal||"").slice(0,500),members:Array.isArray(team.members)?team.members.slice(0,10).map(x=>String(x).slice(0,80)):[]}})});
+      return json(await r.json(),r.status,request);
+    }
+    if(request.method==="DELETE"){const teamId=String(url.searchParams.get("id")||"");const r=await stub.fetch("https://user-data/teams?id="+encodeURIComponent(teamId),{method:"DELETE"});return json(await r.json(),r.status,request)}
+  }
 
   if (url.pathname === "/v1/user/conversations") {
     const user=await authenticatedUser(request,env);
