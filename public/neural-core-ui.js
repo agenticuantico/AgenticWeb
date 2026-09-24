@@ -45,7 +45,7 @@ export class AIProvider {
 
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-export function createVoiceController({ onState, onTranscript, onSpeakStart, onSpeakEnd }) {
+export function createVoiceController({ getGender, onState, onTranscript, onSpeakStart, onSpeakEnd }) {
   let recognition = null;
   let enabled = false;
   let preferredVoice = null;
@@ -68,7 +68,7 @@ export function createVoiceController({ onState, onTranscript, onSpeakStart, onS
   const speak = (text, { lang = "es-AR", rate = 1, volume = 1 } = {}) => {
     if (!window.speechSynthesis || !text) return false;
     window.speechSynthesis.cancel();
-    preferredVoice = preferredVoiceName ? (getVoices().find(v => v.name === preferredVoiceName) || pickVoice(lang)) : pickVoice(lang);
+    preferredVoice = preferredVoiceName ? (getVoices().find(v => v.name === preferredVoiceName) || pickVoice(lang, getGender?.() || "any")) : pickVoice(lang, getGender?.() || "any");
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = preferredVoice?.lang || lang;
     utterance.voice = preferredVoice;
@@ -127,7 +127,7 @@ export function createVoiceController({ onState, onTranscript, onSpeakStart, onS
   };
 
   window.speechSynthesis?.addEventListener?.("voiceschanged", () => {
-    preferredVoice = preferredVoiceName ? (getVoices().find(v => v.name === preferredVoiceName) || pickVoice("es-AR")) : pickVoice("es-AR");
+    preferredVoice = preferredVoiceName ? (getVoices().find(v => v.name === preferredVoiceName) || pickVoice("es-AR", getGender?.() || "any")) : pickVoice("es-AR", getGender?.() || "any");
   });
 
   loadVoice("es-AR");
@@ -141,6 +141,8 @@ export function createVoiceController({ onState, onTranscript, onSpeakStart, onS
     speak,
     stopSpeaking,
     loadVoice,
+    getVoices,
+    guessGender,
     isListening: () => enabled
   };
 }
