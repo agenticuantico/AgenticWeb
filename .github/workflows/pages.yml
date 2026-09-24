@@ -27,6 +27,12 @@ jobs:
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
+      - name: Generate AgentiCuantico brain GLB
+        run: |
+          python3 -m pip install --disable-pip-version-check --quiet numpy trimesh
+          python3 scripts/generate_brain_glb.py public/assets/AgentiCuantico_brain_PBR.glb
+          test -s public/assets/AgentiCuantico_brain_PBR.glb
+
       - name: Upload site
         uses: actions/upload-pages-artifact@v3
         with:
