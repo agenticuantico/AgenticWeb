@@ -169,7 +169,22 @@ export function initQuantumBrain3D(canvas){
     purple.position.set(2,-.6,2);scene.add(purple);
     scene.add(new THREE.AmbientLight(0x7ca7ff,.5));
 
-    const controller={
+
+async function loadGLBBrain(root,THREE,controller){
+  try{
+    const {GLTFLoader}=await import("https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/loaders/GLTFLoader.js");
+    const loader=new GLTFLoader();
+    const url="https://raw.githubusercontent.com/itayinbarr/brainproject/main/brain-atlas/models/brain.glb";
+    loader.load(url,g=>{
+      const model=g.scene; model.name="AgentiCuanticoGLBBrain";
+      const box=new THREE.Box3().setFromObject(model), size=box.getSize(new THREE.Vector3()), center=box.getCenter(new THREE.Vector3());
+      model.position.sub(center); const scale=3.25/Math.max(size.x,size.y,size.z); model.scale.setScalar(scale);
+      model.traverse(o=>{if(o.isMesh){o.material=o.material.clone();o.material.transparent=true;o.material.opacity=.34;o.material.metalness=.55;o.material.roughness=.25;o.material.emissive=new THREE.Color(0x071d35);o.material.emissiveIntensity=.45}});
+      root.add(model); controller.glbBrain=model; controller.glbLoaded=true;
+    },undefined,()=>{});
+  }catch(e){}
+}
+\n    const controller={
       renderer,scene,camera,root,speaking:false,thinking:false,listening:false,mouthLevel:0,mouseX:0,mouseY:0,
       setSpeaking(v){this.speaking=!!v},
       setListening(v){this.listening=!!v},
@@ -177,7 +192,7 @@ export function initQuantumBrain3D(canvas){
       setThinking(v){this.thinking=!!v}
     };
 
-    canvas.addEventListener("pointermove",e=>{
+    loadGLBBrain(root,THREE,controller);\n\n    canvas.addEventListener("pointermove",e=>{
       const r=canvas.getBoundingClientRect();
       controller.mouseX=((e.clientX-r.left)/Math.max(r.width,1)-.5)*2;
       controller.mouseY=((e.clientY-r.top)/Math.max(r.height,1)-.5)*2;
