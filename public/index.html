@@ -17,7 +17,7 @@
 <script>window.AGENTICUANTICO_GLB_URL="/assets/AgentiCuantico_brain_PBR.glb";</script>
 </head>
 <body>
-<div class="space" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+<div class="space" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div><div class="world-layer" aria-hidden="true"></div>
 <div class="ambient ambient-a" aria-hidden="true"></div><div class="ambient ambient-b" aria-hidden="true"></div>
 <header class="topbar">
   <a class="brand" href="/" aria-label="AgentiCuantico"><span class="brand-mark">✳</span><span>AgentiCuantico</span><sup>®</sup></a>
@@ -28,9 +28,9 @@
 <main class="experience">
 <section class="intro" id="brain">
   <div class="eyebrow"><span class="pulse-dot"></span> NEURAL CORE · ONLINE</div>
-  <h1>Tu inteligencia,<br><strong>en evolución.</strong></h1>
-  <p>Una experiencia única para conversar, razonar y crear con un cerebro neuronal 3D conectado a la IA.</p>
-  <a class="hero-cta" href="#chat" id="start-chat">Entrar al cerebro <span>↘</span></a>
+  <h1>Tu inteligencia,<br><strong>en movimiento.</strong></h1>
+  <p>Conversá, creá y explorá con un núcleo neuronal 3D diseñado para sentirse vivo.</p>
+  <a class="hero-cta" href="#chat" id="start-chat">Entrar al núcleo <span>↘</span></a>
 </section>
 
 <section class="brain-wrap" aria-label="Cerebro neuronal 3D">
@@ -42,7 +42,7 @@
   <div class="chat-head">
     <div class="chat-title"><span class="mini-core"></span><div><strong>AgentiCuantico</strong><small id="ai-status">READY · Cerebro conectado</small></div></div>
     <div class="chat-actions">
-      <select id="ai-model" aria-label="Modelo de IA"><option value="agentic">AGENTIC · AUTO</option><option value="neural">NEURAL · 3D</option><option value="local">QWEN · LOCAL</option></select>
+      
       <button id="new-chat" type="button" title="Nueva conversación" aria-label="Nueva conversación">＋</button>
     </div>
   </div>
@@ -65,17 +65,17 @@
   </form>
   <div class="voice-panel" id="voice-panel" hidden>
     <div><span class="voice-live" id="voice-live">● LISTO</span><small>Voz del dispositivo · respuesta escrita siempre visible</small></div>
-    <label>Idioma <select id="voice-language" aria-label="Idioma de voz"><option value="es-AR" selected>Español Argentina</option><option value="es-ES">Español España</option><option value="en-US">English</option><option value="pt-BR">Português</option><option value="fr-FR">Français</option><option value="it-IT">Italiano</option><option value="de-DE">Deutsch</option></select></label>
-    <label>Voz <select id="voice-select" aria-label="Voz disponible"><option value="">Automática</option></select></label>
+    <label>Idioma <select id="voice-language" aria-label="Idioma de voz"><option value="es-AR" selected>🇦🇷 Español · Argentina</option><option value="en-US">🇺🇸 English · United States</option><option value="pt-BR">🇧🇷 Português · Brasil</option><option value="fr-FR">🇫🇷 Français · France</option><option value="it-IT">🇮🇹 Italiano · Italia</option><option value="de-DE">🇩🇪 Deutsch · Deutschland</option><option value="es-ES">🇪🇸 Español · España</option></select></label>
+    <label>Género <select id="voice-gender" aria-label="Género de voz"><option value="female">♀ Femenina</option><option value="male">♂ Masculina</option><option value="any">◉ Automática</option></select></label><label>Voz <select id="voice-select" aria-label="Voz disponible"><option value="">Automática</option></select></label>
     <label>Velocidad <input id="voice-rate" type="range" min=".7" max="1.2" step=".05" value="1" aria-label="Velocidad"></label>
   </div>
-  <div class="chat-meta"><span><b>●</b> memoria desactivada</span><span id="capability-note">TEXTO · VOZ DEL DISPOSITIVO · ARCHIVOS PREPARADOS</span></div>
+  <div class="chat-meta"><span><b>●</b> memoria desactivada</span><span id="capability-note">TEXTO · VOZ · MULTIMODAL</span></div>
 </section>
 
 <section class="features" id="features">
   <div><b>IA AGÉNTICA</b><span>Orquestación preparada para agentes y herramientas</span></div>
-  <div><b>3D NEURAL</b><span>Cerebro procedural + carga GLB preparada</span></div>
-  <div><b>VOICE</b><span>STT/TTS del navegador cuando está disponible</span></div>
+  <div><b>3D NEURAL</b><span>Cerebro GLB + espectro neuronal inmersivo</span></div>
+  <div><b>VOICE</b><span>Voces por idioma y género según el dispositivo</span></div>
   <div><b>PRIVACY</b><span>Memoria no activada sin consentimiento</span></div>
 </section>
 </main>
@@ -95,7 +95,7 @@ const session=sessionStorage.getItem("aq_session")||crypto.randomUUID(),conversa
 sessionStorage.setItem("aq_session",session);sessionStorage.setItem("aq_conversation",conversation);
 const history=[];const provider=new AIProvider();
 let currentState=AI_STATES.READY,currentFile=null,voiceMode=false;
-const model=document.getElementById("ai-model");
+
 const stateText={READY:"READY",LISTENING:"LISTENING · escuchando",UPLOADING:"UPLOADING · archivo recibido",PROCESSING:"PROCESSING · procesando",ANALYZING:"ANALYZING · analizando",THINKING:"THINKING · razonando",GENERATING:"GENERATING · generando",SPEAKING:"SPEAKING · hablando",DONE:"DONE · listo",ERROR:"ERROR · revisar conexión"};
 function setState(state){
  currentState=state;const label=stateText[state]||state;
@@ -107,7 +107,7 @@ function setState(state){
 function add(role,text){const d=document.createElement("div");d.className="msg "+role;d.textContent=text;messages.appendChild(d);messages.scrollTop=messages.scrollHeight;return d}
 async function ask(text){
  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),30000);
- try{return await provider.chat({message:text,history,conversationId:conversation,session,signal:controller.signal});}
+ try{const attachment=currentFile?await prepareAttachment(currentFile):null;return await provider.chat({message:text,history,conversationId:conversation,session,attachment,signal:controller.signal});}
  finally{clearTimeout(timer)}
 }
 const voice=createVoiceController({
@@ -116,10 +116,10 @@ const voice=createVoiceController({
  onSpeakStart:()=>setState(AI_STATES.SPEAKING),
  onSpeakEnd:()=>setState(AI_STATES.DONE)
 });
-const voiceBtn=document.getElementById("voice-btn"),voicePanel=document.getElementById("voice-panel"),lang=document.getElementById("voice-language"),voiceSelect=document.getElementById("voice-select"),rate=document.getElementById("voice-rate");
-function populateVoices(){if(!voiceSelect||!window.speechSynthesis)return;const voices=window.speechSynthesis.getVoices();voiceSelect.innerHTML='<option value="">Automática</option>';voices.forEach(v=>{const o=document.createElement("option");o.value=v.name;o.textContent=v.name+" · "+v.lang;if(v.lang.toLowerCase()==="es-ar")o.selected=true;voiceSelect.appendChild(o);});}
+const voiceBtn=document.getElementById("voice-btn"),voicePanel=document.getElementById("voice-panel"),lang=document.getElementById("voice-language"),voiceGender=document.getElementById("voice-gender"),voiceSelect=document.getElementById("voice-select"),rate=document.getElementById("voice-rate");
+function populateVoices(){if(!voiceSelect||!window.speechSynthesis)return;const voices=window.speechSynthesis.getVoices();const wanted=lang.value.toLowerCase(),gender=voiceGender?.value||"any";const matches=voices.filter(v=>v.lang?.toLowerCase().startsWith(wanted.slice(0,2))&&((gender==="any")||(typeof voice.guessGender==="function"&&voice.guessGender(v)===gender)));voiceSelect.innerHTML='<option value="">Automática</option>';matches.forEach(v=>{const o=document.createElement("option");o.value=v.name;o.textContent=v.name+" · "+v.lang;voiceSelect.appendChild(o);});}
 populateVoices();window.speechSynthesis?.addEventListener("voiceschanged",populateVoices);
-lang.addEventListener("change",()=>voice.loadVoice(lang.value,voiceSelect.value));
+lang.addEventListener("change",()=>{populateVoices();voice.loadVoice(lang.value,voiceSelect.value);});voiceGender?.addEventListener("change",()=>{populateVoices();voice.loadVoice(lang.value,voiceSelect.value);});
 voiceSelect.addEventListener("change",()=>voice.loadVoice(lang.value,voiceSelect.value));
 voiceBtn.addEventListener("click",()=>{
  if(!voice.recognitionSupported){voicePanel.hidden=false;document.getElementById("voice-live").textContent="● VOZ NO DISPONIBLE · READY FOR BACKEND";return;}
@@ -157,7 +157,7 @@ removeFile.addEventListener("click",()=>{currentFile=null;fileInput.value="";str
 form.addEventListener("drop",e=>showFile(e.dataTransfer?.files?.[0]));
 
 document.getElementById("start-chat")?.addEventListener("click",()=>setTimeout(()=>input.focus(),250));
-model?.addEventListener("change",()=>{status.textContent="MODELO · "+model.options[model.selectedIndex].text;});
+
 setState(AI_STATES.READY);
 </script>
 </body>
