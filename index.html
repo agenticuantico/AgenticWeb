@@ -29,7 +29,7 @@ window.AGENTICUANTICO_GLB_URL="/assets/AgentiCuantico_brain_PBR.glb";
   <section class="intro" id="brain">
     <div class="eyebrow"><span class="pulse-dot"></span> NEURAL CORE · ONLINE</div>
     <h1>Tu inteligencia,<br><strong>en evolución.</strong></h1>
-    <p>Una interfaz inmersiva para conversar, razonar y trabajar con AgentiCuantico.</p>
+    <p>Un espacio inmersivo para conversar, razonar y crear con un cerebro neuronal 3D en tiempo real.</p><a class="hero-cta" href="#chat" id="start-chat">Entrar al cerebro <span>↘</span></a>
   </section>
 
   <section class="brain-wrap" aria-label="Cerebro 3D">
@@ -44,7 +44,7 @@ window.AGENTICUANTICO_GLB_URL="/assets/AgentiCuantico_brain_PBR.glb";
     <div class="chat-head">
       <div class="chat-title"><span class="mini-core"></span><div><strong>AgentiCuantico</strong><small id="ai-status">Cerebro 3D conectado</small></div></div>
       <div class="chat-actions">
-        <select id="ai-model" aria-label="Modo"><option>AGENTIC · AUTO</option><option>NEURAL · 3D</option><option>QWEN · LOCAL</option></select>
+        <select id="ai-model" aria-label="Modelo de IA"><option value="agentic">AGENTIC · AUTO</option><option value="neural">NEURAL · 3D</option><option value="local">QWEN · LOCAL</option></select>
         <button id="new-chat" type="button" title="Nueva conversación">＋</button>
       </div>
     </div>
@@ -75,7 +75,7 @@ const brain=initQuantumBrain3D(document.getElementById("brain-canvas"));
 const messages=document.getElementById("ai-messages"), input=document.getElementById("ai-input"), form=document.getElementById("ai-form"), status=document.getElementById("ai-status");
 const history=[]; const session=sessionStorage.getItem("aq_session")||crypto.randomUUID(); const conversation=sessionStorage.getItem("aq_conversation")||crypto.randomUUID();
 sessionStorage.setItem("aq_session",session); sessionStorage.setItem("aq_conversation",conversation);
-const api=()=> (window.AGENTICUANTICO_API_URL||"https://agenticweb.agenticuantico.workers.dev").replace(/\/$/,"");
+const api=()=> (window.AGENTICUANTICO_API_URL||"https://agenticweb.agenticuantico.workers.dev").replace(/\/$/,"");\nconst model=document.getElementById("ai-model");\nconst start=document.getElementById("start-chat");\nstart?.addEventListener("click",()=>setTimeout(()=>input?.focus(),250));\nmodel?.addEventListener("change",()=>{status.textContent="Modo · "+model.options[model.selectedIndex].text;});
 function add(role,text){const d=document.createElement("div");d.className="msg "+role;d.textContent=text;messages.appendChild(d);messages.scrollTop=messages.scrollHeight;return d}
 async function ask(text){
  const c=new AbortController(), timer=setTimeout(()=>c.abort(),30000);
@@ -83,7 +83,7 @@ async function ask(text){
 }
 form.addEventListener("submit",async e=>{e.preventDefault();const text=input.value.trim();if(!text)return;input.value="";add("user",text);const pending=add("assistant","Pensando…");status.textContent="Cerebro · razonando";brain?.setThinking(true);try{const answer=await ask(text);pending.textContent=answer;history.push({role:"user",content:text},{role:"assistant",content:answer});status.textContent="Cerebro 3D conectado"}catch(err){pending.textContent="No pude responder ahora. Verificá la conexión del cerebro e intentá nuevamente.";status.textContent="Cerebro · reconexión"}finally{brain?.setThinking(false)}});
 document.querySelectorAll(".quick-prompts button").forEach(b=>b.addEventListener("click",()=>{input.value=b.dataset.prompt;input.focus();}));
-input.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();form.requestSubmit()}});
+const resizeInput=()=>{input.style.height="auto";input.style.height=Math.min(input.scrollHeight,150)+"px"};\ninput.addEventListener("input",resizeInput);\ninput.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();form.requestSubmit()}});
 document.getElementById("new-chat").onclick=()=>{history.length=0;messages.innerHTML='<div class="msg assistant">Nueva conversación iniciada. ¿Qué quieres explorar?</div>';input.focus();};
 </script>
 </body>
