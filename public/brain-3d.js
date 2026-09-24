@@ -51,7 +51,10 @@ export function initQuantumBrain3D(canvas){
   if(!canvas) return null;
   try{
     const renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true,powerPreference:"high-performance"});
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.55));
+    const mobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    const reduced=window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+    const quality=mobile?"MEDIUM":"HIGH";
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,quality==="HIGH"?1.55:1.15));
     renderer.outputColorSpace=THREE.SRGBColorSpace;
     renderer.toneMapping=THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure=1.15;
@@ -189,11 +192,17 @@ async function loadGLBBrain(root,THREE,controller){
 }
 
     const controller={
-      renderer,scene,camera,root,speaking:false,thinking:false,listening:false,mouthLevel:0,mouseX:0,mouseY:0,
+      renderer,scene,camera,root,speaking:false,thinking:false,listening:false,state:"READY",mouthLevel:0,mouseX:0,mouseY:0,
       setSpeaking(v){this.speaking=!!v},
       setListening(v){this.listening=!!v},
       setMouth(v){this.mouthLevel=Math.max(0,Math.min(1,v))},
-      setThinking(v){this.thinking=!!v}
+      setThinking(v){this.thinking=!!v},
+      setState(v){
+        this.state=String(v||"READY");
+        this.listening=this.state==="LISTENING";
+        this.thinking=["THINKING","PROCESSING","ANALYZING","GENERATING","UPLOADING"].includes(this.state);
+        this.speaking=this.state==="SPEAKING";
+      }
     };
 
     loadGLBBrain(root,THREE,controller);
@@ -216,9 +225,11 @@ async function loadGLBBrain(root,THREE,controller){
     const animate=()=>{
       const dt=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;
       const speed=controller.thinking?2.05:controller.speaking?1.45:controller.listening?1.7:1;
+      const activity=controller.thinking?1.0:controller.speaking?.82:controller.listening?.7:.32;
       root.rotation.y+=((controller.mouseX*.22+Math.sin(t*.25)*.08)-root.rotation.y)*.035;
       root.rotation.x+=((controller.mouseY*.10+Math.sin(t*.31)*.025)-root.rotation.x)*.035;
       root.position.y=Math.sin(t*.62)*.035;
+      if(reduced) root.rotation.y*=.992;
       shell.rotation.y-=dt*.08;
       dust.rotation.y+=dt*.018;
       left.rotation.y=Math.sin(t*.22)*.018;
@@ -230,7 +241,7 @@ async function loadGLBBrain(root,THREE,controller){
       coreRing.rotation.z+=dt*.9*speed;
       chip.rotation.z=Math.sin(t*.7)*.05;
       lines.material.opacity=.16+(controller.thinking?.2:.06)+Math.sin(t*2.1)*.035;
-      pulseMat.opacity=controller.thinking?.98:controller.speaking?.9:controller.listening?.86:.68;
+      pulseMat.opacity=.48+activity*.5;
 
       const pa=pulses.geometry.attributes.position.array;
       for(let i=0;i<pulseCount;i++){
