@@ -249,12 +249,7 @@ async function callHuggingFace(request, env) {
             const retryData = await retry.json();
             const retryAnswer = retryData?.choices?.[0]?.message?.content;
             if (typeof retryAnswer === "string" && retryAnswer.trim()) {
-              return json({
-                ok: true,
-                answer: retryAnswer.trim(),
-                model: selectedModel.replace(/:fastest$/, ""),
-                provider: "Hugging Face Inference Providers"
-              }, 200, request);
+              return json({ ok: true, answer: retryAnswer.trim() }, 200, request);
             }
           }
         }
@@ -265,12 +260,7 @@ async function callHuggingFace(request, env) {
       const answer = data?.choices?.[0]?.message?.content;
       if (typeof answer !== "string" || !answer.trim()) continue;
 
-      return json({
-        ok: true,
-        answer: answer.trim(),
-        model: selectedModel.replace(/:fastest$/, ""),
-        provider: "Hugging Face Inference Providers"
-      }, 200, request);
+      return json({ ok: true, answer: answer.trim() }, 200, request);
     } catch {
       continue;
     } finally {
@@ -861,21 +851,10 @@ async function handleApi(request, env) {
   }
 
   if (url.pathname === "/v1/public/chat" && request.method === "POST") {
-    // Primary: Hugging Face Inference Providers. Fallback: Cloudflare-hosted AI.
     try {
       const response = await callHuggingFace(request.clone(), env);
       if (response) return response;
-    } catch {
-      // Provider details are intentionally hidden from the public API.
-    }
-
-    try {
-      const response = await callCloudflareAI(request.clone(), env);
-      if (response) return response;
-    } catch {
-      // Keep provider details out of the public API.
-    }
-
+    } catch {}
     return json({
       ok: false,
       error: "ai_unavailable",
