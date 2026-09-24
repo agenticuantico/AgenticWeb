@@ -4,59 +4,80 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#02050d">
-<meta name="description" content="AgentiCuantico — interfaz neuronal 3D para conversar, razonar y crear.">
-<title>AgentiCuantico · Neural Core</title>
+<meta name="description" content="AgentiCuantico — inteligencia agéntica, conversación multimodal y una interfaz neuronal 3D inmersiva.">
+<link rel="canonical" href="https://agenticuantico.dev.ar/">
+<meta property="og:title" content="AgentiCuantico — Neural AI">
+<meta property="og:description" content="Inteligencia agéntica, conversación multimodal y una interfaz neuronal 3D inmersiva.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://agenticuantico.dev.ar/">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="manifest" href="/manifest.json">
+<title>AgentiCuantico — Neural AI</title>
 <link rel="stylesheet" href="./styles.css">
 <script>window.AGENTICUANTICO_GLB_URL="/assets/AgentiCuantico_brain_PBR.glb";</script>
 </head>
 <body>
 <div class="space" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
 <div class="ambient ambient-a" aria-hidden="true"></div><div class="ambient ambient-b" aria-hidden="true"></div>
-
 <header class="topbar">
   <a class="brand" href="/" aria-label="AgentiCuantico"><span class="brand-mark">✳</span><span>AgentiCuantico</span><sup>®</sup></a>
-  <nav class="desktop-nav" aria-label="Principal">
-    <a href="#brain">Cerebro</a><a href="#chat">Conversación</a><a href="#features">Capacidades</a>
-  </nav>
+  <nav class="desktop-nav" aria-label="Principal"><a href="#brain">Cerebro</a><a href="#chat">Conversación</a><a href="#features">Capacidades</a></nav>
   <button class="menu-btn" type="button" aria-label="Abrir menú" aria-expanded="false"><span></span><span></span><span></span></button>
 </header>
 
 <main class="experience">
-  <section class="intro" id="brain">
-    <div class="eyebrow"><span class="pulse-dot"></span> NEURAL CORE · ONLINE</div>
-    <h1>Tu inteligencia,<br><strong>en evolución.</strong></h1>
-    <p>Un espacio 3D único para conversar con AgentiCuantico. Sin saltos entre sitios ni interfaces antiguas.</p><a class="hero-cta" href="#chat" id="start-chat">Entrar al cerebro <span>↘</span></a>
-  </section>
+<section class="intro" id="brain">
+  <div class="eyebrow"><span class="pulse-dot"></span> NEURAL CORE · ONLINE</div>
+  <h1>Tu inteligencia,<br><strong>en evolución.</strong></h1>
+  <p>Una experiencia única para conversar, razonar y crear con un cerebro neuronal 3D conectado a la IA.</p>
+  <a class="hero-cta" href="#chat" id="start-chat">Entrar al cerebro <span>↘</span></a>
+</section>
 
-  <section class="brain-wrap" aria-label="Cerebro neuronal 3D">
-    <div class="brain-aura"></div><canvas id="brain-canvas"></canvas>
-    <div class="brain-label"><span>AGENTIC CORE</span><small id="brain-state">Cerebro neuronal · listo</small></div>
-  </section>
+<section class="brain-wrap" aria-label="Cerebro neuronal 3D">
+  <div class="brain-aura"></div><canvas id="brain-canvas"></canvas>
+  <div class="brain-label"><span>AGENTIC CORE</span><small id="brain-state">Cerebro neuronal · listo</small></div>
+</section>
 
-  <section class="chat-shell glass" id="chat" aria-label="Conversación">
-    <div class="chat-head">
-      <div class="chat-title"><span class="mini-core"></span><div><strong>AgentiCuantico</strong><small id="ai-status">Cerebro 3D conectado</small></div></div>
-      <div class="chat-actions"><select id="ai-model" aria-label="Modelo de IA"><option value="agentic">AGENTIC · AUTO</option><option value="neural">NEURAL · 3D</option><option value="local">QWEN · LOCAL</option></select><button id="new-chat" type="button" title="Nueva conversación">＋</button></div>
+<section class="chat-shell glass" id="chat" aria-label="Conversación con AgentiCuantico">
+  <div class="chat-head">
+    <div class="chat-title"><span class="mini-core"></span><div><strong>AgentiCuantico</strong><small id="ai-status">READY · Cerebro conectado</small></div></div>
+    <div class="chat-actions">
+      <select id="ai-model" aria-label="Modelo de IA"><option value="agentic">AGENTIC · AUTO</option><option value="neural">NEURAL · 3D</option><option value="local">QWEN · LOCAL</option></select>
+      <button id="new-chat" type="button" title="Nueva conversación" aria-label="Nueva conversación">＋</button>
     </div>
-    <div class="quick-prompts" aria-label="Acciones rápidas">
-      <button type="button" data-prompt="Ayúdame a crear una idea paso a paso">Crear una idea</button>
-      <button type="button" data-prompt="Analiza este problema y propón una solución">Analizar</button>
-      <button type="button" data-prompt="Ayúdame a programar esta tarea">Programar</button>
-    </div>
-    <div id="ai-messages" class="messages"><div class="msg assistant">Hola. Soy AgentiCuantico. Estoy listo para conversar, analizar ideas o ayudarte a crear.</div></div>
-    <form class="composer" id="ai-form">
-      <textarea id="ai-input" rows="1" placeholder="Escribe tu mensaje…" autocomplete="off"></textarea>
-      <button class="send" type="submit" aria-label="Enviar">↑</button>
-    </form>
-    <div class="chat-meta"><span><b>●</b> sesión privada</span><span>ENTER para enviar · SHIFT+ENTER nueva línea</span></div>
-  </section>
+  </div>
+  <div class="quick-prompts" aria-label="Acciones rápidas"><button type="button" data-prompt="Ayúdame a crear una idea paso a paso">Crear una idea</button><button type="button" data-prompt="Analiza este problema y propón una solución">Analizar</button><button type="button" data-prompt="Ayúdame a programar esta tarea">Programar</button></div>
+  <div id="ai-messages" class="messages" aria-live="polite"><div class="msg assistant">Hola. Soy AgentiCuantico. Estoy listo para conversar, analizar ideas o ayudarte a crear.</div></div>
 
-  <section class="features" id="features">
-    <div><b>IA AGÉNTICA</b><span>Planificación y herramientas</span></div>
-    <div><b>3D INMERSIVO</b><span>Cerebro visual en tiempo real</span></div>
-    <div><b>APRENDIZAJE</b><span>Memoria bajo consentimiento</span></div>
-    <div><b>PRIVACIDAD</b><span>Control de tus conversaciones</span></div>
-  </section>
+  <div class="attachment-strip" id="attachment-strip" hidden>
+    <div class="file-card"><span class="file-icon">+</span><div><strong id="file-name">archivo</strong><small id="file-meta"></small></div><button id="remove-file" type="button" aria-label="Quitar archivo">×</button></div>
+    <div class="file-state" id="file-state">READY FOR BACKEND · archivo preparado, análisis todavía no conectado</div>
+  </div>
+
+  <form class="composer" id="ai-form">
+    <div class="composer-left">
+      <button class="tool-btn" id="attach-btn" type="button" aria-label="Adjuntar archivo" title="Adjuntar archivo">+</button>
+      <input id="file-input" type="file" hidden accept=".pdf,.doc,.docx,.txt,.csv,.xls,.xlsx,.json,.xml,.zip,.jpg,.jpeg,.png,.webp,.gif,.svg,.mp4,.mov,.webm,.mp3,.wav,.m4a,.js,.ts,.tsx,.jsx,.py,.java,.cpp,.c,.html,.css,.md">
+      <textarea id="ai-input" rows="1" placeholder="Escribe a AgentiCuantico…" autocomplete="off"></textarea>
+    </div>
+    <button class="voice-btn" id="voice-btn" type="button" aria-label="Activar micrófono" title="Voz">◉</button>
+    <button class="send" type="submit" aria-label="Enviar">↑</button>
+  </form>
+  <div class="voice-panel" id="voice-panel" hidden>
+    <div><span class="voice-live" id="voice-live">● LISTO</span><small>Voz del dispositivo · respuesta escrita siempre visible</small></div>
+    <label>Idioma <select id="voice-language" aria-label="Idioma de voz"><option value="es-AR" selected>Español Argentina</option><option value="es-ES">Español España</option><option value="en-US">English</option><option value="pt-BR">Português</option><option value="fr-FR">Français</option><option value="it-IT">Italiano</option><option value="de-DE">Deutsch</option></select></label>
+    <label>Voz <select id="voice-select" aria-label="Voz disponible"><option value="">Automática</option></select></label>
+    <label>Velocidad <input id="voice-rate" type="range" min=".7" max="1.2" step=".05" value="1" aria-label="Velocidad"></label>
+  </div>
+  <div class="chat-meta"><span><b>●</b> memoria desactivada</span><span id="capability-note">TEXTO · VOZ DEL DISPOSITIVO · ARCHIVOS PREPARADOS</span></div>
+</section>
+
+<section class="features" id="features">
+  <div><b>IA AGÉNTICA</b><span>Orquestación preparada para agentes y herramientas</span></div>
+  <div><b>3D NEURAL</b><span>Cerebro procedural + carga GLB preparada</span></div>
+  <div><b>VOICE</b><span>STT/TTS del navegador cuando está disponible</span></div>
+  <div><b>PRIVACY</b><span>Memoria no activada sin consentimiento</span></div>
+</section>
 </main>
 <footer><span>AI · AGENTIC · HUMAN INTERFACE</span><span>WEBGL · 3D · VOICE</span></footer>
 
@@ -66,17 +87,78 @@ menu?.addEventListener("click",()=>{const open=nav?.classList.toggle("open");men
 </script>
 <script type="module">
 import { initQuantumBrain3D } from "./brain-3d.js";
+import { AIProvider, AI_STATES, createVoiceController, validateFile, formatBytes } from "./neural-core-ui.js";
+
 const brain=initQuantumBrain3D(document.getElementById("brain-canvas"));
-const messages=document.getElementById("ai-messages"),input=document.getElementById("ai-input"),form=document.getElementById("ai-form"),status=document.getElementById("ai-status");
-const history=[];const session=sessionStorage.getItem("aq_session")||crypto.randomUUID();const conversation=sessionStorage.getItem("aq_conversation")||crypto.randomUUID();
+const messages=document.getElementById("ai-messages"),input=document.getElementById("ai-input"),form=document.getElementById("ai-form"),status=document.getElementById("ai-status"),brainState=document.getElementById("brain-state");
+const session=sessionStorage.getItem("aq_session")||crypto.randomUUID(),conversation=sessionStorage.getItem("aq_conversation")||crypto.randomUUID();
 sessionStorage.setItem("aq_session",session);sessionStorage.setItem("aq_conversation",conversation);
-const api=()=> (window.AGENTICUANTICO_API_URL||"https://agenticweb.agenticuantico.workers.dev").replace(/\/$/,"");\nconst model=document.getElementById("ai-model");\nconst start=document.getElementById("start-chat");\nstart?.addEventListener("click",()=>setTimeout(()=>input?.focus(),250));\nmodel?.addEventListener("change",()=>{status.textContent="Modo · "+model.options[model.selectedIndex].text;});
+const history=[];const provider=new AIProvider();
+let currentState=AI_STATES.READY,currentFile=null,voiceMode=false;
+const model=document.getElementById("ai-model");
+const stateText={READY:"READY",LISTENING:"LISTENING · escuchando",UPLOADING:"UPLOADING · archivo recibido",PROCESSING:"PROCESSING · procesando",ANALYZING:"ANALYZING · analizando",THINKING:"THINKING · razonando",GENERATING:"GENERATING · generando",SPEAKING:"SPEAKING · hablando",DONE:"DONE · listo",ERROR:"ERROR · revisar conexión"};
+function setState(state){
+ currentState=state;const label=stateText[state]||state;
+ status.textContent=label;
+ if(brainState)brainState.textContent=label;
+ if(brain?.setState)brain.setState(state);
+ else if(brain?.setThinking)brain.setThinking(state==="THINKING"||state==="PROCESSING"||state==="ANALYZING"||state==="GENERATING");
+}
 function add(role,text){const d=document.createElement("div");d.className="msg "+role;d.textContent=text;messages.appendChild(d);messages.scrollTop=messages.scrollHeight;return d}
-async function ask(text){const c=new AbortController(),timer=setTimeout(()=>c.abort(),30000);try{const r=await fetch(api()+"/v1/public/chat",{method:"POST",signal:c.signal,headers:{"Content-Type":"application/json","X-Guest-Session":session},body:JSON.stringify({conversation_id:conversation,message:text,consent_to_memory:false,history:history.slice(-10)})});if(!r.ok)throw Error("HTTP "+r.status);const d=await r.json();if(!d.answer)throw Error("empty");return d.answer}finally{clearTimeout(timer)}}
-form.addEventListener("submit",async e=>{e.preventDefault();const text=input.value.trim();if(!text)return;input.value="";add("user",text);const pending=add("assistant","Pensando…");status.textContent="Cerebro · razonando";brain?.setThinking(true);try{const answer=await ask(text);pending.textContent=answer;history.push({role:"user",content:text},{role:"assistant",content:answer});status.textContent="Cerebro 3D conectado"}catch(err){pending.textContent="No pude responder ahora. Verificá la conexión e intentá nuevamente.";status.textContent="Cerebro · reconexión"}finally{brain?.setThinking(false)}});
-document.querySelectorAll(".quick-prompts button").forEach(b=>b.addEventListener("click",()=>{input.value=b.dataset.prompt;input.focus();}));
-const resizeInput=()=>{input.style.height="auto";input.style.height=Math.min(input.scrollHeight,150)+"px"};\ninput.addEventListener("input",resizeInput);\ninput.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();form.requestSubmit()}});
-document.getElementById("new-chat").onclick=()=>{history.length=0;messages.innerHTML='<div class="msg assistant">Nueva conversación iniciada. ¿Qué quieres explorar?</div>';input.focus();};
+async function ask(text){
+ const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),30000);
+ try{return await provider.chat({message:text,history,conversationId:conversation,session,signal:controller.signal});}
+ finally{clearTimeout(timer)}
+}
+const voice=createVoiceController({
+ onState:setState,
+ onTranscript:(text,final)=>{if(text){input.value=text;resizeInput();if(final)form.requestSubmit();}},
+ onSpeakStart:()=>setState(AI_STATES.SPEAKING),
+ onSpeakEnd:()=>setState(AI_STATES.DONE)
+});
+const voiceBtn=document.getElementById("voice-btn"),voicePanel=document.getElementById("voice-panel"),lang=document.getElementById("voice-language"),voiceSelect=document.getElementById("voice-select"),rate=document.getElementById("voice-rate");
+function populateVoices(){if(!voiceSelect||!window.speechSynthesis)return;const voices=window.speechSynthesis.getVoices();voiceSelect.innerHTML='<option value="">Automática</option>';voices.forEach(v=>{const o=document.createElement("option");o.value=v.name;o.textContent=v.name+" · "+v.lang;if(v.lang.toLowerCase()==="es-ar")o.selected=true;voiceSelect.appendChild(o);});}
+populateVoices();window.speechSynthesis?.addEventListener("voiceschanged",populateVoices);
+lang.addEventListener("change",()=>voice.loadVoice(lang.value,voiceSelect.value));
+voiceSelect.addEventListener("change",()=>voice.loadVoice(lang.value,voiceSelect.value));
+voiceBtn.addEventListener("click",()=>{
+ if(!voice.recognitionSupported){voicePanel.hidden=false;document.getElementById("voice-live").textContent="● VOZ NO DISPONIBLE · READY FOR BACKEND";return;}
+ voiceMode=!voiceMode;voicePanel.hidden=!voiceMode;voiceBtn.classList.toggle("active",voiceMode);
+ if(voiceMode){voice.startListening({lang:lang.value});}else{voice.stopListening();voice.stopSpeaking();setState(AI_STATES.READY);}
+});
+async function sendMessage(text){
+ if(!text.trim())return;
+ add("user",text);const pending=add("assistant","Pensando…");setState(AI_STATES.THINKING);
+ try{
+   const answer=await ask(text);
+   pending.textContent=answer;history.push({role:"user",content:text},{role:"assistant",content:answer});
+   if(voiceMode&&voice.speechSupported){setState(AI_STATES.SPEAKING);voice.speak(answer,{lang:lang.value,rate:rate.value});}
+   else setState(AI_STATES.DONE);
+ }catch(err){pending.textContent="AgentiCuantico no pudo responder ahora. Verificá la conexión e intentá nuevamente.";setState(AI_STATES.ERROR);}
+}
+form.addEventListener("submit",async e=>{e.preventDefault();const text=input.value.trim();if(!text)return;input.value="";resizeInput();await sendMessage(text);});
+document.querySelectorAll(".quick-prompts button").forEach(b=>b.addEventListener("click",()=>{input.value=b.dataset.prompt;input.focus();resizeInput();}));
+function resizeInput(){input.style.height="auto";input.style.height=Math.min(input.scrollHeight,150)+"px"}
+input.addEventListener("input",resizeInput);
+input.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();form.requestSubmit()}});
+document.getElementById("new-chat").onclick=()=>{history.length=0;messages.innerHTML='<div class="msg assistant">Nueva conversación iniciada. ¿Qué quieres explorar?</div>';setState(AI_STATES.READY);input.focus();};
+
+const attachBtn=document.getElementById("attach-btn"),fileInput=document.getElementById("file-input"),strip=document.getElementById("attachment-strip"),removeFile=document.getElementById("remove-file"),fileName=document.getElementById("file-name"),fileMeta=document.getElementById("file-meta"),fileState=document.getElementById("file-state");
+function showFile(file){
+ const check=validateFile(file);if(!check.ok){fileState.textContent=check.reason==="size"?"ERROR · máximo 100 MB":"ERROR · archivo inválido";strip.hidden=false;currentFile=null;return;}
+ currentFile=file;fileName.textContent=file.name;fileMeta.textContent=(file.type||"tipo desconocido")+" · "+formatBytes(file.size);fileState.textContent="READY FOR BACKEND · archivo seleccionado, análisis todavía no conectado";strip.hidden=false;setState(AI_STATES.UPLOADING);
+ setTimeout(()=>setState(AI_STATES.READY),250);
+}
+attachBtn.addEventListener("click",()=>fileInput.click());
+fileInput.addEventListener("change",()=>showFile(fileInput.files?.[0]));
+removeFile.addEventListener("click",()=>{currentFile=null;fileInput.value="";strip.hidden=true;setState(AI_STATES.READY);});
+["dragenter","dragover"].forEach(type=>form.addEventListener(type,e=>{e.preventDefault();form.classList.add("drop-active");}));
+["dragleave","drop"].forEach(type=>form.addEventListener(type,e=>{e.preventDefault();form.classList.remove("drop-active");}));
+form.addEventListener("drop",e=>showFile(e.dataTransfer?.files?.[0]));
+
+document.getElementById("start-chat")?.addEventListener("click",()=>setTimeout(()=>input.focus(),250));
+model?.addEventListener("change",()=>{status.textContent="MODELO · "+model.options[model.selectedIndex].text;});
+setState(AI_STATES.READY);
 </script>
 </body>
 </html>
