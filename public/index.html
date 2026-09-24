@@ -110,7 +110,8 @@ async function ask(text){
  try{const attachment=currentFile?await prepareAttachment(currentFile):null;return await provider.chat({message:text,history,conversationId:conversation,session,attachment,signal:controller.signal});}
  finally{clearTimeout(timer)}
 }
-const voice=createVoiceController({
+const voiceBtn=document.getElementById("voice-btn"),voicePanel=document.getElementById("voice-panel"),lang=document.getElementById("voice-language"),voiceGender=document.getElementById("voice-gender"),voiceSelect=document.getElementById("voice-select"),rate=document.getElementById("voice-rate");
+const voice=createVoiceController({ getGender:()=>voiceGender?.value||"any",
  onState:setState,
  onTranscript:(text,final)=>{if(text){input.value=text;resizeInput();if(final)form.requestSubmit();}},
  onSpeakStart:()=>setState(AI_STATES.SPEAKING),
@@ -119,7 +120,7 @@ const voice=createVoiceController({
 const voiceBtn=document.getElementById("voice-btn"),voicePanel=document.getElementById("voice-panel"),lang=document.getElementById("voice-language"),voiceGender=document.getElementById("voice-gender"),voiceSelect=document.getElementById("voice-select"),rate=document.getElementById("voice-rate");
 function populateVoices(){if(!voiceSelect||!window.speechSynthesis)return;const voices=window.speechSynthesis.getVoices();const wanted=lang.value.toLowerCase(),gender=voiceGender?.value||"any";const matches=voices.filter(v=>v.lang?.toLowerCase().startsWith(wanted.slice(0,2))&&((gender==="any")||(typeof voice.guessGender==="function"&&voice.guessGender(v)===gender)));voiceSelect.innerHTML='<option value="">Automática</option>';matches.forEach(v=>{const o=document.createElement("option");o.value=v.name;o.textContent=v.name+" · "+v.lang;voiceSelect.appendChild(o);});}
 populateVoices();window.speechSynthesis?.addEventListener("voiceschanged",populateVoices);
-lang.addEventListener("change",()=>{populateVoices();voice.loadVoice(lang.value,voiceSelect.value);});voiceGender?.addEventListener("change",()=>{populateVoices();voice.loadVoice(lang.value,voiceSelect.value);});
+lang.addEventListener("change",()=>{populateVoices();voice.loadVoice(lang.value,voiceSelect.value,voiceGender?.value||"any");});voiceGender?.addEventListener("change",()=>{populateVoices();voice.loadVoice(lang.value,voiceSelect.value);});
 voiceSelect.addEventListener("change",()=>voice.loadVoice(lang.value,voiceSelect.value));
 voiceBtn.addEventListener("click",()=>{
  if(!voice.recognitionSupported){voicePanel.hidden=false;document.getElementById("voice-live").textContent="● VOZ NO DISPONIBLE · READY FOR BACKEND";return;}
