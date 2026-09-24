@@ -13,7 +13,7 @@
   const ACTIVE_KEY="aq_active_v2";
   const AUTH_KEY="aq_auth_v1";
   const SESSION_KEY="aq_guest_v6";
-  let busy=false,listening=false,recognition=null,selectedVoice=null,browserVoices=[];
+  let busy=false,listening=false,recognition=null,selectedVoice=null,browserVoices=[];\n  let speechOutput=localStorage.getItem("aq_speech_output")!== "off";\n  let voiceGender=localStorage.getItem("aq_voice_gender")||"female";\n  let voiceLocale=localStorage.getItem("aq_voice_locale")||"es-AR";
   let conversations=loadLocal();
   let activeId=localStorage.getItem(ACTIVE_KEY)||"";
   let current=null;
@@ -156,7 +156,7 @@
   $("clearHistory")?.addEventListener("click",clearAll);
   syncServer();
 
-  const setThinking=v=>{brain()?.setThinking?.(v);brain()?.setThinkingState?.();if(status)status.textContent=v?"AgentiQ está razonando…":"Voz lista"};
+  const setThinking=v=>{brain()?.setThinking?.(v);brain()?.setThinkingState?.();if(status&&v)status.textContent="AgentiQ está razonando…"};\n  const setListeningState=v=>{brain()?.setListening?.(v);if(status)status.textContent=v?"Escuchando…":"Voz lista";};
   const setDisabled=v=>{if(send)send.disabled=v;if(input)input.disabled=v};
 
   function renderAttachments(files){
@@ -200,7 +200,7 @@
       thinking.remove();
       appendMessage("assistant",data.answer,data.model?String(data.model):"AgentiQ");
       saveTurn("assistant",data.answer);
-      speak(data.answer);
+      if(speechOutput)speak(data.answer);
     }catch(err){
       thinking.remove();
       const detail=String(err?.message||err||"error de conexión");
@@ -216,7 +216,7 @@
     browserVoices=window.speechSynthesis.getVoices()||[];
     if(!browserVoices.length)return;
     const preferred=browserVoices.filter(v=>/^es(-|_)(AR|MX|ES)/i.test(v.lang));
-    selectedVoice=selectedVoice||preferred[0]||browserVoices[0];
+    const localeMatches=browserVoices.filter(v=>String(v.lang||"").toLowerCase()===voiceLocale.toLowerCase());\n    const genderHint=voiceGender==="male"?/male|man|jorge|diego|mateo|bruno|alex|james/i:/female|woman|female|clara|luna|sophie|samantha|aria|zira/i;\n    const genderMatches=browserVoices.filter(v=>genderHint.test(v.name));\n    selectedVoice=localeMatches[0]||genderMatches.find(v=>String(v.lang||"").toLowerCase().startsWith(voiceLocale.slice(0,2).toLowerCase()))||preferred[0]||browserVoices[0];
     if(voiceName)voiceName.textContent=(selectedVoice?.name||"Voz del dispositivo")+" · "+(selectedVoice?.lang||"");
     const list=$("voiceList");
     if(list){
@@ -228,7 +228,7 @@
   function speak(text){
     if(!("speechSynthesis" in window)||!text)return;
     window.speechSynthesis.cancel();loadVoices();
-    const u=new SpeechSynthesisUtterance(String(text));u.voice=selectedVoice||null;u.lang=selectedVoice?.lang||"es-AR";u.rate=.96;u.pitch=1.02;u.volume=1;
+    const u=new SpeechSynthesisUtterance(String(text));u.voice=selectedVoice||null;u.lang=voiceLocale;u.rate=.96;u.pitch=1.02;u.volume=1;
     u.onstart=()=>{brain()?.setSpeaking?.(true);if(status)status.textContent="AgentiQ está hablando…"};
     u.onend=()=>{brain()?.setSpeaking?.(false);if(status)status.textContent="Voz lista"};
     u.onerror=()=>{brain()?.setSpeaking?.(false);if(status)status.textContent="Voz no disponible en este navegador"};
@@ -238,20 +238,20 @@
 
   const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(mic&&SpeechRecognition){
-    recognition=new SpeechRecognition();window.recognition=recognition;recognition.lang="es-AR";recognition.continuous=false;recognition.interimResults=true;
-    recognition.onstart=()=>{listening=true;mic.classList.add("active");if(status)status.textContent="Escuchando…";setThinking(true)};
+    recognition=new SpeechRecognition();window.recognition=recognition;recognition.lang=voiceLocale;recognition.continuous=false;recognition.interimResults=true;
+    recognition.onstart=()=>{listening=true;mic.classList.add("active");setListeningState(true);setThinking(false);$("micModeToggle")?.classList.add("active");$("micModeToggle")?.setAttribute("aria-pressed","true");$("micModeToggle")&&( $("micModeToggle").textContent="🎙️ Micrófono activo" );};
     recognition.onresult=e=>{let finalText="";for(let i=e.resultIndex;i<e.results.length;i++)finalText+=e.results[i][0].transcript;if(input)input.value=finalText};
-    recognition.onerror=e=>{listening=false;mic.classList.remove("active");setThinking(false);if(status)status.textContent="Voz lista";notify("No pude acceder al micrófono: "+e.error)};
-    recognition.onend=()=>{listening=false;mic.classList.remove("active");setThinking(false);if(input?.value.trim()){const t=input.value.trim();input.value="";ask(t)}};
+    recognition.onerror=e=>{listening=false;mic.classList.remove("active");setListeningState(false);if(status)status.textContent="Voz lista";$("micModeToggle")?.classList.remove("active");$("micModeToggle")?.setAttribute("aria-pressed","false");if($("micModeToggle"))$("micModeToggle").textContent="🎙️ Micrófono apagado";notify("No pude acceder al micrófono: "+e.error)};
+    recognition.onend=()=>{listening=false;mic.classList.remove("active");setListeningState(false);$("micModeToggle")?.classList.remove("active");$("micModeToggle")?.setAttribute("aria-pressed","false");if($("micModeToggle"))$("micModeToggle").textContent="🎙️ Micrófono apagado";if(input?.value.trim()){const t=input.value.trim();input.value="";ask(t)}};
     mic.addEventListener("click",e=>{e.preventDefault();e.stopImmediatePropagation();if(listening){recognition.stop();return}try{recognition.start()}catch{}},true);
   }else if(mic)mic.addEventListener("click",e=>{e.preventDefault();e.stopImmediatePropagation();notify("Este navegador no habilita reconocimiento de voz. Probá Chrome/Edge con permiso de micrófono.")},true);
 
-  stop?.addEventListener("click",()=>{window.speechSynthesis?.cancel();if(listening)recognition?.stop();brain()?.setSpeaking?.(false);if(status)status.textContent="Voz detenida"});
+  stop?.addEventListener("click",()=>{window.speechSynthesis?.cancel();if(listening)recognition?.stop();brain()?.setSpeaking?.(false);if(status)status.textContent="Voz detenida"});\n  $("speechOutputToggle")?.addEventListener("click",()=>{speechOutput=!speechOutput;localStorage.setItem("aq_speech_output",speechOutput?"on":"off");$("speechOutputToggle").classList.toggle("active",speechOutput);$("speechOutputToggle").setAttribute("aria-pressed",String(speechOutput));$("speechOutputToggle").textContent=speechOutput?"🔊 Respuestas habladas":"🔇 Solo texto";notify(speechOutput?"Respuestas por voz activadas":"Respuestas solo por texto")});\n  $("micModeToggle")?.addEventListener("click",()=>{if(!recognition){notify("Este navegador no admite reconocimiento de voz");return}if(listening){recognition.stop();return}recognition.lang=voiceLocale;try{recognition.start()}catch{}});\n  document.querySelectorAll(".voice-tab").forEach(tab=>tab.addEventListener("click",()=>{voiceGender=tab.dataset.voiceGender||"female";localStorage.setItem("aq_voice_gender",voiceGender);document.querySelectorAll(".voice-tab").forEach(t=>t.classList.toggle("active",t===tab));loadVoices()}));\n  document.querySelectorAll(".language-row").forEach(row=>row.addEventListener("click",()=>{const text=row.innerText.toLowerCase();voiceLocale=text.includes("argentina")?"es-AR":text.includes("españa")?"es-ES":text.includes("estados unidos")?"en-US":"en-GB";localStorage.setItem("aq_voice_locale",voiceLocale);document.querySelectorAll(".language-row").forEach(r=>r.classList.toggle("active",r===row));if(recognition)recognition.lang=voiceLocale;loadVoices();notify("Idioma de voz: "+row.innerText.replace("›","").trim())}));
   $("attachButton")?.addEventListener("click",e=>{e.preventDefault();e.stopImmediatePropagation();attach?.click()},true);
-  attach?.addEventListener("change",async e=>{e.stopImmediatePropagation();const files=[...(attach.files||[])];renderAttachments(files);if(files.length)await ask("",files);attach.value="";setTimeout(()=>renderAttachments([]),300)},true);
+  attach?.addEventListener("change",async e=>{e.stopImmediatePropagation();const files=[...(attach.files||[])];renderAttachments(files);if(files.length)await ask("",files);attach.value="";setTimeout(()=>renderAttachments([]),900)},true);
   send?.addEventListener("click",e=>{e.preventDefault();e.stopImmediatePropagation();const t=input?.value.trim();if(t){input.value="";ask(t)}},true);
   input?.addEventListener("keydown",e=>{e.stopImmediatePropagation();if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();const t=input.value.trim();if(t){input.value="";ask(t)}}},true);
   $("composer")?.addEventListener("submit",e=>{e.preventDefault();const t=input?.value.trim();if(t){input.value="";ask(t)}},true);
 
-  window.addEventListener("load",()=>{loadVoices();window.speechSynthesis?.addEventListener?.("voiceschanged",loadVoices);if(status&&!status.textContent)status.textContent="Voz lista";notify("AgentiQ listo")},{once:true});
+  window.addEventListener("load",()=>{if($("speechOutputToggle")){ $("speechOutputToggle").classList.toggle("active",speechOutput);$("speechOutputToggle").setAttribute("aria-pressed",String(speechOutput));$("speechOutputToggle").textContent=speechOutput?"🔊 Respuestas habladas":"🔇 Solo texto";}loadVoices();window.speechSynthesis?.addEventListener?.("voiceschanged",loadVoices);if(status&&!status.textContent)status.textContent="Voz lista";notify("AgentiQ listo")},{once:true});
 })();
