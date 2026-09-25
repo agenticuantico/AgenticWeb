@@ -517,7 +517,8 @@ const BUILTIN_AGENTS=[
   {id:"designer",name:"UXQ",icon:"◇",role:"Diseñador UI/UX",skills:["UI","UX","responsive","accesibilidad"],knowledge:["design systems","prototipado","mobile-first"],description:"Diseña interfaces claras, accesibles y adaptativas."},
   {id:"graphic",name:"PixelQ",icon:"◈",role:"Diseñador gráfico",skills:["identidad","composición","dirección de arte"],knowledge:["branding","social media","campañas"],description:"Desarrolla conceptos visuales y sistemas gráficos."},
   {id:"illustrator3d",name:"3DQ",icon:"◉",role:"Ilustrador 3D",skills:["Three.js","WebGL","GLB","GLTF","materiales"],knowledge:["modelado","iluminación","optimización 3D"],description:"Trabaja con escenas 3D, modelos GLB/GLTF y experiencias inmersivas."},
-  {id:"research",name:"ResearchQ",icon:"◎",role:"Investigador",skills:["investigación","síntesis","verificación"],knowledge:["fuentes","comparativas","documentación"],description:"Investiga, estructura información y separa hechos de hipótesis."}
+  {id:"research",name:"ResearchQ",icon:"◎",role:"Investigador",skills:["investigación","síntesis","verificación"],knowledge:["fuentes","comparativas","documentación"],description:"Investiga, estructura información y separa hechos de hipótesis."},
+  {id:"data-science",name:"Data Science",icon:"▦",role:"Analista de datos BigQuery",skills:["BigQuery","SQL","estadística","análisis"],knowledge:["datasets","métricas","visualización","Memory Bank"],description:"Consulta BigQuery mediante Google ADK, analiza resultados y conserva contexto cuando Agent Engine está habilitado."}
 ];
 
 function cleanAgent(a,custom=false){
@@ -660,6 +661,10 @@ async function handleApi(request, env) {
       const r=await stub.fetch("https://user-data/agents?id="+encodeURIComponent(agentId),{method:"DELETE"});
       return json(await r.json().catch(()=>({ok:false})),r.status,request);
     }
+  }
+
+  if (url.pathname === "/v1/public/adk/data-science" && request.method === "POST") {
+    return callGoogleDataScienceAgent(request.clone(), env);
   }
 
   if (url.pathname === "/v1/public/codex" && request.method === "POST") {
