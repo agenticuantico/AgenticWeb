@@ -25,7 +25,7 @@ body::before,body::after{display:none!important;content:none!important}
   <button class="mobile-menu icon-button" id="mobileMenu" aria-label="Abrir navegación">☰</button>
   <a class="brand" href="#chat" aria-label="AgentiCuantico inicio"><span class="brand-mark">AQ</span><span>AgentiCuantico</span></a>
   <div class="connection-pill" aria-live="polite"><span class="status-dot" id="topDot"></span><span id="connection">Conectando</span><span class="separator">·</span><span id="model">Motor</span></div>
-  <div class="top-actions"><button class="icon-button" id="newTop" title="Nueva conversación" aria-label="Nueva conversación">＋</button><a class="top-link" href="https://github.com/agenticuantico/AgenticWeb" target="_blank" rel="noopener">GitHub ↗</a></div>
+  <div class="top-actions"><a class="top-link" href="https://github.com/agenticuantico/AgenticWeb" target="_blank" rel="noopener">GitHub ↗</a></div>
 </header>
 
 <div class="app">
@@ -37,7 +37,9 @@ body::before,body::after{display:none!important;content:none!important}
       <a class="active" href="#chat">◉ <span>Neural Chat</span></a>
       <button id="agentsOpen">◇ <span>Mis agentes</span><b>+</b></button>
       <button id="teamsOpen">◎ <span>Equipos</span><b>+</b></button>
-      <button id="toolsOpen">⌘ <span>Herramientas</span></button>
+      <button id="toolsOpen">⌘ <span>Complementos</span></button>
+      <button id="historyOpen">◷ <span>Historial</span></button>
+      <button id="deleteHistory">⌫ <span>Borrar historial</span></button>
       <a href="#neural">✦ <span>Neural Core</span></a>
       <a href="#system">▦ <span>Sistema</span></a>
     </nav>
@@ -160,6 +162,24 @@ body::before,body::after{display:none!important;content:none!important}
     </div>
     <p class="form-help">Una herramienta solo se muestra como activa cuando existe un endpoint real detrás de ella.</p>
   </section>
+  <section class="modal" id="historyModal" hidden aria-modal="true" role="dialog" aria-labelledby="historyModalTitle">
+    <div class="modal-head"><div><span class="eyebrow">CONVERSATION VAULT</span><h2 id="historyModalTitle">Historial</h2></div><button class="close-button" data-close-modal aria-label="Cerrar">×</button></div>
+    <div class="history-toolbar">
+      <span class="form-help">Tus conversaciones se guardan en este dispositivo y, si iniciás sesión, también pueden sincronizarse.</span>
+      <button type="button" class="soft-button danger-button" id="historyDeleteAll">Borrar todo</button>
+    </div>
+    <div id="historyList" class="history-list"></div>
+  </section>
+
+  <section class="modal" id="newConversationModal" hidden aria-modal="true" role="dialog" aria-labelledby="newConversationTitle">
+    <div class="modal-head"><div><span class="eyebrow">NEW SESSION</span><h2 id="newConversationTitle">Nueva conversación</h2></div><button class="close-button" data-close-modal aria-label="Cerrar">×</button></div>
+    <form id="newConversationForm" class="modal-form">
+      <label>Nombre de la conversación<input id="conversationName" maxlength="100" placeholder="Ej. Proyecto AgentiCuantico"></label>
+      <label>Mensaje inicial<textarea id="conversationPrompt" rows="5" maxlength="12000" placeholder="Escribí el primer mensaje o dejalo vacío para abrir una conversación limpia."></textarea></label>
+      <div class="modal-actions"><button type="button" class="soft-button" data-close-modal>Cancelar</button><button class="primary-button" type="submit">Abrir conversación</button></div>
+    </form>
+  </section>
+
 </div>
 </div>
 
@@ -167,6 +187,7 @@ body::before,body::after{display:none!important;content:none!important}
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const messages=$('#messages'), input=$('#input'), history=[];
 let busy=false, attachment=null, selectedAgent=null, selectedTeam=null, conversations=[];
+let conversationId='conv-'+crypto.randomUUID(), conversationTitle='Nueva conversación';
 const voiceState={lang:localStorage.getItem('aq-lang')||'es-AR',speak:localStorage.getItem('aq-speak')==='1',profile:localStorage.getItem('aq-voice-profile')||'female',listening:false,recognition:null,voices:[]};
 const LANG={'es-AR':'🇦🇷 Español (Argentina)','es-ES':'🇪🇸 Español (España)','en-US':'🇺🇸 English (United States)','en-GB':'🇬🇧 English (United Kingdom)','pt-BR':'🇧🇷 Português (Brasil)','fr-FR':'🇫🇷 Français (France)','it-IT':'🇮🇹 Italiano (Italia)','de-DE':'🇩🇪 Deutsch (Deutschland)','ja-JP':'🇯🇵 日本語 (Japan)','ko-KR':'🇰🇷 한국어 (Korea)'};
 let agents=[];
@@ -217,11 +238,20 @@ async function saveTeam(team){
   teams.push(team);renderTeams();return true
 }
 function toast(t){let x=$('.toast');if(!x){x=document.createElement('div');x.className='toast';document.body.appendChild(x)}x.textContent=t;x.classList.add('show');clearTimeout(x._t);x._t=setTimeout(()=>x.classList.remove('show'),3200)}
-function openModal(id){$('#modalBackdrop').hidden=false;$$('#modalBackdrop>.modal').forEach(m=>m.hidden=true);$(id).hidden=false;document.body.classList.add('modal-open')}
-function closeModals(){$('#modalBackdrop').hidden=true;$$('#modalBackdrop>.modal').forEach(m=>m.hidden=true);document.body.classList.remove('modal-open')}
-async function send(text){text=String(text||'').trim();if(!text||busy)return;$('#emptyState')?.remove();addMessage('user',text,selectedAgent?.name||selectedTeam?.name||'');const reply=addMessage('assistant','');busy=true;$('#typing').hidden=false;setState('THINKING');const body={message:text,history:history.slice(-10),language:voiceState.lang,voiceProfile:voiceState.profile,speak:voiceState.speak};if(attachment)body.attachments=[attachment];if(selectedAgent)body.agent=selectedAgent;if(selectedTeam)body.team={id:selectedTeam.id,name:selectedTeam.name,goal:selectedTeam.goal,members:selectedTeam.members||[]};try{const guestKey='aq-guest-session';let guestId=localStorage.getItem(guestKey);if(!guestId){guestId='guest-'+crypto.randomUUID();localStorage.setItem(guestKey,guestId)}const adk=selectedAgent?.id==='data-science';const endpoint=adk?'/v1/public/adk/data-science':'/v1/public/chat';const headers={'Content-Type':'application/json','X-Guest-Session':guestId};const token=localStorage.getItem('aq-session');if(token)headers.Authorization='Bearer '+token;const r=await fetch(endpoint,{method:'POST',headers,body:JSON.stringify(body)});const d=await r.json().catch(()=>({}));if(!r.ok||!d.answer)throw Error(d.message||'AI unavailable');reply.textContent=d.answer;history.push({role:'user',content:text},{role:'assistant',content:d.answer});setConnection(true,'Online','AgentiQ');setState('RESPONDING');await speak(d.answer)}catch{reply.textContent='No pude completar la solicitud en este momento. Intentá nuevamente.';setState('ERROR')}finally{attachment=null;$('#typing').hidden=true;busy=false;setTimeout(()=>{if(document.body.dataset.aiState==='RESPONDING')setState('ONLINE')},800)}}
+function openModal(id){$('#modalBackdrop').hidden=false;$('#modalBackdrop>.modal').forEach(m=>m.hidden=true);$(id).hidden=false;document.body.classList.add('modal-open')}
+function closeModals(){$('#modalBackdrop').hidden=true;$('#modalBackdrop>.modal').forEach(m=>m.hidden=true);document.body.classList.remove('modal-open')}
+function localConversationList(){try{const value=JSON.parse(localStorage.getItem('aq-conversations')||'[]');return Array.isArray(value)?value:[]}catch{return[]}}
+function persistConversationList(list){localStorage.setItem('aq-conversations',JSON.stringify(list.slice(-50)))}
+function conversationSnapshot(){if(!history.length)return null;const firstUser=history.find(x=>x?.role==='user'&&x.content);return {id:conversationId,title:(conversationTitle&&conversationTitle!=='Nueva conversación')?conversationTitle:String(firstUser?.content||'Nueva conversación').slice(0,70),messages:history.slice(-50),updatedAt:Date.now()}}
+async function syncConversations(){const token=localStorage.getItem('aq-session');if(!token)return;try{await fetch('/v1/user/conversations',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({conversations})})}catch{}}
+function saveCurrentConversation(){const snap=conversationSnapshot();if(!snap)return;conversations=localConversationList().filter(c=>c.id!==snap.id);conversations.push(snap);persistConversationList(conversations);syncConversations()}
+function renderHistory(){const list=$('#historyList');if(!list)return;conversations=localConversationList().sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));if(!conversations.length){list.innerHTML='<div class="history-empty">No hay conversaciones guardadas todavía.</div>';return}list.innerHTML=conversations.map(c=>'<div class="history-item"><button class="history-open" data-history-id="'+esc(c.id)+'"><b>'+esc(c.title||'Nueva conversación')+'</b><small>'+new Date(c.updatedAt||Date.now()).toLocaleString('es-AR')+'</small><span>'+esc((c.messages||[]).find(m=>m?.role==='user')?.content||'Conversación vacía').slice(0,120)+'</span></button><button class="history-delete" data-history-delete="'+esc(c.id)+'" aria-label="Borrar conversación">×</button></div>').join('')}
+function loadConversation(id){const c=conversations.find(x=>x.id===id);if(!c)return;saveCurrentConversation();conversationId=c.id;conversationTitle=c.title||'Nueva conversación';history.length=0;(c.messages||[]).filter(m=>m&&(m.role==='user'||m.role==='assistant')&&typeof m.content==='string').slice(-50).forEach(m=>history.push(m));messages.innerHTML='';history.forEach(m=>addMessage(m.role,m.content));$('#chatTitle').textContent=conversationTitle;closeModals();setState('ONLINE');input.focus()}
+async function deleteConversation(id){conversations=localConversationList().filter(c=>c.id!==id);persistConversationList(conversations);const token=localStorage.getItem('aq-session');if(token){try{await fetch('/v1/user/conversations?id='+encodeURIComponent(id),{method:'DELETE',headers:{Authorization:'Bearer '+token}})}catch{}}renderHistory()}
+async function deleteAllHistory(){if(!confirm('¿Borrar todo el historial de conversaciones? Esta acción no se puede deshacer.'))return;conversations=[];persistConversationList([]);const token=localStorage.getItem('aq-session');if(token){try{await fetch('/v1/user/conversations',{method:'DELETE',headers:{Authorization:'Bearer '+token}})}catch{}}if(!history.length){newConversation(false)}renderHistory();toast('Historial borrado')}
+async function send(text){text=String(text||'').trim();if(!text||busy)return;$('#emptyState')?.remove();addMessage('user',text,selectedAgent?.name||selectedTeam?.name||'');const reply=addMessage('assistant','');busy=true;$('#typing').hidden=false;setState('THINKING');const body={message:text,history:history.slice(-10),language:voiceState.lang,voiceProfile:voiceState.profile,speak:voiceState.speak};if(attachment)body.attachments=[attachment];if(selectedAgent)body.agent=selectedAgent;if(selectedTeam)body.team={id:selectedTeam.id,name:selectedTeam.name,goal:selectedTeam.goal,members:selectedTeam.members||[]};try{const guestKey='aq-guest-session';let guestId=localStorage.getItem(guestKey);if(!guestId){guestId='guest-'+crypto.randomUUID();localStorage.setItem(guestKey,guestId)}const adk=selectedAgent?.id==='data-science';const endpoint=adk?'/v1/public/adk/data-science':'/v1/public/chat';const headers={'Content-Type':'application/json','X-Guest-Session':guestId};const token=localStorage.getItem('aq-session');if(token)headers.Authorization='Bearer '+token;const r=await fetch(endpoint,{method:'POST',headers,body:JSON.stringify(body)});const d=await r.json().catch(()=>({}));if(!r.ok||!d.answer)throw Error(d.message||'AI unavailable');reply.textContent=d.answer;history.push({role:'user',content:text},{role:'assistant',content:d.answer});saveCurrentConversation();setConnection(true,'Online','AgentiQ');setState('RESPONDING');await speak(d.answer)}catch{reply.textContent='No pude completar la solicitud en este momento. Intentá nuevamente.';setState('ERROR')}finally{attachment=null;$('#typing').hidden=true;busy=false;setTimeout(()=>{if(document.body.dataset.aiState==='RESPONDING')setState('ONLINE')},800)}}
 async function readFile(file){if(!file)return;const max=2*1024*1024;if(file.size>max){toast('Archivo demasiado grande. Máximo 2 MB.');return}if(file.type.startsWith('image/')){const reader=new FileReader();reader.onload=()=>attachment={name:file.name,kind:'image',data:reader.result};reader.readAsDataURL(file);toast('Imagen preparada para el próximo mensaje.');return}const reader=new FileReader();reader.onload=()=>attachment={name:file.name,kind:'text',data:String(reader.result).slice(0,30000)};reader.readAsText(file);toast('Archivo preparado para el próximo mensaje.')}
-function newConversation(){history.length=0;messages.innerHTML='<div class="empty-state" id="emptyState"><div class="neural-orb"><span></span><i></i></div><h2>Construí con inteligencia.</h2><p>Iniciá una nueva conversación.</p></div>';clearContext();input.value='';input.style.height='';setState('ONLINE')}
+function newConversation(openWindow=true){saveCurrentConversation();conversationId='conv-'+crypto.randomUUID();conversationTitle='Nueva conversación';history.length=0;messages.innerHTML='<div class="empty-state" id="emptyState"><div class="neural-orb"><span></span><i></i></div><h2>Nueva conversación</h2><p>Sesión limpia lista para conversar.</p></div>';clearContext();input.value='';input.style.height='';$('#chatTitle').textContent='Nueva conversación';setState('ONLINE');if(openWindow){$('#conversationName').value='';$('#conversationPrompt').value='';openModal('#newConversationModal')}else input.focus()}
 $('#chatForm').onsubmit=e=>{e.preventDefault();const t=input.value;input.value='';input.style.height='';send(t)}
 input.oninput=()=>{input.style.height='auto';input.style.height=Math.min(input.scrollHeight,180)+'px'}
 input.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();$('#chatForm').requestSubmit()}}
@@ -231,12 +261,20 @@ $('#languageBtn').onclick=()=>{$('#languageMenu').hidden=!$('#languageMenu').hid
 $('#voiceProfileBtn').onclick=()=>{$('#voiceMenu').hidden=!$('#voiceMenu').hidden;$('#languageMenu').hidden=true}
 $$('[data-lang]').forEach(b=>b.onclick=()=>setLanguage(b.dataset.lang));$$('[data-profile]').forEach(b=>b.onclick=()=>setProfile(b.dataset.profile));
 $('#attach').onclick=()=>$('#file').click();$('#file').onchange=e=>readFile(e.target.files[0]);
-$('#clear').onclick=newConversation;$('#newTop').onclick=newConversation;$('#newChat').onclick=newConversation;$('#clearContext').onclick=clearContext;
+$('#clear').onclick=()=>newConversation(true);$('#newChat').onclick=()=>newConversation(true);$('#clearContext').onclick=clearContext;$('#historyOpen').onclick=()=>{renderHistory();openModal('#historyModal')};$('#deleteHistory').onclick=deleteAllHistory;$('#historyDeleteAll').onclick=deleteAllHistory;
 $('#brainToggle').onclick=()=>document.body.classList.toggle('show-neural');$('#closeBrain').onclick=()=>document.body.classList.remove('show-neural');
 $('#mobileMenu').onclick=()=>$('#sidebar').classList.toggle('open');$('#collapse').onclick=()=>$('#sidebar').classList.toggle('collapsed');
 $('#agentsOpen').onclick=()=>openModal('#agentModal');$('#teamsOpen').onclick=()=>{renderMembers();openModal('#teamModal')};$('#toolsOpen').onclick=()=>openModal('#toolsModal');
 $('[data-close-modal]').forEach(b=>b.onclick=closeModals);
-$('[data-tool]').forEach(b=>b.onclick=async()=>{if(b.dataset.tool==='codq'){closeModals();const task=prompt('¿Qué querés que analice CodQ en AgenticWeb?','Revisá la arquitectura, detectá errores y proponé mejoras concretas.');if(!task)return;$('#emptyState')?.remove();const reply=addMessage('assistant','');setState('THINKING');try{const r=await fetch('/v1/public/codex',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({repo:'agenticuantico/AgenticWeb',task})});const d=await r.json().catch(()=>({}));if(!r.ok||!d.answer)throw 0;reply.textContent=d.answer;setState('RESPONDING')}catch{reply.textContent='No pude completar el análisis en este momento.';setState('ERROR')}}else if(b.dataset.tool==='data-science'){const a=agents.find(x=>x.id==='data-science');closeModals();if(a)selectAgent(a);toast('Data Science listo para usar.')}else toast('Herramienta disponible próximamente.');});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModals()});
+$('#historyList').addEventListener('click',e=>{const del=e.target.closest('[data-history-delete]');if(del){e.stopPropagation();deleteConversation(del.dataset.historyDelete);return}const open=e.target.closest('[data-history-id]');if(open)loadConversation(open.dataset.historyId)});
+$('#newConversationForm').onsubmit=e=>{e.preventDefault();conversationTitle=$('#conversationName').value.trim()||'Nueva conversación';$('#chatTitle').textContent=conversationTitle;const prompt=$('#conversationPrompt').value.trim();closeModals();input.focus();if(prompt){input.value=prompt;input.dispatchEvent(new Event('input'));send(prompt);input.value='';input.style.height=''}toast('Nueva conversación abierta')};
+$('[data-tool]').forEach(b=>b.onclick=async()=>{if(b.dataset.tool==='codq'){closeModals();const task=prompt('¿Qué querés que analice CodQ en AgenticWeb?','Revisá la arquitectura, detectá errores y proponé mejoras concretas.');if(!task)return;$('#emptyState')?.remove();const reply=addMessage('assistant','');setState('THINKING');try{const r=await fetch('/v1/public/codex',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({repo:'agenticuantico/AgenticWeb',task})});const d=await r.json().catch(()=>({}));if(!r.ok||!d.answer)throw 0;reply.textContent=d.answer;setState('RESPONDING')}catch{reply.textContent='No pude completar el análisis en este momento.';setState('ERROR')}}else if(b.dataset.tool==='data-science'){const a=agents.find(x=>x.id==='data-science');closeModals();if(a)selectAgent(a);toast('Data Science listo para usar.')}else if(b.dataset.tool==='vision'){closeModals();$('#file').click();toast('Adjuntá una imagen para usar Vision.')}
+else if(b.dataset.tool==='research'){closeModals();input.value='Investigá este tema con fuentes verificables y separá hechos, datos, incertidumbres y conclusiones.';input.dispatchEvent(new Event('input'));input.focus()}
+else if(b.dataset.tool==='3d'){closeModals();document.body.classList.add('show-neural');toast('Neural Core abierto.')}
+else if(b.dataset.tool==='files'){closeModals();$('#file').click();toast('Seleccioná un archivo para File Lab.')}
+else if(b.dataset.tool==='automation'){closeModals();input.value='Diseñá un flujo de automatización paso a paso para esta tarea, indicando entradas, acciones, validaciones y salidas.';input.dispatchEvent(new Event('input'));input.focus()}
+else toast('Herramienta disponible próximamente.');});
 $('#modalBackdrop').onclick=e=>{if(e.target===$('#modalBackdrop'))closeModals()};
 $('#agentForm').onsubmit=async e=>{e.preventDefault();const agent={id:'custom-'+crypto.randomUUID(),name:$('#agentName').value.trim(),icon:'◇',role:$('#agentRole').value.trim(),skills:$('#agentSkills').value.split(',').map(x=>x.trim()).filter(Boolean),knowledge:$('#agentKnowledge').value.split(',').map(x=>x.trim()).filter(Boolean),instructions:$('#agentInstructions').value.trim(),custom:true};if(await saveAgent(agent)){selectAgent(agent);e.target.reset();toast('Agente creado.')}};
 $('#teamForm').onsubmit=async e=>{e.preventDefault();const ids=$$('#memberGrid input:checked').slice(0,10).map(x=>x.value);const members=ids.map(id=>agents.find(a=>a.id===id)).filter(Boolean);const team={id:'team-'+crypto.randomUUID(),name:$('#teamName').value.trim(),goal:$('#teamGoal').value.trim(),members};if(!members.length){toast('Elegí al menos un agente.');return}if(await saveTeam(team)){selectTeam(team);e.target.reset();toast('Equipo creado.')}};
@@ -245,7 +283,7 @@ messages.addEventListener('click',e=>{const b=e.target.closest('[data-public-age
 $('#agentList').addEventListener('click',e=>{const b=e.target.closest('[data-agent]');if(b){const a=agents.find(x=>x.id===b.dataset.agent);if(a)selectAgent(a)}});
 $('#teamList').addEventListener('click',e=>{const b=e.target.closest('[data-team]');if(b){const t=teams.find(x=>x.id===b.dataset.team);if(t)selectTeam(t)}});
 async function health(){try{const r=await fetch('/health',{cache:'no-store'});if(!r.ok)throw 0;const m=await fetch('/v1/public/model',{cache:'no-store'});const d=await m.json();setConnection(true,'Online',d.display_name||'AgentiQ')}catch{setConnection(false,'Offline','Motor no disponible');setState('OFFLINE')}}
-$('#voiceBtn').setAttribute('aria-pressed',String(voiceState.speak));$('#voiceLabel').textContent=voiceState.speak?'Voz activada':'Voz apagada';setLanguage(voiceState.lang);setProfile(voiceState.profile);loadWorkspace();health();
+$('#voiceBtn').setAttribute('aria-pressed',String(voiceState.speak));$('#voiceLabel').textContent=voiceState.speak?'Voz activada':'Voz apagada';setLanguage(voiceState.lang);setProfile(voiceState.profile);conversations=localConversationList();loadWorkspace();health();
 </script>
 </body>
 </html>
