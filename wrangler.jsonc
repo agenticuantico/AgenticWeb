@@ -64,7 +64,10 @@
     "PAYPAL_PLAN_STARTER": "",
     "PAYPAL_PLAN_PRO": "",
     "PAYPAL_PLAN_ULTRA": "",
-    "PAYPAL_PLAN_BUSINESS": ""
+    "PAYPAL_PLAN_BUSINESS": "",
+    "TTS_API_URL": "",
+    "TTS_MODEL": "tts-1",
+    "TTS_VOICES": "{}"
   },
   "ai": {
     "binding": "AI"
