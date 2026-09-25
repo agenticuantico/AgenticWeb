@@ -1,98 +1,98 @@
-# AgentiCuantico — Neural Intelligence
+# AgentiCuantico — Neural Workspace
 
-Experiencia web 3D inmersiva con Neural Core, chat de IA y arquitectura preparada para proveedores Qwen/modelos propios.
+Frontend público de **AgentiCuantico**: una aplicación responsive para conversar con IA, seleccionar agentes especializados, crear equipos, utilizar herramientas y explorar un Neural Core 3D.
 
-Frontend público de **AgentiCuantico**, servido como una única experiencia web.
+## Experiencia
 
-## Fuente única de la interfaz
+- **Responsive mobile-first:** navegación lateral en desktop y drawer táctil en teléfonos.
+- **Neural Chat:** conversación real mediante `/v1/public/chat`; no hay respuestas simuladas.
+- **Voz:** micrófono mediante Web Speech API cuando el navegador lo soporta; salida de voz configurable. Para una voz neural más natural existe `/v1/public/tts`, preparado para un proveedor TTS compatible.
+- **Idiomas:** español Argentina/España, inglés EE. UU./Reino Unido, portugués Brasil, francés, italiano, alemán, japonés y coreano.
+- **Preferencia de voz:** perfiles femenina/masculina. En el fallback del navegador se trata como preferencia porque los navegadores no garantizan el género de cada voz disponible.
+- **Adjuntos:** texto/código e imágenes, con límites para evitar cargas excesivas.
+- **Neural Core:** visualización Three.js + GLB y fallback procedural.
 
-La aplicación principal vive exclusivamente en:
+## Agent Studio
 
-- `public/index.html`
-- `public/styles.css`
-- `public/brain-3d.js`
-- `public/neural-core-ui.js`
-- `public/assets/background/quantum-world.svg`
-- `public/assets/AgentiCuantico_brain_PBR.glb` (generado durante el deployment)
+Incluye perfiles base para:
 
-No se mantienen versiones antiguas de la homepage ni interfaces paralelas.
+- Asistente virtual
+- Programación / CodeQ
+- Marketing / MarketQ
+- UI/UX / UXQ
+- Diseño gráfico / PixelQ
+- Ilustración 3D / 3DQ
+- Research / ResearchQ
+
+Cada agente puede definir nombre, rol, habilidades, conocimientos e instrucciones. Los agentes creados desde la interfaz se guardan localmente en el dispositivo y, si existe una sesión válida, también pueden sincronizarse con el backend.
+
+## Team Builder
+
+Permite crear un grupo de hasta 10 agentes y asignar un objetivo. La conversación puede enviar el equipo activo al backend para que el motor use sus roles como contexto y entregue una única respuesta coordinada.
+
+Los equipos locales funcionan sin cuenta en el dispositivo. La sincronización persistente del backend requiere autenticación y está sujeta a las reglas del servicio.
+
+## Toolbox
+
+- **CodQ:** análisis de repositorios permitidos mediante `/v1/public/codex`.
+- **File Lab:** adjuntos.
+- **Vision:** contexto para imágenes cuando el proveedor/modelo activo lo soporte.
+- **3D Studio:** GLB/GLTF, Three.js y WebGL.
+- **Research:** preparado para flujos de investigación verificables.
+- **FlowQ:** espacio preparado para automatización multi-step.
+
+Las herramientas que no tengan un endpoint real no se presentan como ejecutadas.
 
 ## Arquitectura
 
 ```
-Browser
+Usuario
   ↓
-AgentiCuantico Neural Core
-  ├─ Three.js / GLB / procedural fallback
-  ├─ chat + estados neuronales
-  ├─ voz del navegador
-  └─ archivos compatibles
+Neural Workspace
+  ├─ Chat
+  ├─ Voice
+  ├─ Agent Studio
+  ├─ Team Builder
+  ├─ Toolbox
+  └─ Neural Core 3D
   ↓
 Cloudflare Worker
+  ├─ /v1/public/chat
+  ├─ /v1/public/tts
+  ├─ /v1/public/agents
+  ├─ /v1/user/agents
+  ├─ /v1/user/teams
+  └─ /v1/public/codex
   ↓
-Qwen configurado en backend
+Motor configurado (Qwen / Workers AI / otro proveedor)
 ```
 
-Los secretos y credenciales permanecen en Cloudflare/GitHub Secrets. El nombre del proveedor/modelo no forma parte de la UI pública.
+El frontend no contiene claves de modelos. Los secretos deben permanecer en Cloudflare/GitHub Secrets.
 
 ## 3D
 
-El cerebro se genera con `scripts/generate_brain_glb.py` durante el deployment y se publica como:
+El modelo principal utiliza **glTF 2.0**, preferentemente `.glb` para entregar el modelo binario en un único archivo. Three.js dispone de `GLTFLoader` para cargar glTF/GLB y admite extensiones de compresión y materiales. El pipeline genera:
 
-`/assets/AgentiCuantico_brain_PBR.glb`
+`public/assets/AgentiCuantico_brain_PBR.glb`
 
-Si WebGL o el GLB no puede utilizarse, `public/brain-3d.js` proporciona un fallback procedural.
+Si WebGL o el modelo no puede utilizarse, `public/brain-3d.js` genera una representación procedural.
+
+## Responsive y accesibilidad
+
+La interfaz utiliza viewport correcto, CSS Grid/Flexbox, breakpoints y controles táctiles. También contempla `prefers-reduced-motion`, foco de controles, etiquetas ARIA y tamaños adaptados a pantallas pequeñas.
 
 ## Deployment
 
-El deployment oficial es **Cloudflare Workers + Assets** mediante:
+El deployment objetivo es **Cloudflare Workers + Assets** mediante:
 
 `.github/workflows/cloudflare.yml`
 
-El workflow genera el GLB, valida la aplicación y despliega `worker.js` con `wrangler.jsonc`.
+El workflow genera el GLB, valida Wrangler y despliega Worker + assets.
 
-No se utiliza un segundo workflow de GitHub Pages para publicar una copia alternativa del sitio.
+La publicación real en `https://agenticuantico.dev.ar` depende de que Cloudflare esté autenticado y de que los secrets requeridos estén configurados en GitHub Actions.
 
-## API
+## Repositorio del cerebro
 
-La UI utiliza:
-
-`/v1/public/chat`
-
-El frontend nunca contiene tokens de modelos.
-
-## Estado
-
-### Implementado
-
-- Neural Core UI
-- cerebro 3D
-- GLB generado en deployment
-- fallback procedural
-- fondo espacial/partículas
-- chat
-- estados neuronales
-- voz del navegador
-- selección de idioma y género cuando existen voces compatibles
-- drag & drop
-- validación de archivos
-- integración con backend Qwen
-
-### Ready for Backend
-
-- STT/TTS propio
-- pipeline PDF/documentos
-- análisis de vídeo
-- análisis de audio
-- RAG documental
-- multimodalidad avanzada end-to-end
-
-### No disponible
-
-Cualquier capacidad que no esté conectada al backend no se presenta como funcional en la interfaz.
-
-## Cerebro operativo
-
-Repositorio separado:
+El backend/operaciones más amplias de AgentiCuantico se mantienen en:
 
 https://github.com/agenticuantico/AgentiCuantico
