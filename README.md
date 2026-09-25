@@ -1,4 +1,6 @@
-# AgentiCuantico — Neural Core
+# AgentiCuantico — Neural Intelligence
+
+Experiencia web 3D inmersiva con Neural Core, chat de IA y arquitectura preparada para proveedores Qwen/modelos propios.
 
 Frontend público de **AgentiCuantico**, servido como una única experiencia web.
 
