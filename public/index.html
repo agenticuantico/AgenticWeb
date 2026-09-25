@@ -185,9 +185,31 @@ function renderTeams(){$('#teamList').innerHTML=teams.slice(0,8).map(t=>'<button
 function selectAgent(a){selectedAgent=a;selectedTeam=null;$('#contextBar').hidden=false;$('#contextIcon').textContent=a.icon||'◇';$('#contextName').textContent=a.name;$('#contextType').textContent=a.role;$('#activeContext').textContent='Agente activo: '+a.name;closeModals()}
 function selectTeam(t){selectedTeam=t;selectedAgent=null;$('#contextBar').hidden=false;$('#contextIcon').textContent='◎';$('#contextName').textContent=t.name;$('#contextType').textContent=(t.members||[]).length+' agentes';$('#activeContext').textContent='Equipo activo: '+t.name;closeModals()}
 function clearContext() {selectedAgent=null;selectedTeam=null;$('#contextBar').hidden=true;$('#activeContext').textContent='AgentiCuantico responde desde el motor configurado.'}
-async function loadWorkspace(){try{const r=await fetch('/v1/public/agents');const d=await r.json();agents=d.agents||[]}catch{agents=[]}renderAgents();renderMembers();try{const me=await fetch('/v1/auth/me');if(me.ok){const m=await me.json();const a=await fetch('/v1/user/agents',{headers:{Authorization:'Bearer '+m.token}});if(a.ok){const d=await a.json();agents=[...agents,...(d.agents||[])];renderAgents();renderMembers()}}}catch{}}
-async function saveAgent(agent){const token=localStorage.getItem('aq-session');if(!token){toast('Iniciá sesión para guardar agentes personalizados.');return false}const r=await fetch('/v1/user/agents',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({agent})});if(!r.ok){toast('No se pudo guardar el agente.');return false}agents.push(agent);renderAgents();renderMembers();return true}
-async function saveTeam(team){const token=localStorage.getItem('aq-session');if(!token){toast('Iniciá sesión para crear equipos persistentes.');return false}const r=await fetch('/v1/user/teams',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({team})});if(!r.ok){const d=await r.json().catch(()=>({}));toast(d.message||'No se pudo crear el equipo.');return false}teams.push(team);renderTeams();return true}
+async function loadWorkspace(){
+  try{const r=await fetch('/v1/public/agents');const d=await r.json();agents=d.agents||[]}catch{agents=[]}
+  const localAgents=JSON.parse(localStorage.getItem('aq-agents')||'[]');
+  const localTeams=JSON.parse(localStorage.getItem('aq-teams')||'[]');
+  agents=[...agents,...localAgents.filter(x=>!agents.some(a=>a.id===x.id))];
+  teams=localTeams;
+  renderAgents();renderMembers();renderTeams();
+  const token=localStorage.getItem('aq-session');
+  if(token){
+    try{const a=await fetch('/v1/user/agents',{headers:{Authorization:'Bearer '+token}});if(a.ok){const d=await a.json();agents=[...agents,...(d.agents||[]).filter(x=>!agents.some(a=>a.id===x.id))];renderAgents();renderMembers()}}catch{}
+    try{const t=await fetch('/v1/user/teams',{headers:{Authorization:'Bearer '+token}});if(t.ok){const d=await t.json();teams=d.teams||teams;renderTeams()}}catch{}
+  }
+}
+async function saveAgent(agent){
+  const local=JSON.parse(localStorage.getItem('aq-agents')||'[]');local.push(agent);localStorage.setItem('aq-agents',JSON.stringify(local));
+  const token=localStorage.getItem('aq-session');
+  if(token){try{const r=await fetch('/v1/user/agents',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({agent})});if(!r.ok)toast('Guardado localmente; no se pudo sincronizar con tu cuenta.')}catch{toast('Guardado localmente; servidor no disponible.')}} 
+  agents.push(agent);renderAgents();renderMembers();return true
+}
+async function saveTeam(team){
+  const local=JSON.parse(localStorage.getItem('aq-teams')||'[]');local.push(team);localStorage.setItem('aq-teams',JSON.stringify(local));
+  const token=localStorage.getItem('aq-session');
+  if(token){try{const r=await fetch('/v1/user/teams',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({team})});if(!r.ok)toast('Equipo guardado en este dispositivo; sincronización no disponible.')}catch{toast('Equipo guardado en este dispositivo.')}} 
+  teams.push(team);renderTeams();return true
+}
 function toast(t){let x=$('.toast');if(!x){x=document.createElement('div');x.className='toast';document.body.appendChild(x)}x.textContent=t;x.classList.add('show');clearTimeout(x._t);x._t=setTimeout(()=>x.classList.remove('show'),3200)}
 function openModal(id){$('#modalBackdrop').hidden=false;$$('#modalBackdrop>.modal').forEach(m=>m.hidden=true);$(id).hidden=false;document.body.classList.add('modal-open')}
 function closeModals(){$('#modalBackdrop').hidden=true;$$('#modalBackdrop>.modal').forEach(m=>m.hidden=true);document.body.classList.remove('modal-open')}
@@ -207,7 +229,9 @@ $('#clear').onclick=newConversation;$('#newTop').onclick=newConversation;$('#new
 $('#brainToggle').onclick=()=>document.body.classList.toggle('show-neural');$('#closeBrain').onclick=()=>document.body.classList.remove('show-neural');
 $('#mobileMenu').onclick=()=>$('#sidebar').classList.toggle('open');$('#collapse').onclick=()=>$('#sidebar').classList.toggle('collapsed');
 $('#agentsOpen').onclick=()=>openModal('#agentModal');$('#teamsOpen').onclick=()=>{renderMembers();openModal('#teamModal')};$('#toolsOpen').onclick=()=>openModal('#toolsModal');
-$$('[data-close-modal]').forEach(b=>b.onclick=closeModals);$('#modalBackdrop').onclick=e=>{if(e.target===$('#modalBackdrop'))closeModals()};
+$('[data-close-modal]').forEach(b=>b.onclick=closeModals);
+$('[data-tool]').forEach(b=>b.onclick=async()=>{if(b.dataset.tool==='codq'){closeModals();const task=prompt('¿Qué querés que analice CodQ en agenticuantico/AgenticWeb?','Revisa la arquitectura, detecta errores y propone mejoras concretas.');if(!task)return;$('#emptyState')?.remove();const reply=addMessage('assistant','');setState('THINKING');try{const r=await fetch('/v1/public/codex',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({repo:'agenticuantico/AgenticWeb',task})});const d=await r.json();if(!r.ok||!d.answer)throw Error(d.message||'CodQ no disponible');reply.textContent=d.answer;setState('RESPONDING')}catch(e){reply.textContent='CodQ no pudo completar el análisis. El backend debe tener un motor de IA configurado.';setState('ERROR')}}else toast('Herramienta preparada para el siguiente módulo.');});
+$('#modalBackdrop').onclick=e=>{if(e.target===$('#modalBackdrop'))closeModals()};
 $('#agentForm').onsubmit=async e=>{e.preventDefault();const agent={id:'custom-'+crypto.randomUUID(),name:$('#agentName').value.trim(),icon:'◇',role:$('#agentRole').value.trim(),skills:$('#agentSkills').value.split(',').map(x=>x.trim()).filter(Boolean),knowledge:$('#agentKnowledge').value.split(',').map(x=>x.trim()).filter(Boolean),instructions:$('#agentInstructions').value.trim(),custom:true};if(await saveAgent(agent)){selectAgent(agent);e.target.reset();toast('Agente creado.')}};
 $('#teamForm').onsubmit=async e=>{e.preventDefault();const ids=$$('#memberGrid input:checked').slice(0,10).map(x=>x.value);const members=ids.map(id=>agents.find(a=>a.id===id)).filter(Boolean);const team={id:'team-'+crypto.randomUUID(),name:$('#teamName').value.trim(),goal:$('#teamGoal').value.trim(),members};if(!members.length){toast('Elegí al menos un agente.');return}if(await saveTeam(team)){selectTeam(team);e.target.reset();toast('Equipo creado.')}};
 $$('[data-q]').forEach(b=>b.onclick=()=>{input.value=b.dataset.q;input.dispatchEvent(new Event('input'));input.focus()});
