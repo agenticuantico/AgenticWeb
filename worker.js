@@ -499,6 +499,31 @@ async function googleUserFromCredential(credential,env){const client=String(env.
 
 async function authenticatedUser(request,env){const token=String(request.headers.get("Authorization")||"").replace(/^Bearer\s+/i,"");return verifySession(token,authSecret(env))}
 
+const BUILTIN_AGENTS=[
+  {id:"assistant",name:"Asistente",icon:"✦",role:"Asistente virtual",skills:["conversación","organización","explicación"],knowledge:["general"],description:"Ayuda a pensar, organizar tareas y resolver dudas."},
+  {id:"coder",name:"CodeQ",icon:"⌘",role:"Programador full-stack",skills:["JavaScript","Python","APIs","debugging","Git"],knowledge:["arquitectura","testing","seguridad"],description:"Diseña, implementa y revisa software con foco en calidad."},
+  {id:"marketing",name:"MarketQ",icon:"↗",role:"Marketing digital",skills:["SEO","contenido","estrategia","analítica"],knowledge:["marca","growth","conversión"],description:"Convierte objetivos de negocio en campañas y contenido medible."},
+  {id:"designer",name:"UXQ",icon:"◇",role:"Diseñador UI/UX",skills:["UI","UX","responsive","accesibilidad"],knowledge:["design systems","prototipado","mobile-first"],description:"Diseña interfaces claras, accesibles y adaptativas."},
+  {id:"graphic",name:"PixelQ",icon:"◈",role:"Diseñador gráfico",skills:["identidad","composición","dirección de arte"],knowledge:["branding","social media","campañas"],description:"Desarrolla conceptos visuales y sistemas gráficos."},
+  {id:"illustrator3d",name:"3DQ",icon:"◉",role:"Ilustrador 3D",skills:["Three.js","WebGL","GLB","GLTF","materiales"],knowledge:["modelado","iluminación","optimización 3D"],description:"Trabaja con escenas 3D, modelos GLB/GLTF y experiencias inmersivas."},
+  {id:"research",name:"ResearchQ",icon:"◎",role:"Investigador",skills:["investigación","síntesis","verificación"],knowledge:["fuentes","comparativas","documentación"],description:"Investiga, estructura información y separa hechos de hipótesis."}
+];
+
+function cleanAgent(a,custom=false){
+  return {
+    id:String(a?.id||crypto.randomUUID()).slice(0,100),
+    name:String(a?.name||"Agente").trim().slice(0,80),
+    icon:String(a?.icon||"✦").slice(0,4),
+    role:String(a?.role||"Asistente").slice(0,120),
+    skills:Array.isArray(a?.skills)?a.skills.slice(0,20).map(x=>String(x).slice(0,80)):[],
+    knowledge:Array.isArray(a?.knowledge)?a.knowledge.slice(0,20).map(x=>String(x).slice(0,120)):[],
+    instructions:String(a?.instructions||"").slice(0,2500),
+    description:String(a?.description||"").slice(0,300),
+    custom:!!custom
+  };
+}
+
+
 async function handleApi(request, env) {
   const url = new URL(request.url);
 
@@ -573,9 +598,11 @@ async function handleApi(request, env) {
     if(request.method==="GET"){const r=await stub.fetch("https://user-data/teams");const data=await r.json();return json({ok:true,teams:data.teams||[]},200,request)}
     if(request.method==="POST"){
       if(!planActive(await getUserRecord(env,user.sub)))return json({ok:false,error:"plan_required",message:"Los equipos requieren un plan pago."},403,request);
-      const body=await request.json().catch(()=>({}));const team=body?.team;
-      if(!team||typeof team.name!=="string"||!team.name.trim())return json({ok:false,error:"invalid_team",message:"Equipo inválido."},400,request);
-      const r=await stub.fetch("https://user-data/teams",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({team:{id:String(team.id||crypto.randomUUID()),name:team.name.trim().slice(0,80),goal:String(team.goal||"").slice(0,500),members:Array.isArray(team.members)?team.members.slice(0,10).map(x=>String(x).slice(0,80)):[]}})});
+      const body=await request.json().catch(()=>({}));const raw=body?.team;
+      if(!raw||typeof raw.name!=="string"||!raw.name.trim())return json({ok:false,error:"invalid_team",message:"Equipo inválido."},400,request);
+      const members=Array.isArray(raw.members)?raw.members.slice(0,10).map(m=>typeof m==="object"?cleanAgent(m,true):{id:String(m).slice(0,100),name:String(m).slice(0,80)}):[];
+      const team={id:String(raw.id||crypto.randomUUID()).slice(0,100),name:raw.name.trim().slice(0,80),goal:String(raw.goal||"").slice(0,500),members};
+      const r=await stub.fetch("https://user-data/teams",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({team})});
       return json(await r.json(),r.status,request);
     }
     if(request.method==="DELETE"){const teamId=String(url.searchParams.get("id")||"");const r=await stub.fetch("https://user-data/teams?id="+encodeURIComponent(teamId),{method:"DELETE"});return json(await r.json(),r.status,request)}
@@ -596,7 +623,32 @@ async function handleApi(request, env) {
   }
 
   if (url.pathname === "/v1/public/model" && request.method === "GET") {
-    return json({ok:true,display_name:"AgentiQ",capabilities:["conversación","visión","archivos","agentes","CodQ"]},200,request);
+    return json({ok:true,display_name:"AgentiQ",capabilities:["conversación","visión","archivos","agentes","equipos","CodQ","voz"],agents:BUILTIN_AGENTS.map(x=>cleanAgent(x,false))},200,request);
+  }
+
+  if (url.pathname === "/v1/public/agents" && request.method === "GET") {
+    return json({ok:true,agents:BUILTIN_AGENTS.map(x=>cleanAgent(x,false))},200,request);
+  }
+
+  if (url.pathname === "/v1/user/agents") {
+    const user=await authenticatedUser(request,env);
+    if(!user)return json({ok:false,error:"unauthorized",message:"Iniciá sesión para administrar tus agentes."},401,request);
+    const id=env.USER_DATA.idFromName(user.sub),stub=env.USER_DATA.get(id);
+    if(request.method==="GET"){
+      const r=await stub.fetch("https://user-data/agents"); const data=await r.json().catch(()=>({agents:[]}));
+      return json({ok:true,agents:(data.agents||[]).map(x=>cleanAgent(x,true))},200,request);
+    }
+    if(request.method==="POST"){
+      const body=await request.json().catch(()=>({})); const agent=cleanAgent(body?.agent,true);
+      if(!agent.name)return json({ok:false,error:"invalid_agent",message:"El agente necesita un nombre."},400,request);
+      const r=await stub.fetch("https://user-data/agents",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({agent})});
+      return json(await r.json().catch(()=>({ok:false,error:"agent_store_error"})),r.status,request);
+    }
+    if(request.method==="DELETE"){
+      const agentId=String(url.searchParams.get("id")||"").trim();
+      const r=await stub.fetch("https://user-data/agents?id="+encodeURIComponent(agentId),{method:"DELETE"});
+      return json(await r.json().catch(()=>({ok:false})),r.status,request);
+    }
   }
 
   if (url.pathname === "/v1/public/codex" && request.method === "POST") {
@@ -605,6 +657,26 @@ async function handleApi(request, env) {
 
   if (url.pathname === "/v1/public/codex/write" && request.method === "POST") {
     return codexWrite(request.clone(), env);
+  }
+
+  if (url.pathname === "/v1/public/tts" && request.method === "POST") {
+    let body=await request.json().catch(()=>({}));
+    const textValue=String(body?.text||"").trim().slice(0,6000);
+    const speak=body?.speak!==false;
+    if(!speak||!textValue)return json({ok:false,error:"tts_disabled"},400,request);
+    const endpoint=String(env.TTS_API_URL||"").trim(), key=String(env.TTS_API_KEY||"").trim(), model=String(env.TTS_MODEL||"").trim();
+    if(!endpoint||!key)return json({ok:false,error:"tts_not_configured",message:"La voz neural no está configurada en el servidor."},503,request);
+    const voiceProfile=String(body?.voiceProfile||"female").toLowerCase();
+    const language=String(body?.language||"es-AR");
+    const voiceMap={};
+    try{Object.assign(voiceMap,JSON.parse(String(env.TTS_VOICES||"{}")))}catch{}
+    const voice=voiceMap[language+"-"+voiceProfile]||voiceMap[language]||voiceMap["default-"+voiceProfile]||voiceMap.default||"alloy";
+    try{
+      const upstream=await fetch(endpoint,{method:"POST",headers:{"Authorization":"Bearer "+key,"Content-Type":"application/json"},body:JSON.stringify({model:model||"tts-1",voice,input:textValue,response_format:"mp3"})});
+      if(!upstream.ok)return json({ok:false,error:"tts_provider_error"},502,request);
+      const headers=new Headers(upstream.headers);headers.set("content-type","audio/mpeg");headers.set("cache-control","no-store");
+      return applySecurityHeaders(new Response(upstream.body,{status:200,headers}),request);
+    }catch{return json({ok:false,error:"tts_failed"},502,request);}
   }
 
   if (url.pathname === "/v1/public/chat" && request.method === "POST") {
@@ -735,6 +807,22 @@ export class UserData extends DurableObject {
       const current=await this.ctx.storage.get("conversations")||[];
       const next=Array.isArray(current)?current.filter(c=>c?.id!==id):[];
       await this.ctx.storage.put("conversations",next);
+      return new Response(JSON.stringify({ok:true,deleted:id,count:next.length}),{headers:{"content-type":"application/json"}});
+    }
+    if(url.pathname==="/agents" && request.method==="GET"){
+      return new Response(JSON.stringify({agents:await this.ctx.storage.get("agents")||[]}),{headers:{"content-type":"application/json"}});
+    }
+    if(url.pathname==="/agents" && request.method==="POST"){
+      const body=await request.json().catch(()=>({})); const agent=body?.agent;
+      if(!agent?.id||!agent?.name)return new Response(JSON.stringify({ok:false,error:"invalid_agent"}),{status:400,headers:{"content-type":"application/json"}});
+      const current=await this.ctx.storage.get("agents")||[];
+      const next=[...current.filter(x=>x?.id!==agent.id),agent].slice(-50);
+      await this.ctx.storage.put("agents",next);
+      return new Response(JSON.stringify({ok:true,agent,count:next.length}),{headers:{"content-type":"application/json"}});
+    }
+    if(url.pathname==="/agents" && request.method==="DELETE"){
+      const id=String(url.searchParams.get("id")||""); const current=await this.ctx.storage.get("agents")||[];
+      const next=current.filter(x=>x?.id!==id); await this.ctx.storage.put("agents",next);
       return new Response(JSON.stringify({ok:true,deleted:id,count:next.length}),{headers:{"content-type":"application/json"}});
     }
     if(url.pathname==="/teams" && request.method==="GET"){
