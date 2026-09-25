@@ -702,7 +702,7 @@ async function handleApi(request, env) {
     return json({
       ok: false,
       error: "ai_unavailable",
-      message: "El servicio de IA está temporalmente no disponible."
+      message: "El Core de IA no pudo conectarse con ningún proveedor configurado. Revisá AI binding/HF_TOKEN y el modelo configurado en Cloudflare."
     }, 502, request);
   }
 
