@@ -21,7 +21,11 @@ if(canvas){
     particles.setAttribute("position",new THREE.BufferAttribute(pos,3));
     const pmat=new THREE.PointsMaterial({color:0x8feaff,size:mobile?.035:.025,transparent:true,opacity:.48,blending:THREE.AdditiveBlending,depthWrite:false});
     const points=new THREE.Points(particles,pmat);root.add(points);
-    const fallback=new THREE.Mesh(new THREE.IcosahedronGeometry(1.8,3),new THREE.MeshBasicMaterial({color:0x6faeff,wireframe:true,transparent:true,opacity:.1,blending:THREE.AdditiveBlending}));
+    const fallback=new THREE.Group();
+    const lobeMat=new THREE.MeshBasicMaterial({color:0x6faeff,wireframe:true,transparent:true,opacity:.11,blending:THREE.AdditiveBlending});
+    for(const side of [-1,1]){const lobe=new THREE.Mesh(new THREE.SphereGeometry(1.55,28,20),lobeMat);lobe.scale.set(1,.92,1.05);lobe.position.x=side*.82;fallback.add(lobe)}
+    const cleft=new THREE.Mesh(new THREE.BoxGeometry(.08,2.45,1.85),new THREE.MeshBasicMaterial({color:0x8feaff,transparent:true,opacity:.16,blending:THREE.AdditiveBlending}));fallback.add(cleft);
+    for(let i=0;i<18;i++){const a=(i/18)*Math.PI*2, node=new THREE.Mesh(new THREE.SphereGeometry(.025,8,8),new THREE.MeshBasicMaterial({color:0x9eeaff}));node.position.set(Math.cos(a)*1.55,(Math.sin(a*2)*.65),Math.sin(a)*.75);fallback.add(node)}
     root.add(fallback);
     const loader=new GLTFLoader();
     loader.load("/assets/AgentiCuantico_brain_PBR.glb",g=>{
