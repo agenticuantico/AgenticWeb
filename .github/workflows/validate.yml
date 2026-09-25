@@ -23,8 +23,9 @@ jobs:
 
       - name: Validate JavaScript syntax
         run: |
-          node --check public/neural-core-ui.js
           node --check public/brain-3d.js
+          node --check public/world-3d.js
+          node --check worker.js
 
       - name: Validate Worker syntax
         run: node --check worker.js
