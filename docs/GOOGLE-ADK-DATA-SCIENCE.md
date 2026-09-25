@@ -40,7 +40,7 @@ Configurá como Worker Secrets, nunca en GitHub:
 - `GOOGLE_AGENT_ENGINE_ID`
 - `GOOGLE_SERVICE_ACCOUNT_JSON`
 
-El último secreto contiene el JSON de la cuenta de servicio que puede invocar Agent Engine. El Worker crea un access token OAuth de corta duración y el navegador nunca recibe la credencial.
+El último secreto contiene el JSON de una cuenta de servicio que puede invocar Agent Engine. Esa cuenta necesita permiso para consultar el Reasoning Engine (por ejemplo, `roles/aiplatform.user` a nivel de proyecto, o permisos equivalentes). El Worker crea un access token OAuth de corta duración y el navegador nunca recibe la credencial.
 
 Como alternativa temporal se puede configurar `GOOGLE_AGENT_ENGINE_TOKEN`, aunque para producción se recomienda la cuenta de servicio.
 
