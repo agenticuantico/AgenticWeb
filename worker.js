@@ -612,6 +612,10 @@ async function handleApi(request, env) {
       const response = await callCloudflareAI(request.clone(), env);
       if (response) return response;
     } catch {}
+    try {
+      const response = await callHuggingFace(request.clone(), env);
+      if (response) return response;
+    } catch {}
     return json({
       ok: false,
       error: "ai_unavailable",
