@@ -54,7 +54,7 @@
     "HF_MODEL": "Qwen/Qwen3.8-27B",
     "HF_API_URL": "https://router.huggingface.co/v1/chat/completions",
     "HF_MODELS": "Qwen/Qwen3.8-27B",
-    "CF_AI_MODEL": "@cf/qwen/qwen3.8-27b",
+    "CF_AI_MODEL": "@cf/qwen/qwen3-30b-a3b-fp8",
     "GOOGLE_CLIENT_ID": "",
     "PLAN_STARTER_ARS": "4999",
     "PLAN_PRO_ARS": "9999",
