@@ -68,6 +68,17 @@ jobs:
           else
             echo "AGENTIC_ADMIN_KEY no configurado: la escritura administrativa de CodQ quedará deshabilitada."
           fi
+      - name: Configure neural TTS secret (optional)
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          TTS_API_KEY: ${{ secrets.TTS_API_KEY }}
+        run: |
+          if [ -n "$TTS_API_KEY" ]; then
+            printf '%s' "$TTS_API_KEY" | npx wrangler secret put TTS_API_KEY --name agenticweb
+          else
+            echo "TTS_API_KEY no configurado: la interfaz usará la voz del navegador como fallback."
+          fi
       - name: Configure Auth + Billing secrets (optional)
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
