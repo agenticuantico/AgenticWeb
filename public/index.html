@@ -1,18 +1,96 @@
 <!doctype html>
-<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#07080c"><meta name="description" content="AgentiCuantico — Autonomous Intelligence"><title>AGENTICUANTICO / CORE</title><link rel="stylesheet" href="./styles.css"></head>
-<body><div class="grain"></div><header><a class="brand" href="#top"><b>AQ</b> AGENTICUANTICO</a><nav><a href="#system">SYSTEM</a><a href="#console">CONSOLE</a><a href="#architecture">ARCHITECTURE</a></nav><a class="launch" href="#console">LAUNCH CORE ↗</a></header>
-<main id="top">
-<section class="hero"><div class="copy"><small>01 / AUTONOMOUS INTELLIGENCE</small><h1>BUILD WITH<br><i>INTELLIGENCE.</i></h1><p>Una nueva interfaz para AgentiCuantico: limpia, inmersiva y centrada en conversar con el núcleo, explorar agentes y convertir ideas en acciones.</p><div class="actions"><a href="#console">ENTER THE CORE <strong>→</strong></a><a class="plain" href="#system">EXPLORE SYSTEM ↓</a></div><div class="meta"><span>01 CORE</span><span>02 AGENTS</span><span>03 TOOLS</span></div></div>
-<div class="core"><div class="planet-backdrop" aria-hidden="true"></div><div class="orbit o1"></div><div class="orbit o2"></div><div class="orbit o3"></div><canvas id="core"></canvas><div class="brain-stage"><img src="./assets/neural-brain-reference.webp" alt="AgentiCuantico Neural Brain"></div><div class="nucleus"></div><label>COGNITIVE FIELD<br><b id="status">INITIALIZING</b></label><label class="right">AQ / 001<br><b>NEURAL ENGINE</b></label></div></section>
-<section id="system" class="system"><div class="intro"><small>02 / INTELLIGENCE</small><h2>One core.<br><i>Many directions.</i></h2><p>El nuevo diseño separa conversación, agentes, herramientas y estado del sistema sin reutilizar la interfaz anterior.</p></div><div class="cards"><article class="big"><span>A01</span><div class="network"><img src="./assets/neural-brain-reference.webp" alt="" loading="lazy"></div><h3>NEURAL CORE</h3><p>Centro de conversación, contexto y ejecución.</p><em>CORE / LIVE</em></article><article><span>A02</span><strong>◈</strong><h3>AGENTS</h3><p>Espacio preparado para agentes especializados.</p><em>MULTI-AGENT</em></article><article><span>A03</span><strong>⌁</strong><h3>TOOLS</h3><p>Herramientas conectables para acciones verificables.</p><em>EXECUTION</em></article><article class="wide"><span>A04</span><h3>PRIVATE BY DESIGN</h3><p>Credenciales e integraciones permanecen del lado del sistema; nunca en la interfaz.</p><em>SECURE LAYER</em></article></div></section>
-<section id="console" class="console-wrap"><div class="console-title"><small>03 / CORE CONSOLE</small><h2>Talk to the machine.</h2><span id="online">● CONNECTING</span></div><div class="console"><aside><b>AGENTICUANTICO</b><button class="active">CORE CHAT <i>01</i></button><button>AGENTS <i>04</i></button><button>TOOLS <i>08</i></button><button>MEMORY <i>—</i></button><footer>SESSION<br><strong>LOCAL CONTEXT</strong></footer></aside><section class="chat"><div class="chatbar"><span><b>NEURAL CORE</b><small>GENERAL INTELLIGENCE INTERFACE</small></span><button id="clear">CLEAR</button></div><div id="messages"><div class="welcome"><div class="orb"></div><div><small>CORE RESPONSE</small><h3>¿Qué vamos a construir?</h3><p>Escribí una idea, problema o tarea. El Core responde desde esta nueva interfaz.</p><div class="chips"><button data-q="Diseñá la arquitectura de mi próximo proyecto.">ARCHITECTURE</button><button data-q="Ayúdame a programar una solución.">PROGRAMMING</button><button data-q="Analiza esta idea y conviértela en un plan.">PLANNING</button></div></div></div></div><form id="form"><button type="button" id="plus">＋</button><textarea id="input" rows="1" placeholder="Message AgentiCuantico..."></textarea><small>↵ SEND</small><button class="send">↑</button></form><input id="file" type="file" hidden></section></div></section>
-<section id="architecture" class="architecture"><div><small>04 / ARCHITECTURE</small><h2>A system that<br><i>can evolve.</i></h2></div><div class="flow"><div>01<br><b>USER</b></div><i>→</i><div>02<br><b>CORE</b></div><i>→</i><div>03<br><b>AGENTS</b></div><i>→</i><div>04<br><b>TOOLS</b></div></div></section></main><footer class="bottom"><span>AGENTICUANTICO © 2026</span><span>AUTONOMOUS INTELLIGENCE SYSTEM</span></footer>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#05060a">
+<meta name="description" content="AgentiCuantico — Neural Intelligence Interface">
+<title>AGENTICUANTICO — NEURAL</title>
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<div class="space"></div>
+<header class="nav">
+  <a class="logo" href="#home"><span>◉</span> AGENTICUANTICO</a>
+  <nav><a href="#neural">NEURAL</a><a href="#agents">AGENTS</a><a href="#console">CONSOLE</a></nav>
+  <a class="status-pill" href="#console"><i></i> ENTER CORE</a>
+</header>
+
+<main id="home">
+<section class="hero">
+  <div class="hero-copy">
+    <div class="eyebrow">NEURAL INTELLIGENCE / 001</div>
+    <h1>THE<br><span>INTELLIGENT</span><br>CORE.</h1>
+    <p>Una nueva arquitectura visual para AgentiCuantico. Conversación, razonamiento, agentes y herramientas reunidos alrededor de un núcleo vivo.</p>
+    <div class="hero-actions"><a class="primary" href="#console">OPEN CONSOLE <b>↗</b></a><a href="#neural">EXPLORE NEURAL ↓</a></div>
+    <div class="readout"><span>CORE <b id="health">CHECKING</b></span><span>MODE <b>AUTONOMOUS</b></span><span>BUILD <b>2026.09</b></span></div>
+  </div>
+  <div class="neural-visual" id="neural">
+    <div class="planet"></div>
+    <div class="halo"></div>
+    <div class="rings r1"></div><div class="rings r2"></div><div class="rings r3"></div>
+    <img class="brain" src="./assets/neural-brain-reference.webp" alt="Núcleo neuronal AgentiCuantico">
+    <div class="core-dot"></div>
+    <div class="visual-label top">NEURAL FIELD<br><strong>ACTIVE</strong></div>
+    <div class="visual-label bottom">AQ / CORE-01<br><strong>COGNITIVE ENGINE</strong></div>
+  </div>
+</section>
+
+<section class="manifesto">
+  <div><span class="num">02</span><h2>ONE CORE.<br><em>INFINITE WORKFLOWS.</em></h2></div>
+  <p>La interfaz se reconstruyó desde cero. No depende de la estructura visual anterior: el núcleo es ahora el punto de entrada y cada capacidad tiene un espacio propio.</p>
+</section>
+
+<section class="capabilities" id="agents">
+  <article class="feature feature-main"><small>01 / NEURAL CORE</small><div class="mini-brain"><img src="./assets/neural-brain-reference.webp" alt=""></div><h3>CONTEXT<br>ENGINE</h3><p>Conversación y contexto preparados para evolucionar hacia agentes especializados.</p></article>
+  <article class="feature"><small>02 / AGENTS</small><div class="glyph">✦</div><h3>SPECIALIZED<br>AGENTS</h3><p>Programación, análisis, diseño, investigación y operaciones como capacidades separadas.</p></article>
+  <article class="feature"><small>03 / TOOLS</small><div class="glyph">⌁</div><h3>TOOLS<br>& ACTIONS</h3><p>Integraciones y ejecución verificable conectadas al núcleo.</p></article>
+  <article class="feature wide"><div><small>04 / SYSTEM</small><h3>PRIVATE<br>BY DESIGN.</h3></div><p>La interfaz no expone secretos. Credenciales, configuración y operaciones permanecen en las capas del sistema.</p><span class="line"></span></article>
+</section>
+
+<section class="console-section" id="console">
+  <div class="section-head"><div><span class="num">03</span><h2>CORE<br><em>CONSOLE.</em></h2></div><div class="connection"><i id="dot"></i><span id="connection">CONNECTING</span></div></div>
+  <div class="console">
+    <aside class="sidebar"><strong>AQ / NEURAL</strong><button class="selected">CONVERSATION <b>01</b></button><button>AGENTS <b>04</b></button><button>TOOLS <b>08</b></button><button>MEMORY <b>—</b></button><div class="sidebar-foot">SYSTEM<br><strong>ONLINE LAYER</strong></div></aside>
+    <div class="chat">
+      <div class="chat-head"><span><b>NEURAL CORE</b><small>GENERAL INTELLIGENCE INTERFACE</small></span><button id="clear">CLEAR</button></div>
+      <div class="messages" id="messages">
+        <div class="welcome"><div class="signal"></div><div><small>CORE READY</small><h3>¿Qué querés construir?</h3><p>Escribí una idea, problema o tarea para iniciar una conversación con el núcleo.</p><div class="suggestions"><button data-q="Analiza mi proyecto y propón una arquitectura.">ARCHITECTURE</button><button data-q="Ayúdame a programar una solución.">PROGRAMMING</button><button data-q="Convierte esta idea en un plan de trabajo.">PLANNING</button></div></div></div>
+      </div>
+      <form id="chatForm"><button type="button" class="attach" id="attach">＋</button><textarea id="input" rows="1" placeholder="Message AgentiCuantico..."></textarea><span>↵ SEND</span><button class="send" type="submit">↑</button></form>
+      <input id="file" type="file" hidden>
+    </div>
+  </div>
+</section>
+
+<section class="architecture">
+  <span class="num">04</span><h2>CORE → AGENTS → TOOLS → <em>RESULTS.</em></h2>
+</section>
+</main>
+<footer><span>AGENTICUANTICO © 2026</span><span>NEURAL INTELLIGENCE SYSTEM</span></footer>
+
 <script>
-const c=document.getElementById('core'),x=c.getContext('2d');let w,h,p=[];
-function size(){w=c.clientWidth;h=c.clientHeight;const d=Math.min(devicePixelRatio||1,2);c.width=w*d;c.height=h*d;x.setTransform(d,0,0,d,0,0);p=Array.from({length:180},()=>({a:Math.random()*6.28,r:40+Math.random()*210,s:.001+Math.random()*.004}))}function loop(t){x.clearRect(0,0,w,h);let X=w/2,Y=h/2,S=Math.min(w,h)/600;p.forEach((q,i)=>{q.a+=q.s;let r=q.r*S,px=X+Math.cos(q.a)*r,py=Y+Math.sin(q.a)*r*.58;x.fillStyle='rgba(225,235,255,'+(.12+Math.random()*.55)+')';x.fillRect(px,py,1.4,1.4);if(i%9===0){x.beginPath();x.moveTo(X+Math.cos(q.a)*r*.65,Y+Math.sin(q.a)*r*.38);x.lineTo(px,py);x.strokeStyle='rgba(110,160,255,.08)';x.stroke()}});let g=x.createRadialGradient(X,Y,2,X,Y,190*S);g.addColorStop(0,'rgba(255,255,255,.9)');g.addColorStop(.12,'rgba(120,220,255,.5)');g.addColorStop(.4,'rgba(100,90,255,.12)');g.addColorStop(1,'transparent');x.fillStyle=g;x.beginPath();x.arc(X,Y,200*S,0,6.28);x.fill();requestAnimationFrame(loop)}size();addEventListener('resize',size);requestAnimationFrame(loop);
-fetch('/health').then(r=>{document.getElementById('status').textContent=r.ok?'ONLINE':'READY';document.getElementById('online').textContent=r.ok?'● ONLINE':'● CORE READY'}).catch(()=>{document.getElementById('status').textContent='READY';document.getElementById('online').textContent='● CORE READY'});
-const form=document.getElementById('form'),input=document.getElementById('input'),messages=document.getElementById('messages'),history=[];
-function add(role,t){let d=document.createElement('div');d.className='msg '+role;d.textContent=t;messages.appendChild(d);messages.scrollTop=messages.scrollHeight;return d}
-async function send(t){if(!t.trim())return;add('user',t);let m=add('assistant','Thinking…');document.body.classList.add('thinking');try{let r=await fetch('/v1/public/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:t,history})});if(!r.ok)throw 0;let d=await r.json();m.textContent=d.answer||'No response.';history.push({role:'user',content:t},{role:'assistant',content:d.answer||''})}catch(e){m.textContent='El Core no está disponible ahora. Intentá nuevamente.'}document.body.classList.remove('thinking')}
-form.onsubmit=e=>{e.preventDefault();let t=input.value.trim();input.value='';input.style.height='';send(t)};input.oninput=()=>{input.style.height='auto';input.style.height=Math.min(input.scrollHeight,130)+'px'};document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{input.value=b.dataset.q;input.focus()});document.getElementById('clear').onclick=()=>{messages.innerHTML='';history.length=0};document.getElementById('plus').onclick=()=>document.getElementById('file').click();document.getElementById('file').onchange=e=>{if(e.target.files[0])input.value+=' [Archivo: '+e.target.files[0].name+']'};
-</script></body></html>
+const $=s=>document.querySelector(s);
+const messages=$('#messages'),input=$('#input'),history=[];
+function add(role,text){const el=document.createElement('div');el.className='message '+role;el.textContent=text;messages.appendChild(el);messages.scrollTop=messages.scrollHeight;return el}
+async function send(text){
+ if(!text.trim())return;
+ add('user',text); const reply=add('assistant','Procesando…'); document.body.classList.add('busy');
+ try{
+  const r=await fetch('/v1/public/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text,history})});
+  if(!r.ok)throw new Error('core');
+  const data=await r.json(); reply.textContent=data.answer||'Sin respuesta.';
+  history.push({role:'user',content:text},{role:'assistant',content:data.answer||''});
+ }catch(e){reply.textContent='El Core no está disponible en este momento. Verificá la conexión e intentá nuevamente.'}
+ document.body.classList.remove('busy');
+}
+$('#chatForm').addEventListener('submit',e=>{e.preventDefault();const t=input.value.trim();input.value='';input.style.height='';send(t)});
+input.addEventListener('input',()=>{input.style.height='auto';input.style.height=Math.min(input.scrollHeight,140)+'px'});
+document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{input.value=b.dataset.q;input.focus()});
+$('#clear').onclick=()=>{messages.innerHTML='';history.length=0};
+$('#attach').onclick=()=>$('#file').click();
+$('#file').onchange=e=>{if(e.target.files[0])input.value+=' [Archivo: '+e.target.files[0].name+']';};
+fetch('/health').then(r=>{const ok=r.ok;$('#health').textContent=ok?'ONLINE':'READY';$('#connection').textContent=ok?'ONLINE':'CORE READY';$('#dot').classList.toggle('live',ok)}).catch(()=>{$('#health').textContent='READY';$('#connection').textContent='CORE READY'});
+</script>
+</body>
+</html>
