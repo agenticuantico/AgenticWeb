@@ -3,114 +3,219 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0b0d12">
-<meta name="description" content="AgentiCuantico — espacio de inteligencia artificial con Neural Core 3D y conversación con IA.">
+<meta name="theme-color" content="#07090d">
+<meta name="description" content="AgentiCuantico — espacio de inteligencia artificial con chat multimodal, agentes personalizados, equipos colaborativos y Neural Core 3D.">
 <meta name="robots" content="index,follow,max-image-preview:large">
 <link rel="canonical" href="https://agenticuantico.dev.ar/">
-<meta property="og:type" content="website"><meta property="og:title" content="AgentiCuantico — Neural Core">
-<meta property="og:description" content="Explorá el núcleo neuronal y conversá con AgentiCuantico.">
+<meta property="og:type" content="website"><meta property="og:title" content="AgentiCuantico — Neural Workspace">
+<meta property="og:description" content="Conversá con IA, creá agentes y coordiná equipos dentro de un workspace 3D.">
 <meta property="og:url" content="https://agenticuantico.dev.ar/">
-<title>AgentiCuantico — Neural Core</title>
+<title>AgentiCuantico — Neural Workspace</title>
 <link rel="stylesheet" href="/styles.css"><link rel="manifest" href="/manifest.webmanifest">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"AgentiCuantico","url":"https://agenticuantico.dev.ar/"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"AgentiCuantico","url":"https://agenticuantico.dev.ar/","description":"Neural Workspace de inteligencia artificial."}</script>
 <script type="module" src="/brain-3d.js"></script>
 </head>
 <body data-ai-state="OFFLINE">
-<div class="app-shell">
 <header class="topbar">
-  <button class="mobile-menu" id="mobileMenu" aria-label="Abrir menú">☰</button>
-  <a class="brand" href="#chat"><span class="brand-icon">AQ</span><span>AgentiCuantico</span></a>
-  <div class="top-center"><span class="status-dot" id="topDot"></span><span id="connection">Conectando</span><span class="slash">/</span><span id="model">Motor detectando</span></div>
-  <div class="top-actions"><button class="icon-btn" id="newTop" title="Nueva conversación">＋</button><a class="github" href="https://github.com/agenticuantico/AgenticWeb" target="_blank" rel="noopener">GitHub ↗</a></div>
+  <button class="mobile-menu icon-button" id="mobileMenu" aria-label="Abrir navegación">☰</button>
+  <a class="brand" href="#chat" aria-label="AgentiCuantico inicio"><span class="brand-mark">AQ</span><span>AgentiCuantico</span></a>
+  <div class="connection-pill" aria-live="polite"><span class="status-dot" id="topDot"></span><span id="connection">Conectando</span><span class="separator">·</span><span id="model">Motor</span></div>
+  <div class="top-actions"><button class="icon-button" id="newTop" title="Nueva conversación" aria-label="Nueva conversación">＋</button><a class="top-link" href="https://github.com/agenticuantico/AgenticWeb" target="_blank" rel="noopener">GitHub ↗</a></div>
 </header>
-<div class="workspace">
+
+<div class="app">
 <aside class="sidebar" id="sidebar">
-  <div class="sidebar-head"><span>ESPACIO</span><button id="collapse" aria-label="Contraer menú">‹</button></div>
-  <button class="new-chat" id="newChat"><span>＋</span> Nueva conversación</button>
-  <nav class="side-nav">
-    <a class="active" href="#chat"><span>◉</span> Neural Chat</a>
-    <a href="#neural"><span>✦</span> Neural Core</a>
-    <a href="#agents"><span>◇</span> Agentes</a>
-    <a href="#system"><span>⌘</span> Sistema</a>
-  </nav>
-  <div class="side-section"><small>RECIENTES</small><div id="recent"><button>Sesión actual</button></div></div>
-  <div class="side-bottom">
-    <div class="mini-status"><span class="status-dot" id="sideDot"></span><div><b id="sideConnection">Sistema</b><small>Estado del servicio</small></div></div>
-    <div class="user-chip"><span>AC</span><div><b>AgentiCuantico</b><small>Neural workspace</small></div></div>
+  <div class="sidebar-scroll">
+    <div class="sidebar-title"><span>WORKSPACE</span><button id="collapse" class="collapse-button" aria-label="Contraer navegación">‹</button></div>
+    <button class="new-chat" id="newChat"><strong>＋</strong> Nueva conversación</button>
+    <nav class="main-nav" aria-label="Navegación principal">
+      <a class="active" href="#chat">◉ <span>Neural Chat</span></a>
+      <button id="agentsOpen">◇ <span>Mis agentes</span><b>+</b></button>
+      <button id="teamsOpen">◎ <span>Equipos</span><b>+</b></button>
+      <button id="toolsOpen">⌘ <span>Herramientas</span></button>
+      <a href="#neural">✦ <span>Neural Core</span></a>
+      <a href="#system">▦ <span>Sistema</span></a>
+    </nav>
+    <div class="nav-section"><small>AGENTES</small><div id="agentList" class="mini-list"></div></div>
+    <div class="nav-section"><small>EQUIPOS</small><div id="teamList" class="mini-list"></div></div>
+  </div>
+  <div class="sidebar-bottom">
+    <div class="service-status"><span class="status-dot" id="sideDot"></span><div><b id="sideConnection">Sistema</b><small>Estado del servicio</small></div></div>
   </div>
 </aside>
+
 <main class="main" id="chat">
-  <section class="chat-view">
-    <div class="chat-top">
-      <div><span class="eyebrow">NEURAL CHAT</span><h1>¿Qué querés construir?</h1></div>
-      <div class="chat-tools"><button id="clear" class="tool-btn">Limpiar</button><button id="brainToggle" class="tool-btn accent">Neural Core</button></div>
-    </div>
-    <div class="messages" id="messages">
-      <div class="empty-state" id="emptyState">
-        <div class="empty-orb"><span></span></div>
-        <h2>AgentiCuantico</h2>
-        <p>Un espacio para pensar, programar y construir. Escribí una tarea para comenzar.</p>
-        <div class="prompt-grid">
-          <button data-q="Analiza mi idea y conviértela en una arquitectura técnica."><b>Arquitectura</b><span>Diseñar una solución de principio a fin</span></button>
-          <button data-q="Ayúdame a programar una solución robusta y mantenible."><b>Programación</b><span>Resolver y explicar código</span></button>
-          <button data-q="Analiza este proyecto y dime qué debería mejorar."><b>Análisis</b><span>Detectar problemas y oportunidades</span></button>
-          <button data-q="Crea un plan de trabajo por etapas para este proyecto."><b>Planificación</b><span>Convertir objetivos en acciones</span></button>
-        </div>
+<section class="chat-view">
+  <div class="chat-head">
+    <div><span class="eyebrow">NEURAL WORKSPACE</span><h1 id="chatTitle">¿Qué querés construir?</h1><p id="activeContext">AgentiCuantico responde desde el motor configurado.</p></div>
+    <div class="head-actions"><button class="soft-button" id="clear">Limpiar</button><button class="soft-button accent" id="brainToggle">Neural Core</button></div>
+  </div>
+
+  <div class="messages" id="messages" aria-live="polite">
+    <div class="empty-state" id="emptyState">
+      <div class="neural-orb"><span></span><i></i></div>
+      <h2>Construí con inteligencia.</h2>
+      <p>Conversá por texto o voz, elegí un agente especializado o armá un equipo para dividir una tarea entre roles.</p>
+      <div class="quick-grid">
+        <button data-q="Analiza mi proyecto y propón una arquitectura full-stack segura."><b>Arquitectura</b><span>Diseño técnico de extremo a extremo</span></button>
+        <button data-q="Revisa esta idea como programador senior y crea un plan de implementación."><b>Programación</b><span>Código, APIs, testing y debugging</span></button>
+        <button data-q="Diseña una experiencia UI/UX responsive y accesible para mi producto."><b>UI / UX</b><span>Mobile-first, desktop y accesibilidad</span></button>
+        <button data-q="Crea un concepto visual 3D para una experiencia web inmersiva."><b>3D Web</b><span>GLB, GLTF, WebGL y dirección visual</span></button>
       </div>
     </div>
-    <div class="typing" id="typing" hidden><span></span><span></span><span></span><b>AgentiCuantico está procesando</b></div>
-    <div class="composer-wrap">
-      <form class="composer" id="chatForm">
-        <button type="button" class="attach" id="attach" aria-label="Adjuntar archivo">＋</button>
-        <textarea id="input" rows="1" maxlength="12000" placeholder="Mensaje a AgentiCuantico..." autocomplete="off"></textarea>
-        <button class="send" type="submit" aria-label="Enviar">↑</button>
-      </form>
-      <div class="composer-meta"><div class="voice-controls"><button type="button" id="micBtn" class="voice-btn" aria-label="Activar micrófono">🎙️ <span id="micLabel">Hablar</span></button><button type="button" id="voiceBtn" class="voice-btn" aria-pressed="false">🔊 <span id="voiceLabel">Voz apagada</span></button><button type="button" id="languageBtn" class="voice-btn">🌐 <span id="languageLabel">🇦🇷 Español (Argentina)</span></button></div><span id="privacyHint">El audio solo se usa cuando activás el micrófono.</span></div>
-<div class="language-menu" id="languageMenu" hidden>
-<button data-lang="es-AR">🇦🇷 Español — Argentina</button><button data-lang="es-ES">🇪🇸 Español — España</button><button data-lang="en-US">🇺🇸 English — United States</button><button data-lang="en-GB">🇬🇧 English — United Kingdom</button><button data-lang="pt-BR">🇧🇷 Português — Brasil</button><button data-lang="fr-FR">🇫🇷 Français — France</button><button data-lang="it-IT">🇮🇹 Italiano — Italia</button><button data-lang="de-DE">🇩🇪 Deutsch — Deutschland</button><button data-lang="ja-JP">🇯🇵 日本語 — Japan</button><button data-lang="ko-KR">🇰🇷 한국어 — Korea</button></div>
+  </div>
+
+  <div class="typing" id="typing" hidden><span></span><span></span><span></span><b>AgentiCuantico está procesando</b></div>
+
+  <div class="composer-wrap">
+    <div class="context-bar" id="contextBar" hidden><span id="contextIcon">◇</span><b id="contextName"></b><span id="contextType"></span><button id="clearContext" aria-label="Quitar contexto">×</button></div>
+    <form class="composer" id="chatForm">
+      <button type="button" class="composer-icon" id="attach" aria-label="Adjuntar archivo">＋</button>
+      <textarea id="input" rows="1" maxlength="12000" placeholder="Mensaje a AgentiCuantico…" autocomplete="off"></textarea>
+      <button type="button" class="composer-icon" id="micBtn" aria-label="Activar micrófono">🎙</button>
+      <button type="submit" class="send-button" aria-label="Enviar mensaje">↑</button>
+    </form>
+    <div class="composer-meta">
+      <div class="voice-controls">
+        <button type="button" id="voiceBtn" class="voice-control" aria-pressed="false">🔊 <span id="voiceLabel">Voz apagada</span></button>
+        <button type="button" id="languageBtn" class="voice-control">🌐 <span id="languageLabel">🇦🇷 Español (Argentina)</span></button>
+        <button type="button" id="voiceProfileBtn" class="voice-control">◉ <span id="voiceProfileLabel">Voz femenina</span></button>
+      </div>
+      <span class="composer-note">Enter enviar · Shift+Enter salto de línea · audio solo con tu permiso</span>
     </div>
-    <input id="file" type="file" hidden>
-  </section>
-  <aside class="neural-panel" id="neural">
-    <div class="panel-header"><div><span class="eyebrow">NEURAL CORE</span><h2>Núcleo activo</h2></div><button id="closeBrain" class="close-brain">×</button></div>
-    <div class="brain-card">
-      <canvas id="brainCanvas"></canvas>
-      <div class="brain-label"><span class="status-dot"></span><b id="brainState">OFFLINE</b></div>
-      <div class="brain-coordinates">CORE-01<br><span>3D COGNITIVE FIELD</span></div>
+    <div class="language-menu" id="languageMenu" hidden>
+      <button data-lang="es-AR">🇦🇷 Español — Argentina</button><button data-lang="es-ES">🇪🇸 Español — España</button>
+      <button data-lang="en-US">🇺🇸 English — United States</button><button data-lang="en-GB">🇬🇧 English — United Kingdom</button>
+      <button data-lang="pt-BR">🇧🇷 Português — Brasil</button><button data-lang="fr-FR">🇫🇷 Français — France</button>
+      <button data-lang="it-IT">🇮🇹 Italiano — Italia</button><button data-lang="de-DE">🇩🇪 Deutsch — Deutschland</button>
+      <button data-lang="ja-JP">🇯🇵 日本語 — Japan</button><button data-lang="ko-KR">🇰🇷 한국어 — Korea</button>
     </div>
-    <div class="core-state"><div><small>ESTADO</small><b id="stateLabel">Esperando conexión</b></div><div class="pulse"></div></div>
-    <div class="core-note">La visualización representa el estado del motor. No se muestran métricas ficticias.</div>
-  </aside>
+    <div class="voice-menu" id="voiceMenu" hidden>
+      <button data-profile="female">◉ Femenina <span>Preferencia de voz</span></button>
+      <button data-profile="male">◉ Masculina <span>Preferencia de voz</span></button>
+    </div>
+  </div>
+  <input id="file" type="file" hidden accept=".txt,.md,.json,.csv,.pdf,.js,.ts,.tsx,.jsx,.py,.html,.css,.svg,image/*">
+</section>
+
+<aside class="neural-panel" id="neural">
+  <div class="panel-head"><div><span class="eyebrow">NEURAL CORE</span><h2>Núcleo visual</h2></div><button id="closeBrain" class="close-button">×</button></div>
+  <div class="brain-card"><canvas id="brainCanvas"></canvas><div class="brain-status"><span class="status-dot"></span><b id="brainState">OFFLINE</b></div><div class="brain-code">CORE-01<br><small>3D COGNITIVE FIELD</small></div></div>
+  <div class="core-state"><div><small>ESTADO DEL MOTOR</small><b id="stateLabel">Esperando conexión</b></div><div class="pulse"></div></div>
+  <p class="panel-note">La visualización cambia con el estado de la conversación. No se muestran métricas inventadas.</p>
+</aside>
 </main>
 </div>
-</div>
-<section class="below" id="agents">
-  <div class="below-inner"><span class="eyebrow">ARQUITECTURA</span><h2>Un núcleo. Varias capacidades.</h2><p>La interfaz separa conversación, visualización y futuras herramientas para que el producto pueda crecer sin convertir la homepage en un panel saturado.</p>
-  <div class="agent-grid"><article><i>⌘</i><b>Coding Agent</b><span>Programación y revisión de código</span><em>Roadmap</em></article><article><i>◇</i><b>Web Agent</b><span>Frontend, UX y arquitectura web</span><em>Roadmap</em></article><article><i>◎</i><b>Research Agent</b><span>Investigación y síntesis verificable</span><em>Roadmap</em></article><article><i>↗</i><b>Automation Agent</b><span>Flujos y tareas operativas</span><em>Roadmap</em></article></div></div>
+
+<section class="capability-section" id="agents">
+<div class="section-inner"><span class="eyebrow">AGENT STUDIO</span><h2>Creá especialistas a tu manera.</h2><p>Un agente es una identidad operativa con rol, habilidades, conocimientos e instrucciones. Podés usar los perfiles incluidos o diseñar los tuyos.</p>
+<div class="capability-grid" id="publicAgents"></div></div>
 </section>
-<section class="system-section" id="system"><div><span class="eyebrow">SISTEMA</span><h2>Diseñado para evolucionar.</h2><p>Browser → Neural UI → API → motor de IA. El frontend no guarda secretos y el proveedor puede cambiar sin rehacer la experiencia.</p></div><div class="system-flow"><span>NEURAL UI</span><i>→</i><span>/v1/public/chat</span><i>→</i><span>BACKEND</span><i>→</i><span>QWEN / MOTOR</span></div></section>
-<footer><span>AGENTICUANTICO © 2026</span><span>NEURAL CORE · WEBGL · AI</span></footer>
-<script>const $=s=>document.querySelector(s),messages=$('#messages'),input=$('#input'),history=[];let busy=false;
-const voiceState={lang:localStorage.getItem('aq-lang')||'es-AR',speak:localStorage.getItem('aq-speak')==='1',listening:false,recognition:null,voices:[]};
-const LANG={ 'es-AR':'🇦🇷 Español (Argentina)','es-ES':'🇪🇸 Español (España)','en-US':'🇺🇸 English (United States)','en-GB':'🇬🇧 English (United Kingdom)','pt-BR':'🇧🇷 Português (Brasil)','fr-FR':'🇫🇷 Français (France)','it-IT':'🇮🇹 Italiano (Italia)','de-DE':'🇩🇪 Deutsch (Deutschland)','ja-JP':'🇯🇵 日本語 (Japan)','ko-KR':'🇰🇷 한국어 (Korea)'};
-function setState(s){document.body.dataset.aiState=s;$('#brainState').textContent=s;$('#stateLabel').textContent=s==='ONLINE'?'Motor conectado':s==='THINKING'?'Procesando solicitud':s==='RESPONDING'?'Generando respuesta':s==='ERROR'?'Servicio no disponible':'Esperando conexión'}
-function add(role,text){const e=document.createElement('div');e.className='message '+role;e.innerHTML='<div class="message-role">'+(role==='user'?'Vos':'AgentiCuantico')+'</div><div class="message-body"></div>';e.querySelector('.message-body').textContent=text;messages.appendChild(e);messages.scrollTop=messages.scrollHeight;return e.querySelector('.message-body')}
+
+<section class="system-section" id="system">
+<div><span class="eyebrow">NEURAL ARCHITECTURE</span><h2>Un workspace que puede crecer.</h2><p>La interfaz separa conversación, agentes, equipos, herramientas, voz y visualización. El frontend no contiene secretos y las acciones reales pasan por la API.</p></div>
+<div class="system-flow"><span>USUARIO</span><i>→</i><span>NEURAL UI</span><i>→</i><span>WORKER / API</span><i>→</i><span>QWEN / MOTOR</span></div>
+</section>
+<footer><span>AGENTICUANTICO © 2026</span><span>NEURAL WORKSPACE · WEBGL · AI</span></footer>
+
+<div class="modal-backdrop" id="modalBackdrop" hidden>
+  <section class="modal" id="agentModal" hidden aria-modal="true" role="dialog" aria-labelledby="agentModalTitle">
+    <div class="modal-head"><div><span class="eyebrow">AGENT STUDIO</span><h2 id="agentModalTitle">Crear agente</h2></div><button class="close-button" data-close-modal>×</button></div>
+    <form id="agentForm" class="modal-form">
+      <div class="form-row two"><label>Nombre<input id="agentName" maxlength="80" required placeholder="Ej. Arquitecto Web"></label><label>Rol<input id="agentRole" maxlength="120" required placeholder="Ej. Senior Full-Stack"></label></div>
+      <label>Habilidades<input id="agentSkills" placeholder="Python, React, SEO, WebGL…"></label>
+      <label>Conocimientos<input id="agentKnowledge" placeholder="Arquitectura, accesibilidad, branding…"></label>
+      <label>Instrucciones de comportamiento<textarea id="agentInstructions" maxlength="2500" rows="5" placeholder="Cómo debe pensar, responder y verificar su trabajo…"></textarea></label>
+      <div class="modal-actions"><button type="button" class="soft-button" data-close-modal>Cancelar</button><button class="primary-button" type="submit">Guardar agente</button></div>
+      <p class="form-help" id="agentHelp">Los agentes personalizados requieren una sesión iniciada.</p>
+    </form>
+  </section>
+
+  <section class="modal" id="teamModal" hidden aria-modal="true" role="dialog" aria-labelledby="teamModalTitle">
+    <div class="modal-head"><div><span class="eyebrow">TEAM BUILDER</span><h2 id="teamModalTitle">Crear equipo de agentes</h2></div><button class="close-button" data-close-modal>×</button></div>
+    <form id="teamForm" class="modal-form">
+      <label>Nombre del equipo<input id="teamName" maxlength="80" required placeholder="Ej. Studio de Producto"></label>
+      <label>Objetivo<input id="teamGoal" maxlength="500" placeholder="Qué debe conseguir el equipo…"></label>
+      <div><div class="label-line"><b>Seleccioná integrantes</b><small>Hasta 10 agentes</small></div><div class="member-grid" id="memberGrid"></div></div>
+      <div class="modal-actions"><button type="button" class="soft-button" data-close-modal>Cancelar</button><button class="primary-button" type="submit">Crear equipo</button></div>
+      <p class="form-help">El coordinador presenta una sola respuesta; los roles se usan como contexto de trabajo.</p>
+    </form>
+  </section>
+
+  <section class="modal tools-modal" id="toolsModal" hidden aria-modal="true" role="dialog" aria-labelledby="toolsModalTitle">
+    <div class="modal-head"><div><span class="eyebrow">TOOLBOX</span><h2 id="toolsModalTitle">Herramientas</h2></div><button class="close-button" data-close-modal>×</button></div>
+    <div class="tool-grid">
+      <button data-tool="codq"><b>CodQ</b><span>Analiza repositorios permitidos y propone cambios verificables.</span></button>
+      <button data-tool="vision"><b>Vision</b><span>Adjuntá imágenes para que el motor las analice cuando el proveedor lo soporte.</span></button>
+      <button data-tool="research"><b>Research</b><span>Preparado para flujos de investigación con fuentes verificables.</span></button>
+      <button data-tool="3d"><b>3D Studio</b><span>GLB / GLTF, Three.js, WebGL y optimización de escenas.</span></button>
+      <button data-tool="automation"><b>FlowQ</b><span>Espacio previsto para automatizaciones y tareas multi-step.</span></button>
+      <button data-tool="files"><b>File Lab</b><span>Adjuntos de texto, código e imágenes dentro de la conversación.</span></button>
+    </div>
+    <p class="form-help">Una herramienta solo se muestra como activa cuando existe un endpoint real detrás de ella.</p>
+  </section>
+</div>
+</div>
+
+<script>
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const messages=$('#messages'), input=$('#input'), history=[];
+let busy=false, attachment=null, selectedAgent=null, selectedTeam=null, conversations=[];
+const voiceState={lang:localStorage.getItem('aq-lang')||'es-AR',speak:localStorage.getItem('aq-speak')==='1',profile:localStorage.getItem('aq-voice-profile')||'female',listening:false,recognition:null,voices:[]};
+const LANG={'es-AR':'🇦🇷 Español (Argentina)','es-ES':'🇪🇸 Español (España)','en-US':'🇺🇸 English (United States)','en-GB':'🇬🇧 English (United Kingdom)','pt-BR':'🇧🇷 Português (Brasil)','fr-FR':'🇫🇷 Français (France)','it-IT':'🇮🇹 Italiano (Italia)','de-DE':'🇩🇪 Deutsch (Deutschland)','ja-JP':'🇯🇵 日本語 (Japan)','ko-KR':'🇰🇷 한국어 (Korea)'};
+let agents=[];
+let teams=[];
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function setState(s){document.body.dataset.aiState=s;$('#brainState').textContent=s;$('#stateLabel').textContent=s==='ONLINE'?'Motor conectado':s==='THINKING'?'Procesando solicitud':s==='RESPONDING'?'Generando respuesta':s==='ERROR'?'Servicio no disponible':'Esperando conexión';}
+function setConnection(ok,label,model){$('#connection').textContent=label;$('#model').textContent=model||'Motor';$('#sideConnection').textContent=label;['#topDot','#sideDot'].forEach(x=>$(x)?.classList.toggle('live',!!ok));if(ok&&document.body.dataset.aiState==='OFFLINE')setState('ONLINE')}
+function addMessage(role,text,meta=''){const e=document.createElement('article');e.className='message '+role;e.innerHTML='<div class="message-role">'+(role==='user'?'Vos':'AgentiCuantico')+(meta?'<span>'+esc(meta)+'</span>':'')+'</div><div class="message-body"></div>';e.querySelector('.message-body').textContent=text;messages.appendChild(e);messages.scrollTop=messages.scrollHeight;return e.querySelector('.message-body')}
 function chooseVoice(lang){return voiceState.voices.find(v=>v.lang===lang)||voiceState.voices.find(v=>v.lang?.startsWith(lang.split('-')[0]))||voiceState.voices.find(v=>v.lang?.startsWith('es'))||voiceState.voices[0]}
-function speak(text){if(!voiceState.speak||!('speechSynthesis' in window)||!text)return;window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang=voiceState.lang;const v=chooseVoice(voiceState.lang);if(v)u.voice=v;u.rate=.98;u.pitch=1;window.speechSynthesis.speak(u)}
+function browserSpeak(text){if(!voiceState.speak||!('speechSynthesis'in window)||!text)return;window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang=voiceState.lang;const v=chooseVoice(voiceState.lang);if(v)u.voice=v;u.rate=.98;u.pitch=voiceState.profile==='female'?1.04:.94;window.speechSynthesis.speak(u)}
+async function speak(text){if(!voiceState.speak||!text)return;try{const r=await fetch('/v1/public/tts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text,language:voiceState.lang,voiceProfile:voiceState.profile,speak:true})});if(r.ok&&r.headers.get('content-type')?.includes('audio')){const blob=await r.blob(),url=URL.createObjectURL(blob),audio=new Audio(url);audio.onended=()=>URL.revokeObjectURL(url);await audio.play();return}}catch{}browserSpeak(text)}
 function refreshVoices(){voiceState.voices=window.speechSynthesis?.getVoices?.()||[]}
 if('speechSynthesis'in window){refreshVoices();speechSynthesis.onvoiceschanged=refreshVoices}
-function setupRecognition(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){$('#micLabel').textContent='No compatible';return null}const r=new SR();r.continuous=false;r.interimResults=true;r.maxAlternatives=1;r.lang=voiceState.lang;r.onstart=()=>{voiceState.listening=true;$('#micBtn').classList.add('recording');$('#micLabel').textContent='Escuchando…'};r.onresult=e=>{let finalText='';for(const x of e.results)finalText+=x[0].transcript;if(e.results[e.results.length-1].isFinal){input.value=finalText;input.dispatchEvent(new Event('input'));send(finalText);}};r.onerror=e=>{$('#micLabel').textContent=e.error==='not-allowed'?'Permiso denegado':'Error de micrófono'};r.onend=()=>{voiceState.listening=false;$('#micBtn').classList.remove('recording');$('#micLabel').textContent='Hablar'};return r}
+function setupRecognition(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){$('#micBtn').title='El reconocimiento de voz no está disponible en este navegador';return null}const r=new SR();r.continuous=false;r.interimResults=true;r.maxAlternatives=1;r.lang=voiceState.lang;r.onstart=()=>{voiceState.listening=true;$('#micBtn').classList.add('recording');$('#micBtn').setAttribute('aria-label','Detener micrófono')};r.onresult=e=>{let text='';for(const x of e.results)text+=x[0].transcript;if(e.results[e.results.length-1].isFinal){input.value=text;input.dispatchEvent(new Event('input'));send(text)}};r.onerror=e=>{voiceState.listening=false;$('#micBtn').classList.remove('recording');if(e.error==='not-allowed')toast('El navegador denegó el permiso del micrófono.');};r.onend=()=>{voiceState.listening=false;$('#micBtn').classList.remove('recording');$('#micBtn').setAttribute('aria-label','Activar micrófono')};return r}
+voiceState.recognition=setupRecognition();
 function setLanguage(lang){voiceState.lang=lang;localStorage.setItem('aq-lang',lang);if(voiceState.recognition)voiceState.recognition.lang=lang;$('#languageLabel').textContent=LANG[lang]||lang;$('#languageMenu').hidden=true}
-async function send(text){if(!text.trim()||busy)return;$('#emptyState')?.remove();add('user',text);const reply=add('assistant','');busy=true;$('#typing').hidden=false;setState('THINKING');
-try{const r=await fetch('/v1/public/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text,history,language:voiceState.lang})});const d=await r.json().catch(()=>({}));if(!r.ok||!d.answer)throw Error(d.message||'AI unavailable');reply.textContent=d.answer;history.push({role:'user',content:text},{role:'assistant',content:d.answer});setState('RESPONDING');speak(d.answer)}catch(e){reply.textContent='El servicio de IA no respondió. No voy a simular una respuesta: revisá la conexión del backend e intentá nuevamente.';setState('ERROR')}finally{$('#typing').hidden=true;busy=false;setTimeout(()=>{if(document.body.dataset.aiState==='RESPONDING')setState('ONLINE')},900)}}
-$('#chatForm').onsubmit=e=>{e.preventDefault();const t=input.value.trim();input.value='';input.style.height='';send(t)};input.oninput=()=>{input.style.height='auto';input.style.height=Math.min(input.scrollHeight,150)+'px'};input.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();$('#chatForm').requestSubmit()}};
-document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{input.value=b.dataset.q;input.focus()});
-function reset(){window.speechSynthesis?.cancel();messages.innerHTML='<div class="empty-state" id="emptyState"><div class="empty-orb"><span></span></div><h2>AgentiCuantico</h2><p>Nueva conversación lista.</p></div>';history.length=0;setState('ONLINE')}
-$('#clear').onclick=reset;$('#newChat').onclick=reset;$('#newTop').onclick=reset;$('#attach').onclick=()=>$('#file').click();$('#mobileMenu').onclick=()=>$('#sidebar').classList.toggle('open');$('#collapse').onclick=()=>$('#sidebar').classList.toggle('collapsed');$('#brainToggle').onclick=()=>document.body.classList.toggle('show-neural');$('#closeBrain').onclick=()=>document.body.classList.remove('show-neural');
-$('#voiceBtn').onclick=()=>{voiceState.speak=!voiceState.speak;localStorage.setItem('aq-speak',voiceState.speak?'1':'0');$('#voiceBtn').setAttribute('aria-pressed',voiceState.speak);$('#voiceLabel').textContent=voiceState.speak?'Voz activada':'Voz apagada';if(!voiceState.speak)window.speechSynthesis?.cancel()};
-$('#micBtn').onclick=()=>{if(!voiceState.recognition)voiceState.recognition=setupRecognition();if(!voiceState.recognition)return;if(voiceState.listening)voiceState.recognition.stop();else{voiceState.recognition.lang=voiceState.lang;try{voiceState.recognition.start()}catch(e){}}};
-$('#languageBtn').onclick=()=>$('#languageMenu').hidden=!$('#languageMenu').hidden;
-document.querySelectorAll('#languageMenu [data-lang]').forEach(b=>b.onclick=()=>setLanguage(b.dataset.lang));
-setLanguage(voiceState.lang);$('#voiceBtn').setAttribute('aria-pressed',voiceState.speak);$('#voiceLabel').textContent=voiceState.speak?'Voz activada':'Voz apagada';
-Promise.all([fetch('/health').then(r=>r.ok).catch(()=>false),fetch('/v1/public/model').then(r=>r.ok?r.json():null).catch(()=>null)]).then(([ok,m])=>{const name=m?.display_name||m?.model||'Motor de IA';$('#model').textContent=name;$('#connection').textContent=ok?'Conectado':'Sin conexión';$('#sideConnection').textContent=ok?'Servicio online':'Servicio offline';document.querySelectorAll('.status-dot').forEach(x=>x.classList.toggle('live',ok));setState(ok?'ONLINE':'OFFLINE')});</script>
-</body></html>
+function setProfile(profile){voiceState.profile=profile;localStorage.setItem('aq-voice-profile',profile);$('#voiceProfileLabel').textContent=profile==='female'?'Voz femenina':'Voz masculina';$('#voiceMenu').hidden=true}
+function renderAgents(){const list=[...agents];$('#agentList').innerHTML=list.slice(0,8).map(a=>'<button data-agent="'+esc(a.id)+'"><span>'+esc(a.icon||'◇')+'</span>'+esc(a.name)+'</button>').join('')||'<span class="empty-mini">Usá “+” para crear uno.</span>';$('#publicAgents').innerHTML=agents.map(a=>'<article class="cap-card"><i>'+esc(a.icon||'◇')+'</i><b>'+esc(a.name)+'</b><span>'+esc(a.role)+'</span><small>'+esc((a.skills||[]).slice(0,3).join(' · '))+'</small><button data-public-agent="'+esc(a.id)+'">Usar agente</button></article>').join('')}
+function allAgentPool(){return agents}
+function renderMembers(){const pool=allAgentPool();$('#memberGrid').innerHTML=pool.map(a=>'<label class="member-card"><input type="checkbox" value="'+esc(a.id)+'"><span class="member-icon">'+esc(a.icon||'◇')+'</span><span><b>'+esc(a.name)+'</b><small>'+esc(a.role)+'</small></span></label>').join('')||'<p class="form-help">Cargá los agentes disponibles primero.</p>'}
+function renderTeams(){$('#teamList').innerHTML=teams.slice(0,8).map(t=>'<button data-team="'+esc(t.id)+'"><span>◎</span>'+esc(t.name)+'</button>').join('')||'<span class="empty-mini">Creá un equipo con “+”.</span>'}
+function selectAgent(a){selectedAgent=a;selectedTeam=null;$('#contextBar').hidden=false;$('#contextIcon').textContent=a.icon||'◇';$('#contextName').textContent=a.name;$('#contextType').textContent=a.role;$('#activeContext').textContent='Agente activo: '+a.name;closeModals()}
+function selectTeam(t){selectedTeam=t;selectedAgent=null;$('#contextBar').hidden=false;$('#contextIcon').textContent='◎';$('#contextName').textContent=t.name;$('#contextType').textContent=(t.members||[]).length+' agentes';$('#activeContext').textContent='Equipo activo: '+t.name;closeModals()}
+function clearContext() {selectedAgent=null;selectedTeam=null;$('#contextBar').hidden=true;$('#activeContext').textContent='AgentiCuantico responde desde el motor configurado.'}
+async function loadWorkspace(){try{const r=await fetch('/v1/public/agents');const d=await r.json();agents=d.agents||[]}catch{agents=[]}renderAgents();renderMembers();try{const me=await fetch('/v1/auth/me');if(me.ok){const m=await me.json();const a=await fetch('/v1/user/agents',{headers:{Authorization:'Bearer '+m.token}});if(a.ok){const d=await a.json();agents=[...agents,...(d.agents||[])];renderAgents();renderMembers()}}}catch{}}
+async function saveAgent(agent){const token=localStorage.getItem('aq-session');if(!token){toast('Iniciá sesión para guardar agentes personalizados.');return false}const r=await fetch('/v1/user/agents',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({agent})});if(!r.ok){toast('No se pudo guardar el agente.');return false}agents.push(agent);renderAgents();renderMembers();return true}
+async function saveTeam(team){const token=localStorage.getItem('aq-session');if(!token){toast('Iniciá sesión para crear equipos persistentes.');return false}const r=await fetch('/v1/user/teams',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({team})});if(!r.ok){const d=await r.json().catch(()=>({}));toast(d.message||'No se pudo crear el equipo.');return false}teams.push(team);renderTeams();return true}
+function toast(t){let x=$('.toast');if(!x){x=document.createElement('div');x.className='toast';document.body.appendChild(x)}x.textContent=t;x.classList.add('show');clearTimeout(x._t);x._t=setTimeout(()=>x.classList.remove('show'),3200)}
+function openModal(id){$('#modalBackdrop').hidden=false;$$('#modalBackdrop>.modal').forEach(m=>m.hidden=true);$(id).hidden=false;document.body.classList.add('modal-open')}
+function closeModals(){$('#modalBackdrop').hidden=true;$$('#modalBackdrop>.modal').forEach(m=>m.hidden=true);document.body.classList.remove('modal-open')}
+async function send(text){text=String(text||'').trim();if(!text||busy)return;$('#emptyState')?.remove();addMessage('user',text,selectedAgent?.name||selectedTeam?.name||'');const reply=addMessage('assistant','');busy=true;$('#typing').hidden=false;setState('THINKING');const body={message:text,history:history.slice(-10),language:voiceState.lang,voiceProfile:voiceState.profile,speak:voiceState.speak};if(attachment)body.attachments=[attachment];if(selectedAgent)body.agent=selectedAgent;if(selectedTeam)body.team={id:selectedTeam.id,name:selectedTeam.name,goal:selectedTeam.goal,members:selectedTeam.members||[]};try{const r=await fetch('/v1/public/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const d=await r.json().catch(()=>({}));if(!r.ok||!d.answer)throw Error(d.message||'AI unavailable');reply.textContent=d.answer;history.push({role:'user',content:text},{role:'assistant',content:d.answer});setConnection(true,'Online',d.model||'AgentiQ');setState('RESPONDING');await speak(d.answer)}catch(e){reply.textContent='El servicio de IA no respondió. No voy a simular una respuesta: revisá el backend e intentá nuevamente.';setState('ERROR')}finally{attachment=null;$('#typing').hidden=true;busy=false;setTimeout(()=>{if(document.body.dataset.aiState==='RESPONDING')setState('ONLINE')},800)}}
+async function readFile(file){if(!file)return;const max=2*1024*1024;if(file.size>max){toast('Archivo demasiado grande. Máximo 2 MB.');return}if(file.type.startsWith('image/')){const reader=new FileReader();reader.onload=()=>attachment={name:file.name,kind:'image',data:reader.result};reader.readAsDataURL(file);toast('Imagen preparada para el próximo mensaje.');return}const reader=new FileReader();reader.onload=()=>attachment={name:file.name,kind:'text',data:String(reader.result).slice(0,30000)};reader.readAsText(file);toast('Archivo preparado para el próximo mensaje.')}
+function newConversation(){history.length=0;messages.innerHTML='<div class="empty-state" id="emptyState"><div class="neural-orb"><span></span><i></i></div><h2>Construí con inteligencia.</h2><p>Iniciá una nueva conversación.</p></div>';clearContext();input.value='';input.style.height='';setState('ONLINE')}
+$('#chatForm').onsubmit=e=>{e.preventDefault();const t=input.value;input.value='';input.style.height='';send(t)}
+input.oninput=()=>{input.style.height='auto';input.style.height=Math.min(input.scrollHeight,180)+'px'}
+input.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();$('#chatForm').requestSubmit()}}
+$('#micBtn').onclick=()=>{if(!voiceState.recognition){toast('Este navegador no ofrece reconocimiento de voz compatible.');return}if(voiceState.listening)voiceState.recognition.stop();else{voiceState.recognition.lang=voiceState.lang;try{voiceState.recognition.start()}catch{}}}
+$('#voiceBtn').onclick=()=>{voiceState.speak=!voiceState.speak;localStorage.setItem('aq-speak',voiceState.speak?'1':'0');$('#voiceBtn').setAttribute('aria-pressed',String(voiceState.speak));$('#voiceLabel').textContent=voiceState.speak?'Voz activada':'Voz apagada';if(!voiceState.speak&&'speechSynthesis'in window)speechSynthesis.cancel()}
+$('#languageBtn').onclick=()=>{$('#languageMenu').hidden=!$('#languageMenu').hidden;$('#voiceMenu').hidden=true}
+$('#voiceProfileBtn').onclick=()=>{$('#voiceMenu').hidden=!$('#voiceMenu').hidden;$('#languageMenu').hidden=true}
+$$('[data-lang]').forEach(b=>b.onclick=()=>setLanguage(b.dataset.lang));$$('[data-profile]').forEach(b=>b.onclick=()=>setProfile(b.dataset.profile));
+$('#attach').onclick=()=>$('#file').click();$('#file').onchange=e=>readFile(e.target.files[0]);
+$('#clear').onclick=newConversation;$('#newTop').onclick=newConversation;$('#newChat').onclick=newConversation;$('#clearContext').onclick=clearContext;
+$('#brainToggle').onclick=()=>document.body.classList.toggle('show-neural');$('#closeBrain').onclick=()=>document.body.classList.remove('show-neural');
+$('#mobileMenu').onclick=()=>$('#sidebar').classList.toggle('open');$('#collapse').onclick=()=>$('#sidebar').classList.toggle('collapsed');
+$('#agentsOpen').onclick=()=>openModal('#agentModal');$('#teamsOpen').onclick=()=>{renderMembers();openModal('#teamModal')};$('#toolsOpen').onclick=()=>openModal('#toolsModal');
+$$('[data-close-modal]').forEach(b=>b.onclick=closeModals);$('#modalBackdrop').onclick=e=>{if(e.target===$('#modalBackdrop'))closeModals()};
+$('#agentForm').onsubmit=async e=>{e.preventDefault();const agent={id:'custom-'+crypto.randomUUID(),name:$('#agentName').value.trim(),icon:'◇',role:$('#agentRole').value.trim(),skills:$('#agentSkills').value.split(',').map(x=>x.trim()).filter(Boolean),knowledge:$('#agentKnowledge').value.split(',').map(x=>x.trim()).filter(Boolean),instructions:$('#agentInstructions').value.trim(),custom:true};if(await saveAgent(agent)){selectAgent(agent);e.target.reset();toast('Agente creado.')}};
+$('#teamForm').onsubmit=async e=>{e.preventDefault();const ids=$$('#memberGrid input:checked').slice(0,10).map(x=>x.value);const members=ids.map(id=>agents.find(a=>a.id===id)).filter(Boolean);const team={id:'team-'+crypto.randomUUID(),name:$('#teamName').value.trim(),goal:$('#teamGoal').value.trim(),members};if(!members.length){toast('Elegí al menos un agente.');return}if(await saveTeam(team)){selectTeam(team);e.target.reset();toast('Equipo creado.')}};
+$$('[data-q]').forEach(b=>b.onclick=()=>{input.value=b.dataset.q;input.dispatchEvent(new Event('input'));input.focus()});
+messages.addEventListener('click',e=>{const b=e.target.closest('[data-public-agent]');if(b){const a=agents.find(x=>x.id===b.dataset.publicAgent);if(a)selectAgent(a)}});
+$('#agentList').addEventListener('click',e=>{const b=e.target.closest('[data-agent]');if(b){const a=agents.find(x=>x.id===b.dataset.agent);if(a)selectAgent(a)}});
+$('#teamList').addEventListener('click',e=>{const b=e.target.closest('[data-team]');if(b){const t=teams.find(x=>x.id===b.dataset.team);if(t)selectTeam(t)}});
+async function health(){try{const r=await fetch('/health',{cache:'no-store'});if(!r.ok)throw 0;const m=await fetch('/v1/public/model',{cache:'no-store'});const d=await m.json();setConnection(true,'Online',d.display_name||'AgentiQ')}catch{setConnection(false,'Offline','Motor no disponible');setState('OFFLINE')}}
+$('#voiceBtn').setAttribute('aria-pressed',String(voiceState.speak));$('#voiceLabel').textContent=voiceState.speak?'Voz activada':'Voz apagada';setLanguage(voiceState.lang);setProfile(voiceState.profile);loadWorkspace();health();
+</script>
+</body>
+</html>
