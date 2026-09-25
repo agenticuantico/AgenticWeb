@@ -112,22 +112,21 @@ async function callHuggingFace(request, env) {
   let agent = body?.agent && typeof body.agent === "object" ? {
     name:String(body.agent.name||"").slice(0,80),role:String(body.agent.role||"").slice(0,160),
     skills:Array.isArray(body.agent.skills)?body.agent.skills.slice(0,12).map(x=>String(x).slice(0,80)):[],
-    knowledge:Array.isArray(body.agent.knowledge)?body.agent.knowledge.slice(0,12).map(x=>String(x).slice(0,120)):[]
+    knowledge:Array.isArray(body.agent.knowledge)?body.agent.knowledge.slice(0,12).map(x=>String(x).slice(0,120)):[],
+    instructions:String(body.agent.instructions||"").slice(0,2500)
   } : null;
   let team = body?.team && typeof body.team === "object" ? {
     id:String(body.team.id||"").slice(0,100),name:String(body.team.name||"").slice(0,80),
-    goal:String(body.team.goal||"").slice(0,500),members:Array.isArray(body.team.members)?body.team.members.slice(0,10).map(x=>String(x).slice(0,80)):[]
+    goal:String(body.team.goal||"").slice(0,500),members:Array.isArray(body.team.members)?body.team.members.slice(0,10):[]
   } : null;
-  if(team){
+  if(team && !String(team.id||"").startsWith("team-")){
     const session=await authenticatedUser(request,env);
-    if(!session)return json({ok:false,error:"team_auth_required",message:"Iniciá sesión para usar equipos."},401,request);
-    const record=await getUserRecord(env,session.sub);
-    if(!planActive(record))return json({ok:false,error:"plan_required",message:"El chat grupal requiere un plan pago."},403,request);
-    const stub=env.USER_DATA.idFromName(session.sub),saved=await stub.fetch("https://user-data/teams");
-    const list=(await saved.json().catch(()=>({teams:[]}))).teams||[];
-    const stored=list.find(x=>x.id===team.id);
-    if(!stored)return json({ok:false,error:"team_not_found",message:"El equipo no existe en tu espacio."},404,request);
-    team=stored;
+    if(session){
+      const stub=env.USER_DATA.idFromName(session.sub),saved=await stub.fetch("https://user-data/teams");
+      const list=(await saved.json().catch(()=>({teams:[]}))).teams||[];
+      const stored=list.find(x=>x.id===team.id);
+      if(stored) team=stored;
+    }
   }
   const hasAttachments = Array.isArray(body?.attachments) && body.attachments.length > 0;
   if (!message && !hasAttachments) {
