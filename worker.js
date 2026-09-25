@@ -635,7 +635,7 @@ async function handleApi(request, env) {
   }
 
   if (url.pathname === "/v1/public/model" && request.method === "GET") {
-    return json({ok:true,display_name:"AgentiQ",capabilities:["conversación","visión","archivos","agentes","equipos","CodQ","voz"],agents:BUILTIN_AGENTS.map(x=>cleanAgent(x,false))},200,request);
+    return json({ok:true,display_name:"AgentiQ",capabilities:["conversación","visión","archivos","agentes","equipos","CodQ","Google ADK","BigQuery","Memory Bank","voz"],agents:BUILTIN_AGENTS.map(x=>cleanAgent(x,false))},200,request);
   }
 
   if (url.pathname === "/v1/public/agents" && request.method === "GET") {
