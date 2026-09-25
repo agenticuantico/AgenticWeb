@@ -21,6 +21,7 @@ function applySecurityHeaders(response, request) {
   headers.set("referrer-policy", "strict-origin-when-cross-origin");
   headers.set("permissions-policy", "camera=(), microphone=(self), geolocation=()");
   headers.set("strict-transport-security", "max-age=31536000; includeSubDomains");
+  headers.set("content-security-policy", "default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; img-src 'self' data: blob: https:; font-src 'self' data: https:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; connect-src 'self' https:; media-src 'self' blob:; worker-src 'self' blob:;");
   return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
 }
 
@@ -86,7 +87,7 @@ async function callCloudflareAI(request, env) {
       chat_template_kwargs:{enable_thinking:false}
     });
     const answer=result?.response||result?.choices?.[0]?.message?.content||result?.result?.response||"";
-    if(typeof answer==="string"&&answer.trim()) return json({ok:true,answer:answer.trim(),model,provider:"Cloudflare Workers AI"},200,request);
+    if(typeof answer==="string"&&answer.trim()) return json({ok:true,answer:answer.trim(),model:"AgentiQ"},200,request);
   } catch {}
   return null;
 }
@@ -311,7 +312,7 @@ async function codexAnalyze(request, env) {
     if(!upstream.ok)return json({ok:false,error:"ai_unavailable",message:"El motor de análisis no respondió."},502,request);
     const data=await upstream.json();const answer=data?.choices?.[0]?.message?.content;
     if(typeof answer!=="string"||!answer.trim())return json({ok:false,error:"empty_analysis",message:"El análisis llegó vacío."},502,request);
-    return json({ok:true,answer:answer.trim(),model:model.replace(":fastest",""),repo,branch:m.default_branch||"main",files:candidates.map(x=>x.path)},200,request);
+    return json({ok:true,answer:answer.trim(),model:"AgentiQ",repo,branch:m.default_branch||"main"},200,request);
   } catch { return json({ok:false,error:"codex_failed",message:"No se pudo completar el análisis del proyecto."},502,request); }
 }
 
@@ -510,6 +511,243 @@ async function googleUserFromCredential(credential,env){const client=String(env.
 
 async function authenticatedUser(request,env){const token=String(request.headers.get("Authorization")||"").replace(/^Bearer\s+/i,"");return verifySession(token,authSecret(env))}
 
+
+function b64UrlBytes(bytes) {
+  let s = "";
+  for (const b of bytes) s += String.fromCharCode(b);
+  return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+function utf8B64Url(value) {
+  return b64UrlBytes(new TextEncoder().encode(value));
+}
+
+function pemToArrayBuffer(pem) {
+  const body = String(pem || "")
+    .replace(/-----BEGIN PRIVATE KEY-----/g, "")
+    .replace(/-----END PRIVATE KEY-----/g, "")
+    .replace(/\s+/g, "");
+  const raw = atob(body);
+  const bytes = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
+  return bytes.buffer;
+}
+
+let googleAgentTokenCache = null;
+
+async function googleServiceAccountToken(env) {
+  const direct = String(env.GOOGLE_AGENT_ENGINE_TOKEN || "").trim();
+  if (direct) return direct;
+
+  const raw = String(env.GOOGLE_SERVICE_ACCOUNT_JSON || "").trim();
+  if (!raw) return null;
+
+  let sa;
+  try { sa = JSON.parse(raw); } catch { return null; }
+  if (!sa?.client_email || !sa?.private_key) return null;
+
+  const now = Math.floor(Date.now() / 1000);
+  if (googleAgentTokenCache && googleAgentTokenCache.exp > now + 60) return googleAgentTokenCache.token;
+
+  const header = utf8B64Url(JSON.stringify({ alg: "RS256", typ: "JWT" }));
+  const claim = utf8B64Url(JSON.stringify({
+    iss: sa.client_email,
+    scope: "https://www.googleapis.com/auth/cloud-platform",
+    aud: "https://oauth2.googleapis.com/token",
+    iat: now,
+    exp: now + 3600
+  }));
+  const unsigned = header + "." + claim;
+
+  const key = await crypto.subtle.importKey(
+    "pkcs8",
+    pemToArrayBuffer(sa.private_key),
+    { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+  const signature = await crypto.subtle.sign(
+    "RSASSA-PKCS1-v1_5",
+    key,
+    new TextEncoder().encode(unsigned)
+  );
+  const assertion = unsigned + "." + b64UrlBytes(new Uint8Array(signature));
+
+  const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: { "content-type": "application/x-www-form-urlencoded" },
+    body: "grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=" + encodeURIComponent(assertion)
+  });
+  if (!tokenResponse.ok) return null;
+
+  const tokenData = await tokenResponse.json().catch(() => ({}));
+  const token = String(tokenData?.access_token || "").trim();
+  if (!token) return null;
+
+  googleAgentTokenCache = { token, exp: now + Number(tokenData?.expires_in || 3600) };
+  return token;
+}
+
+function extractGoogleAgentText(value) {
+  if (typeof value === "string") return value;
+  if (!value || typeof value !== "object") return "";
+
+  const directKeys = ["text", "content", "message", "answer", "output", "response"];
+  for (const key of directKeys) {
+    if (typeof value[key] === "string" && value[key].trim()) return value[key];
+  }
+
+  if (Array.isArray(value.content)) {
+    const parts = value.content.map(extractGoogleAgentText).filter(Boolean);
+    if (parts.length) return parts.join("");
+  }
+
+  if (Array.isArray(value.parts)) {
+    const parts = value.parts.map(extractGoogleAgentText).filter(Boolean);
+    if (parts.length) return parts.join("");
+  }
+
+  for (const key of ["result", "event", "data", "delta", "chunk"]) {
+    const text = extractGoogleAgentText(value[key]);
+    if (text) return text;
+  }
+  return "";
+}
+
+async function callGoogleDataScienceAgent(request, env) {
+  let body;
+  try { body = await request.json(); } catch {
+    return json({ ok: false, error: "invalid_request", message: "Solicitud inválida." }, 400, request);
+  }
+
+  const message = typeof body?.message === "string" ? body.message.trim().slice(0, 12000) : "";
+  if (!message) return json({ ok: false, error: "invalid_request", message: "El mensaje no puede estar vacío." }, 400, request);
+
+  const project = String(env.GOOGLE_CLOUD_PROJECT || "").trim();
+  const location = String(env.GOOGLE_CLOUD_LOCATION || "us-central1").trim();
+  const engineId = String(env.GOOGLE_AGENT_ENGINE_ID || "").trim();
+  if (!project || !engineId) {
+    return json({
+      ok: false,
+      error: "agent_unavailable",
+      message: "El agente de datos no está disponible en este momento."
+    }, 503, request);
+  }
+
+  const user = await authenticatedUser(request, env);
+  const guest = String(request.headers.get("X-Guest-Session") || "").trim().slice(0, 160);
+  const userId = String(user?.sub || guest || crypto.randomUUID()).slice(0, 160);
+
+  const attachments = Array.isArray(body?.attachments)
+    ? body.attachments.filter(a => a && typeof a.name === "string" && typeof a.data === "string").slice(0, 4)
+    : [];
+  const attachmentText = attachments
+    .filter(a => a.kind !== "image")
+    .map(a => "\n[Archivo adjunto: " + a.name.slice(0, 120) + "]\n" + a.data.slice(0, 20000))
+    .join("\n");
+
+  const token = await googleServiceAccountToken(env);
+  if (!token) {
+    return json({
+      ok: false,
+      error: "agent_unavailable",
+      message: "El agente de datos no está disponible en este momento."
+    }, 503, request);
+  }
+
+  const normalizedId = engineId.startsWith("projects/")
+    ? engineId
+    : "projects/" + project + "/locations/" + location + "/reasoningEngines/" + engineId;
+
+  const host = String(env.GOOGLE_AGENT_ENGINE_URL || (location + "-aiplatform.googleapis.com"))
+    .replace(/^https?:\/\//, "")
+    .replace(/\/+$/, "");
+  const endpoint = "https://" + host + "/v1/" + normalizedId + ":streamQuery";
+
+  const payload = {
+    class_method: "async_stream_query",
+    input: {
+      user_id: userId,
+      message: message + attachmentText
+    }
+  };
+
+  try {
+    const upstream = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "authorization": "Bearer " + token,
+        "content-type": "application/json",
+        "accept": "text/event-stream, application/json"
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!upstream.ok) {
+      return json({
+        ok: false,
+        error: "agent_unavailable",
+        message: "El agente de datos no respondió."
+      }, 502, request);
+    }
+
+    let answer = "";
+    const contentType = String(upstream.headers.get("content-type") || "");
+
+    if (contentType.includes("text/event-stream") && upstream.body) {
+      const reader = upstream.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      while (true) {
+        const part = await reader.read();
+        if (part.done) break;
+        buffer += decoder.decode(part.value, { stream: true });
+        const lines = buffer.split(/\r?\n/);
+        buffer = lines.pop() || "";
+        for (const line of lines) {
+          if (!line.startsWith("data:")) continue;
+          const raw = line.slice(5).trim();
+          if (!raw || raw === "[DONE]") continue;
+          try { answer += extractGoogleAgentText(JSON.parse(raw)); } catch {}
+        }
+      }
+      buffer += decoder.decode();
+      for (const line of buffer.split(/\r?\n/)) {
+        if (!line.startsWith("data:")) continue;
+        const raw = line.slice(5).trim();
+        if (!raw || raw === "[DONE]") continue;
+        try { answer += extractGoogleAgentText(JSON.parse(raw)); } catch {}
+      }
+    } else {
+      const data = await upstream.json().catch(() => ({}));
+      answer = extractGoogleAgentText(data);
+    }
+
+    answer = String(answer || "").trim();
+    if (!answer) {
+      return json({
+        ok: false,
+        error: "empty_response",
+        message: "El agente de datos no produjo una respuesta."
+      }, 502, request);
+    }
+
+    return json({
+      ok: true,
+      answer,
+      model: "AgentiQ",
+      agent: "data-science"
+    }, 200, request);
+  } catch {
+    return json({
+      ok: false,
+      error: "agent_unavailable",
+      message: "El agente de datos no está disponible en este momento."
+    }, 502, request);
+  }
+}
+
+
 const BUILTIN_AGENTS=[
   {id:"assistant",name:"Asistente",icon:"✦",role:"Asistente virtual",skills:["conversación","organización","explicación"],knowledge:["general"],description:"Ayuda a pensar, organizar tareas y resolver dudas."},
   {id:"coder",name:"CodeQ",icon:"⌘",role:"Programador full-stack",skills:["JavaScript","Python","APIs","debugging","Git"],knowledge:["arquitectura","testing","seguridad"],description:"Diseña, implementa y revisa software con foco en calidad."},
@@ -552,7 +790,7 @@ async function handleApi(request, env) {
   }
 
   if (url.pathname === "/health" && request.method === "GET") {
-    return json({ ok: true, service: "agenticweb" }, 200, request);
+    return json({ ok: true, service: "online" }, 200, request);
   }
 
   if (url.pathname === "/v1/auth/config" && request.method === "GET") {
@@ -707,7 +945,7 @@ async function handleApi(request, env) {
     return json({
       ok: false,
       error: "ai_unavailable",
-      message: "El Core de IA no pudo conectarse con ningún proveedor configurado. Revisá AI binding/HF_TOKEN y el modelo configurado en Cloudflare."
+      message: "El servicio de IA no está disponible en este momento. Intentá nuevamente en unos instantes."
     }, 502, request);
   }
 
@@ -867,13 +1105,21 @@ export default {
   },
 
   async fetch(request, env) {
-    const url = new URL(request.url);
-
-    if (isApiPath(url.pathname)) {
-      return handleApi(request, env);
+    try {
+      const url = new URL(request.url);
+      if (isApiPath(url.pathname)) {
+        return await handleApi(request, env);
+      }
+      const assetResponse = await env.ASSETS.fetch(request);
+      return applySecurityHeaders(assetResponse, request);
+    } catch {
+      return applySecurityHeaders(
+        new Response("Servicio no disponible.", {
+          status: 500,
+          headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" }
+        }),
+        request
+      );
     }
-
-    const assetResponse = await env.ASSETS.fetch(request);
-    return applySecurityHeaders(assetResponse, request);
   }
 };
