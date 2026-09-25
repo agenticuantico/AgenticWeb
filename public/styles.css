@@ -17,3 +17,26 @@ body{background:#06090d;color:#f6f8fb}
 .composer{background:#10151b;border-color:#3a444f;box-shadow:0 18px 50px rgba(0,0,0,.28)}
 /* Never allow accidental diagnostic/source text to become a visible layer. */
 pre,code{max-width:100%;white-space:pre-wrap;overflow-wrap:anywhere}
+
+
+/* Workspace controls / conversation vault */
+.history-toolbar{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px}
+.history-list{display:grid;gap:7px;max-height:58vh;overflow:auto;padding-right:2px}
+.history-item{display:grid;grid-template-columns:1fr auto;gap:6px;border:1px solid var(--line);background:#10151b;border-radius:10px;padding:4px}
+.history-open{border:0;background:transparent;color:#fff;text-align:left;padding:10px;border-radius:8px;cursor:pointer;min-width:0}
+.history-open:hover{background:#171d25}
+.history-open b,.history-open small,.history-open span{display:block;overflow:hidden;text-overflow:ellipsis}
+.history-open b{font-size:10px}
+.history-open small{font-size:7px;color:#68727e;margin-top:3px}
+.history-open span{font-size:8px;color:#8b95a1;margin-top:6px;white-space:nowrap}
+.history-delete{align-self:center;width:30px;height:30px;border:1px solid transparent;background:transparent;color:#7f8995;border-radius:7px;cursor:pointer;font-size:17px}
+.history-delete:hover{border-color:#542a31;background:#241519;color:#ff9da8}
+.history-empty{padding:30px 10px;text-align:center;color:#69737f;font-size:9px;border:1px dashed var(--line2);border-radius:10px}
+.danger-button{color:#ffb0ba;border-color:#54313a!important}
+@media(max-width:760px){
+  .history-toolbar{display:grid;grid-template-columns:1fr}
+  .history-toolbar .danger-button{justify-self:start}
+  .history-open span{white-space:normal}
+}
+/* The top-right new-session control is intentionally removed; new conversations are launched from the workspace action. */
+#newTop{display:none!important}
