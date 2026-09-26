@@ -113,3 +113,5 @@ jobs:
       - name: Smoke test deployed Worker
         run: |
           curl --fail --silent --show-error --retry 6 --retry-delay 5 --connect-timeout 10 https://agenticweb.agenticuantico.workers.dev/health
+          curl --fail --silent --show-error --retry 6 --retry-delay 5 --connect-timeout 10 https://agenticuantico.dev.ar/health
+          curl --fail --silent --show-error --retry 6 --retry-delay 5 --connect-timeout 10 https://agenticuantico.dev.ar/ | grep -q "NEURAL UI · 2026.09.26"
