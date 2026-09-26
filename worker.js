@@ -992,25 +992,22 @@ async function handleApi(request, env) {
     const language = String(body?.language||"es-AR");
     const gender = String(body?.gender||"female");
     const profiles = {
-      "es": {
-        model:"@cf/deepgram/aura-2-es",
-        female:"diana",
-        male:"alvaro"
-      },
-      "en": {
-        model:"@cf/deepgram/aura-2-en",
-        female:"luna",
-        male:"orion"
-      }
+      "es": {model:"@cf/deepgram/aura-2-es",female:"diana",male:"alvaro"},
+      "en": {model:"@cf/deepgram/aura-2-en",female:"luna",male:"orion"},
+      "pt": {model:"@cf/myshell-ai/melotts",lang:"pt"},
+      "fr": {model:"@cf/myshell-ai/melotts",lang:"fr"},
+      "it": {model:"@cf/myshell-ai/melotts",lang:"it"},
+      "de": {model:"@cf/myshell-ai/melotts",lang:"de"},
+      "ja": {model:"@cf/myshell-ai/melotts",lang:"ja"},
+      "zh": {model:"@cf/myshell-ai/melotts",lang:"zh"}
     };
     const p = profiles[language.split("-")[0]];
     if (!p) return json({ok:false,error:"tts_language_unavailable"},400,request);
     try {
-      const audio = await env.AI.run(p.model, {
-        text:textValue,
-        speaker: gender === "male" ? p.male : p.female,
-        encoding:"mp3"
-      }, {returnRawResponse:true});
+      const input = p.lang
+        ? {prompt:textValue,lang:p.lang}
+        : {text:textValue,speaker:gender==="male"?p.male:p.female,encoding:"mp3"};
+      const audio = await env.AI.run(p.model, input, {returnRawResponse:true});
       const headers = new Headers(audio?.headers || {});
       headers.set("content-type","audio/mpeg");
       headers.set("cache-control","no-store");
