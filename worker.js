@@ -102,9 +102,9 @@ async function callCloudflareAI(request, env) {
 
   const configured = String(env.CF_AI_MODEL || "").trim();
   const models = [
-    configured || "@cf/qwen/qwen3-30b-a3b-fp8",
-    "@cf/qwen/qwen3-30b-a3b-fp8",
-    "@cf/qwen/qwen3.8-27b"
+    configured || "@cf/google/gemma-4-26b-a4b-it",
+    "@cf/google/gemma-4-26b-a4b-it",
+    "@cf/qwen/qwen3-30b-a3b-fp8"
   ].filter((m,i,a)=>m && a.indexOf(m)===i);
 
   for (const model of models) {
@@ -980,6 +980,45 @@ async function handleApi(request, env) {
       const headers=new Headers(upstream.headers);headers.set("content-type","audio/mpeg");headers.set("cache-control","no-store");
       return applySecurityHeaders(new Response(upstream.body,{status:200,headers}),request);
     }catch{return json({ok:false,error:"tts_failed"},502,request);}
+  }
+
+  if (url.pathname === "/v1/public/tts" && request.method === "POST") {
+    if (!env.AI || typeof env.AI.run !== "function") {
+      return json({ok:false,error:"tts_unavailable",message:"La voz neural no está disponible."},503,request);
+    }
+    const body = await request.json().catch(()=>null);
+    const textValue = String(body?.text||"").trim().slice(0,5000);
+    if (!textValue) return json({ok:false,error:"invalid_request",message:"Texto vacío."},400,request);
+    const language = String(body?.language||"es-AR");
+    const gender = String(body?.gender||"female");
+    const profiles = {
+      "es": {
+        model:"@cf/deepgram/aura-2-es",
+        female:"diana",
+        male:"alvaro"
+      },
+      "en": {
+        model:"@cf/deepgram/aura-2-en",
+        female:"luna",
+        male:"orion"
+      }
+    };
+    const p = profiles[language.split("-")[0]];
+    if (!p) return json({ok:false,error:"tts_language_unavailable"},400,request);
+    try {
+      const audio = await env.AI.run(p.model, {
+        text:textValue,
+        speaker: gender === "male" ? p.male : p.female,
+        encoding:"mp3"
+      }, {returnRawResponse:true});
+      const headers = new Headers(audio?.headers || {});
+      headers.set("content-type","audio/mpeg");
+      headers.set("cache-control","no-store");
+      return applySecurityHeaders(new Response(audio?.body || audio,{status:200,headers}),request);
+    } catch (error) {
+      console.error("public-tts-failed",{model:p.model,message:String(error?.message||"").slice(0,240)});
+      return json({ok:false,error:"tts_failed",message:"No se pudo generar la voz."},502,request);
+    }
   }
 
   if (url.pathname === "/v1/public/chat" && request.method === "POST") {
