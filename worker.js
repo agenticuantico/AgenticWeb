@@ -1023,11 +1023,11 @@ async function handleApi(request, env) {
 
   if (url.pathname === "/v1/public/chat" && request.method === "POST") {
     try {
-      const response = await callCloudflareAI(request.clone(), env);
+      const response = await callHuggingFace(request.clone(), env);
       if (response) return response;
     } catch {}
     try {
-      const response = await callHuggingFace(request.clone(), env);
+      const response = await callCloudflareAI(request.clone(), env);
       if (response) return response;
     } catch {}
     return json({
