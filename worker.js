@@ -102,7 +102,8 @@ async function callCloudflareAI(request, env) {
 
   const configured = String(env.CF_AI_MODEL || "").trim();
   const models = [
-    configured || "@cf/google/gemma-4-26b-a4b-it",
+    configured || "@cf/qwen/qwen3.8-27b",
+    "@cf/qwen/qwen3.8-27b",
     "@cf/google/gemma-4-26b-a4b-it",
     "@cf/qwen/qwen3-30b-a3b-fp8"
   ].filter((m,i,a)=>m && a.indexOf(m)===i);
@@ -126,7 +127,7 @@ async function callCloudflareAI(request, env) {
         "";
 
       if (typeof answer === "string" && answer.trim()) {
-        return json({ok:true,answer:answer.trim(),model:"AgentiQ"},200,request);
+        return json({ok:true,answer:answer.trim(),model:model},200,request);
       }
     } catch (error) {
       // Keep provider diagnostics server-side. Never expose model/provider errors to the browser.
@@ -838,6 +839,16 @@ async function handleApi(request, env) {
     }), request);
   }
 
+  if (url.pathname === "/v1/integrations/status" && request.method === "GET") {
+    return json({
+      ok: true,
+      cloudflare: !!env.AI,
+      github: !!String(env.GH_TOKEN || "").trim(),
+      huggingface: !!String(env.HF_TOKEN || "").trim(),
+      google: !!String(env.GOOGLE_CLIENT_ID || "").trim()
+    }, 200, request);
+  }
+
   if (url.pathname === "/health" && request.method === "GET") {
     return json({ ok: true, service: "online" }, 200, request);
   }
@@ -1020,11 +1031,11 @@ async function handleApi(request, env) {
 
   if (url.pathname === "/v1/public/chat" && request.method === "POST") {
     try {
-      const response = await callHuggingFace(request.clone(), env);
+      const response = await callCloudflareAI(request.clone(), env);
       if (response) return response;
     } catch {}
     try {
-      const response = await callCloudflareAI(request.clone(), env);
+      const response = await callHuggingFace(request.clone(), env);
       if (response) return response;
     } catch {}
     return json({
