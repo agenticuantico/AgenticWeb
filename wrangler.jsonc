@@ -4,6 +4,12 @@
   "main": "worker.js",
   "compatibility_date": "2026-09-24",
   "workers_dev": true,
+  "routes": [
+    {
+      "pattern": "agenticuantico.dev.ar",
+      "custom_domain": true
+    }
+  ],
   "assets": {
     "directory": "./public",
     "binding": "ASSETS",
