@@ -213,6 +213,8 @@ body{font-family:"Space Grotesk",Inter,ui-sans-serif,system-ui,sans-serif}
 (()=>{"use strict";
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const EMAIL="agenticuantico@gmail.com",STORAGE="agenticuantico_conversations_v2",PREFS="agenticuantico_preferences_v2",MAX=50*1024*1024;
+const API_ORIGIN=location.hostname==="agenticweb.agenticuantico.workers.dev"?"":"https://agenticweb.agenticuantico.workers.dev";
+const apiUrl=path=>API_ORIGIN+path;
 const UI_TEXT={
 "es-AR":{placeholder:"Preguntale lo que quieras a AgentiCuantico…",send:"ENVIAR ↗",hint:"Enter envía · Shift+Enter agrega una línea · Adjuntá archivos y pedile a la IA que los analice.",contact:"CONTACTO",workspace:"WORKSPACE",capabilities:"CAPACIDADES",conversation:"Conversación",overview:"Resumen",codeWorkspace:"Espacio de código",files:"Archivos",voice:"Voz",memory:"Memoria",projects:"Proyectos",integrations:"Integraciones",settings:"Configuración",newConversation:"+ NUEVA CONVERSACIÓN",online:"ONLINE",searchConversations:"Buscar conversaciones",heroEyebrow:"NEURAL AI WORKSPACE · ONLINE",heroSub:"Inteligencia sin límites.",heroLead:"Un workspace de IA multimodal para crear, programar, analizar documentos y convertir ideas en workflows inteligentes.",start:"INICIAR CONVERSACIÓN",explore:"EXPLORAR CAPACIDADES"},
 "es-ES":{placeholder:"Pregúntale lo que quieras a AgentiCuantico…",send:"ENVIAR ↗",hint:"Enter envía · Shift+Enter agrega una línea · Adjunta archivos y pídele a la IA que los analice.",contact:"CONTACTO",workspace:"WORKSPACE",capabilities:"CAPACIDADES",conversation:"Conversación",overview:"Resumen",codeWorkspace:"Espacio de código",files:"Archivos",voice:"Voz",memory:"Memoria",projects:"Proyectos",newConversation:"+ NUEVA CONVERSACIÓN",online:"EN LÍNEA",searchConversations:"Buscar conversaciones",heroEyebrow:"NEURAL AI WORKSPACE · ONLINE",heroSub:"Inteligencia sin límites.",heroLead:"Un workspace de IA multimodal para crear, programar, analizar documentos y convertir ideas en workflows inteligentes.",start:"INICIAR CONVERSACIÓN",explore:"EXPLORAR CAPACIDADES"},
@@ -273,7 +275,7 @@ function historyRender(q=""){el.history.innerHTML="";const n=q.toLowerCase();sta
 function switchView(v){state.view=v;$$(".view").forEach(x=>x.classList.remove("active"));$$(".nav-button").forEach(x=>x.classList.toggle("active",x.dataset.view===v));$("#view-"+v)?.classList.add("active");const labels={conversation:["Conversation","One intelligence. One continuous workspace."],overview:["Overview","Activity across your local environment."],code:["Code Workspace","Developer capability within AgentiCuantico."],files:["Files","Multimodal context and previews."],voice:["Voice","Natural input and browser speech output."],memory:["Memory","Local continuity and preference controls."],projects:["Projects","Organized contexts for intelligent work."],integrations:["Integrations","Connected services and developer tools."],settings:["Settings","Interface, voice and AI connection controls."],integrations:["Integrations","Connected services and developer tools."],settings:["Settings","Interface, voice and AI connection controls."]};$("#active-view-title").textContent=labels[v]?.[0]||"AgentiCuantico";$("#active-view-subtitle").textContent=labels[v]?.[1]||"";el.sidebar.classList.remove("open")}
 async function loadIntegrationStatus(){
  try{
-  const r=await fetch("/v1/integrations/status",{cache:"no-store"});const d=await r.json().catch(()=>({}));
+  const r=await fetch(apiUrl("/v1/integrations/status",{cache:"no-store"});const d=await r.json().catch(()=>({}));
   const set=(id,value)=>{const n=$("#"+id);if(n)n.textContent=value?"CONNECTED":"NOT CONNECTED"};
   set("integration-github",d.github);set("integration-cloudflare",d.cloudflare);set("integration-hf",d.huggingface);set("integration-google",d.google);
  }catch{["github","cloudflare","hf","google"].forEach(x=>{const n=$("#integration-"+x);if(n)n.textContent="UNKNOWN"})}
@@ -294,7 +296,7 @@ async function send(){
  stateSet(attached.length?"ANALYZING":"THINKING");typing();
  try{
   const payload={message:v||"Analizá los archivos adjuntos y respondé según lo que solicite el usuario.",language:state.language,history:current().messages.slice(-10).map(x=>({role:x.role,content:x.content})),attachments:attached};
-  const r=await fetch("/v1/public/chat",{method:"POST",headers:{"Content-Type":"application/json","X-Guest-Session":localStorage.getItem("aq-session")||"guest"},body:JSON.stringify(payload)});
+  const r=await fetch(apiUrl("/v1/public/chat",{method:"POST",headers:{"Content-Type":"application/json","X-Guest-Session":localStorage.getItem("aq-session")||"guest"},body:JSON.stringify(payload)});
   const d=await r.json().catch(()=>({}));
   if(!r.ok||!d.answer)throw Error(d.message||"ai_unavailable");
   $("#typing")?.remove();stateSet("RESPONDING");add("assistant",d.answer);
@@ -398,7 +400,7 @@ async function speak(text){
  if(activeAudio){try{activeAudio.pause();activeAudio.src=""}catch{}activeAudio=null}
  stateSet("SPEAKING");el.voiceVisual?.classList.add("active");if(el.voiceState)el.voiceState.textContent="SPEAKING";
  try{
-  const r=await fetch("/v1/public/tts",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:value.slice(0,5000),language:state.language,gender:state.gender})});
+  const r=await fetch(apiUrl("/v1/public/tts",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:value.slice(0,5000),language:state.language,gender:state.gender})});
   if(r.ok&&String(r.headers.get("content-type")||"").includes("audio")){
    const url=URL.createObjectURL(await r.blob());const a=new Audio(url);activeAudio=a;a.volume=+el.volume.value;
    a.onended=()=>{URL.revokeObjectURL(url);activeAudio=null;el.voiceVisual?.classList.remove("active");if(el.voiceState)el.voiceState.textContent="MIC OFF";stateSet("IDLE")};
