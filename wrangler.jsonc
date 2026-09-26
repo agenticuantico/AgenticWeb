@@ -8,22 +8,41 @@
     "directory": "./public",
     "binding": "ASSETS",
     "not_found_handling": "404-page",
-    "run_worker_first": ["/v1/*", "/health"]
+    "run_worker_first": [
+      "/v1/*",
+      "/health"
+    ]
   },
   "triggers": {
-    "crons": ["*/15 * * * *"]
+    "crons": [
+      "*/15 * * * *"
+    ]
   },
   "durable_objects": {
     "bindings": [
-      {"name": "USER_DATA", "class_name": "UserData"},
-      {"name": "AUTH_DATA", "class_name": "AuthData"}
+      {
+        "name": "USER_DATA",
+        "class_name": "UserData"
+      },
+      {
+        "name": "AUTH_DATA",
+        "class_name": "AuthData"
+      }
     ]
   },
   "exports": {
-    "UserData": {"type": "durable-object", "storage": "sqlite"},
-    "AuthData": {"type": "durable-object", "storage": "sqlite"}
+    "UserData": {
+      "type": "durable-object",
+      "storage": "sqlite"
+    },
+    "AuthData": {
+      "type": "durable-object",
+      "storage": "sqlite"
+    }
   },
-  "observability": {"enabled": true},
+  "observability": {
+    "enabled": true
+  },
   "vars": {
     "HF_MODEL": "Qwen/Qwen3.8-27B",
     "HF_API_URL": "https://router.huggingface.co/v1/chat/completions",
@@ -43,5 +62,7 @@
     "TTS_MODEL": "tts-1",
     "TTS_VOICES": "{}"
   },
-  "ai": {"binding": "AI"}
+  "ai": {
+    "binding": "AI"
+  }
 }
