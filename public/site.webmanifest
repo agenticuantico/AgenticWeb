@@ -1,0 +1,10 @@
+{
+  "name":"AgentiCuantico — AI Workspace",
+  "short_name":"AgentiCuantico",
+  "start_url":"/",
+  "display":"standalone",
+  "background_color":"#05070a",
+  "theme_color":"#05070a",
+  "description":"AI workspace for intelligent work, coding, multimodal analysis, voice and automation.",
+  "icons":[{"src":"/favicon.svg","sizes":"128x128","type":"image/svg+xml","purpose":"any maskable"}]
+}
