@@ -52,7 +52,22 @@ body.chat-lock{overflow:hidden}
 @media(max-width:1023px){.chat{width:calc(100% - 36px)!important;margin-bottom:44px!important;min-height:500px;height:clamp(500px,64vh,650px)}.messages{padding-left:18px;padding-right:18px}}
 @media(max-width:700px){.hero{overflow:visible}.chat{width:calc(100% - 24px)!important;margin:0 12px 28px!important;min-height:520px;height:clamp(520px,70vh,680px);border-radius:24px}.chat-head{min-height:62px;padding:11px 12px 10px 15px}.chat-body{min-height:0}.messages{padding:14px 14px 18px;font-size:13px}.msg{font-size:13px;max-width:94%}.composer{grid-template-columns:38px 38px minmax(0,1fr) 38px 46px;gap:4px;padding:10px 8px 11px}.icon-btn{width:38px;height:42px}.send{width:46px;height:46px}.chat-size-toggle{width:36px;height:36px}.chat-size-toggle .svg-icon{width:23px;height:23px}.chat-hint{display:none}.chat-head-actions{gap:4px}.chat-mode{display:none}.chat-brain-mini .brain-icon{width:28px;height:28px}.brain-btn .brain-icon{width:29px;height:29px}}
 @media(max-width:390px){.chat{width:calc(100% - 16px)!important;margin-left:8px!important;margin-right:8px!important;min-height:500px;height:520px}.composer{grid-template-columns:34px 34px minmax(0,1fr) 34px 44px;gap:3px}.icon-btn{width:34px}.send{width:44px;height:44px}}
-</style>
+<style>
+.chat{margin-top:-1px!important;margin-bottom:0!important}
+.composer{position:relative;grid-template-columns:48px minmax(0,1fr) 44px 44px 44px 54px;gap:6px;align-items:center}
+.composer textarea{align-self:stretch;min-width:0}
+.composer .icon-btn,.composer .send{justify-self:center}
+.chat-size-toggle{position:relative;display:grid!important;place-items:center!important}
+.brain-btn{position:relative}.brain-btn .brain-icon{position:relative;z-index:1;width:30px;height:30px;stroke:#3f83f1;stroke-width:2.15;fill:none}
+.brain-btn.active{background:rgba(63,131,241,.1);box-shadow:none}.brain-btn.active:after{content:"";position:absolute;inset:6px;border-radius:11px;background:rgba(63,131,241,.08)}
+.tool-menu{position:absolute;left:12px;bottom:calc(100% + 10px);z-index:30;width:min(320px,calc(100% - 24px));padding:10px;background:rgba(255,255,255,.985);border:1px solid rgba(24,24,27,.12);border-radius:22px;box-shadow:0 24px 65px rgba(0,0,0,.2);backdrop-filter:blur(20px)}
+.tool-option{width:100%;display:flex;align-items:center;gap:12px;padding:10px 12px;border:0;background:transparent;border-radius:15px;text-align:left;color:#18181b}
+.tool-option:hover,.tool-option:focus-visible{background:#f1f2f5;outline:none}.tool-option>span:last-child{display:flex;flex-direction:column;gap:2px;min-width:0}
+.tool-option strong{font:500 14px Outfit,sans-serif}.tool-option small{font:400 10px Inter,sans-serif;opacity:.55}
+.tool-icon{width:40px;height:40px;flex:none;border-radius:50%;background:#f0f1f3;display:grid;place-items:center}.tool-icon>svg{width:22px;height:22px;fill:none;stroke:#18181b;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.tool-icon .brain-icon{width:26px;height:26px;stroke:#3f83f1;stroke-width:2.15;fill:none}
+@media(max-width:700px){.chat{width:100%!important;margin-left:0!important;margin-right:0!important;border-radius:24px 24px 0 0;min-height:calc(100dvh - 470px);height:calc(100dvh - 420px);max-height:none}.composer{grid-template-columns:40px minmax(0,1fr) 40px 40px 40px 46px;gap:3px;padding:9px 8px calc(9px + env(safe-area-inset-bottom))}.icon-btn{width:40px;height:42px}.send{width:46px;height:46px}.tool-menu{left:12px;bottom:calc(100% + 8px);width:min(306px,calc(100% - 24px));border-radius:24px;padding:9px}}
+@media(max-width:390px){.composer{grid-template-columns:34px minmax(0,1fr) 34px 34px 34px 43px;gap:2px;padding-left:6px;padding-right:6px}.icon-btn{width:34px}.send{width:43px;height:43px}.tool-menu{left:8px;width:calc(100% - 16px)}}
+</style></style>
 </head>
 <body>
 <header class="site-nav">
@@ -80,22 +95,30 @@ body.chat-lock{overflow:hidden}
     <div class="chat-identity"><span class="chat-brain-mini"><svg viewBox="0 0 64 64" class="svg-icon brain-icon" aria-hidden="true"><path d="M29 8c-8-3-16 1-17 10-6 1-9 6-8 12-4 4-3 11 2 14-1 8 5 13 12 12 2 6 9 8 14 4V10c0-1-1-1-3-2Z"/><path d="M35 8c8-3 16 1 17 10 6 1 9 6 8 12 4 4 3 11-2 14 1 8-5 13-12 12-2 6-9 8-14 4V10c0-1 1-1 3-2Z"/><path d="M32 9v45M15 22c4-2 9 0 11 4M13 35c5-2 10 0 12 4M49 22c-4-2-9 0-11 4M51 35c-5-2-10 0-12 4"/></svg></span><div><div class="chat-title">AgentiCuantico</div><div class="chat-mode" id="chat-mode">IA conversacional</div></div></div>
     <div class="chat-head-actions">
       <div class="status"><b id="status-dot"></b><span id="status-text">conectando</span></div>
-      <button class="chat-size-toggle" id="chat-size-toggle" type="button" aria-label="Abrir chat completo" title="Abrir chat completo"><svg viewBox="0 0 24 24" class="svg-icon expand-icon" aria-hidden="true"><path d="M9 4H4v5M4 4l6 6M15 20h5v-5M20 20l-6-6M15 4h5v5M20 4l-6 6M9 20H4v-5M4 20l6-6"/></svg><svg viewBox="0 0 24 24" class="svg-icon minimize-icon" aria-hidden="true" hidden><path d="M9 4v5H4M4 9l6-5M15 20v-5h5M20 15l-5 5M15 4v5h5M20 9l-5-5M9 20v-5H4M4 15l6 5"/></svg></button>
-    </div>
+      </div>
   </div>
   <div class="chat-body">
     <div class="attachment-list" id="attachment-list" aria-live="polite"></div>
     <div class="messages" id="messages" aria-live="polite"><div class="msg ai">Hola. Soy AgentiCuantico. ¿Qué querés crear, resolver o explorar?</div></div>
   </div>
   <form class="composer" id="chat-form">
-    <input id="file-input" type="file" hidden multiple accept="image/*,application/pdf,text/plain,text/markdown,text/csv,application/json,text/html,text/css,application/javascript,text/javascript,text/x-python,text/xml,video/*,audio/*,.js,.jsx,.ts,.tsx,.py,.java,.c,.cpp,.h,.hpp,.rs,.go,.php,.sql,.sh,.md,.csv,.json,.html,.css,.xml,.yaml,.yml">
-    <button class="icon-btn attach" id="attach" type="button" aria-label="Subir archivos" title="Subir archivos"><svg viewBox="0 0 24 24" class="svg-icon" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
-    <button class="icon-btn brain-btn" id="brain" type="button" aria-label="Activar razonamiento avanzado" aria-pressed="false" title="Razonamiento avanzado"><svg viewBox="0 0 64 64" class="svg-icon brain-icon" aria-hidden="true"><path d="M29 8c-8-3-16 1-17 10-6 1-9 6-8 12-4 4-3 11 2 14-1 8 5 13 12 12 2 6 9 8 14 4V10c0-1-1-1-3-2Z"/><path d="M35 8c8-3 16 1 17 10 6 1 9 6 8 12 4 4 3 11-2 14 1 8-5 13-12 12-2 6-9 8-14 4V10c0-1 1-1 3-2Z"/><path d="M32 9v45M15 22c4-2 9 0 11 4M13 35c5-2 10 0 12 4M49 22c-4-2-9 0-11 4M51 35c-5-2-10 0-12 4"/></svg></button>
-    <textarea id="input" rows="1" placeholder="Escribí un mensaje…" aria-label="Mensaje"></textarea>
-    <button class="icon-btn mic-btn" id="mic" type="button" aria-label="Hablar" title="Hablar"><svg viewBox="0 0 24 24" class="svg-icon" aria-hidden="true"><rect x="8" y="3" width="8" height="12" rx="4"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M9 21h6"/></svg></button>
-    <button class="send" id="send" type="submit" aria-label="Enviar" title="Enviar"><svg viewBox="0 0 24 24" class="svg-icon send-icon" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button>
-  </form>
-  <div class="chat-hint" id="chat-hint">＋ archivos · 🎙 voz · cerebro = razonamiento avanzado</div>
+<input id="file-input" type="file" hidden multiple accept="image/*,application/pdf,text/plain,text/markdown,text/csv,application/json,text/html,text/css,application/javascript,text/javascript,text/x-python,text/xml,video/*,audio/*,.js,.jsx,.ts,.tsx,.py,.java,.c,.cpp,.h,.hpp,.rs,.go,.php,.sql,.sh,.md,.csv,.json,.html,.css,.xml,.yaml,.yml">
+<input id="camera-input" type="file" hidden accept="image/*" capture="environment">
+<input id="photo-input" type="file" hidden multiple accept="image/*">
+<button class="icon-btn attach" id="attach" type="button" aria-label="Agregar" title="Agregar"><svg viewBox="0 0 24 24" class="svg-icon" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+<textarea id="input" rows="1" placeholder="Escribí un mensaje…" aria-label="Mensaje"></textarea>
+<button class="chat-size-toggle icon-btn" id="chat-size-toggle" type="button" aria-label="Abrir chat completo" title="Abrir chat completo"><svg viewBox="0 0 24 24" class="svg-icon expand-icon" aria-hidden="true"><path d="M9 4H4v5M4 4l6 6M15 20h5v-5M20 20l-6-6"/></svg><svg viewBox="0 0 24 24" class="svg-icon minimize-icon" aria-hidden="true" hidden><path d="M9 4v5H4M4 9l6-5M15 20v-5h5M20 15l-5 5"/></svg></button>
+<button class="icon-btn brain-btn" id="brain" type="button" aria-label="Activar razonamiento avanzado" aria-pressed="false" title="Pensar más"><svg viewBox="0 0 64 64" class="svg-icon brain-icon" aria-hidden="true"><path d="M29 8c-8-3-16 1-17 10-6 1-9 6-8 12-4 4-3 11 2 14-1 8 5 13 12 12 2 6 9 8 14 4V10c0-1-1-1-3-2Z"/><path d="M35 8c8-3 16 1 17 10 6 1 9 6 8 12 4 4 3 11-2 14 1 8-5 13-12 12-2 6-9 8-14 4V10c0-1 1-1 3-2Z"/><path d="M32 9v45M15 22c4-2 9 0 11 4M13 35c5-2 10 0 12 4M49 22c-4-2-9 0-11 4M51 35c-5-2-10 0-12 4"/></svg></button>
+<button class="icon-btn mic-btn" id="mic" type="button" aria-label="Hablar" title="Hablar"><svg viewBox="0 0 24 24" class="svg-icon" aria-hidden="true"><rect x="8" y="3" width="8" height="12" rx="4"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M9 21h6"/></svg></button>
+<button class="send" id="send" type="submit" aria-label="Enviar" title="Enviar"><svg viewBox="0 0 24 24" class="svg-icon send-icon" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button>
+</form>
+<div class="tool-menu" id="tool-menu" hidden>
+<button type="button" class="tool-option" data-action="camera"><span class="tool-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8h2l1.4-2h5.2L16 8h2a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2Z"/><circle cx="12" cy="13" r="3"/></svg></span><span><strong>Cámara</strong><small>Tomar una foto</small></span></button>
+<button type="button" class="tool-option" data-action="photos"><span class="tool-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="2"/><circle cx="9" cy="10" r="1.4"/><path d="m5 17 4-4 3 3 2-2 5 4"/></svg></span><span><strong>Fotos</strong><small>Elegir imágenes</small></span></button>
+<button type="button" class="tool-option" data-action="files"><span class="tool-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l4 4v14H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M14 3v5h5"/></svg></span><span><strong>Archivos</strong><small>PDF, documentos, código y más</small></span></button>
+<button type="button" class="tool-option" data-action="extensions"><span class="tool-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="m8 8 8 8M16 8l-3 3 3 3"/></svg></span><span><strong>Complementos</strong><small>Conexiones y herramientas</small></span></button>
+<button type="button" class="tool-option" data-action="reasoning"><span class="tool-icon"><svg viewBox="0 0 64 64" class="svg-icon brain-icon" aria-hidden="true"><path d="M29 8c-8-3-16 1-17 10-6 1-9 6-8 12-4 4-3 11 2 14-1 8 5 13 12 12 2 6 9 8 14 4V10c0-1-1-1-3-2Z"/><path d="M35 8c8-3 16 1 17 10 6 1 9 6 8 12 4 4 3 11-2 14 1 8-5 13-12 12-2 6-9 8-14 4V10c0-1 1-1 3-2Z"/><path d="M32 9v45M15 22c4-2 9 0 11 4M13 35c5-2 10 0 12 4M49 22c-4-2-9 0-11 4M51 35c-5-2-10 0-12 4"/></svg></span><span><strong>Pensar más</strong><small id="reasoning-menu-text">Activar razonamiento avanzado</small></span></button>
+</div><div class="chat-hint" id="chat-hint">＋ archivos · 🎙 voz · cerebro = razonamiento avanzado</div>
 </div>
 
 <script>
@@ -110,6 +133,9 @@ const attach=document.querySelector("#attach");
 const brain=document.querySelector("#brain");
 const mic=document.querySelector("#mic");
 const attachmentList=document.querySelector("#attachment-list");
+const toolMenu=document.querySelector("#tool-menu");
+const cameraInput=document.querySelector("#camera-input");
+const photoInput=document.querySelector("#photo-input");
 const chat=document.querySelector("#chat");
 const sizeToggle=document.querySelector("#chat-size-toggle");
 const expandIcon=sizeToggle?.querySelector(".expand-icon");
@@ -147,6 +173,21 @@ function setExpanded(value){
   if(value) setTimeout(()=>input.focus(),80);
 }
 sizeToggle.addEventListener("click",()=>setExpanded(!chat.classList.contains("expanded")));
+function closeToolMenu(){toolMenu.hidden=true;attach.setAttribute("aria-expanded","false")}
+attach.setAttribute("aria-expanded","false");
+attach.addEventListener("click",()=>{toolMenu.hidden=!toolMenu.hidden;attach.setAttribute("aria-expanded",toolMenu.hidden?"false":"true")});
+document.addEventListener("click",e=>{if(!chat.contains(e.target))closeToolMenu()});
+toolMenu.querySelectorAll(".tool-option").forEach(btn=>btn.addEventListener("click",()=>{
+ const action=btn.dataset.action; closeToolMenu();
+ if(action==="camera"){cameraInput.click();return}
+ if(action==="photos"){photoInput.click();return}
+ if(action==="files"){fileInput.click();return}
+ if(action==="reasoning"){reasoning=!reasoning;brain.classList.toggle("active",reasoning);brain.setAttribute("aria-pressed",reasoning?"true":"false");chatMode.textContent=reasoning?"Razonamiento avanzado":"IA conversacional";document.querySelector("#reasoning-menu-text").textContent=reasoning?"Razonamiento avanzado activado":"Activar razonamiento avanzado";return}
+ if(action==="extensions")add("Complementos: este espacio está preparado para conectar herramientas y servicios externos.","ai")
+}));
+const processInput=async el=>{if(el.files?.length){await handleFiles(el.files);el.value=""}};
+cameraInput.addEventListener("change",()=>processInput(cameraInput));
+photoInput.addEventListener("change",()=>processInput(photoInput));
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&chat.classList.contains("expanded"))setExpanded(false)});
 
 brain.addEventListener("click",()=>{
@@ -154,6 +195,7 @@ brain.addEventListener("click",()=>{
   brain.classList.toggle("active",reasoning);
   brain.setAttribute("aria-pressed",reasoning?"true":"false");
   chatMode.textContent=reasoning?"Razonamiento avanzado":"IA conversacional";
+  document.querySelector("#reasoning-menu-text").textContent=reasoning?"Razonamiento avanzado activado":"Activar razonamiento avanzado";
 });
 
 function add(text,type){
@@ -278,7 +320,7 @@ async function handleFiles(list){
     renderAttachments();
   }
 }
-attach.addEventListener("click",()=>fileInput.click());
+
 fileInput.addEventListener("change",async()=>{await handleFiles(fileInput.files);fileInput.value=""});
 
 const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
