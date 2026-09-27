@@ -43,6 +43,15 @@ body.chat-lock{overflow:hidden}
 @media(max-width:390px){.chat{max-height:292px}.composer{grid-template-columns:32px 32px minmax(0,1fr) 32px 41px;gap:3px}.icon-btn{width:32px}.send{width:41px;height:41px}.composer textarea{font-size:12px}}
 @media(max-width:850px) and (max-height:700px){.chat:not(.expanded){max-height:270px}.chat:not(.expanded) .messages{height:86px}}
 @media(prefers-reduced-motion:reduce){.chat,.chat.expanded{transition:none}.mic-btn.recording{animation:none}}
+
+/* Chat canvas: ahora ocupa el bloque de espacio debajo del robot */
+.chat{position:relative!important;left:auto!important;right:auto!important;bottom:auto!important;top:auto!important;transform:none!important;width:min(1180px,calc(100% - 56px))!important;margin:0 auto 72px!important;min-height:560px;height:clamp(520px,62vh,720px);padding:0!important;display:flex;flex-direction:column;overflow:hidden;border-radius:30px;background:rgba(255,255,255,.96);box-shadow:0 26px 80px rgba(24,24,27,.15);backdrop-filter:blur(18px)}
+.chat-head{flex:none;min-height:72px;padding:15px 18px 12px}.chat-body{min-height:0;flex:1;display:flex;flex-direction:column}.attachment-list{flex:none}.messages{height:auto;min-height:0;flex:1;padding:16px 24px 20px;font-size:14px}.msg{font-size:14px;max-width:min(760px,88%);margin-bottom:12px}.msg.user,.msg.ai{padding:12px 14px}.composer{flex:none;padding:12px 16px 13px;grid-template-columns:52px 52px minmax(0,1fr) 52px 54px;gap:8px;background:rgba(255,255,255,.94)}.icon-btn{width:52px;height:48px;border-radius:14px}.send{width:54px;height:54px}.chat-hint{padding:0 18px 13px}.chat-size-toggle{width:40px;height:40px;border:0;background:transparent;border-radius:10px;color:#171717;display:grid;place-items:center;padding:0}.chat-size-toggle:hover{background:rgba(24,24,27,.055)}.chat-size-toggle .minimize-icon{width:25px;height:25px}.chat-size-toggle .expand-icon{width:25px;height:25px}.chat-brain-mini .brain-icon{width:29px;height:29px;stroke:#3d82f1;stroke-width:2.15;fill:none}.brain-btn{color:#3d82f1}.brain-btn .brain-icon{width:31px;height:31px;stroke-width:2.2;fill:none}
+.chat.expanded{position:fixed!important;left:14px!important;right:14px!important;top:14px!important;bottom:14px!important;width:auto!important;height:auto!important;min-height:0!important;margin:0!important;z-index:1000!important;border-radius:26px}.chat.expanded .chat-body{display:flex;flex:1;min-height:0}.chat.expanded .messages{flex:1;min-height:0}
+body.chat-lock{overflow:hidden}
+@media(max-width:1023px){.chat{width:calc(100% - 36px)!important;margin-bottom:44px!important;min-height:500px;height:clamp(500px,64vh,650px)}.messages{padding-left:18px;padding-right:18px}}
+@media(max-width:700px){.hero{overflow:visible}.chat{width:calc(100% - 24px)!important;margin:0 12px 28px!important;min-height:520px;height:clamp(520px,70vh,680px);border-radius:24px}.chat-head{min-height:62px;padding:11px 12px 10px 15px}.chat-body{min-height:0}.messages{padding:14px 14px 18px;font-size:13px}.msg{font-size:13px;max-width:94%}.composer{grid-template-columns:38px 38px minmax(0,1fr) 38px 46px;gap:4px;padding:10px 8px 11px}.icon-btn{width:38px;height:42px}.send{width:46px;height:46px}.chat-size-toggle{width:36px;height:36px}.chat-size-toggle .svg-icon{width:23px;height:23px}.chat-hint{display:none}.chat-head-actions{gap:4px}.chat-mode{display:none}.chat-brain-mini .brain-icon{width:28px;height:28px}.brain-btn .brain-icon{width:29px;height:29px}}
+@media(max-width:390px){.chat{width:calc(100% - 16px)!important;margin-left:8px!important;margin-right:8px!important;min-height:500px;height:520px}.composer{grid-template-columns:34px 34px minmax(0,1fr) 34px 44px;gap:3px}.icon-btn{width:34px}.send{width:44px;height:44px}}
 </style>
 </head>
 <body>
@@ -68,11 +77,10 @@ body.chat-lock{overflow:hidden}
 
 <div class="chat" id="chat" aria-label="Chat de AgentiCuantico">
   <div class="chat-head">
-    <div class="chat-identity"><span class="chat-brain-mini"><svg viewBox="0 0 64 64" class="svg-icon brain-icon mini" aria-hidden="true"><path d="M25 8c-6 0-10 4-10 10v2c-4 1-7 5-7 9s2 7 5 9c-2 5 1 11 7 12 1 4 4 6 8 6 3 0 6-2 7-4V14c-2-4-5-6-10-6Z"/><path d="M39 14v38c1 2 4 4 7 4 4 0 7-2 8-6 6-1 9-7 7-12 3-2 5-5 5-9s-3-8-7-9v-2c0-6-4-10-10-10-5 0-8 2-10 6Z"/><path d="M32 10v42M16 26c4-1 8 1 9 5M15 39c4-2 8-1 10 2M48 27c-4-1-8 1-9 5M49 40c-4-2-8-1-10 2"/></svg></span><div><div class="chat-title">AgentiCuantico</div><div class="chat-mode" id="chat-mode">IA conversacional</div></div></div>
+    <div class="chat-identity"><span class="chat-brain-mini"><svg viewBox="0 0 64 64" class="svg-icon brain-icon" aria-hidden="true"><path d="M29 8c-8-3-16 1-17 10-6 1-9 6-8 12-4 4-3 11 2 14-1 8 5 13 12 12 2 6 9 8 14 4V10c0-1-1-1-3-2Z"/><path d="M35 8c8-3 16 1 17 10 6 1 9 6 8 12 4 4 3 11-2 14 1 8-5 13-12 12-2 6-9 8-14 4V10c0-1 1-1 3-2Z"/><path d="M32 9v45M15 22c4-2 9 0 11 4M13 35c5-2 10 0 12 4M49 22c-4-2-9 0-11 4M51 35c-5-2-10 0-12 4"/></svg></span><div><div class="chat-title">AgentiCuantico</div><div class="chat-mode" id="chat-mode">IA conversacional</div></div></div>
     <div class="chat-head-actions">
       <div class="status"><b id="status-dot"></b><span id="status-text">conectando</span></div>
-      <button class="chat-expand" id="chat-expand" type="button" aria-label="Abrir chat completo" title="Abrir chat completo"><svg viewBox="0 0 24 24" class="svg-icon" aria-hidden="true"><path d="M9 4H4v5M4 4l6 6M15 20h5v-5M20 20l-6-6M15 4h5v5M20 4l-6 6M9 20H4v-5M4 20l6-6"/></svg></button>
-      <button class="chat-minimize" id="chat-minimize" type="button" aria-label="Minimizar chat" title="Minimizar chat" hidden><svg viewBox="0 0 24 24" class="svg-icon" aria-hidden="true"><path d="M9 4v5H4M4 9l6-5M15 20v-5h5M20 15l-5 5M15 4v5h5M20 9l-5-5M9 20v-5H4M4 15l6 5"/></svg></button>
+      <button class="chat-size-toggle" id="chat-size-toggle" type="button" aria-label="Abrir chat completo" title="Abrir chat completo"><svg viewBox="0 0 24 24" class="svg-icon expand-icon" aria-hidden="true"><path d="M9 4H4v5M4 4l6 6M15 20h5v-5M20 20l-6-6M15 4h5v5M20 4l-6 6M9 20H4v-5M4 20l6-6"/></svg><svg viewBox="0 0 24 24" class="svg-icon minimize-icon" aria-hidden="true" hidden><path d="M9 4v5H4M4 9l6-5M15 20v-5h5M20 15l-5 5M15 4v5h5M20 9l-5-5M9 20v-5H4M4 15l6 5"/></svg></button>
     </div>
   </div>
   <div class="chat-body">
@@ -82,7 +90,7 @@ body.chat-lock{overflow:hidden}
   <form class="composer" id="chat-form">
     <input id="file-input" type="file" hidden multiple accept="image/*,application/pdf,text/plain,text/markdown,text/csv,application/json,text/html,text/css,application/javascript,text/javascript,text/x-python,text/xml,video/*,audio/*,.js,.jsx,.ts,.tsx,.py,.java,.c,.cpp,.h,.hpp,.rs,.go,.php,.sql,.sh,.md,.csv,.json,.html,.css,.xml,.yaml,.yml">
     <button class="icon-btn attach" id="attach" type="button" aria-label="Subir archivos" title="Subir archivos"><svg viewBox="0 0 24 24" class="svg-icon" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
-    <button class="icon-btn brain-btn" id="brain" type="button" aria-label="Activar razonamiento avanzado" aria-pressed="false" title="Razonamiento avanzado"><svg viewBox="0 0 64 64" class="svg-icon brain-icon " aria-hidden="true"><path d="M25 8c-6 0-10 4-10 10v2c-4 1-7 5-7 9s2 7 5 9c-2 5 1 11 7 12 1 4 4 6 8 6 3 0 6-2 7-4V14c-2-4-5-6-10-6Z"/><path d="M39 14v38c1 2 4 4 7 4 4 0 7-2 8-6 6-1 9-7 7-12 3-2 5-5 5-9s-3-8-7-9v-2c0-6-4-10-10-10-5 0-8 2-10 6Z"/><path d="M32 10v42M16 26c4-1 8 1 9 5M15 39c4-2 8-1 10 2M48 27c-4-1-8 1-9 5M49 40c-4-2-8-1-10 2"/></svg></button>
+    <button class="icon-btn brain-btn" id="brain" type="button" aria-label="Activar razonamiento avanzado" aria-pressed="false" title="Razonamiento avanzado"><svg viewBox="0 0 64 64" class="svg-icon brain-icon" aria-hidden="true"><path d="M29 8c-8-3-16 1-17 10-6 1-9 6-8 12-4 4-3 11 2 14-1 8 5 13 12 12 2 6 9 8 14 4V10c0-1-1-1-3-2Z"/><path d="M35 8c8-3 16 1 17 10 6 1 9 6 8 12 4 4 3 11-2 14 1 8-5 13-12 12-2 6-9 8-14 4V10c0-1 1-1 3-2Z"/><path d="M32 9v45M15 22c4-2 9 0 11 4M13 35c5-2 10 0 12 4M49 22c-4-2-9 0-11 4M51 35c-5-2-10 0-12 4"/></svg></button>
     <textarea id="input" rows="1" placeholder="Escribí un mensaje…" aria-label="Mensaje"></textarea>
     <button class="icon-btn mic-btn" id="mic" type="button" aria-label="Hablar" title="Hablar"><svg viewBox="0 0 24 24" class="svg-icon" aria-hidden="true"><rect x="8" y="3" width="8" height="12" rx="4"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M9 21h6"/></svg></button>
     <button class="send" id="send" type="submit" aria-label="Enviar" title="Enviar"><svg viewBox="0 0 24 24" class="svg-icon send-icon" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button>
@@ -103,8 +111,9 @@ const brain=document.querySelector("#brain");
 const mic=document.querySelector("#mic");
 const attachmentList=document.querySelector("#attachment-list");
 const chat=document.querySelector("#chat");
-const expand=document.querySelector("#chat-expand");
-const minimize=document.querySelector("#chat-minimize");
+const sizeToggle=document.querySelector("#chat-size-toggle");
+const expandIcon=sizeToggle?.querySelector(".expand-icon");
+const minimizeIcon=sizeToggle?.querySelector(".minimize-icon");
 const statusDot=document.querySelector("#status-dot");
 const statusText=document.querySelector("#status-text");
 const chatMode=document.querySelector("#chat-mode");
@@ -130,13 +139,14 @@ function setStatus(ok,text){
 function setExpanded(value){
   chat.classList.toggle("expanded",value);
   document.body.classList.toggle("chat-lock",value);
-  expand.hidden=value;
-  minimize.hidden=!value;
-  chat.setAttribute("aria-expanded",value?"true":"false");
+  expandIcon.hidden=value;
+  minimizeIcon.hidden=!value;
+  sizeToggle.setAttribute("aria-expanded",value?"true":"false");
+  sizeToggle.setAttribute("aria-label",value?"Achicar chat":"Abrir chat completo");
+  sizeToggle.title=value?"Achicar chat":"Abrir chat completo";
   if(value) setTimeout(()=>input.focus(),80);
 }
-expand.addEventListener("click",()=>setExpanded(true));
-minimize.addEventListener("click",()=>setExpanded(false));
+sizeToggle.addEventListener("click",()=>setExpanded(!chat.classList.contains("expanded")));
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&chat.classList.contains("expanded"))setExpanded(false)});
 
 brain.addEventListener("click",()=>{
