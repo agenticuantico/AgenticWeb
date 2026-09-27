@@ -60,7 +60,8 @@
     "PAYPAL_PLAN_BUSINESS": "",
     "TTS_API_URL": "",
     "TTS_MODEL": "tts-1",
-    "TTS_VOICES": "{}"
+    "TTS_VOICES": "{}",
+    "ELEVENLABS_MODEL_ID": "eleven_multilingual_v2"
   },
   "ai": {
     "binding": "AI"
