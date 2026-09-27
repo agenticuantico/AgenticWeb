@@ -21,6 +21,7 @@ function applySecurityHeaders(response, request) {
   headers.set("referrer-policy", "strict-origin-when-cross-origin");
   headers.set("permissions-policy", "camera=(), microphone=(self), geolocation=()");
   headers.set("strict-transport-security", "max-age=31536000; includeSubDomains");
+  try { const p = new URL(request?.url || "https://agenticuantico.dev.ar/").pathname; if (p === "/" || p.endsWith(".html")) headers.set("cache-control", "no-store"); } catch {}
   headers.set("content-security-policy", "default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; img-src 'self' data: blob: https:; font-src 'self' data: https:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; connect-src 'self' https:; media-src 'self' blob:; worker-src 'self' blob:;");
   return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
 }
@@ -278,7 +279,7 @@ async function callHuggingFace(request, env) {
             const retryData = await retry.json();
             const retryAnswer = retryData?.choices?.[0]?.message?.content;
             if (typeof retryAnswer === "string" && retryAnswer.trim()) {
-              return json({ ok: true, answer: retryAnswer.trim() }, 200, request);
+              return json({ ok: true, answer: retryAnswer.trim(), model: selectedModel, provider: "huggingface" }, 200, request);
             }
           }
         }
@@ -289,7 +290,7 @@ async function callHuggingFace(request, env) {
       const answer = data?.choices?.[0]?.message?.content;
       if (typeof answer !== "string" || !answer.trim()) continue;
 
-      return json({ ok: true, answer: answer.trim() }, 200, request);
+      return json({ ok: true, answer: answer.trim(), model: selectedModel, provider: "huggingface" }, 200, request);
     } catch {
       continue;
     } finally {
@@ -1032,12 +1033,14 @@ async function handleApi(request, env) {
   }
 
   if (url.pathname === "/v1/public/chat" && request.method === "POST") {
+    // Hugging Face is the primary public chat engine. Cloudflare AI remains
+    // only as a server-side fallback if the HF provider is unavailable.
     try {
-      const response = await callCloudflareAI(request.clone(), env);
+      const response = await callHuggingFace(request.clone(), env);
       if (response) return response;
     } catch {}
     try {
-      const response = await callHuggingFace(request.clone(), env);
+      const response = await callCloudflareAI(request.clone(), env);
       if (response) return response;
     } catch {}
     return json({
@@ -1198,26 +1201,3 @@ export class UserData extends DurableObject {
 }
 
 export default {
-  async scheduled(controller, env, ctx) {
-    ctx.waitUntil(autonomousBrainCycle(env));
-  },
-
-  async fetch(request, env) {
-    try {
-      const url = new URL(request.url);
-      if (isApiPath(url.pathname)) {
-        return await handleApi(request, env);
-      }
-      const assetResponse = await env.ASSETS.fetch(request);
-      return applySecurityHeaders(assetResponse, request);
-    } catch {
-      return applySecurityHeaders(
-        new Response("Servicio no disponible.", {
-          status: 500,
-          headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" }
-        }),
-        request
-      );
-    }
-  }
-};
