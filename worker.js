@@ -152,7 +152,7 @@ async function callHuggingFace(request, env) {
   // hard-coding providers that may not serve the model at a given moment.
   const models = [model.endsWith(":fastest") ? model : model + ":fastest"];
 
-  if (!token) return null;
+  if (!token) { console.warn("public-chat-huggingface-skipped: HF_TOKEN is not configured"); return null; }
 
   let body;
   try {
@@ -257,6 +257,7 @@ async function callHuggingFace(request, env) {
       });
 
       if (!upstream.ok) {
+        console.warn("public-chat-huggingface-http-failed", { model:selectedModel, status:upstream.status });
         // Retry with a minimal OpenAI-compatible payload if a provider rejects
         // an optional generation field, then fail over to the next model.
         if (upstream.status >= 400 && upstream.status < 500) {
@@ -291,7 +292,8 @@ async function callHuggingFace(request, env) {
       if (typeof answer !== "string" || !answer.trim()) continue;
 
       return json({ ok: true, answer: answer.trim(), model: selectedModel, provider: "huggingface" }, 200, request);
-    } catch {
+    } catch (error) {
+      console.warn("public-chat-huggingface-request-failed", { model:selectedModel, message:String(error?.message||error).slice(0,240) });
       continue;
     } finally {
       clearTimeout(timeout);
@@ -1104,19 +1106,20 @@ async function handleApi(request, env) {
   }
 
   if (url.pathname === "/v1/public/chat" && request.method === "POST") {
-    // Cloudflare Workers AI is the primary engine on both the custom domain
-    // and workers.dev host. Hugging Face is an optional secondary fallback.
-    try {
-      const response = await callCloudflareAI(request.clone(), env);
-      if (response) return response;
-    } catch (error) {
-      console.error("public-chat-cloudflare-failed", String(error?.message || error).slice(0,300));
-    }
+    // Hugging Face is the preferred chat provider. Cloudflare Workers AI is
+    // retained as a fallback so the public chat can still answer if HF is
+    // unavailable or its secret is not configured.
     try {
       const response = await callHuggingFace(request.clone(), env);
       if (response) return response;
     } catch (error) {
       console.error("public-chat-huggingface-failed", String(error?.message || error).slice(0,300));
+    }
+    try {
+      const response = await callCloudflareAI(request.clone(), env);
+      if (response) return response;
+    } catch (error) {
+      console.error("public-chat-cloudflare-failed", String(error?.message || error).slice(0,300));
     }
     return json({
       ok: false,
