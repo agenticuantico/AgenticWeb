@@ -3,7 +3,7 @@
   "name": "agenticweb",
   "main": "worker.js",
   "compatibility_date": "2026-09-24",
-  "workers_dev": true,
+  "workers_dev": false,
   "assets": {
     "directory": "./public",
     "binding": "ASSETS",
