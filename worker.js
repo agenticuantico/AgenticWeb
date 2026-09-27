@@ -63,8 +63,9 @@ async function callCloudflareAI(request, env) {
   const attachments = Array.isArray(body?.attachments)
     ? body.attachments
         .filter(a => a && typeof a.name === "string" && typeof a.data === "string")
-        .slice(0, 4)
+        .slice(0, 5)
     : [];
+  const reasoning = body?.reasoning === true;
 
   if (!message && !attachments.length) {
     return json({ok:false,error:"invalid_request",message:"El mensaje no puede estar vacío."},400,request);
@@ -112,11 +113,11 @@ async function callCloudflareAI(request, env) {
     try {
       const result = await env.AI.run(model, {
         messages,
-        max_completion_tokens: 900,
-        temperature: 0.55,
+        max_completion_tokens: reasoning ? 1800 : 900,
+        temperature: reasoning ? 0.45 : 0.55,
         top_p: 0.85,
-        reasoning_effort: "low",
-        chat_template_kwargs: { enable_thinking: false }
+        reasoning_effort: reasoning ? "xhigh" : "low",
+        chat_template_kwargs: { enable_thinking: reasoning }
       });
 
       const answer =
@@ -193,6 +194,7 @@ async function callHuggingFace(request, env) {
   const attachments = Array.isArray(body?.attachments)
     ? body.attachments.filter(a => a && typeof a.name === "string" && typeof a.data === "string").slice(0,5)
     : [];
+  const reasoning = body?.reasoning === true;
   const imageParts = attachments
     .filter(a => a.kind === "image" && String(a.data).startsWith("data:image/") && a.data.length < 7000000)
     .map(a => ({type:"image_url",image_url:{url:a.data}}));
@@ -237,17 +239,17 @@ async function callHuggingFace(request, env) {
         body: JSON.stringify({
           model: selectedModel,
           messages,
-          temperature: 0.7,
+          temperature: reasoning ? 0.45 : 0.7,
           top_p: 0.8,
-          max_tokens: 512,
-          presence_penalty: 1.5,
-          reasoning_effort: "medium",
+          max_tokens: reasoning ? 1400 : 512,
+          presence_penalty: 1.2,
+          reasoning_effort: reasoning ? "xhigh" : "medium",
           stream: false,
           extra_body: {
             top_k: 20,
             chat_template_kwargs: {
-              enable_thinking: true,
-              preserve_thinking: true
+              enable_thinking: reasoning,
+              preserve_thinking: reasoning
             }
           }
         })
