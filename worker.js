@@ -1201,3 +1201,26 @@ export class UserData extends DurableObject {
 }
 
 export default {
+  async scheduled(controller, env, ctx) {
+    ctx.waitUntil(autonomousBrainCycle(env));
+  },
+
+  async fetch(request, env) {
+    try {
+      const url = new URL(request.url);
+      if (isApiPath(url.pathname)) {
+        return await handleApi(request, env);
+      }
+      const assetResponse = await env.ASSETS.fetch(request);
+      return applySecurityHeaders(assetResponse, request);
+    } catch {
+      return applySecurityHeaders(
+        new Response("Servicio no disponible.", {
+          status: 500,
+          headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" }
+        }),
+        request
+      );
+    }
+  }
+};
