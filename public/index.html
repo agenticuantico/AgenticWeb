@@ -27,6 +27,22 @@
 @media(max-width:850px) and (max-height:720px){.hero{padding-top:98px}.hero h1{font-size:clamp(42px,11vw,58px)}.lead{margin-top:14px;line-height:1.4}.actions{margin-top:14px}.video-wrap{height:460px;min-height:460px;margin-top:24px}.chat{bottom:10px}.messages{height:105px}}
 @media(min-width:521px) and (max-width:850px){.hero{padding-left:32px;padding-right:32px}.hero h1{font-size:clamp(54px,9vw,76px)}.video-wrap{width:calc(100% + 64px);transform:translateX(-32px);height:clamp(420px,58svh,620px)}.chat{width:min(440px,calc(100% - 48px))}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.video-wrap video{animation:none}.hero-content,.chat{transition:none}}
+
+.chat{width:min(430px,calc(100% - 36px));padding:0;overflow:hidden;border-radius:24px;background:rgba(255,255,255,.92);border:1px solid rgba(24,24,27,.13);box-shadow:0 24px 70px rgba(24,24,27,.18);backdrop-filter:blur(22px);transition:width .25s ease,height .25s ease,top .25s ease,bottom .25s ease,left .25s ease,right .25s ease,border-radius .25s ease}
+.chat-head{min-height:60px;padding:10px 12px 9px 15px}
+.chat-identity{display:flex;align-items:center;gap:9px;min-width:0}.chat-brain-mini{display:grid;place-items:center;width:27px;height:27px;flex:none}.chat-brain-mini .brain-icon{width:25px;height:25px;stroke:#3f83f1;stroke-width:1.8;fill:none}.chat-title{font-size:15px;line-height:1.1}.chat-mode{font-size:9px;opacity:.5;margin-top:4px}.chat-head-actions{display:flex;align-items:center;gap:7px}.status{font-size:9px;display:flex;gap:5px;align-items:center;white-space:nowrap}.status b{width:7px;height:7px;background:#35ae67;border-radius:50%;box-shadow:0 0 0 3px rgba(53,174,103,.12)}.status.offline b{background:#d05252;box-shadow:0 0 0 3px rgba(208,82,82,.1)}
+.chat-expand,.chat-minimize{width:35px;height:35px;border:0;background:transparent;border-radius:10px;display:grid;place-items:center;padding:0}.chat-expand:hover,.chat-minimize:hover{background:rgba(24,24,27,.06)}
+.chat-body{min-width:0}.attachment-list{display:flex;gap:7px;overflow:auto;padding:0 14px 8px}.attachment-chip{display:flex;align-items:center;gap:7px;flex:none;max-width:235px;padding:7px 9px;background:rgba(237,238,245,.9);border:1px solid rgba(24,24,27,.08);border-radius:11px;font-size:10px}.attachment-chip span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.attachment-chip button{width:18px;height:18px;border:0;border-radius:50%;background:rgba(24,24,27,.08);font-size:12px;line-height:18px;padding:0}
+.messages{height:150px;overflow:auto;padding:4px 14px 6px;scrollbar-width:thin}.msg{font-size:12.5px;line-height:1.5;margin:0 0 10px;max-width:90%}.msg.user{padding:9px 11px}.msg.ai{padding:9px 11px}
+.composer{display:grid;grid-template-columns:40px 40px minmax(0,1fr) 40px 44px;gap:6px;align-items:end;border-top:1px solid var(--line);padding:9px 10px 10px}.composer textarea{min-width:0;width:100%;min-height:42px;max-height:110px;resize:none;border:0;outline:0;background:transparent;padding:10px 5px;color:var(--ink);font-size:13px;line-height:1.35}.svg-icon{width:23px;height:23px;display:block;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}.icon-btn{width:40px;height:42px;border:0;border-radius:13px;background:transparent;color:#141414;display:grid;place-items:center;padding:0}.icon-btn:hover{background:rgba(24,24,27,.055)}.brain-btn{color:#3f83f1}.brain-btn .brain-icon{width:27px;height:27px}.brain-btn.active{background:rgba(63,131,241,.1);box-shadow:inset 0 0 0 1px rgba(63,131,241,.18)}.brain-btn.active .brain-icon{filter:drop-shadow(0 0 7px rgba(63,131,241,.55))}.mic-btn.recording{color:#e34242;background:rgba(227,66,66,.08);animation:micPulse 1s ease-in-out infinite}@keyframes micPulse{50%{transform:scale(1.05)}}.send{width:44px;height:44px;border:0;border-radius:50%;background:#3f83f1;color:#fff;display:grid;place-items:center;padding:0}.send:disabled{opacity:.45}.send .send-icon{width:23px;height:23px;stroke-width:2.1}.chat-hint{font-size:8.5px;opacity:.48;padding:0 14px 10px;text-align:center}.typing{opacity:.55}
+.chat.expanded{position:fixed!important;z-index:1000;left:12px;right:12px;top:12px;bottom:12px;width:auto!important;height:auto;max-height:none;border-radius:24px}.chat.expanded .chat-body{flex:1;min-height:0;display:flex;flex-direction:column}.chat.expanded .messages{height:auto;flex:1;min-height:0}.chat.expanded .composer{padding-bottom:max(10px,env(safe-area-inset-bottom))}
+body.chat-lock{overflow:hidden}
+@media(max-width:850px){.chat{position:fixed;z-index:40;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));transform:none;width:auto;max-height:min(68dvh,520px);border-radius:22px}.chat.expanded{left:7px;right:7px;top:max(7px,env(safe-area-inset-top));bottom:max(7px,env(safe-area-inset-bottom));border-radius:22px}.chat-head{min-height:57px;padding:8px 10px 7px 13px}.messages{height:clamp(105px,22dvh,155px);padding-left:11px;padding-right:11px}.composer{grid-template-columns:38px 38px minmax(0,1fr) 38px 43px;gap:4px;padding-left:8px;padding-right:8px}.icon-btn{width:38px}.send{width:43px;height:43px}.chat-hint{display:none}.attachment-list{padding-left:10px;padding-right:10px}.chat-mode{display:none}}
+@media(max-width:520px){.chat{left:10px;right:10px;bottom:calc(9px + env(safe-area-inset-bottom));max-height:310px;border-radius:20px}.chat.expanded{left:0;right:0;top:0;bottom:0;border-radius:0}.chat-head{min-height:53px}.status{display:none}.composer{grid-template-columns:35px 35px minmax(0,1fr) 35px 43px}.icon-btn{width:35px;height:40px}.send{width:43px;height:43px}.messages{height:105px}.attachment-chip{max-width:180px}}
+@media(min-width:851px){.chat.expanded .chat-head{min-height:68px;padding:13px 17px}.chat.expanded .messages{font-size:14px}.chat.expanded .msg{font-size:13.5px;max-width:80%}}
+@media(max-width:390px){.chat{max-height:292px}.composer{grid-template-columns:32px 32px minmax(0,1fr) 32px 41px;gap:3px}.icon-btn{width:32px}.send{width:41px;height:41px}.composer textarea{font-size:12px}}
+@media(max-width:850px) and (max-height:700px){.chat:not(.expanded){max-height:270px}.chat:not(.expanded) .messages{height:86px}}
+@media(prefers-reduced-motion:reduce){.chat,.chat.expanded{transition:none}.mic-btn.recording{animation:none}}
 </style>
 </head>
 <body>
@@ -49,24 +65,273 @@
 <source src="https://media.dinamosites.com/library/v1/sections/alba-interior-video-33ea797fee02.mp4" type="video/mp4">
 </video><span class="video-pending" id="video-pending">video pendiente / alojar en /media/alba-interior-video.mp4</span>
 </div>
+
 <div class="chat" id="chat" aria-label="Chat de AgentiCuantico">
-<div class="chat-head"><div class="chat-title">AgentiCuantico</div><div class="status"><b></b> online</div></div>
-<div class="messages" id="messages" aria-live="polite"><div class="msg ai">Hola. Soy AgentiCuantico. ¿Qué querés crear, resolver o explorar?</div></div>
-<form class="composer" id="chat-form"><textarea id="input" rows="1" placeholder="Escribí un mensaje…" aria-label="Mensaje"></textarea><button class="send" id="send" type="submit" aria-label="Enviar">↑</button></form>
+  <div class="chat-head">
+    <div class="chat-identity"><span class="chat-brain-mini"><svg viewBox="0 0 64 64" class="svg-icon brain-icon mini" aria-hidden="true"><path d="M25 8c-6 0-10 4-10 10v2c-4 1-7 5-7 9s2 7 5 9c-2 5 1 11 7 12 1 4 4 6 8 6 3 0 6-2 7-4V14c-2-4-5-6-10-6Z"/><path d="M39 14v38c1 2 4 4 7 4 4 0 7-2 8-6 6-1 9-7 7-12 3-2 5-5 5-9s-3-8-7-9v-2c0-6-4-10-10-10-5 0-8 2-10 6Z"/><path d="M32 10v42M16 26c4-1 8 1 9 5M15 39c4-2 8-1 10 2M48 27c-4-1-8 1-9 5M49 40c-4-2-8-1-10 2"/></svg></span><div><div class="chat-title">AgentiCuantico</div><div class="chat-mode" id="chat-mode">IA conversacional</div></div></div>
+    <div class="chat-head-actions">
+      <div class="status"><b id="status-dot"></b><span id="status-text">conectando</span></div>
+      <button class="chat-expand" id="chat-expand" type="button" aria-label="Abrir chat completo" title="Abrir chat completo"><svg viewBox="0 0 24 24" class="svg-icon" aria-hidden="true"><path d="M9 4H4v5M4 4l6 6M15 20h5v-5M20 20l-6-6M15 4h5v5M20 4l-6 6M9 20H4v-5M4 20l6-6"/></svg></button>
+      <button class="chat-minimize" id="chat-minimize" type="button" aria-label="Minimizar chat" title="Minimizar chat" hidden><svg viewBox="0 0 24 24" class="svg-icon" aria-hidden="true"><path d="M9 4v5H4M4 9l6-5M15 20v-5h5M20 15l-5 5M15 4v5h5M20 9l-5-5M9 20v-5H4M4 15l6 5"/></svg></button>
+    </div>
+  </div>
+  <div class="chat-body">
+    <div class="attachment-list" id="attachment-list" aria-live="polite"></div>
+    <div class="messages" id="messages" aria-live="polite"><div class="msg ai">Hola. Soy AgentiCuantico. ¿Qué querés crear, resolver o explorar?</div></div>
+  </div>
+  <form class="composer" id="chat-form">
+    <input id="file-input" type="file" hidden multiple accept="image/*,application/pdf,text/plain,text/markdown,text/csv,application/json,text/html,text/css,application/javascript,text/javascript,text/x-python,text/xml,video/*,audio/*,.js,.jsx,.ts,.tsx,.py,.java,.c,.cpp,.h,.hpp,.rs,.go,.php,.sql,.sh,.md,.csv,.json,.html,.css,.xml,.yaml,.yml">
+    <button class="icon-btn attach" id="attach" type="button" aria-label="Subir archivos" title="Subir archivos"><svg viewBox="0 0 24 24" class="svg-icon" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+    <button class="icon-btn brain-btn" id="brain" type="button" aria-label="Activar razonamiento avanzado" aria-pressed="false" title="Razonamiento avanzado"><svg viewBox="0 0 64 64" class="svg-icon brain-icon " aria-hidden="true"><path d="M25 8c-6 0-10 4-10 10v2c-4 1-7 5-7 9s2 7 5 9c-2 5 1 11 7 12 1 4 4 6 8 6 3 0 6-2 7-4V14c-2-4-5-6-10-6Z"/><path d="M39 14v38c1 2 4 4 7 4 4 0 7-2 8-6 6-1 9-7 7-12 3-2 5-5 5-9s-3-8-7-9v-2c0-6-4-10-10-10-5 0-8 2-10 6Z"/><path d="M32 10v42M16 26c4-1 8 1 9 5M15 39c4-2 8-1 10 2M48 27c-4-1-8 1-9 5M49 40c-4-2-8-1-10 2"/></svg></button>
+    <textarea id="input" rows="1" placeholder="Escribí un mensaje…" aria-label="Mensaje"></textarea>
+    <button class="icon-btn mic-btn" id="mic" type="button" aria-label="Hablar" title="Hablar"><svg viewBox="0 0 24 24" class="svg-icon" aria-hidden="true"><rect x="8" y="3" width="8" height="12" rx="4"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M9 21h6"/></svg></button>
+    <button class="send" id="send" type="submit" aria-label="Enviar" title="Enviar"><svg viewBox="0 0 24 24" class="svg-icon send-icon" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button>
+  </form>
+  <div class="chat-hint" id="chat-hint">＋ archivos · 🎙 voz · cerebro = razonamiento avanzado</div>
 </div>
-</section>
-</main>
+
 <script>
-(()=>{const API="/v1/public/chat",form=document.querySelector("#chat-form"),input=document.querySelector("#input"),send=document.querySelector("#send"),messages=document.querySelector("#messages"),menu=document.querySelector("#menu"),menuList=document.querySelector("#menu-list"),video=document.querySelector("#hero-video"),pending=document.querySelector("#video-pending"),reduce=matchMedia("(prefers-reduced-motion: reduce)");
-menu.onclick=()=>menuList.classList.toggle("open");menuList.querySelectorAll("a").forEach(a=>a.onclick=()=>menuList.classList.remove("open"));
-if(reduce.matches)video.pause();
-document.addEventListener("visibilitychange",()=>{if(document.hidden)video.pause();else if(!reduce.matches)video.play().catch(()=>{})});
-video.addEventListener("error",()=>pending.classList.add("show"));
-function add(text,type){const d=document.createElement("div");d.className="msg "+type;d.textContent=text;messages.append(d);messages.scrollTop=messages.scrollHeight;return d}
-function history(){return [...messages.querySelectorAll(".msg")].slice(-10).map(x=>({role:x.classList.contains("user")?"user":"assistant",content:x.textContent}))}
-form.onsubmit=async e=>{e.preventDefault();const value=input.value.trim();if(!value||send.disabled)return;add(value,"user");input.value="";input.style.height="auto";send.disabled=true;const t=add("Pensando…","ai typing");
-try{const r=await fetch(API,{method:"POST",headers:{"Content-Type":"application/json","X-Guest-Session":localStorage.getItem("aq-session")||"guest"},body:JSON.stringify({message:value,language:"es-AR",history:history().slice(0,-1),attachments:[]})});const d=await r.json().catch(()=>({}));if(!r.ok||!d.answer)throw Error("AI unavailable");t.classList.remove("typing");t.textContent=d.answer}catch(err){t.classList.remove("typing");t.textContent="No pude conectar con el motor de IA. Intentá nuevamente en unos segundos."}finally{send.disabled=false;input.focus()}};
-input.addEventListener("input",()=>{input.style.height="auto";input.style.height=Math.min(input.scrollHeight,100)+"px"});input.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();form.requestSubmit()}});
+(()=>{
+const API="/v1/public/chat";
+const form=document.querySelector("#chat-form");
+const input=document.querySelector("#input");
+const send=document.querySelector("#send");
+const messages=document.querySelector("#messages");
+const fileInput=document.querySelector("#file-input");
+const attach=document.querySelector("#attach");
+const brain=document.querySelector("#brain");
+const mic=document.querySelector("#mic");
+const attachmentList=document.querySelector("#attachment-list");
+const chat=document.querySelector("#chat");
+const expand=document.querySelector("#chat-expand");
+const minimize=document.querySelector("#chat-minimize");
+const statusDot=document.querySelector("#status-dot");
+const statusText=document.querySelector("#status-text");
+const chatMode=document.querySelector("#chat-mode");
+const reduce=matchMedia("(prefers-reduced-motion: reduce)");
+let reasoning=false;
+let attachments=[];
+let recognition=null;
+let recognizing=false;
+const sessionKey="aq-session";
+
+function session(){
+  let v=localStorage.getItem(sessionKey);
+  if(!v){v=(crypto.randomUUID?crypto.randomUUID():String(Date.now())+"-"+Math.random());localStorage.setItem(sessionKey,v)}
+  return v;
+}
+session();
+
+function setStatus(ok,text){
+  statusDot.classList.toggle("bad",!ok);
+  statusDot.parentElement.classList.toggle("offline",!ok);
+  statusText.textContent=text;
+}
+function setExpanded(value){
+  chat.classList.toggle("expanded",value);
+  document.body.classList.toggle("chat-lock",value);
+  expand.hidden=value;
+  minimize.hidden=!value;
+  chat.setAttribute("aria-expanded",value?"true":"false");
+  if(value) setTimeout(()=>input.focus(),80);
+}
+expand.addEventListener("click",()=>setExpanded(true));
+minimize.addEventListener("click",()=>setExpanded(false));
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&chat.classList.contains("expanded"))setExpanded(false)});
+
+brain.addEventListener("click",()=>{
+  reasoning=!reasoning;
+  brain.classList.toggle("active",reasoning);
+  brain.setAttribute("aria-pressed",reasoning?"true":"false");
+  chatMode.textContent=reasoning?"Razonamiento avanzado":"IA conversacional";
+});
+
+function add(text,type){
+  const d=document.createElement("div");
+  d.className="msg "+type;
+  d.textContent=text;
+  messages.append(d);
+  messages.scrollTop=messages.scrollHeight;
+  return d;
+}
+function history(){
+  return [...messages.querySelectorAll(".msg")].slice(-12).map(x=>({role:x.classList.contains("user")?"user":"assistant",content:x.textContent}));
+}
+function fileChip(name,index){
+  const d=document.createElement("div");
+  d.className="attachment-chip";
+  const s=document.createElement("span");s.textContent=name;
+  const b=document.createElement("button");b.type="button";b.textContent="×";b.setAttribute("aria-label","Quitar "+name);
+  b.onclick=()=>{attachments.splice(index,1);renderAttachments()};
+  d.append(s,b);return d;
+}
+function renderAttachments(){
+  attachmentList.replaceChildren();
+  attachments.forEach((a,i)=>attachmentList.append(fileChip(a.name,i)));
+  attachmentList.hidden=!attachments.length;
+}
+
+function readAsDataURL(file){
+  return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result));r.onerror=reject;r.readAsDataURL(file)});
+}
+function readText(file){
+  return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result||""));r.onerror=reject;r.readAsText(file)});
+}
+function compressImage(file,maxSide=1440){
+  return new Promise((resolve,reject)=>{
+    const url=URL.createObjectURL(file),img=new Image();
+    img.onload=()=>{
+      try{
+        const scale=Math.min(1,maxSide/Math.max(img.naturalWidth,img.naturalHeight));
+        const canvas=document.createElement("canvas");
+        canvas.width=Math.max(1,Math.round(img.naturalWidth*scale));
+        canvas.height=Math.max(1,Math.round(img.naturalHeight*scale));
+        canvas.getContext("2d",{alpha:false}).drawImage(img,0,0,canvas.width,canvas.height);
+        resolve(canvas.toDataURL("image/jpeg",.82));
+      }catch(e){reject(e)}finally{URL.revokeObjectURL(url)}
+    };
+    img.onerror=reject;img.src=url;
+  });
+}
+async function extractPdf(file){
+  const pdfjs=await import("https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.min.mjs");
+  pdfjs.GlobalWorkerOptions.workerSrc="https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.worker.min.mjs";
+  const pdf=await pdfjs.getDocument({data:await file.arrayBuffer()}).promise;
+  const pages=Math.min(pdf.numPages,30);
+  let out="";
+  for(let i=1;i<=pages;i++){
+    const page=await pdf.getPage(i);
+    const tc=await page.getTextContent();
+    out+="\n[Página "+i+"]\n"+tc.items.map(x=>x.str||"").join(" ");
+    if(out.length>50000)break;
+  }
+  return out.slice(0,50000);
+}
+async function extractVideoFrames(file){
+  const url=URL.createObjectURL(file),video=document.createElement("video");
+  video.preload="metadata";video.muted=true;video.playsInline=true;video.src=url;
+  await new Promise((resolve,reject)=>{video.onloadedmetadata=resolve;video.onerror=reject;video.load()});
+  const duration=Number.isFinite(video.duration)&&video.duration>0?video.duration:1;
+  const times=[duration*.08,duration*.5,duration*.92].filter((v,i,a)=>a.indexOf(v)===i);
+  const frames=[];
+  for(let i=0;i<times.length;i++){
+    await new Promise((resolve,reject)=>{
+      const done=()=>{video.removeEventListener("seeked",done);resolve()};
+      video.addEventListener("seeked",done,{once:true});
+      video.currentTime=Math.min(duration-.01,Math.max(.01,times[i]));
+      setTimeout(()=>{video.removeEventListener("seeked",done);reject(new Error("video_seek_timeout"))},6000);
+    });
+    const max=1024,scale=Math.min(1,max/Math.max(video.videoWidth||max,video.videoHeight||max));
+    const canvas=document.createElement("canvas");
+    canvas.width=Math.max(1,Math.round((video.videoWidth||max)*scale));
+    canvas.height=Math.max(1,Math.round((video.videoHeight||Math.round(max*.56))*scale));
+    canvas.getContext("2d",{alpha:false}).drawImage(video,0,0,canvas.width,canvas.height);
+    frames.push({name:file.name+" · frame "+(i+1),kind:"image",data:canvas.toDataURL("image/jpeg",.76)});
+  }
+  URL.revokeObjectURL(url);
+  return {frames,duration:Math.round(duration),width:video.videoWidth,height:video.videoHeight};
+}
+function kindOf(file){
+  const ext=(file.name.split(".").pop()||"").toLowerCase();
+  if(file.type.startsWith("image/"))return "image";
+  if(file.type.startsWith("video/"))return "video";
+  if(file.type==="application/pdf"||ext==="pdf")return "pdf";
+  if(/^(txt|md|csv|json|js|jsx|ts|tsx|py|java|c|cpp|h|hpp|rs|go|php|sql|sh|html|css|xml|yaml|yml|toml|ini|log)$/i.test(ext))return "text";
+  if(file.type.startsWith("text/")||file.type==="application/json")return "text";
+  return "other";
+}
+async function prepareFile(file){
+  const kind=kindOf(file);
+  if(file.size>12*1024*1024)throw new Error("El archivo supera 12 MB.");
+  if(kind==="image")return [{name:file.name,kind:"image",data:await compressImage(file)}];
+  if(kind==="pdf")return [{name:file.name+" · texto extraído",kind:"text",data:await extractPdf(file)}];
+  if(kind==="video"){
+    const v=await extractVideoFrames(file);
+    return [{name:file.name+" · video "+v.width+"×"+v.height+" · "+v.duration+"s",kind:"text",data:"Video adjunto. Se envían tres fotogramas representativos para análisis visual."},...v.frames];
+  }
+  if(kind==="text")return [{name:file.name,kind:"text",data:(await readText(file)).slice(0,50000)}];
+  if(file.type.startsWith("audio/"))return [{name:file.name,kind:"text",data:"Archivo de audio adjunto: "+file.name+". El chat puede recibir el archivo, pero la transcripción automática del archivo no está habilitada en este navegador."}];
+  return [{name:file.name,kind:"text",data:"Archivo adjunto: "+file.name+". Tipo: "+(file.type||"desconocido")+". Para analizar su contenido se necesita una extracción compatible."}];
+}
+async function handleFiles(list){
+  for(const file of [...list]){
+    if(attachments.length>=5){add("Podés adjuntar hasta 5 elementos por mensaje.","ai");break}
+    try{
+      const prepared=await prepareFile(file);
+      for(const a of prepared){
+        if(attachments.length>=5)break;
+        attachments.push(a);
+      }
+    }catch(err){
+      add("No pude preparar "+file.name+": "+String(err.message||"error"),"ai");
+    }
+    renderAttachments();
+  }
+}
+attach.addEventListener("click",()=>fileInput.click());
+fileInput.addEventListener("change",async()=>{await handleFiles(fileInput.files);fileInput.value=""});
+
+const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+if(SpeechRecognition){
+  recognition=new SpeechRecognition();
+  recognition.lang="es-AR";recognition.continuous=false;recognition.interimResults=true;
+  recognition.onstart=()=>{recognizing=true;mic.classList.add("recording");mic.setAttribute("aria-label","Detener grabación")};
+  recognition.onresult=e=>{
+    let text="";
+    for(let i=e.resultIndex;i<e.results.length;i++)text+=e.results[i][0].transcript;
+    input.value=text.trim();input.style.height="auto";input.style.height=Math.min(input.scrollHeight,110)+"px";
+  };
+  recognition.onerror=()=>{recognizing=false;mic.classList.remove("recording")};
+  recognition.onend=()=>{recognizing=false;mic.classList.remove("recording");mic.setAttribute("aria-label","Hablar")};
+  mic.addEventListener("click",()=>{if(recognizing)recognition.stop();else{try{recognition.start()}catch{}}});
+}else{
+  mic.title="Tu navegador no ofrece reconocimiento de voz";
+  mic.addEventListener("click",()=>{add("El reconocimiento de voz no está disponible en este navegador. Probá Chrome o Samsung Internet.","ai")});
+}
+
+async function sendMessage(e){
+  e.preventDefault();
+  const value=input.value.trim();
+  if(!value&&!attachments.length||send.disabled)return;
+  const payloadAttachments=attachments.map(a=>({name:a.name,kind:a.kind,data:a.data}));
+  const displayText=value||(attachments.length?"Analizá los archivos adjuntos y explicame qué encontrás.":"");
+  add(displayText,"user");
+  input.value="";input.style.height="auto";
+  attachmentList.replaceChildren();attachmentList.hidden=true;
+  const outgoing=attachments.slice();attachments=[];
+  const thinking=add(reasoning?"Pensando con razonamiento avanzado…":"Pensando…","ai typing");
+  send.disabled=true;attach.disabled=true;brain.disabled=true;mic.disabled=true;
+  try{
+    const r=await fetch(API,{method:"POST",headers:{"Content-Type":"application/json","X-Guest-Session":session()},body:JSON.stringify({
+      message:value,language:"es-AR",history:history().slice(0,-1),attachments:payloadAttachments,reasoning:reasoning
+    })});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok||!d.answer)throw new Error(d.message||"ai_unavailable");
+    thinking.classList.remove("typing");
+    thinking.textContent=d.answer;
+    setStatus(true,"online");
+  }catch(err){
+    thinking.classList.remove("typing");
+    thinking.textContent="No pude conectar con el motor de IA. Revisá la conexión y probá nuevamente.";
+    setStatus(false,"IA no disponible");
+  }finally{
+    send.disabled=false;attach.disabled=false;brain.disabled=false;mic.disabled=false;input.focus();
+  }
+}
+form.addEventListener("submit",sendMessage);
+input.addEventListener("input",()=>{input.style.height="auto";input.style.height=Math.min(input.scrollHeight,110)+"px"});
+input.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();form.requestSubmit()}});
+
+(async()=>{
+  try{const r=await fetch("/health",{cache:"no-store"});if(r.ok)setStatus(true,"online");else setStatus(false,"IA no disponible")}catch{setStatus(false,"sin conexión")}
+  if(reduce.matches){const video=document.querySelector("#hero-video");if(video)video.pause()}
+})();
+
+const video=document.querySelector("#hero-video"),pending=document.querySelector("#video-pending");
+if(video){
+  document.addEventListener("visibilitychange",()=>{if(document.hidden)video.pause();else if(!reduce.matches)video.play().catch(()=>{})});
+  video.addEventListener("error",()=>pending.classList.add("show"));
+}
 })();
 </script>
 </body>
