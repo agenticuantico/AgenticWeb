@@ -104,7 +104,7 @@ const langs=[["es-AR","🇦🇷","Español · Argentina"],["en-US","🇺🇸","E
 const lang=$('#language'),gender=$('#gender'),voice=$('#voice'),flag=$('#flag'),callLayer=$('#voice-call'),callStatus=$('#call-status');
 langs.forEach(([id,f,n])=>{const o=document.createElement("option");o.value=id;o.textContent=n;lang.append(o)});
 lang.value="es-AR";
-function flagFor(v){return (langs.find(x=>x[0]===v)||langs[0])[1]}function baseLang(v){return String(v||"").toLowerCase().split("-")[0];
+function flagFor(v){return (langs.find(x=>x[0]===v)||langs[0])[1]}function baseLang(v){return String(v||"").toLowerCase().split("-")[0]}
 function setState(s){stageState.textContent=s;document.body.dataset.state=s}
 function add(text,type="ai"){const d=document.createElement("div");d.className="msg "+type;d.textContent=text;messages.append(d);messages.scrollTop=messages.scrollHeight;return d}
 function history(){return [...messages.querySelectorAll(".msg")].slice(-14).map(x=>({role:x.classList.contains("user")?"user":"assistant",content:x.textContent}))}
