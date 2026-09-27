@@ -4,122 +4,134 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#EDEEF5">
-<meta name="description" content="AgentiCuantico — Neural AI conversacional, voz natural y workspace 3D inmersivo.">
+<meta name="description" content="AgentiCuantico — inteligencia artificial conversacional.">
 <link rel="canonical" href="https://agenticuantico.dev.ar/">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:ital,wght@0,400;0,500&display=swap"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500&display=swap">
-<title>AgentiCuantico — Neural AI</title>
-<style>:root{--bg:#EDEEF5;--ink:#18181b;--lime:#9fff00;--line:rgba(24,24,27,.12);--white:rgba(255,255,255,.82)}*{box-sizing:border-box}html{scroll-behavior:smooth;background:var(--bg)}body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif;overflow-x:hidden}button,input,textarea,select{font:inherit}button,a{cursor:pointer}a{text-decoration:none;color:inherit}.hidden{display:none!important}
-.site-nav{position:fixed;inset:0 0 auto;height:72px;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:0 28px;background:rgba(237,238,245,.84);border-bottom:1px solid var(--line);backdrop-filter:blur(16px)}.brand{display:flex;align-items:center;gap:10px;font:400 20px Outfit, sans-serif}.brand-mark{width:28px;height:28px;display:grid;place-items:center}.brand-mark svg{width:28px;height:28px}.nav-links{display:flex;align-items:center;gap:4px;font-size:12px}.nav-links a{padding:10px 11px;border-radius:10px}.nav-links a:hover{background:#fff}.nav-links .start{background:var(--ink);color:#fff}.menu{display:none;border:1px solid var(--line);background:#fff;border-radius:10px;width:40px;height:40px}.mobile-nav{display:none}
-.hero{position:relative;z-index:2;min-height:100svh;padding:160px 24px 0;text-align:center;overflow:hidden}.hero-inner{width:min(1180px,100%);margin:0 auto}.eyebrow{font:500 10px Inter,sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#555}.hero h1{font:400 clamp(48px,7vw,96px)/.98 Outfit,sans-serif;letter-spacing:-.03em;margin:15px auto 16px;max-width:1050px}.hero h1 span{display:inline-block;background:var(--lime);padding:0 .14em;border-radius:16px}.lead{max-width:576px;margin:0 auto;font:400 clamp(16px,1.5vw,18px)/1.55 Inter,sans-serif;color:#5c6069}.actions{display:flex;justify-content:center;gap:10px;margin-top:24px}.action{padding:13px 19px;border-radius:999px;border:1px solid var(--line);font:500 12px Inter,sans-serif;background:rgba(255,255,255,.6);backdrop-filter:blur(10px)}.action.primary{background:#18181b;color:#fff;border-color:#18181b}.status-pill{display:inline-flex;align-items:center;gap:7px;margin-top:14px;padding:7px 11px;border:1px solid var(--line);border-radius:999px;background:#ffffff88;font-size:9px;color:#666}.status-dot{width:6px;height:6px;border-radius:50%;background:#27ad65;box-shadow:0 0 10px #27ad65}
-.neural-stage{position:relative;width:min(1180px,100%);height:min(52vh,600px);min-height:300px;margin:0 auto;overflow:hidden;mask-image:linear-gradient(to bottom,transparent 0,#000 14%,#000 82%,transparent 100%)}#neural-canvas{position:absolute!important;inset:0!important;z-index:0!important;pointer-events:none!important}.stage-caption,.stage-state,.orbit,.scanline{z-index:2}.stage-caption{position:absolute;top:15px;left:10px;font:500 8px Inter;letter-spacing:.16em;color:#777}.stage-state{position:absolute;top:15px;right:10px;font:500 8px Inter;letter-spacing:.16em;color:#3f83f1}.orbit{position:absolute;left:50%;top:53%;width:34%;aspect-ratio:1;transform:translate(-50%,-50%);border:1px solid #3f83f122;border-radius:50%;box-shadow:0 0 70px #3f83f11a inset}.orbit:before,.orbit:after{content:"";position:absolute;inset:-15%;border:1px solid #9fff0044;border-radius:50%;transform:rotate(45deg) scaleY(.35)}.orbit:after{transform:rotate(-35deg) scaleY(.25)}
-.workspace{position:relative;z-index:5;width:min(1180px,calc(100% - 40px));margin:0 auto 70px}.chat{position:relative;width:100%;height:min(720px,76vh);min-height:540px;background:rgba(255,255,255,.96)!important;border:1px solid var(--line)!important;border-radius:28px!important;box-shadow:0 25px 70px #18181b1c!important}.chat.expanded{position:fixed!important;inset:12px!important;width:auto!important;height:auto!important;z-index:1000;border-radius:22px!important}.chat-head{background:#fff!important;border-bottom:1px solid var(--line)!important;color:var(--ink)}.head-btn{background:#f2f3f6!important;color:var(--ink)!important;border-color:var(--line)!important}.chat-title{font:500 17px Outfit}.chat-mode,.online{color:#777}.online i{background:#27ad65;box-shadow:0 0 10px #27ad65}.chat-main{background:#fff}.history{background:#f7f7fa!important;border-right:1px solid var(--line)!important}.new-chat{background:#fff!important;border-color:var(--line)!important}.messages{padding:22px 24px}.msg{font:400 13px/1.55 Inter}.msg.ai{background:#f0f1f5!important;color:#35363b!important}.msg.user{background:#18181b!important;color:#fff!important}.composer-wrap{background:#fff!important;border-top:1px solid var(--line)!important}.textarea{background:#f2f3f6!important;border-color:var(--line)!important}.send{background:var(--lime)!important;color:var(--ink)!important}.tool-menu,.voice-panel{background:#fff!important;border-color:var(--line)!important}
-.info-section{background:#ffffffd9!important;border-color:var(--line)!important}.footer{border-color:var(--line)}
-@keyframes heroIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}.hero .eyebrow,.hero h1,.hero .lead,.hero .actions,.hero .status-pill{animation:heroIn .8s ease both}.hero h1{animation-delay:.08s}.hero .lead{animation-delay:.16s}.hero .actions{animation-delay:.24s}.hero .status-pill{animation-delay:.32s}@media(prefers-reduced-motion:reduce){.hero .eyebrow,.hero h1,.hero .lead,.hero .actions,.hero .status-pill{animation:none}}
-@media(max-width:1050px){.nav-links a:nth-child(3){display:none}}@media(max-width:850px){.site-nav{height:64px;padding:0 16px}.nav-links{display:none}.menu{display:grid;place-items:center}.mobile-nav{position:absolute;top:64px;left:12px;right:12px;display:none;flex-direction:column;padding:8px;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 18px 40px #18181b18}.mobile-nav.open{display:flex}.mobile-nav a{padding:13px 12px;border-radius:9px;font-size:13px}.mobile-nav a:hover{background:#f2f3f6}.hero{padding-top:112px}.workspace{width:100%;margin-bottom:40px}.chat{border-radius:24px 24px 0 0!important;height:72vh}.history{display:none}}@media(max-width:520px){.brand{font-size:17px}.hero{padding:112px 14px 0}.hero h1{font-size:clamp(48px,13vw,72px);overflow-wrap:break-word}.lead{font-size:16px}.actions{flex-direction:column;align-items:stretch}.action{width:100%}.neural-stage{height:360px;min-height:300px}.workspace{width:100%}.chat{height:70vh;min-height:490px}.messages{padding:16px 12px}.msg{max-width:95%;font-size:12px}.composer{grid-template-columns:34px minmax(0,1fr) 34px 34px 44px!important}.composer .brain-btn{display:none}.icon-btn{width:34px;height:40px}.send{width:44px;height:44px}}
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:ital,wght@0,400;0,500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500&display=swap">
+<title>AgentiCuantico</title>
+<style>
+:root{--bg:#EDEEF5;--ink:#18181b;--lime:#9fff00;--line:rgba(24,24,27,.12);--glass:rgba(255,255,255,.72)}
+*{box-sizing:border-box}
+html{background:var(--bg);scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,sans-serif;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+button{font:inherit}
+.site-header{position:absolute;top:0;left:0;right:0;z-index:20;padding:24px 28px}
+.nav{width:100%;max-width:1440px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.brand{display:inline-flex;align-items:center;gap:10px;font:400 20px Outfit,sans-serif;white-space:nowrap}
+.clover{width:30px;height:30px;display:grid;place-items:center}
+.clover svg{width:30px;height:30px}
+.nav-links{display:flex;align-items:center;gap:2px}
+.nav-links a,.menu-button{padding:10px 11px;border:0;border-radius:999px;background:transparent;font:400 12px Inter,sans-serif;white-space:nowrap}
+.nav-links a:hover{background:rgba(255,255,255,.7)}
+.nav-links .start{background:var(--ink);color:#fff;padding-inline:16px}
+.menu-button{display:none;border:1px solid var(--line);background:var(--glass)}
+.mobile-nav{display:none}
+.hero{min-height:100svh;padding:160px 24px 0;background:var(--bg);text-align:center;overflow:hidden}
+.hero-inner{max-width:1180px;margin:auto}
+.eyebrow{font:500 10px/1.2 Inter,sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#5e6067;animation:heroIn .8s ease both}
+h1{max-width:1100px;margin:16px auto 18px;font:400 clamp(48px,7vw,96px)/.98 Outfit,sans-serif;letter-spacing:-.03em;animation:heroIn .8s .08s ease both}
+h1 .lime{display:inline-block;background:var(--lime);border-radius:16px;padding:0 .14em}
+.lead{max-width:576px;margin:0 auto;font:400 clamp(16px,1.5vw,18px)/1.55 Inter,sans-serif;color:#555962;animation:heroIn .8s .16s ease both}
+.actions{display:flex;justify-content:center;gap:10px;margin-top:25px;animation:heroIn .8s .24s ease both}
+.action{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:0 20px;border-radius:999px;border:1px solid var(--line);font:500 12px Inter,sans-serif}
+.action.primary{background:var(--ink);color:#fff;border-color:var(--ink)}
+.action.secondary{background:rgba(255,255,255,.58);backdrop-filter:blur(12px)}
+.video-wrap{position:relative;margin:58px auto 0;width:min(1180px,100vw);height:min(62vh,680px);min-height:330px;overflow:hidden;background:#dfe1e8;mask-image:linear-gradient(to bottom,transparent 0%,#000 13%,#000 100%);-webkit-mask-image:linear-gradient(to bottom,transparent 0%,#000 13%,#000 100%);animation:heroIn .8s .32s ease both}
+.video-wrap video{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:cover;object-position:center center}
+.video-fade{position:absolute;inset:0 0 auto;height:23%;z-index:2;background:linear-gradient(to bottom,var(--bg),rgba(237,238,245,.72),transparent);pointer-events:none}
+.video-pending{position:absolute;z-index:3;left:50%;top:50%;transform:translate(-50%,-50%);padding:11px 15px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.82);backdrop-filter:blur(12px);font:400 11px Inter,sans-serif;color:#555;display:none}
+.video-wrap.failed .video-pending{display:block}
+@keyframes heroIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.eyebrow,h1,.lead,.actions,.video-wrap{animation:none}.video-wrap video{animation:none}}
+@media(max-width:1050px){.nav-links a:nth-child(2),.nav-links a:nth-child(3),.nav-links a:nth-child(5){display:none}}
+@media(max-width:820px){
+.site-header{padding:18px 16px}
+.nav-links{display:none}.menu-button{display:block}
+.mobile-nav{position:absolute;top:68px;left:16px;right:16px;display:none;flex-direction:column;align-items:stretch;padding:8px;background:rgba(255,255,255,.94);border:1px solid var(--line);border-radius:16px;box-shadow:0 18px 45px rgba(24,24,27,.12);backdrop-filter:blur(18px)}
+.mobile-nav.open{display:flex}
+.mobile-nav a{padding:14px 12px;border-radius:10px;font:400 14px Inter,sans-serif;text-align:left}
+.mobile-nav a:hover{background:#f2f3f6}
+.hero{padding:112px 14px 0}
+.video-wrap{margin-top:48px;width:100%;height:clamp(360px,62svh,650px);min-height:360px}
+}
+@media(max-width:520px){
+.brand{font-size:18px}.clover,.clover svg{width:27px;height:27px}
+h1{font-size:clamp(48px,13vw,72px);overflow-wrap:anywhere}
+.lead{font-size:16px}
+.actions{flex-direction:column;align-items:stretch}
+.action{width:100%}
+.video-wrap{margin-top:42px;height:max(390px,60svh)}
+}
 </style>
 </head>
 <body>
-<div id="neural-canvas" aria-hidden="true"></div><div class="grain" aria-hidden="true"></div>
-<header class="site-nav"><a class="brand" href="/" aria-label="AgentiCuantico"><span class="brand-mark"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3"><path d="M29 8c-8-3-16 1-17 10-6 1-9 6-8 12-4 4-3 11 2 14-1 8 5 13 12 12 2 6 9 8 14 4V10c0-1-1-1-3-2Z"/><path d="M35 8c8-3 16 1 17 10 6 1 9 6 8 12 4 4 3 11-2 14 1 8-5 13-12 12-2 6-9 8-14 4V10c0-1 1-1 3-2Z"/><path d="M32 9v45"/></svg></span><span>AgentiCuantico</span></a><nav class="nav-links"><a href="#ai">IA</a><a href="#chat">Chat</a><a href="/como-funciona.html">Cómo funciona</a><a href="/nosotros.html">Nosotros</a><a href="mailto:agenticuantico@gmail.com">Contacto</a><a class="start" href="#chat">Empezar →</a></nav><button class="menu" id="menu" aria-label="Menú">☰</button><nav class="mobile-nav" id="mobile-nav"><a href="#ai">IA</a><a href="#chat">Chat</a><a href="/como-funciona.html">Cómo funciona</a><a href="/nosotros.html">Nosotros</a><a href="mailto:agenticuantico@gmail.com">Contacto</a><a href="#chat">Empezar →</a></nav></header>
-<main id="ai">
-<section class="hero"><div class="hero-inner"><div class="eyebrow">INTELIGENCIA ARTIFICIAL CONVERSACIONAL</div><h1>Pensá. Creá. <span>Conectá tu IA.</span></h1><p class="lead">Una inteligencia artificial para conversar, programar, analizar información, trabajar con archivos y transformar ideas en soluciones.</p><div class="actions"><a class="action primary" href="#chat">Empezar →</a><a class="action" href="/como-funciona.html">Cómo funciona</a></div><div class="status-pill"><i class="status-dot"></i> NEURAL CORE · ONLINE</div><div class="neural-stage" id="stage"><div class="stage-caption">AGENTICUANTICO / NEURAL CORE / 3D</div><div class="stage-state" id="stage-state">IDLE</div><div class="orbit"></div></div></div></section>
-<section class="workspace" id="chat">
-<div class="chat" id="chat-shell">
-<div class="chat-head">
-<div class="identity"><div class="mini-brain"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M29 8c-8-3-16 1-17 10-6 1-9 6-8 12-4 4-3 11 2 14-1 8 5 13 12 12 2 6 9 8 14 4V10c0-1-1-1-3-2Z"/><path d="M35 8c8-3 16 1 17 10 6 1 9 6 8 12 4 4 3 11-2 14 1 8-5 13-12 12-2 6-9 8-14 4V10c0-1 1-1 3-2Z"/><path d="M32 9v45M15 22c4-2 9 0 11 4M13 35c5-2 10 0 12 4M49 22c-4-2-9 0-11 4M51 35c-5-2-10 0-12 4"/></svg></div><div><div class="chat-title">AgentiCuantico</div><div class="chat-mode" id="chat-mode">IA conversacional · Hugging Face / Cloudflare fallback</div></div></div>
-<div class="head-actions"><span class="online"><i></i><span id="status-text">ONLINE</span></span><button class="head-btn" id="voice-settings" title="Voz"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M9 21h6"/></svg></button><button class="head-btn" id="size-toggle" title="Abrir chat completo" aria-label="Abrir chat completo"><svg class="expand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 3H3v5M3 3l7 7M16 3h5v5M21 3l-7 7M3 16v5h5M3 21l7-7M21 16v5h-5M21 21l-7-7"/></svg><svg class="min-icon hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 3v6H3M3 9l7-7M15 3v6h6M21 9l-7-7M3 15h6v6M9 21l-7-7M21 15h-6v6M15 21l7-7"/></svg></button></div>
+<header class="site-header">
+<nav class="nav" aria-label="Navegación principal">
+<a class="brand" href="/" aria-label="AgentiCuantico">
+<span class="clover" aria-hidden="true">
+<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3">
+<path d="M32 31c-8-1-17-6-17-14 0-6 5-10 10-9 5 0 8 4 7 9 1-5 5-9 10-9 5-1 10 3 10 9 0 8-9 13-17 14Z"/>
+<path d="M32 33c-8 1-17 6-17 14 0 6 5 10 10 9 5 0 8-4 7-9 1 5 5 9 10 9 5 1 10-3 10-9 0-8-9-13-17-14Z"/>
+<path d="M32 31V18M32 33v13"/>
+</svg>
+</span>
+<span>AgentiCuantico</span>
+</a>
+<div class="nav-links">
+<a href="#hero">alba</a>
+<a href="#hero">servicios</a>
+<a href="#hero">recursos para pacientes</a>
+<a href="/nosotros.html">nosotros</a>
+<a href="#hero">centro educativo</a>
+<a href="#hero">buscar ayuda</a>
+<a class="start" href="#hero">empezar →</a>
 </div>
-<div class="chat-main">
-<aside class="history"><button class="new-chat" id="new-chat">＋ Nueva conversación</button><div class="history-list" id="history-list"></div></aside>
-<div class="conversation"><div class="messages" id="messages" aria-live="polite"><div class="msg ai">Hola. Soy AgentiCuantico. ¿Qué querés crear, resolver, programar o explorar?</div></div><div class="attachments" id="attachments"></div>
-<div class="composer-wrap">
-<div class="tool-menu hidden" id="tool-menu"><div class="tool-grid">
-<button class="tool" data-action="camera"><span class="tool-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 8h3l1.3-2h5.4L16 8h3a2 2 0 0 1 2 2v8H3v-8a2 2 0 0 1 2-2Z"/><circle cx="12" cy="14" r="3"/></svg></span><span><strong>Cámara</strong><small>Capturar imagen</small></span></button>
-<button class="tool" data-action="photos"><span class="tool-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="5" width="16" height="14" rx="2"/><circle cx="9" cy="10" r="1.4"/><path d="m5 17 4-4 3 3 2-2 5 4"/></svg></span><span><strong>Fotos</strong><small>Imágenes</small></span></button>
-<button class="tool" data-action="files"><span class="tool-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 3h7l4 4v14H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M14 3v5h5"/></svg></span><span><strong>Archivos</strong><small>PDF · video · audio · código</small></span></button>
-<button class="tool" data-action="connect"><span class="tool-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8" cy="8" r="3"/><circle cx="16" cy="16" r="3"/><path d="m10 10 4 4M14 10l-4 4"/></svg></span><span><strong>Complementos</strong><small>GitHub · Cloudflare · más</small></span></button>
-<button class="tool" data-action="reasoning"><span class="tool-icon"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M29 8c-8-3-16 1-17 10-6 1-9 6-8 12-4 4-3 11 2 14-1 8 5 13 12 12 2 6 9 8 14 4V10c0-1-1-1-3-2Z"/><path d="M35 8c8-3 16 1 17 10 6 1 9 6 8 12 4 4 3 11-2 14 1 8-5 13-12 12-2 6-9 8-14 4V10c0-1 1-1 3-2Z"/><path d="M32 9v45"/></svg></span><span><strong>Pensar más</strong><small id="reasoning-label">Razonamiento avanzado</small></span></button>
-<button class="tool" data-action="call"><span class="tool-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 4 4 7c0 7 6 13 13 13l3-3-4-3-2 2c-2-1-5-4-6-6l2-2-3-4Z"/></svg></span><span><strong>Llamada voz a voz</strong><small>Conversación manos libres</small></span></button>
-</div></div>
-<div class="voice-panel" id="voice-panel"><div class="voice-title">Voz natural · idioma · género</div><div class="voice-row"><div class="flag" id="flag">🇦🇷</div><select id="language"></select><select id="gender"><option value="female">Femenina</option><option value="male">Masculina</option><option value="neutral">Neutra</option></select></div><div class="voice-row"><select id="voice" style="grid-column:1/3"><option value="">Cargando voces…</option></select><button id="preview-voice">▶ Probar voz</button></div></div>
-<form class="composer" id="form">
-<input id="file-input" type="file" multiple accept="image/*,application/pdf,text/plain,text/markdown,text/csv,application/json,text/html,text/css,application/javascript,text/javascript,video/*,audio/*,.js,.jsx,.ts,.tsx,.py,.java,.c,.cpp,.h,.hpp,.rs,.go,.php,.sql,.sh,.md,.csv,.json,.html,.css,.xml,.yaml,.yml">
-<input id="camera-input" type="file" accept="image/*" capture="environment"><input id="photo-input" type="file" multiple accept="image/*">
-<button class="icon-btn" id="plus" type="button" aria-label="Adjuntos y complementos" title="Adjuntos y complementos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M5 12h14"/></svg></button>
-<button class="icon-btn" id="brain" type="button" aria-label="Pensar más" title="Pensar más"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M29 8c-8-3-16 1-17 10-6 1-9 6-8 12-4 4-3 11 2 14-1 8 5 13 12 12 2 6 9 8 14 4V10c0-1-1-1-3-2Z"/><path d="M35 8c8-3 16 1 17 10 6 1 9 6 8 12 4 4 3 11-2 14 1 8-5 13-12 12-2 6-9 8-14 4V10c0-1 1-1 3-2Z"/><path d="M32 9v45M15 22c4-2 9 0 11 4M13 35c5-2 10 0 12 4M49 22c-4-2-9 0-11 4M51 35c-5-2-10 0-12 4"/></svg></button>
-<textarea class="textarea" id="input" rows="1" placeholder="Escribí un mensaje…"></textarea>
-<button class="icon-btn" id="mic" type="button" aria-label="Hablar" title="Reconocimiento de voz"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="8" y="3" width="8" height="12" rx="4"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M9 21h6"/></svg></button>
-<button class="icon-btn" id="voice-btn" type="button" aria-label="Voz natural" title="Reproducir última respuesta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 9h4l5-4v14l-5-4H4Z"/><path d="M17 9a4 4 0 0 1 0 6M19 6a8 8 0 0 1 0 12"/></svg></button>
-<button class="send" id="send" type="submit" aria-label="Enviar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button>
-</form><div class="hint">＋ archivos y complementos · 🧠 pensar más · 🎙 voz · ☎ llamada voz a voz</div>
-</div></div></div>
-<div class="voice-call" id="voice-call"><div class="call-card"><div class="call-orb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M7 4 4 7c0 7 6 13 13 13l3-3-4-3-2 2c-2-1-5-4-6-6l2-2-3-4Z"/></svg></div><div class="call-label">NEURAL VOICE LINK</div><div class="call-name">AgentiCuantico</div><div class="call-sub" id="call-status">Conectando voz a voz…</div><div class="call-actions"><button class="call-btn" id="call-mute" title="Silenciar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z"/><path d="M5 11a7 7 0 0 0 14 0"/></svg></button><button class="call-btn end" id="call-end" title="Finalizar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div></div></div>
+<button class="menu-button" id="menu" type="button" aria-expanded="false" aria-controls="mobile-nav">☰</button>
+<div class="mobile-nav" id="mobile-nav">
+<a href="#hero">alba</a>
+<a href="#hero">servicios</a>
+<a href="#hero">recursos para pacientes</a>
+<a href="/nosotros.html">nosotros</a>
+<a href="#hero">centro educativo</a>
+<a href="#hero">buscar ayuda</a>
+<a href="#hero">empezar →</a>
+</div>
+</nav>
+</header>
+<main>
+<section class="hero" id="hero" aria-label="Hero AgentiCuantico">
+<div class="hero-inner">
+<div class="eyebrow">terapia con base científica</div>
+<h1>Tu mente merece<br>un <span class="lime">equipo</span> de verdad.</h1>
+<p class="lead">Psicólogos, psiquiatras y coaches trabajando juntos en un solo plan. Sin listas de espera.</p>
+<div class="actions">
+<a class="action primary" href="#hero">empezar →</a>
+<a class="action secondary" href="/como-funciona.html">cómo funciona</a>
+</div>
+<div class="video-wrap" id="video-wrap">
+<video id="hero-video" src="https://media.dinamosites.com/library/v1/sections/alba-interior-video-33ea797fee02.mp4" poster="https://media.dinamosites.com/library/v1/sections/alba-interior-poster-cc7d98f2e238.jpg" autoplay muted loop playsinline preload="metadata" aria-label="Video del hero"></video>
+<div class="video-fade" aria-hidden="true"></div>
+<div class="video-pending" role="status">Archivo de video pendiente</div>
+</div>
 </div>
 </section>
-<section class="info-section" id="how-it-works"><h2>Cómo funciona</h2><p>El chat envía la conversación al endpoint público del Neural Core. El Worker prioriza el motor configurado de Hugging Face y conserva un fallback de Cloudflare Workers AI. Los archivos se preparan en el navegador y se envían con límites. El modo “Pensar más” solicita razonamiento avanzado al motor sin exponer su cadena interna.</p><p>La voz natural se mantiene del lado servidor: cuando ElevenLabs está configurado, el Worker utiliza su API y nunca expone la clave al navegador. La interfaz ofrece perfiles por idioma y género, y el modo llamada encadena reconocimiento de voz → IA → voz para una experiencia manos libres.</p></section>
-<section class="info-section" id="about"><h2>Nosotros</h2><p>AgentiCuantico es un workspace de inteligencia artificial orientado a conversación, programación, análisis, automatización y creación. El objetivo es reunir IA, herramientas, agentes y una interfaz neural 3D en una experiencia simple y accesible.</p></section>
 </main>
-<footer class="footer">AGENTICUANTICO · NEURAL AI · <a href="mailto:agenticuantico@gmail.com">agenticuantico@gmail.com</a></footer>
-<script src="https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.150.1/examples/js/loaders/GLTFLoader.js"></script>
 <script>
 (()=>{"use strict";
-const API="/v1/public/chat",TTS="/v1/public/tts",VOICES="/v1/public/voices",MODEL="/v1/public/model";
-const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
-const chat=$("#chat-shell"),messages=$("#messages"),input=$("#input"),send=$("#send"),form=$("#form"),plus=$("#plus"),brain=$("#brain"),mic=$("#mic"),voiceBtn=$("#voice-btn"),toolMenu=$("#tool-menu"),voicePanel=$("#voice-panel"),statusText=$("#status-text"),stageState=$("#stage-state");
-const sessionKey="aq-session-v3",convKey="aq-conversations-v3";let sid=localStorage.getItem(sessionKey)||crypto.randomUUID();localStorage.setItem(sessionKey,sid);
-let reasoning=false,attachments=[],lastAnswer="",voices=[],lastVoiceProfile=null,recognition=null,recognizing=false,callActive=false,callMuted=false;
-const langs=[["es-AR","🇦🇷","Español · Argentina"],["en-US","🇺🇸","English · United States"],["pt-BR","🇧🇷","Português · Brasil"],["fr-FR","🇫🇷","Français"],["de-DE","🇩🇪","Deutsch"],["it-IT","🇮🇹","Italiano"],["ja-JP","🇯🇵","日本語"],["ko-KR","🇰🇷","한국어"],["zh-CN","🇨🇳","中文"],["ru-RU","🇷🇺","Русский"]];
-const lang=$('#language'),gender=$('#gender'),voice=$('#voice'),flag=$('#flag'),callLayer=$('#voice-call'),callStatus=$('#call-status');
-langs.forEach(([id,f,n])=>{const o=document.createElement("option");o.value=id;o.textContent=n;lang.append(o)});
-lang.value="es-AR";
-function flagFor(v){return (langs.find(x=>x[0]===v)||langs[0])[1]}function baseLang(v){return String(v||"").toLowerCase().split("-")[0]}
-function setState(s){stageState.textContent=s;document.body.dataset.state=s}
-function add(text,type="ai"){const d=document.createElement("div");d.className="msg "+type;d.textContent=text;messages.append(d);messages.scrollTop=messages.scrollHeight;return d}
-function history(){return [...messages.querySelectorAll(".msg")].slice(-14).map(x=>({role:x.classList.contains("user")?"user":"assistant",content:x.textContent}))}
-function renderHistory(){const list=$("#history-list");list.innerHTML="";const arr=JSON.parse(localStorage.getItem(convKey)||"[]");arr.slice(-8).reverse().forEach(c=>{const b=document.createElement("button");b.className="history-item";b.textContent=c.title||"Nueva conversación";b.onclick=()=>{messages.innerHTML="";(c.messages||[]).forEach(m=>add(m.content,m.role==="user"?"user":"ai"))};list.append(b)})}
-function saveConversation(){const arr=JSON.parse(localStorage.getItem(convKey)||"[]");const hs=history();if(!hs.length)return;const title=(hs.find(x=>x.role==="user")?.content||"Nueva conversación").slice(0,54);arr.push({id:crypto.randomUUID(),title,messages:hs});localStorage.setItem(convKey,JSON.stringify(arr.slice(-30)));renderHistory()}
-function renderAttachments(){const box=$("#attachments");box.innerHTML="";attachments.forEach((a,i)=>{const d=document.createElement("div");d.className="chip";d.innerHTML="<span>"+escapeHtml(a.name)+"</span>";const b=document.createElement("button");b.textContent="×";b.onclick=()=>{attachments.splice(i,1);renderAttachments()};d.append(b);box.append(d)})}
-function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
-async function prepareFile(f){const max=6*1024*1024;if(f.size>max)throw new Error("archivo mayor a 6 MB");const kind=f.type.startsWith("image/")?"image":f.type.startsWith("video/")?"video":f.type.startsWith("audio/")?"audio":"file";if(kind==="image"){const data=await new Promise((res,rej)=>{const r=new FileReader;r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(f)});return{name:f.name,kind,data}}const text=await f.text().catch(()=>"[binario: "+f.type+"]");return{name:f.name,kind,data:text.slice(0,50000)}}
-async function handleFiles(list){for(const f of [...list]){if(attachments.length>=5){add("Máximo 5 archivos por mensaje.","ai");break}try{attachments.push(await prepareFile(f))}catch(e){add("No pude preparar "+f.name+": "+e.message,"ai")}}renderAttachments()}
-function toggleTools(){toolMenu.classList.toggle("hidden");voicePanel.classList.remove("open")}
-plus.onclick=toggleTools;
-$$(".tool").forEach(b=>b.onclick=async()=>{const a=b.dataset.action;toolMenu.classList.add("hidden");if(a==="camera")$("#camera-input").click();if(a==="photos")$("#photo-input").click();if(a==="files")$("#file-input").click();if(a==="reasoning"){reasoning=!reasoning;brain.classList.toggle("active",reasoning);brain.setAttribute("aria-pressed",String(reasoning));$("#reasoning-label").textContent=reasoning?"Activado":"Razonamiento avanzado";$("#chat-mode").textContent=reasoning?"IA · Razonamiento avanzado":"IA conversacional · Hugging Face / Cloudflare fallback";setState(reasoning?"THINKING":"ONLINE")}if(a==="connect")add("Complementos preparados: GitHub y Cloudflare pueden conectarse mediante los flujos seguros del Neural Core. No se exponen tokens en el navegador.","ai");if(a==="call")startCall()});
-brain.onclick=()=>{reasoning=!reasoning;brain.classList.toggle("active",reasoning);brain.setAttribute("aria-pressed",String(reasoning));setState(reasoning?"THINKING":"ONLINE")};
-$("#file-input").onchange=e=>{handleFiles(e.target.files);e.target.value=""};$("#camera-input").onchange=e=>{handleFiles(e.target.files);e.target.value=""};$("#photo-input").onchange=e=>{handleFiles(e.target.files);e.target.value=""};
-$("#voice-settings").onclick=()=>{voicePanel.classList.toggle("open");toolMenu.classList.add("hidden")};lang.onchange=()=>{flag.textContent=flagFor(lang.value);populateVoices()};gender.onchange=populateVoices;
-async function loadVoices(){try{const r=await fetch(VOICES,{cache:"no-store"});const d=await r.json();voices=d.voices||[]}catch{voices=[]}populateVoices()}
-function populateVoices(){flag.textContent=flagFor(lang.value);voice.innerHTML="";const bl=baseLang(lang.value);const g=gender.value;let list=voices.filter(v=>baseLang(v.language||v.language_code||"")===bl&&(v.gender||v.labels?.gender||"").toLowerCase()===g);if(!list.length)list=voices.filter(v=>baseLang(v.language||v.language_code||"")===bl);if(!list.length)list=[{voice_id:"browser",name:"Voz del navegador",gender:g,language:bl,provider:"browser"}];list.slice(0,30).forEach(v=>{const o=document.createElement("option");o.value=v.voice_id;o.textContent=(v.name||"Voz")+" · "+(v.provider==="elevenlabs"?"ElevenLabs":"fallback");o.dataset.provider=v.provider||"browser";voice.append(o)})}
-async function speak(text){if(!text)return;const v=voice.selectedOptions[0];const voiceId=v?.value||"";setState("SPEAKING");try{const r=await fetch(TTS,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:text.slice(0,6000),language:lang.value,gender:gender.value,voiceId})});if(r.ok&&r.headers.get("content-type")?.includes("audio")){const blob=await r.blob();const url=URL.createObjectURL(blob);const a=new Audio(url);await a.play();await new Promise(res=>a.onended=res);URL.revokeObjectURL(url);setState("ONLINE");return}}catch{}if("speechSynthesis"in window){speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang=lang.value;u.rate=.98;u.pitch=gender.value==="female"?1.03:gender.value==="male"?.96:1;speechSynthesis.speak(u);await new Promise(res=>u.onend=res)}setState("ONLINE")}
-$("#preview-voice").onclick=()=>speak("Hola, soy AgentiCuantico. Esta es una prueba de voz natural.");
-voiceBtn.onclick=()=>speak(lastAnswer);
-function initRecognition(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR)return null;const r=new SR;r.continuous=false;r.interimResults=true;r.lang=lang.value;r.onstart=()=>{recognizing=true;mic.classList.add("active");setState("LISTENING")};r.onresult=e=>{let t="";for(let i=e.resultIndex;i<e.results.length;i++)t+=e.results[i][0].transcript;input.value=t};r.onend=()=>{recognizing=false;mic.classList.remove("active");if(callActive&&!callMuted&&input.value.trim())form.requestSubmit();else setState("ONLINE")};r.onerror=()=>{recognizing=false;mic.classList.remove("active")};return r}
-mic.onclick=()=>{if(!recognition)recognition=initRecognition();if(!recognition){add("El reconocimiento de voz no está disponible en este navegador.","ai");return}if(recognizing)recognition.stop();else{recognition.lang=lang.value;try{recognition.start()}catch{}}};
-async function sendMessage(e){e?.preventDefault();const text=input.value.trim();if(!text&&!attachments.length)return;const outgoing=attachments.map(x=>({...x}));const shown=text||"Analizá los archivos adjuntos.";add(shown,"user");input.value="";attachments=[];renderAttachments();setState(reasoning?"THINKING":"PROCESSING");const typing=add(reasoning?"Pensando con razonamiento avanzado…":"Pensando…","ai typing");send.disabled=true;try{const r=await fetch(API,{method:"POST",headers:{"Content-Type":"application/json","X-Guest-Session":sid},body:JSON.stringify({message:text,language:lang.value,history:history().slice(0,-1),attachments:outgoing,reasoning})});const d=await r.json().catch(()=>({}));if(!r.ok||!d.answer)throw new Error(d.message||"ai_unavailable");typing.classList.remove("typing");typing.textContent=d.answer;lastAnswer=d.answer;saveConversation();setState("ONLINE");if(callActive&&!callMuted){await speak(d.answer);if(callActive)startListeningCall()}else if(lastVoiceProfile==="auto")await speak(d.answer)}catch(e){typing.classList.remove("typing");typing.textContent="No pude conectar con el motor de IA. Probá nuevamente.";setState("ERROR")}finally{send.disabled=false;input.focus();if(callActive)callStatus.textContent="Escuchando…"}}
-form.onsubmit=sendMessage;input.oninput=()=>{input.style.height="auto";input.style.height=Math.min(input.scrollHeight,130)+"px"};input.onkeydown=e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();form.requestSubmit()}};
-$("#size-toggle").onclick=()=>{const ex=chat.classList.toggle("expanded");document.body.classList.toggle("chat-lock",ex);$("#size-toggle .expand-icon").classList.toggle("hidden",ex);$("#size-toggle .min-icon").classList.toggle("hidden",!ex);$("#size-toggle").title=ex?"Achicar chat":"Abrir chat completo"};
-$("#new-chat").onclick=()=>{messages.innerHTML="";add("Nueva conversación iniciada. ¿Qué querés crear?","ai");input.focus()};
-$("#menu").onclick=()=>$("#mobile-nav").classList.toggle("open");
-function startCall(){if(callActive)return;callActive=true;callMuted=false;callLayer.classList.add("open");callStatus.textContent="Conectando…";setState("LISTENING");startListeningCall()}
-function startListeningCall(){if(!callActive||callMuted)return;if(!recognition)recognition=initRecognition();if(!recognition){callStatus.textContent="Este navegador no admite voz en vivo";return}recognition.lang=lang.value;callStatus.textContent="Escuchando…";try{recognition.start()}catch{}}
-$("#call-end").onclick=()=>{callActive=false;callLayer.classList.remove("open");if(recognizing)recognition?.stop();if("speechSynthesis"in window)speechSynthesis.cancel();setState("ONLINE")};
-$("#call-mute").onclick=()=>{callMuted=!callMuted;$("#call-mute").style.opacity=callMuted?".45":"1";if(callMuted&&recognizing)recognition.stop();else if(callActive)startListeningCall();callStatus.textContent=callMuted?"Micrófono silenciado":"Escuchando…"};
-document.addEventListener("click",e=>{if(!chat.contains(e.target))toolMenu.classList.add("hidden")});
-renderHistory();loadVoices();
-(async()=>{try{const r=await fetch("/health",{cache:"no-store"});statusText.textContent=r.ok?"ONLINE":"OFFLINE"}catch{statusText.textContent="OFFLINE"}})();
-
-/* Cinematic Neural Core: GLB first, procedural fallback second. */
-const stage=$("#stage"),scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(42,stage.clientWidth/stage.clientHeight,.1,100),renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,powerPreference:"high-performance"});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(stage.clientWidth,stage.clientHeight);renderer.outputColorSpace=THREE.SRGBColorSpace;stage.appendChild(renderer.domElement);
-scene.add(new THREE.AmbientLight(0x7899cc,1.2));const key=new THREE.PointLight(0x57e8ff,9,18);key.position.set(3,3,4);scene.add(key);const fill=new THREE.PointLight(0x9b7cff,7,16);fill.position.set(-4,-2,2);scene.add(fill);
-let model=null;const group=new THREE.Group();scene.add(group);
-function procedural(){const g=new THREE.IcosahedronGeometry(1.35,5),m=new THREE.MeshPhysicalMaterial({color:0x223f72,emissive:0x126078,emissiveIntensity:1.7,metalness:.65,roughness:.23,transmission:.08,wireframe:false});const brain=new THREE.Mesh(g,m);group.add(brain);for(let i=0;i<260;i++){const p=new THREE.Mesh(new THREE.SphereGeometry(.012+Math.random()*.018,5,5),new THREE.MeshBasicMaterial({color:Math.random()>.5?0x57e8ff:0x9b7cff}));const a=Math.random()*Math.PI*2,b=Math.acos(2*Math.random()-1),r=1.42+Math.random()*.18;p.position.set(r*Math.sin(b)*Math.cos(a),r*Math.sin(b)*Math.sin(a),r*Math.cos(b));group.add(p)}}procedural();
-try{const loader=new THREE.GLTFLoader;loader.load("/assets/AgentiCuantico_brain_PBR.glb",g=>{if(model)group.remove(model);model=g.scene;model.traverse(o=>{if(o.isMesh&&o.material){o.material.emissiveIntensity=.9;o.material.metalness=Math.max(o.material.metalness||0,.45)}});model.scale.setScalar(1.8);group.add(model);stageState.textContent="GLB · ONLINE"},undefined,()=>{})}catch{}
-camera.position.set(0,.2,4.8);function animate(t=0){requestAnimationFrame(animate);const s=t*.001;group.rotation.y=s*.22;group.rotation.x=Math.sin(s*.55)*.08;const pulse=1+Math.sin(s*2.2)*.025;group.scale.setScalar(pulse);key.position.x=Math.sin(s*.8)*4;key.position.z=Math.cos(s*.8)*4;camera.lookAt(0,0,0);renderer.render(scene,camera)}animate();
-new ResizeObserver(()=>{const w=stage.clientWidth,h=stage.clientHeight;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h)}).observe(stage);
+const video=document.getElementById("hero-video"),wrap=document.getElementById("video-wrap"),menu=document.getElementById("menu"),mobile=document.getElementById("mobile-nav");
+menu.addEventListener("click",()=>{const open=mobile.classList.toggle("open");menu.setAttribute("aria-expanded",String(open));});
+mobile.querySelectorAll("a").forEach(a=>a.addEventListener("click",()=>{mobile.classList.remove("open");menu.setAttribute("aria-expanded","false");}));
+const reduced=window.matchMedia("(prefers-reduced-motion: reduce)");
+const observer=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting&&!reduced.matches) video.play().catch(()=>{});else video.pause();}),{threshold:.05});
+observer.observe(video);
+function pending(){wrap.classList.add("failed");video.pause();}
+video.addEventListener("error",pending);
+reduced.addEventListener?.("change",e=>{if(e.matches)video.pause();else if(document.visibilityState==="visible")video.play().catch(()=>{});});
+document.addEventListener("visibilitychange",()=>{if(document.hidden)video.pause();else if(!reduced.matches)video.play().catch(()=>{});});
 })();
 </script>
-<script>document.getElementById("menu")?.addEventListener("click",()=>document.getElementById("mobile-nav")?.classList.toggle("open"));</script></body>
+</body>
 </html>
