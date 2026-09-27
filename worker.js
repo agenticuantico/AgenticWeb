@@ -107,7 +107,7 @@ async function callCloudflareAI(request, env) {
     configured || "@cf/qwen/qwen3.8-27b",
     "@cf/qwen/qwen3.8-27b",
     "@cf/google/gemma-4-26b-a4b-it",
-    "@cf/qwen/qwen3-30b-a3b-fp8"
+    "@cf/meta/llama-3.3-70b-instruct-fp8-fast"
   ].filter((m,i,a)=>m && a.indexOf(m)===i);
 
   for (const model of models) {
@@ -1104,20 +1104,24 @@ async function handleApi(request, env) {
   }
 
   if (url.pathname === "/v1/public/chat" && request.method === "POST") {
-    // Hugging Face is the primary public chat engine. Cloudflare AI remains
-    // only as a server-side fallback if the HF provider is unavailable.
-    try {
-      const response = await callHuggingFace(request.clone(), env);
-      if (response) return response;
-    } catch {}
+    // Cloudflare Workers AI is the primary engine on both the custom domain
+    // and workers.dev host. Hugging Face is an optional secondary fallback.
     try {
       const response = await callCloudflareAI(request.clone(), env);
       if (response) return response;
-    } catch {}
+    } catch (error) {
+      console.error("public-chat-cloudflare-failed", String(error?.message || error).slice(0,300));
+    }
+    try {
+      const response = await callHuggingFace(request.clone(), env);
+      if (response) return response;
+    } catch (error) {
+      console.error("public-chat-huggingface-failed", String(error?.message || error).slice(0,300));
+    }
     return json({
       ok: false,
       error: "ai_unavailable",
-      message: "El servicio de IA no está disponible en este momento. Intentá nuevamente en unos instantes."
+      message: "No se pudo conectar con los motores de IA. Revisá la configuración del servicio e intentá nuevamente."
     }, 502, request);
   }
 
