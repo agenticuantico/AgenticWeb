@@ -49,7 +49,7 @@
     "HF_API_URL": "https://router.huggingface.co/v1/chat/completions",
     "HF_MODELS": "Qwen/Qwen3.8-27B",
     "CF_AI_MODEL": "@cf/qwen/qwen3.8-27b",
-    "GOOGLE_CLIENT_ID": "",
+    "GOOGLE_CLIENT_ID": "53862680468-umk18ffdtgq0dnipl0j9alcofa6g58d6.apps.googleusercontent.com",
     "PLAN_STARTER_ARS": "4999",
     "PLAN_PRO_ARS": "9999",
     "PLAN_ULTRA_ARS": "19999",
