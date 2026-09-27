@@ -66,5 +66,15 @@
   },
   "ai": {
     "binding": "AI"
-  }
+  },
+  "routes": [
+    {
+      "pattern": "agenticuantico.dev.ar",
+      "custom_domain": true
+    },
+    {
+      "pattern": "www.agenticuantico.dev.ar",
+      "custom_domain": true
+    }
+  ]
 }
