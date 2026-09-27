@@ -242,7 +242,7 @@ async function callHuggingFace(request, env) {
           messages,
           temperature: reasoning ? 0.45 : 0.7,
           top_p: 0.8,
-          max_tokens: reasoning ? 1400 : 512,
+          max_tokens: reasoning ? 1800 : 1400,
           presence_penalty: 1.2,
           reasoning_effort: reasoning ? "xhigh" : "medium",
           stream: false,
@@ -272,7 +272,7 @@ async function callHuggingFace(request, env) {
               messages,
               temperature: 0.7,
               top_p: 0.8,
-              max_tokens: 512,              stream: false
+              max_tokens: 1400,              stream: false
             })
           });
           if (retry.ok) {
