@@ -22,7 +22,7 @@ function applySecurityHeaders(response, request) {
   headers.set("permissions-policy", "camera=(), microphone=(self), geolocation=()");
   headers.set("strict-transport-security", "max-age=31536000; includeSubDomains");
   try { const p = new URL(request?.url || "https://agenticuantico.dev.ar/").pathname; if (p === "/" || p.endsWith(".html")) headers.set("cache-control", "no-store"); } catch {}
-  headers.set("content-security-policy", "default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; img-src 'self' data: blob: https:; font-src 'self' data: https:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; connect-src 'self' https:; media-src 'self' blob:; worker-src 'self' blob:;");
+  headers.set("content-security-policy", "default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; img-src 'self' data: blob: https:; font-src 'self' data: https:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://accounts.google.com; frame-src https://accounts.google.com; connect-src 'self' https:; media-src 'self' blob:; worker-src 'self' blob:;");
   return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
 }
 
@@ -909,7 +909,7 @@ async function handleApi(request, env) {
     const stub=await authStore(env);if(!stub)return json({ok:false,error:"auth_store_unavailable"},503,request);
     const r=await stub.fetch("https://auth/email?email="+encodeURIComponent(email));if(!r.ok)return json({ok:false,error:"invalid_credentials",message:"Correo o clave incorrectos."},401,request);
     const user=await r.json().catch(()=>null);if(!await verifyPassword(password,user?.password))return json({ok:false,error:"invalid_credentials",message:"Correo o clave incorrectos."},401,request);
-    const token=await createSession(user,String(env.AUTH_SESSION_SECRET));return json({ok:true,token,user:cleanUser(user),plan:publicPlan(user)},200,request);
+    const token=await createSession(user,authSecret(env));return json({ok:true,token,user:cleanUser(user),plan:publicPlan(user)},200,request);
   }
 
   if (url.pathname === "/v1/auth/logout" && request.method === "POST") return json({ok:true},200,request);
