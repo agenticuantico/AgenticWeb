@@ -103,22 +103,22 @@ async function callCloudflareAI(request, env) {
   ];
 
   const configured = String(env.CF_AI_MODEL || "").trim();
+  // Keep a broadly available, low-latency model first; try configured and
+  // alternate models only if the account/model is unavailable.
   const models = [
-    configured || "@cf/qwen/qwen3.8-27b",
-    "@cf/qwen/qwen3.8-27b",
-    "@cf/google/gemma-4-26b-a4b-it",
-    "@cf/meta/llama-3.3-70b-instruct-fp8-fast"
+    "@cf/meta/llama-3.1-8b-instruct",
+    configured,
+    "@cf/qwen/qwen3-30b-a3b-fp8",
+    "@cf/google/gemma-3-12b-it"
   ].filter((m,i,a)=>m && a.indexOf(m)===i);
 
   for (const model of models) {
     try {
       const result = await env.AI.run(model, {
         messages,
-        max_completion_tokens: reasoning ? 1800 : 900,
+        max_tokens: reasoning ? 1400 : 900,
         temperature: reasoning ? 0.45 : 0.55,
-        top_p: 0.85,
-        reasoning_effort: reasoning ? "xhigh" : "low",
-        chat_template_kwargs: { enable_thinking: reasoning }
+        top_p: 0.85
       });
 
       const answer =
