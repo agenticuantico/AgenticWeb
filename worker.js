@@ -976,58 +976,111 @@ async function handleApi(request, env) {
     return codexWrite(request.clone(), env);
   }
 
-  if (url.pathname === "/v1/public/tts" && request.method === "POST") {
-    let body=await request.json().catch(()=>({}));
-    const textValue=String(body?.text||"").trim().slice(0,6000);
-    const speak=body?.speak!==false;
-    if(!speak||!textValue)return json({ok:false,error:"tts_disabled"},400,request);
-    const endpoint=String(env.TTS_API_URL||"").trim(), key=String(env.TTS_API_KEY||"").trim(), model=String(env.TTS_MODEL||"").trim();
-    if(!endpoint||!key)return json({ok:false,error:"tts_not_configured",message:"La voz neural no está configurada en el servidor."},503,request);
-    const voiceProfile=String(body?.voiceProfile||"female").toLowerCase();
-    const language=String(body?.language||"es-AR");
-    const voiceMap={};
-    try{Object.assign(voiceMap,JSON.parse(String(env.TTS_VOICES||"{}")))}catch{}
-    const voice=voiceMap[language+"-"+voiceProfile]||voiceMap[language]||voiceMap["default-"+voiceProfile]||voiceMap.default||"alloy";
-    try{
-      const upstream=await fetch(endpoint,{method:"POST",headers:{"Authorization":"Bearer "+key,"Content-Type":"application/json"},body:JSON.stringify({model:model||"tts-1",voice,input:textValue,response_format:"mp3"})});
-      if(!upstream.ok)return json({ok:false,error:"tts_provider_error"},502,request);
-      const headers=new Headers(upstream.headers);headers.set("content-type","audio/mpeg");headers.set("cache-control","no-store");
-      return applySecurityHeaders(new Response(upstream.body,{status:200,headers}),request);
-    }catch{return json({ok:false,error:"tts_failed"},502,request);}
+  if (url.pathname === "/v1/public/voices" && request.method === "GET") {
+    const key = String(env.ELEVENLABS_API_KEY || "").trim();
+    const fallback = [
+      {voice_id:"browser-es-female",name:"Voz natural · Español",language:"es",language_code:"es-AR",gender:"female",provider:"browser"},
+      {voice_id:"browser-es-male",name:"Voz natural · Español",language:"es",language_code:"es-AR",gender:"male",provider:"browser"},
+      {voice_id:"browser-en-female",name:"Natural voice · English",language:"en",language_code:"en-US",gender:"female",provider:"browser"},
+      {voice_id:"browser-en-male",name:"Natural voice · English",language:"en",language_code:"en-US",gender:"male",provider:"browser"},
+      {voice_id:"browser-pt-female",name:"Voz natural · Português",language:"pt",language_code:"pt-BR",gender:"female",provider:"browser"},
+      {voice_id:"browser-pt-male",name:"Voz natural · Português",language:"pt",language_code:"pt-BR",gender:"male",provider:"browser"},
+      {voice_id:"browser-fr-female",name:"Voix naturelle · Français",language:"fr",language_code:"fr-FR",gender:"female",provider:"browser"},
+      {voice_id:"browser-fr-male",name:"Voix naturelle · Français",language:"fr",language_code:"fr-FR",gender:"male",provider:"browser"},
+      {voice_id:"browser-de-female",name:"Natürliche Stimme · Deutsch",language:"de",language_code:"de-DE",gender:"female",provider:"browser"},
+      {voice_id:"browser-de-male",name:"Natürliche Stimme · Deutsch",language:"de",language_code:"de-DE",gender:"male",provider:"browser"},
+      {voice_id:"browser-it-female",name:"Voce naturale · Italiano",language:"it",language_code:"it-IT",gender:"female",provider:"browser"},
+      {voice_id:"browser-it-male",name:"Voce naturale · Italiano",language:"it",language_code:"it-IT",gender:"male",provider:"browser"},
+      {voice_id:"browser-ja-female",name:"自然な声 · 日本語",language:"ja",language_code:"ja-JP",gender:"female",provider:"browser"},
+      {voice_id:"browser-ja-male",name:"自然な声 · 日本語",language:"ja",language_code:"ja-JP",gender:"male",provider:"browser"},
+      {voice_id:"browser-ko-female",name:"자연스러운 음성 · 한국어",language:"ko",language_code:"ko-KR",gender:"female",provider:"browser"},
+      {voice_id:"browser-ko-male",name:"자연스러운 음성 · 한국어",language:"ko",language_code:"ko-KR",gender:"male",provider:"browser"},
+      {voice_id:"browser-zh-female",name:"自然声音 · 中文",language:"zh",language_code:"zh-CN",gender:"female",provider:"browser"},
+      {voice_id:"browser-zh-male",name:"自然声音 · 中文",language:"zh",language_code:"zh-CN",gender:"male",provider:"browser"},
+      {voice_id:"browser-ru-female",name:"Естественный голос · Русский",language:"ru",language_code:"ru-RU",gender:"female",provider:"browser"},
+      {voice_id:"browser-ru-male",name:"Естественный голос · Русский",language:"ru",language_code:"ru-RU",gender:"male",provider:"browser"}
+    ];
+    if (!key) return json({ok:true,provider:"browser",voices:fallback},200,request);
+    try {
+      const upstream = await fetch("https://api.elevenlabs.io/v2/voices?page_size=100&include_total_count=false", {
+        headers: {"xi-api-key": key, "Accept":"application/json"}
+      });
+      if (!upstream.ok) return json({ok:true,provider:"browser",voices:fallback},200,request);
+      const data = await upstream.json();
+      const voices = (Array.isArray(data?.voices)?data.voices:[]).map(v => {
+        const verified = Array.isArray(v.verified_languages) && v.verified_languages[0];
+        const labels = v.labels || {};
+        return {
+          voice_id:v.voice_id,
+          name:v.name,
+          language:labels.language || verified?.language || "",
+          language_code:verified?.locale || "",
+          gender:String(labels.gender || "").toLowerCase(),
+          accent:labels.accent || verified?.accent || "",
+          description:v.description || "",
+          preview_url:v.preview_url || verified?.preview_url || "",
+          provider:"elevenlabs"
+        };
+      }).filter(v=>v.voice_id && v.name);
+      return json({ok:true,provider:"elevenlabs",voices},200,request);
+    } catch {
+      return json({ok:true,provider:"browser",voices:fallback},200,request);
+    }
   }
 
   if (url.pathname === "/v1/public/tts" && request.method === "POST") {
+    const body = await request.json().catch(()=>({}));
+    const textValue = String(body?.text || "").trim().slice(0,6000);
+    if (!textValue) return json({ok:false,error:"invalid_request",message:"Texto vacío."},400,request);
+    const elevenKey = String(env.ELEVENLABS_API_KEY || "").trim();
+    const requestedVoice = String(body?.voiceId || "").trim();
+    const language = String(body?.language || "es-AR");
+    const gender = String(body?.gender || "female").toLowerCase();
+    if (elevenKey && requestedVoice && !requestedVoice.startsWith("browser-")) {
+      try {
+        const modelId = String(env.ELEVENLABS_MODEL_ID || "eleven_multilingual_v2").trim();
+        const endpoint = "https://api.elevenlabs.io/v1/text-to-speech/" + encodeURIComponent(requestedVoice) + "?output_format=mp3_44100_128";
+        const upstream = await fetch(endpoint, {
+          method:"POST",
+          headers:{"xi-api-key":elevenKey,"Content-Type":"application/json","Accept":"audio/mpeg"},
+          body:JSON.stringify({
+            text:textValue,
+            model_id:modelId,
+            voice_settings:{stability:.45,similarity_boost:.82,style:.18,use_speaker_boost:true}
+          })
+        });
+        if (upstream.ok) {
+          const headers = new Headers(upstream.headers);
+          headers.set("content-type","audio/mpeg");
+          headers.set("cache-control","no-store");
+          return applySecurityHeaders(new Response(upstream.body,{status:200,headers}),request);
+        }
+      } catch {}
+    }
     if (!env.AI || typeof env.AI.run !== "function") {
       return json({ok:false,error:"tts_unavailable",message:"La voz neural no está disponible."},503,request);
     }
-    const body = await request.json().catch(()=>null);
-    const textValue = String(body?.text||"").trim().slice(0,5000);
-    if (!textValue) return json({ok:false,error:"invalid_request",message:"Texto vacío."},400,request);
-    const language = String(body?.language||"es-AR");
-    const gender = String(body?.gender||"female");
     const profiles = {
-      "es": {model:"@cf/deepgram/aura-2-es",female:"diana",male:"alvaro"},
-      "en": {model:"@cf/deepgram/aura-2-en",female:"luna",male:"orion"},
-      "pt": {model:"@cf/myshell-ai/melotts",lang:"pt"},
-      "fr": {model:"@cf/myshell-ai/melotts",lang:"fr"},
-      "it": {model:"@cf/myshell-ai/melotts",lang:"it"},
-      "de": {model:"@cf/myshell-ai/melotts",lang:"de"},
-      "ja": {model:"@cf/myshell-ai/melotts",lang:"ja"},
-      "zh": {model:"@cf/myshell-ai/melotts",lang:"zh"}
+      es:{model:"@cf/deepgram/aura-2-es",female:"diana",male:"alvaro"},
+      en:{model:"@cf/deepgram/aura-2-en",female:"luna",male:"orion"},
+      pt:{model:"@cf/myshell-ai/melotts",lang:"pt"},
+      fr:{model:"@cf/myshell-ai/melotts",lang:"fr"},
+      it:{model:"@cf/myshell-ai/melotts",lang:"it"},
+      de:{model:"@cf/myshell-ai/melotts",lang:"de"},
+      ja:{model:"@cf/myshell-ai/melotts",lang:"ja"},
+      ko:{model:"@cf/myshell-ai/melotts",lang:"ko"},
+      zh:{model:"@cf/myshell-ai/melotts",lang:"zh"},
+      ru:{model:"@cf/myshell-ai/melotts",lang:"ru"}
     };
-    const p = profiles[language.split("-")[0]];
-    if (!p) return json({ok:false,error:"tts_language_unavailable"},400,request);
+    const p=profiles[language.split("-")[0]];
+    if(!p) return json({ok:false,error:"tts_language_unavailable"},400,request);
     try {
-      const input = p.lang
-        ? {prompt:textValue,lang:p.lang}
-        : {text:textValue,speaker:gender==="male"?p.male:p.female,encoding:"mp3"};
-      const audio = await env.AI.run(p.model, input, {returnRawResponse:true});
-      const headers = new Headers(audio?.headers || {});
-      headers.set("content-type","audio/mpeg");
-      headers.set("cache-control","no-store");
-      return applySecurityHeaders(new Response(audio?.body || audio,{status:200,headers}),request);
-    } catch (error) {
-      console.error("public-tts-failed",{model:p.model,message:String(error?.message||"").slice(0,240)});
+      const input=p.lang?{prompt:textValue,lang:p.lang}:{text:textValue,speaker:gender==="male"?p.male:p.female,encoding:"mp3"};
+      const audio=await env.AI.run(p.model,input,{returnRawResponse:true});
+      const headers=new Headers(audio?.headers||{});
+      headers.set("content-type","audio/mpeg");headers.set("cache-control","no-store");
+      return applySecurityHeaders(new Response(audio?.body||audio,{status:200,headers}),request);
+    } catch {
       return json({ok:false,error:"tts_failed",message:"No se pudo generar la voz."},502,request);
     }
   }
