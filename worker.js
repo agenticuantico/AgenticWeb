@@ -1032,7 +1032,7 @@ async function handleApi(request, env) {
     const body = await request.json().catch(()=>({}));
     const textValue = String(body?.text || "").trim().slice(0,6000);
     if (!textValue) return json({ok:false,error:"invalid_request",message:"Texto vacío."},400,request);
-    const elevenKey = String(env.ELEVENLABS_API_KEY || "").trim();
+    const elevenKey = String(env.ELEVENLABS_API_KEY || env.TTS_API_KEY || "").trim();
     const requestedVoice = String(body?.voiceId || "").trim();
     const language = String(body?.language || "es-AR");
     const gender = String(body?.gender || "female").toLowerCase();
