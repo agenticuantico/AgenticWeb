@@ -1,6 +1,6 @@
 import { DurableObject } from "cloudflare:workers";
 
-const API_PREFIXES = ["/v1/", "/health"];
+const API_PREFIXES = ["/v1/", "/api/", "/health"];
 
 function isApiPath(pathname) {
   return API_PREFIXES.some(prefix => pathname === prefix.replace(/\/$/, "") || pathname.startsWith(prefix));
@@ -850,6 +850,24 @@ async function handleApi(request, env) {
       huggingface: !!String(env.HF_TOKEN || "").trim(),
       google: !!String(env.GOOGLE_CLIENT_ID || "").trim()
     }, 200, request);
+  }
+
+  if (url.pathname === "/api/huggingface/health" && request.method === "GET") {
+    const token = String(env.HF_TOKEN || "").trim();
+    if (!token) return json({ok:false,provider:"huggingface",configured:false,verified:false,message:"HF_TOKEN no está configurado en los secretos del Worker."},503,request);
+    try {
+      const upstream = await fetch(String(env.HF_API_URL || "https://router.huggingface.co/v1/chat/completions").trim(), {
+        method:"POST",
+        headers:{"Authorization":"Bearer "+token,"Content-Type":"application/json"},
+        body:JSON.stringify({model:String(env.HF_MODEL || "Qwen/Qwen3.8-27B").trim(),messages:[{role:"user",content:"Respondé OK."}],max_tokens:2,stream:false})
+      });
+      if (!upstream.ok) return json({ok:false,provider:"huggingface",configured:true,verified:false,status:upstream.status,message:"Hugging Face no confirmó una inferencia; revisá token, acceso al modelo y cuota."},502,request);
+      const data=await upstream.json().catch(()=>({}));
+      const answer=data?.choices?.[0]?.message?.content;
+      return json({ok:typeof answer==="string"&&!!answer.trim(),provider:"huggingface",configured:true,verified:typeof answer==="string"&&!!answer.trim(),model:String(env.HF_MODEL || "Qwen/Qwen3.8-27B").trim()},200,request);
+    } catch {
+      return json({ok:false,provider:"huggingface",configured:true,verified:false,message:"No se pudo verificar la conexión con Hugging Face."},502,request);
+    }
   }
 
   if (url.pathname === "/health" && request.method === "GET") {
