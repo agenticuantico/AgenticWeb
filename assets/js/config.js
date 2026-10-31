@@ -7,7 +7,7 @@ import FIREBASE from './firebase-config.js';
 export const CONFIG = Object.freeze({
   SITE_URL: 'https://agenticuantico.dev.ar',
   /** Backend (Cloudflare Worker worker-v2). Se usa solo si GET /api/health responde OK. */
-  API_BASE: 'https://api.agenticuantico.dev.ar',
+  API_BASE: 'https://agenticuantico-api.agenticuantico.workers.dev',
   HEALTH_TIMEOUT_MS: 2500,
   CONTACT_EMAIL: 'agenticuantico@gmail.com',
   COMMERCIAL_SUBJECT: 'Consulta Comercial',
