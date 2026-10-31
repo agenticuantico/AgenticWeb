@@ -142,8 +142,9 @@ export async function callModel(messages, { fetchFn = fetch, retries = 2 } = {})
   let last = null;
   for (const [url, model] of targets) {
     for (let attempt = 0; attempt <= retries; attempt++) {
-      const r = await postModel(url, model, messages, fetchFn);
-      const text = await r.text();
+      let r, text;
+      try { r = await postModel(url, model, messages, fetchFn); text = await r.text(); }
+      catch (e) { last = new ModelsUnavailable(0, `${url} fetch failed: ${(e.cause && e.cause.code) || e.message}`); log(`modelo no disponible: ${last.message}`); break; }
       const ctype = (r.headers && r.headers.get && r.headers.get('content-type')) || '';
       let j = null; try { j = JSON.parse(text); } catch { /* no es JSON */ }
       if (r.ok && j && j.choices) return String(j.choices[0]?.message?.content || '');

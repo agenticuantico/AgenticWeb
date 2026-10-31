@@ -61,6 +61,8 @@ test('GitHub Models no disponible se informa sin fallar', async () => {
   await assert.rejects(() => callModel([{ role: 'user', content: 'hola' }], { fetchFn: plain, retries: 0 }), (e) => e instanceof ModelsUnavailable && /text\/plain/.test(e.detail));
   let n = 0; const fallback = async (url) => { n++; return /azure/.test(url) ? new Response(JSON.stringify({ choices: [{ message: { content: '{"ok":1}' } }] }), { status: 200 }) : new Response('OK', { status: 200 }); };
   assert.equal(await callModel([{ role: 'user', content: 'hola' }], { fetchFn: fallback, retries: 0 }), '{"ok":1}'); assert.equal(n, 2);
+  const down = async (url) => { if (/azure/.test(url)) throw new TypeError('fetch failed'); return new Response('OK', { status: 200 }); };
+  await assert.rejects(() => callModel([{ role: 'user', content: 'hola' }], { fetchFn: down, retries: 0 }), (e) => e instanceof ModelsUnavailable && /fetch failed/.test(e.detail));
   const ok = async () => new Response(JSON.stringify({ choices: [{ message: { content: '{"title":"x","summary":"y","changes":[]}' } }] }), { status: 200 });
   assert.match(await callModel([{ role: 'user', content: 'hola' }], { fetchFn: ok }), /"title"/);
 });
