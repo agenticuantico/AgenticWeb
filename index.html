@@ -584,7 +584,56 @@ footer { padding: 40px 0px 50px; border-top: 1px solid var(--border); color: rgb
 .chat-header-actions { min-width: 0; }
 .voice-pill select { max-width: 150px; text-overflow: ellipsis; }
 @media (max-width: 560px) { .hero-neural-hud { left: 22px; bottom: 22px; max-width: calc(100% - 44px); } }
+
+/* ---- chat embebido, cerebro 3D y equipo ---- */
+.chat-section { padding: 10px 0 70px; }
+#chat, #cerebro, #equipo { scroll-margin-top: 84px; }
+.ace-host { animation: pageEntrance .9s cubic-bezier(.16,1,.3,1) .1s both; }
+.sec-tag { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: #52525b; background: rgba(255,255,255,.85); border: 1px solid var(--border); padding: 6px 14px; border-radius: 999px; margin-bottom: 16px; }
+.sec-title { font-family: Outfit, sans-serif; font-weight: 400; font-size: clamp(32px, 4.6vw, 58px); line-height: 1.02; letter-spacing: -.03em; margin: 0 0 14px; }
+.sec-lead { font-size: 16px; line-height: 1.6; color: var(--muted); margin: 0 0 18px; max-width: 560px; }
+.brain-section { padding: 30px 0 80px; position: relative; z-index: 10; }
+.brain-grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 36px; align-items: center; }
+.brain-points { list-style: none; padding: 0; margin: 0 0 14px; display: flex; flex-wrap: wrap; gap: 8px; }
+.brain-points li { background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 8px 12px; font-size: 13px; color: #3f3f46; }
+.brain-points strong { font-family: Outfit, sans-serif; font-size: 18px; color: #18181b; margin-right: 4px; }
+.brain-hint { font-size: 12.5px; color: #71717a; margin: 0; }
+.brain-stage { position: relative; height: clamp(360px, 46vw, 560px); border-radius: 32px; overflow: hidden; background: radial-gradient(ellipse at 50% 45%, #1d2a12 0%, #0b1020 55%, #05070d 100%); box-shadow: 0 35px 95px rgba(24,24,27,.18); isolation: isolate; }
+.brain-fallback, .brain-fallback img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 30%; transition: opacity .6s; }
+.brain-stage.is-3d .brain-fallback { opacity: 0; pointer-events: none; }
+.brain-glow { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(circle at 50% 50%, rgba(159,255,0,calc(.10 + var(--ac-voice-level, 0) * .25)), transparent 60%); z-index: 1; }
+.brain3d-canvas { position: absolute; inset: 0; width: 100% !important; height: 100% !important; display: block; z-index: 2; cursor: grab; }
+.brain3d-canvas:active { cursor: grabbing; }
+.brain-badge { position: absolute; left: 16px; bottom: 16px; z-index: 3; display: inline-flex; align-items: center; gap: 8px; background: rgba(15,23,42,.82); color: #fff; backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,.16); border-radius: 999px; padding: 7px 14px; font: 600 12.5px Outfit, sans-serif; max-width: calc(100% - 32px); }
+.brain-load { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 3; background: #9fff00; color: #18181b; border: 0; border-radius: 999px; padding: 12px 22px; font-weight: 700; cursor: pointer; box-shadow: 0 10px 30px rgba(159,255,0,.35); }
+.team-section { padding: 20px 0 90px; position: relative; z-index: 10; }
+.team-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; margin-bottom: 22px; }
+.team-updated { display: inline-flex; align-items: center; gap: 8px; background: #fff; border: 1px solid var(--border); border-radius: 999px; padding: 7px 14px; font-size: 12.5px; font-weight: 600; color: #3f3f46; white-space: nowrap; }
+.team-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.agent-card { background: rgba(255,255,255,.95); border: 1px solid var(--border); border-radius: 22px; padding: 16px; display: flex; flex-direction: column; gap: 10px; min-width: 0; box-shadow: 0 10px 30px rgba(24,24,27,.04); transition: transform .2s, box-shadow .2s; }
+.agent-card:hover { transform: translateY(-2px); box-shadow: 0 16px 40px rgba(24,24,27,.08); }
+.agent-top { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.agent-emoji { width: 42px; height: 42px; flex: 0 0 42px; border-radius: 14px; display: grid; place-items: center; font-size: 22px; background: linear-gradient(135deg, rgba(159,255,0,.28), rgba(37,99,235,.12)); }
+.agent-name { font: 700 15px Outfit, sans-serif; line-height: 1.2; min-width: 0; flex: 1 1 auto; }
+.agent-top .agent-state { margin-left: auto; flex: 0 0 auto; }
+.agent-name small { display: block; font: 500 12px Inter, sans-serif; color: #71717a; margin-top: 2px; }
+.agent-state { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: #f4f4f5; color: #52525b; width: max-content; }
+.agent-state::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #a1a1aa; }
+.agent-state.activo { background: #dcfce7; color: #15803d; } .agent-state.activo::before { background: #22c55e; animation: pulseDot 1.6s infinite; }
+.agent-state.revision { background: #fef9c3; color: #a16207; } .agent-state.revision::before { background: #eab308; }
+.agent-last { font-size: 13px; line-height: 1.5; color: #3f3f46; margin: 0; overflow-wrap: anywhere; }
+.agent-meta { margin-top: auto; display: flex; justify-content: space-between; gap: 8px; font-size: 11.5px; color: #71717a; }
+.agent-meta a { color: #2563eb; font-weight: 600; text-decoration: underline; }
+@media (max-width: 1080px) { .team-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 860px) {
+  .brain-grid { grid-template-columns: 1fr; gap: 20px; }
+  .brain-stage { height: clamp(320px, 92vw, 460px); border-radius: 24px; }
+  .team-head { flex-direction: column; align-items: flex-start; }
+}
+@media (max-width: 520px) { .team-grid { grid-template-columns: 1fr; gap: 10px; } .agent-card { padding: 12px 14px; gap: 6px; border-radius: 18px; } .agent-emoji { width: 38px; height: 38px; flex-basis: 38px; font-size: 20px; } .chat-section { padding-bottom: 50px; } }
+@media (prefers-reduced-motion: reduce) { .agent-state.activo::before { animation: none; } }
 </style>
+<link rel="stylesheet" href="/app/embed.css">
 </head>
 <body>
 
@@ -610,7 +659,9 @@ footer { padding: 40px 0px 50px; border-top: 1px solid var(--border); color: rgb
 
     <!-- Desktop Navigation -->
     <nav class="nav-menu">
-      <a class="nav-link" href="#hero">inicio</a>
+      <a class="nav-link" href="#chat">chat</a>
+      <a class="nav-link" href="#cerebro">cerebro 3D</a>
+      <a class="nav-link" href="#equipo">equipo</a>
       <a class="nav-link" href="/como-funciona">cómo funciona</a>
       <a class="nav-link" href="/nosotros">nosotros</a>
       <a class="nav-link" href="/planes" style="font-weight: 700; color: #2563eb;">planes</a>
@@ -649,7 +700,9 @@ footer { padding: 40px 0px 50px; border-top: 1px solid var(--border); color: rgb
 
   <!-- Mobile Nav Panel -->
   <div class="mobile-nav-panel" id="mobileNavPanel">
-    <a class="nav-link" href="#hero" onclick="closeMobileMenu()">inicio</a>
+    <a class="nav-link" href="#chat" onclick="closeMobileMenu()">chat</a>
+    <a class="nav-link" href="#cerebro" onclick="closeMobileMenu()">cerebro 3D</a>
+    <a class="nav-link" href="#equipo" onclick="closeMobileMenu()">equipo de agentes</a>
     <a class="nav-link" href="/como-funciona" onclick="closeMobileMenu()">cómo funciona</a>
     <a class="nav-link" href="/nosotros" onclick="closeMobileMenu()">nosotros</a>
     <a class="nav-link" href="/planes" onclick="closeMobileMenu()" style="font-weight: 700; color: #2563eb;">planes</a>
@@ -674,7 +727,7 @@ footer { padding: 40px 0px 50px; border-top: 1px solid var(--border); color: rgb
       </p>
 
       <div class="hero-actions">
-        <a class="hero-btn-primary" href="/app/">empezar a conversar →</a>
+        <a class="hero-btn-primary" href="#chat">empezar a conversar →</a>
         <button class="hero-btn-secondary" onclick="openContactModal()" style="cursor: pointer;">contacto comercial ↗</button>
         <a class="hero-btn-secondary" href="/planes">ver planes y agentes</a>
       </div>
@@ -702,169 +755,52 @@ footer { padding: 40px 0px 50px; border-top: 1px solid var(--border); color: rgb
     </div>
   </section>
 
-  <!-- Chat Section -->
-  <section class="chat-section" id="chat">
+  <!-- Chat conversacional (mismo motor que /app/) -->
+  <section class="chat-section" id="chat" aria-label="Chat con AgentiCuántico">
     <div class="wrap">
-      <div class="chat-shell" id="chatShell">
-        
-        <!-- Header Chat -->
-        <div class="chat-header">
-          <div class="chat-title-group">
-            <div class="chat-avatar-wrapper">
-              <img src="/media/agenticuantico-avatar.jpg" alt="AgentiCuantico" class="chat-mini-avatar" id="chatMiniAvatar" width="40" height="40">
-              <div class="chat-status-dot-mini" id="chatStatusDot"></div>
-            </div>
-            <div class="chat-title-col">
-              <div class="chat-title-text">AgentiCuantico · Super Inteligencia</div>
-              <div class="chat-subtitle-text" id="chatSubtitleStatus">Vías neuronales en línea · Lista</div>
-            </div>
-          </div>
+      <div id="acEmbed" class="ace-host"></div>
+      <noscript><p style="text-align:center">Activá JavaScript para conversar o abrí <a href="/app/">la app de chat</a>.</p></noscript>
+    </div>
+  </section>
 
-          <div class="chat-header-actions">
-            <!-- Voz y género -->
-            <div class="voice-pill" title="Seleccionar voz y género">
-              <span>🎙️</span>
-              <select id="genderSelect" aria-label="Género de la voz" style="border: 0; background: transparent; font-weight: 700; color: #18181b; outline: none; cursor: pointer; margin-right: 4px;">
-                <option value="femenino" selected>Femenina</option>
-                <option value="masculino">Masculina</option>
-              </select>
-              <select id="voiceSelect" aria-label="Voz del agente" onchange="changeVoice(this.value)">
-                <option value="female_ar_01" selected>🇦🇷 Sofía (Argentina · Femenina)</option>
-                <option value="male_ar_01">🇦🇷 Tomás (Argentina · Masculino)</option>
-                <option value="female_es_01">🇪🇸 Elena (España · Femenina)</option>
-                <option value="male_es_01">🇪🇸 Carlos (España · Masculino)</option>
-                <option value="female_mx_01">🇲🇽 Valentina (Latam · Femenina)</option>
-                <option value="male_cl_01">🇨🇱 Mateo (Latam · Masculino)</option>
-              </select>
-            </div>
-
-            <!-- Llamada de voz en vivo -->
-            <button class="call-btn-head" onclick="startLiveCall()" title="Iniciar llamada de voz a voz en vivo">
-              <span>📞</span>
-              <span>Llamada en vivo</span>
-            </button>
-
-            <!-- Pantalla completa -->
-            <button class="header-tool-btn" onclick="toggleChatMaximize()" title="Maximizar chat">⤢</button>
-          </div>
-        </div>
-
-        <!-- Messages Area (Welcome without mentioning github/cloudflare) -->
-        <div class="chat-messages" id="chatMessages">
-          <div class="message-row ai">
-            <div class="message-bubble welcome-bubble">
-              <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(159, 255, 0, 0.25); border: 1px solid rgba(159, 255, 0, 0.6); color: #18181b; border-radius: 999px; padding: 3px 12px; font-size: 11px; font-weight: 800; margin-bottom: 8px;">
-                <span>✦</span> <span>SUPER INTELIGENCIA AGÉNTICA CON RAZONAMIENTO PROFUNDO</span>
-              </div>
-              <h3 style="font: 700 20px 'Outfit', sans-serif; margin: 4px 0 8px; color: #111318;">¡Hola! Soy AgentiCuantico.</h3>
-              <p style="margin: 0 0 10px; color: #475569; line-height: 1.65; font-size: 14.5px;">
-                Tu <strong>super inteligencia artificial agéntica</strong> con razonamiento analítico avanzado y equipo multidisciplinario. Cumplo con exactitud las órdenes y desafíos que me solicites: podés pedirme programar soluciones completas con código limpio y probado, diseñar interfaces modernas, estructurar arquitecturas, redactar propuestas comerciales o coordinar agentes expertos en conjunto.
-              </p>
-              <div style="font-size: 12.5px; color: #64748b; line-height: 1.5; background: #f8fafc; padding: 8px 12px; border-radius: 12px; border: 1px solid #e2e8f0;">
-                🎙️ <strong>Interacción Voz a Voz humana:</strong> Podés presionar el micrófono para hablar y la IA te responderá con voz natural sin necesidad de tipear, permitiendo una conversación continua en tiempo real.
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Chat Composer -->
-        <div class="chat-composer">
-          <!-- Status bar: active agents, reasoning & mic listening indicator -->
-          <div class="composer-status-bar">
-            <div class="active-agents-tray" id="activeAgentsTray">
-              <!-- Dynamically injected agent chips -->
-            </div>
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <div class="mic-listening-pill" id="micLiveIndicator">
-                <span>🔴</span>
-                <span>Escuchando tu voz... Hablá con normalidad</span>
-              </div>
-              <div class="reasoning-badge" id="reasoningIndicator">
-                <span>🧠</span>
-                <span>Pensar más activado (Razonamiento profundo)</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Floating (+) Menu with authentic official GitHub & Cloudflare SVGs -->
-          <div class="plus-popup-menu" id="plusMenuPopup">
-            <button class="plus-menu-btn" onclick="triggerFileInput('file')">
-              <span class="plus-menu-icon">📁</span>
-              <span>Subir Archivos</span>
-            </button>
-            <button class="plus-menu-btn" onclick="triggerFileInput('photo')">
-              <span class="plus-menu-icon">🖼️</span>
-              <span>Fotos / Imágenes</span>
-            </button>
-            <button class="plus-menu-btn" onclick="triggerFileInput('camera')">
-              <span class="plus-menu-icon">📷</span>
-              <span>Cámara</span>
-            </button>
-            <button class="plus-menu-btn" onclick="openAgentsModal(); closePlusMenu();">
-              <span class="plus-menu-icon">🤖</span>
-              <span>Equipo de Agentes con Rol</span>
-            </button>
-            <!-- Real Official GitHub SVG Logo -->
-            <button class="plus-menu-btn" onclick="openIntegrationModal('github'); closePlusMenu();">
-              <span class="plus-menu-icon" style="background: #18181b; color: #ffffff;">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
-                </svg>
-              </span>
-              <span>Conectar GitHub</span>
-            </button>
-            <!-- Real Official Cloudflare SVG Logo -->
-            <button class="plus-menu-btn" onclick="openIntegrationModal('cloudflare'); closePlusMenu();">
-              <span class="plus-menu-icon" style="background: #ffffff; border: 1px solid #fed7aa;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                  <path fill="#F38020" d="M18.3 10.4c-.4-2.8-2.8-4.9-5.7-4.9-2.4 0-4.5 1.4-5.4 3.5-1.6.2-2.9 1.4-3.1 3-.1.5 0 1 .2 1.4-.8.5-1.3 1.4-1.3 2.4 0 1.7 1.3 3 3 3h12.5c2.5 0 4.5-2 4.5-4.5 0-2.1-1.4-3.8-3.3-4.3-.1.2-.2.3-.4.4z"/>
-                  <path fill="#FAAE40" d="M18.8 14.5c0-.2 0-.3-.1-.5-.4-2.8-2.8-4.9-5.7-4.9-2.4 0-4.5 1.4-5.4 3.5-.1.2-.1.4-.1.7.3-.2.6-.3 1-.3.2 0 .4 0 .6.1.4-.8 1.1-1.5 2-1.9.9-.4 1.9-.5 2.9-.2 1 .3 1.9.9 2.5 1.8.6.9.9 1.9.9 3 0 .3 0 .6-.1.9h1.4c0-.7-.4-1.5-1-2.2z"/>
-                </svg>
-              </span>
-              <span>Conectar Cloudflare</span>
-            </button>
-            <button class="plus-menu-btn" onclick="startLiveCall(); closePlusMenu();">
-              <span class="plus-menu-icon">📞</span>
-              <span>Llamada de Voz en Vivo</span>
-            </button>
-          </div>
-
-          <!-- Capsule Input -->
-          <div class="composer-capsule">
-            <button class="composer-plus-btn" id="plusToggleBtn" title="Complementos y archivos" onclick="togglePlusMenu()">+</button>
-            <textarea class="composer-input" id="userInputText" rows="1" placeholder="Escribí una orden o mensaje..." onkeydown="handleInputKey(event)"></textarea>
-
-            <div class="composer-actions-right">
-              <!-- Brain toggle -->
-              <button class="action-icon-btn brain-btn" id="brainToggleBtn" title="Activar / desactivar Pensar más (Razonamiento profundo)" onclick="toggleReasoningMode()">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M9.5 2A4.5 4.5 0 0 0 5 6.5a4.48 4.48 0 0 0 .5 2.05A4.5 4.5 0 0 0 4 12a4.48 4.48 0 0 0 1.5 3.39A4.5 4.5 0 0 0 9.5 20H10V2h-.5Z"/>
-                  <path d="M14.5 2A4.5 4.5 0 0 1 19 6.5a4.48 4.48 0 0 1-.5 2.05A4.5 4.5 0 0 1 20 12a4.48 4.48 0 0 1 1.5 3.39A4.5 4.5 0 0 1 14.5 20H14V2h.5Z"/>
-                </svg>
-              </button>
-
-              <!-- Mic toggle (Continuous Voice-to-Voice) -->
-              <button class="action-icon-btn mic-btn" id="micToggleBtn" title="Hablar de voz a voz en vivo con la IA" onclick="toggleVoiceToVoiceMode()">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
-                  <rect x="9" y="2" width="6" height="12" rx="3"/>
-                  <path d="M5 10a7 7 0 0 0 14 0"/>
-                  <line x1="12" y1="17" x2="12" y2="22"/>
-                  <line x1="8" y1="22" x2="16" y2="22"/>
-                </svg>
-              </button>
-
-              <!-- Send Button -->
-              <button class="composer-send-btn" id="sendMessageBtn" title="Enviar orden" onclick="sendMessage()">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#ffffff" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
-                  <line x1="12" y1="19" x2="12" y2="5"/>
-                  <polyline points="5 12 12 5 19 12"/>
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-
+  <!-- Cerebro vivo 3D -->
+  <section class="brain-section" id="cerebro" aria-labelledby="brainTitle">
+    <div class="wrap brain-grid">
+      <div class="brain-copy">
+        <span class="sec-tag">cerebro vivo · 3D</span>
+        <h2 class="sec-title" id="brainTitle">Un cerebro que <span class="lime-box">piensa</span> en red.</h2>
+        <p class="sec-lead">Cada nodo es una habilidad y cada rama dorada, una conexión entre agentes. Cuando AgentiCuántico razona o te habla, las sinapsis se encienden en tiempo real.</p>
+        <ul class="brain-points">
+          <li><strong>460</strong> nodos neuronales</li>
+          <li><strong>860</strong> sinapsis activas</li>
+          <li><strong>8</strong> agentes especialistas</li>
+        </ul>
+        <p class="brain-hint" id="brainHint">Arrastrá para girarlo · se mueve solo</p>
       </div>
+      <div class="brain-stage" id="brainStage" data-src="/media/cerebro.glb">
+        <picture class="brain-fallback">
+          <source type="image/webp" srcset="/media/agenticuantico-hero-960.webp">
+          <img src="/media/agenticuantico-hero-960.jpg" alt="Cerebro dorado de AgentiCuántico" width="960" height="536" loading="lazy" decoding="async">
+        </picture>
+        <div class="brain-glow" aria-hidden="true"></div>
+        <button class="brain-load" id="brainLoad" type="button" hidden>Ver en 3D</button>
+        <div class="brain-badge" id="brainBadge"><span class="hero-hud-dot"></span><span id="brainBadgeText">Cargando cerebro 3D…</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Equipo de agentes en vivo -->
+  <section class="team-section" id="equipo" aria-labelledby="teamTitle">
+    <div class="wrap">
+      <div class="team-head">
+        <div>
+          <span class="sec-tag">equipo de agentes · 24/7</span>
+          <h2 class="sec-title" id="teamTitle">Un equipo de IA que trabaja <span class="lime-box">todo el día</span>.</h2>
+          <p class="sec-lead">Ocho especialistas mejoran AgentiCuántico varias veces por día: proponen cambios pequeños y verificables que un humano revisa antes de publicar.</p>
+        </div>
+        <div class="team-updated" id="teamUpdated"><span class="hero-hud-dot"></span><span>Conectando…</span></div>
+      </div>
+      <div class="team-grid" id="teamGrid" aria-live="polite"></div>
     </div>
   </section>
 </main>
@@ -878,133 +814,6 @@ footer { padding: 40px 0px 50px; border-top: 1px solid var(--border); color: rgb
     </div>
   </div>
 </footer>
-
-<!-- Live Call Overlay (Voice-to-Voice with Human Agent) -->
-<div class="live-call-overlay" id="liveCallOverlay">
-  <div class="call-top-bar">
-    <div class="call-title">Llamada en Vivo con AgentiCuantico</div>
-    <div class="call-status">
-      <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 10px #4ade80;"></span>
-      <span id="callStatusText">Conectado · Voz a voz en tiempo real</span>
-    </div>
-    
-    <!-- Live in-call voice & gender selector -->
-    <div style="margin: 14px 0 6px; display: flex; align-items: center; justify-content: center; gap: 8px;">
-      <span style="font-size: 13px; color: #94a3b8;">Voz y Género del Agente:</span>
-      <select id="callVoiceSelect" onchange="changeVoice(this.value)" style="border: 1.5px solid rgba(159,255,0,0.5); background: rgba(18,24,38,0.92); color: #fff; border-radius: 999px; padding: 7px 16px; font-size: 13.5px; font-weight: 700; outline: none; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.4);">
-        <option value="female_ar_01" selected>🇦🇷 Sofía (Argentina · Femenina)</option>
-        <option value="male_ar_01">🇦🇷 Tomás (Argentina · Masculino)</option>
-        <option value="female_es_01">🇪🇸 Elena (España · Femenina)</option>
-        <option value="male_es_01">🇪🇸 Carlos (España · Masculino)</option>
-        <option value="female_mx_01">🇲🇽 Valentina (Latam · Femenina)</option>
-        <option value="male_cl_01">🇨🇱 Mateo (Latam · Masculino)</option>
-      </select>
-    </div>
-  </div>
-
-  <!-- Real Quantum Call Stage: Neural Cybernetic Avatar with voice waves -->
-  <div class="call-avatar-stage">
-    <div class="call-wave"></div>
-    <div class="call-wave"></div>
-    <div class="call-wave"></div>
-    <div style="position: relative; z-index: 5; text-align: center;">
-      <div class="human-caller-frame">
-        <img id="callAvatarImg" src="/media/agenticuantico-avatar.jpg" alt="Agente cuántico de voz" class="human-caller-img">
-      </div>
-      <div style="margin-top: 10px; font-size: 13px; font-weight: 700; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); padding: 5px 14px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.18); display: inline-flex; align-items: center; gap: 6px;">
-        <span style="width: 8px; height: 8px; border-radius: 50%; background: #22c55e;"></span>
-        <span id="callAgentNameDisplay">Voz Femenina (Sofía · Argentina)</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- Animated Sound Equalizer -->
-  <div style="display: flex; gap: 5px; height: 32px; align-items: flex-end; justify-content: center;" id="callEqualizer">
-    <div style="width: 4px; height: 16px; background: #9fff00; border-radius: 999px; animation: bounceEq 0.8s ease-in-out infinite;"></div>
-    <div style="width: 4px; height: 26px; background: #38bdf8; border-radius: 999px; animation: bounceEq 0.6s ease-in-out infinite 0.15s;"></div>
-    <div style="width: 4px; height: 18px; background: #9fff00; border-radius: 999px; animation: bounceEq 0.7s ease-in-out infinite 0.3s;"></div>
-    <div style="width: 4px; height: 30px; background: #a855f7; border-radius: 999px; animation: bounceEq 0.5s ease-in-out infinite 0.1s;"></div>
-    <div style="width: 4px; height: 20px; background: #38bdf8; border-radius: 999px; animation: bounceEq 0.9s ease-in-out infinite 0.25s;"></div>
-  </div>
-
-  <div class="call-transcript-box" id="callTranscript">
-    Hablá con naturalidad. AgentiCuantico te está escuchando...
-  </div>
-
-  <div class="call-controls">
-    <button class="call-end-btn" onclick="endLiveCall()" title="Finalizar llamada">✕</button>
-  </div>
-</div>
-
-<!-- Modal Agentes con Rol y Skills (Multi-Agent Room) -->
-<div class="integration-modal" id="agentsModal">
-  <div class="modal-box" style="width: min(660px, 100%);">
-    <button class="modal-close" onclick="closeAgentsModal()">×</button>
-    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
-      <span style="font-size: 24px;">🤖</span>
-      <h2 style="font: 700 22px 'Outfit', sans-serif; margin: 0;">Equipo de Agentes Especializados</h2>
-    </div>
-    <p style="color: var(--muted); font-size: 13.5px; margin: 0 0 16px;">
-      Cada agente cuenta con habilidades profesionales y genera código verificado. Podés darles órdenes por escrito o voz para que colaboren en conjunto como un equipo multidisciplinario.
-    </p>
-
-    <!-- Collaborative Synergy Mode Toggle -->
-    <div style="background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 16px; padding: 12px 16px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
-      <div>
-        <div style="font-weight: 700; font-size: 13.5px; color: #1e3a8a;">Sinergia Colaborativa Multi-Agente</div>
-        <div style="font-size: 12px; color: #3b82f6;">Los agentes interactúan entre sí y coordinan para entregarte la mejor solución integral (Disponible en Planes Pro, Business y Enterprise).</div>
-      </div>
-      <input type="checkbox" id="teamCollaborationCheckbox" checked style="width: 22px; height: 22px; cursor: pointer;">
-    </div>
-
-    <div style="display: grid; gap: 12px; max-height: 340px; overflow-y: auto; padding-right: 6px;" id="agentsListContainer">
-      <!-- Injected dynamically -->
-    </div>
-
-    <div style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-      <a href="/planes" style="font-size: 13px; color: #2563eb; font-weight: 700;">Ver planes para desbloquear todos los agentes →</a>
-      <button class="hero-btn-primary" onclick="closeAgentsModal()" style="padding: 10px 22px; font-size: 13.5px;">Guardar y Continuar</button>
-    </div>
-  </div>
-</div>
-
-<!-- Modal Integración (GitHub / Cloudflare) con logos oficiales y conexión Google -->
-<div class="integration-modal" id="integrationModal">
-  <div class="modal-box">
-    <button class="modal-close" onclick="closeIntegrationModal()">×</button>
-    
-    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
-      <div id="intModalLogo" style="width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: #f8fafc; border: 1px solid #e2e8f0;"></div>
-      <div>
-        <h2 id="intModalTitle" style="font: 700 21px 'Outfit', sans-serif; margin: 0;">Conectar Servicio</h2>
-        <div style="font-size: 12px; color: #16a34a; font-weight: 600;" id="intBrandVerified">✓ Integración Oficial Verificada</div>
-      </div>
-    </div>
-    
-    <p id="intModalDesc" style="color: var(--muted); font-size: 13.5px; margin: 0 0 18px;"></p>
-
-    <!-- Connect via Google Account option -->
-    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 14px; margin-bottom: 16px; text-align: center;">
-      <div style="font-size: 13px; font-weight: 600; color: #1e293b; margin-bottom: 8px;">Conexión rápida mediante cuenta de Google</div>
-      <button class="auth-btn-pill" style="width: 100%; height: 42px; justify-content: center; gap: 8px; font-weight: 700;" onclick="connectIntegrationWithGoogle()">
-        <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
-        <span id="googleConnectBtnLabel">Vincular con correo de Google</span>
-      </button>
-    </div>
-
-    <div style="display: flex; align-items: center; gap: 10px; margin: 14px 0; color: #94a3b8; font-size: 12px;">
-      <div style="flex: 1; height: 1px; background: #e2e8f0;"></div>
-      <span>o ingresar token manualmente</span>
-      <div style="flex: 1; height: 1px; background: #e2e8f0;"></div>
-    </div>
-
-    <form onsubmit="saveIntegration(event)">
-      <div id="intFieldGroup"></div>
-      <button class="hero-btn-primary" type="submit" style="width: 100%; border: 0; padding: 12px; margin-top: 10px;">Guardar Conexión</button>
-    </form>
-    <div id="intStatusMsg" style="font-size: 13px; margin-top: 10px; text-align: center; color: #16a34a; font-weight: 600;"></div>
-  </div>
-</div>
 
 <!-- Modal Contacto Empresarial (Email protegido y oculto) -->
 <div class="integration-modal" id="contactModal">
@@ -1165,21 +974,10 @@ footer { padding: 40px 0px 50px; border-top: 1px solid var(--border); color: rgb
   </div>
 </div>
 
-<input id="fileInput" type="file" multiple accept=".pdf,.doc,.docx,.txt,.md,.json,.csv,.py,.ts,.js,.html">
-<input id="photoInput" type="file" multiple accept="image/*">
-<input id="cameraInput" type="file" accept="image/*" capture="environment">
 
 <script>
 // State Management
 let currentUser = null;
-let currentVoice = "female_ar_01";
-let isReasoningActive = false;
-let isMicActive = false;
-let isVoiceToVoiceActive = false;
-let activeAgentList = []; // DevBot y agentes especializados solo intervienen cuando el usuario los selecciona explícitamente
-let allSpecializedAgents = [];
-let speechRecognizer = null;
-let liveCallActive = false;
 let trialSecondsRemaining = 120 * 60; // 2 horas gratis
 let isTrialUnlimited = false;
 let trialTimerInterval = null;
@@ -1188,7 +986,6 @@ let trialTimerInterval = null;
 document.addEventListener("DOMContentLoaded", async () => {
   initParticles();
   initTrialQuota();
-  await loadAvailableAgents();
   await checkUserSession();
 });
 
@@ -1319,72 +1116,9 @@ function initParticles() {
 }
 
 // Fetch Agents
-async function loadAvailableAgents() {
-  try {
-    const res = await fetch("/api/agents");
-    const data = await res.json();
-    if (data.ok) {
-      allSpecializedAgents = data.agents;
-      renderAgentsSelectionModal();
-      renderActiveAgentChips();
-    }
-  } catch (e) {
-    console.warn("Could not load agents catalog:", e);
-  }
-}
 
-function renderAgentsSelectionModal() {
-  const container = document.getElementById("agentsListContainer");
-  if (!container) return;
-  container.innerHTML = allSpecializedAgents.map(ag => {
-    const isChecked = activeAgentList.includes(ag.id);
-    return `
-      <div style="border: 1.5px solid ${isChecked ? '#2563eb' : '#e4e4e7'}; border-radius: 16px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; background: ${isChecked ? '#eff6ff' : '#fff'};">
-        <div style="display: flex; align-items: center; gap: 12px;">
-          <span style="font-size: 26px;">${ag.avatar}</span>
-          <div>
-            <div style="font-weight: 700; font-size: 14.5px; color: #18181b;">${ag.name} <small style="font-weight: 500; color: #71717a;">· ${ag.role}</small></div>
-            <div style="font-size: 12px; color: #52525b; margin-top: 2px;">${ag.description}</div>
-            <div style="margin-top: 6px; display: flex; gap: 5px; flex-wrap: wrap;">
-              ${ag.skills.map(s => `<span style="font-size: 10.5px; background: #e2e8f0; border-radius: 6px; padding: 2px 7px;">${s}</span>`).join('')}
-            </div>
-          </div>
-        </div>
-        <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleAgentActive('${ag.id}', this.checked)" style="width: 20px; height: 20px; cursor: pointer;">
-      </div>
-    `;
-  }).join('');
-}
 
-function toggleAgentActive(agentId, active) {
-  if (active && !activeAgentList.includes(agentId)) {
-    activeAgentList.push(agentId);
-  } else if (!active) {
-    activeAgentList = activeAgentList.filter(id => id !== agentId);
-  }
-  renderActiveAgentChips();
-  renderAgentsSelectionModal();
-}
 
-function renderActiveAgentChips() {
-  const tray = document.getElementById("activeAgentsTray");
-  if (!tray) return;
-  if (!activeAgentList.length) {
-    tray.innerHTML = `<span style="font-size: 12px; color: #a1a1aa;">Ningún agente seleccionado (Super Inteligencia activa)</span>`;
-    return;
-  }
-  tray.innerHTML = activeAgentList.map(id => {
-    const ag = allSpecializedAgents.find(a => a.id === id);
-    if (!ag) return "";
-    return `
-      <div class="agent-tag">
-        <span>${ag.avatar}</span>
-        <span>${ag.name}</span>
-        <button onclick="toggleAgentActive('${ag.id}', false)">×</button>
-      </div>
-    `;
-  }).join('');
-}
 
 // User Session & Subscription
 async function checkUserSession() {
@@ -1453,371 +1187,27 @@ async function cancelAutoRenewal() {
 }
 
 // Chat Send Logic
-async function sendMessage(textOverride = "", fromVoice = false) {
-  const input = document.getElementById("userInputText");
-  const text = (textOverride || input.value).trim();
-  if (!text) return;
 
-  if (!isTrialUnlimited && trialSecondsRemaining <= 0) {
-    openTrialModal();
-    return;
-  }
 
-  appendUserBubble(text);
-  if (!fromVoice) {
-    input.value = "";
-    input.style.height = "auto";
-  }
 
-  // Multi-Agent team execution
-  const isCollaboration = document.getElementById("teamCollaborationCheckbox")?.checked ?? true;
-  if (activeAgentList.length > 0) {
-    try {
-      const res = await fetch("/api/chat/agents", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: text, activeAgentIds: activeAgentList, teamCollaboration: isCollaboration })
-      });
-      const data = await res.json();
-      if (data.ok && data.responses && data.responses.length > 0) {
-        data.responses.forEach(resp => {
-          appendAgentBubble(resp.agentName, resp.agentRole, resp.avatar, resp.reply);
-        });
 
-        // If in voice-to-voice mode, speak the main response out loud
-        if (fromVoice || isVoiceToVoiceActive) {
-          const spokenText = data.responses[0].reply.replace(/```[\s\S]*?```/g, "Te muestro la solución y el código en pantalla.");
-          playVoiceSynthesis(spokenText, () => {
-            if (isVoiceToVoiceActive) resumeVoiceToVoiceListening();
-          });
-        }
-        return;
-      }
-    } catch {}
-  }
-
-  // Fallback public super intelligence chat
-  try {
-    const res = await fetch("/api/public-chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: text, reasoning: isReasoningActive, language: "es-AR" })
-    });
-    const data = await res.json();
-    appendAiBubble(data.answer || "Respuesta recibida.");
-
-    if (fromVoice || isVoiceToVoiceActive) {
-      const spokenText = data.answer.replace(/```[\s\S]*?```/g, "Te preparé el código en pantalla para copiar.");
-      playVoiceSynthesis(spokenText, () => {
-        if (isVoiceToVoiceActive) resumeVoiceToVoiceListening();
-      });
-    }
-  } catch (err) {
-    appendAiBubble("No se pudo procesar tu mensaje. Por favor intentá nuevamente.");
-    if (isVoiceToVoiceActive) resumeVoiceToVoiceListening();
-  }
-}
-
-function handleInputKey(e) {
-  if (e.key === "Enter" && !e.shiftKey) {
-    e.preventDefault();
-    sendMessage();
-  }
-}
-
-function appendUserBubble(text) {
-  const box = document.getElementById("chatMessages");
-  const row = document.createElement("div");
-  row.className = "message-row user";
-  row.innerHTML = `<div class="message-bubble">${escapeHtml(text)}</div>`;
-  box.appendChild(row);
-  box.scrollTop = box.scrollHeight;
-}
-
-function appendAiBubble(text) {
-  const box = document.getElementById("chatMessages");
-  const row = document.createElement("div");
-  row.className = "message-row ai";
-  row.innerHTML = `<div class="message-bubble">${formatMarkdown(text)}</div>`;
-  box.appendChild(row);
-  box.scrollTop = box.scrollHeight;
-}
-
-function appendAgentBubble(agentName, role, avatar, text) {
-  const box = document.getElementById("chatMessages");
-  const row = document.createElement("div");
-  row.className = "message-row ai";
-  row.innerHTML = `
-    <div class="message-bubble">
-      <div class="agent-header-chip">${avatar} ${agentName} · ${role}</div>
-      <div>${formatMarkdown(text)}</div>
-    </div>
-  `;
-  box.appendChild(row);
-  box.scrollTop = box.scrollHeight;
-}
 
 // Real Human Voice-to-Voice Continuous Hands-Free Interaction
-function toggleVoiceToVoiceMode() {
-  const btn = document.getElementById("micToggleBtn");
-  const indicator = document.getElementById("micLiveIndicator");
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) return alert("El reconocimiento de voz no está soportado en este navegador. Te sugerimos utilizar Google Chrome o Microsoft Edge.");
 
-  if (isVoiceToVoiceActive) {
-    isVoiceToVoiceActive = false;
-    btn.classList.remove("active");
-    if (indicator) indicator.classList.remove("active");
-    if (speechRecognizer) {
-      try { speechRecognizer.stop(); } catch {}
-    }
-    if (window.speechSynthesis) window.speechSynthesis.cancel();
-    return;
-  }
-
-  isVoiceToVoiceActive = true;
-  btn.classList.add("active");
-  if (indicator) indicator.classList.add("active");
-  resumeVoiceToVoiceListening();
-}
-
-function resumeVoiceToVoiceListening() {
-  if (!isVoiceToVoiceActive) return;
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) return;
-
-  if (speechRecognizer) {
-    try { speechRecognizer.stop(); } catch {}
-  }
-
-  speechRecognizer = new SR();
-  speechRecognizer.lang = "es-AR";
-  speechRecognizer.interimResults = false;
-  speechRecognizer.maxAlternatives = 1;
-
-  speechRecognizer.onresult = (e) => {
-    const text = e.results?.[0]?.[0]?.transcript?.trim();
-    if (text) {
-      const input = document.getElementById("userInputText");
-      if (input) input.value = text;
-      sendMessage(text, true);
-    }
-  };
-
-  speechRecognizer.onerror = () => {
-    if (isVoiceToVoiceActive) {
-      setTimeout(resumeVoiceToVoiceListening, 800);
-    }
-  };
-
-  speechRecognizer.onend = () => {
-    if (isVoiceToVoiceActive && !window.speechSynthesis?.speaking) {
-      setTimeout(resumeVoiceToVoiceListening, 400);
-    }
-  };
-
-  try { speechRecognizer.start(); } catch {}
-}
 
 // Live Voice-to-Voice Call Overlay with Human Agent
-function startLiveCall() {
-  const overlay = document.getElementById("liveCallOverlay");
-  overlay.classList.add("open");
-  liveCallActive = true;
-  document.getElementById("callStatusText").textContent = "Conectado · Escuchando en vivo...";
-  document.getElementById("callTranscript").textContent = "Te escucho. Podés hablar con naturalidad con tu agente...";
-  changeVoice(currentVoice);
 
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (SR) {
-    speechRecognizer = new SR();
-    speechRecognizer.lang = "es-AR";
-    speechRecognizer.continuous = true;
-    speechRecognizer.interimResults = false;
 
-    speechRecognizer.onresult = async (e) => {
-      const transcript = e.results[e.results.length - 1][0].transcript.trim();
-      if (transcript && liveCallActive) {
-        document.getElementById("callTranscript").innerHTML = `<em>Vos:</em> "${escapeHtml(transcript)}"`;
-        document.getElementById("callStatusText").textContent = "Pensando respuesta...";
-
-        try {
-          const res = await fetch("/api/voice/live-call", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              transcript,
-              voiceId: currentVoice,
-              agentGender: currentVoice.includes("male") ? "masculino" : "femenino"
-            })
-          });
-          const data = await res.json();
-          if (data.ok && data.reply) {
-            document.getElementById("callTranscript").innerHTML = `<strong>${data.agentName || "AgentiCuantico"}:</strong> ${data.reply}`;
-            document.getElementById("callStatusText").textContent = "Hablando...";
-            const avatarImg = document.getElementById("callAvatarImg");
-            if (avatarImg) avatarImg.classList.add("talking");
-
-            playVoiceSynthesis(data.reply, () => {
-              if (avatarImg) avatarImg.classList.remove("talking");
-              if (liveCallActive) {
-                document.getElementById("callStatusText").textContent = "Conectado · Escuchando en vivo...";
-                // Restart listening immediately for seamless turn
-                try { speechRecognizer.start(); } catch {}
-              }
-            });
-          }
-        } catch {
-          document.getElementById("callStatusText").textContent = "Conectado · Escuchando en vivo...";
-        }
-      }
-    };
-
-    speechRecognizer.onerror = () => {};
-    try { speechRecognizer.start(); } catch {}
-  }
-}
-
-function endLiveCall() {
-  liveCallActive = false;
-  document.getElementById("liveCallOverlay").classList.remove("open");
-  const avatarImg = document.getElementById("callAvatarImg");
-  if (avatarImg) avatarImg.classList.remove("talking");
-  if (speechRecognizer) {
-    try { speechRecognizer.stop(); } catch {}
-    speechRecognizer = null;
-  }
-  if (window.speechSynthesis) window.speechSynthesis.cancel();
-}
-
-function playVoiceSynthesis(text, onEnd) {
-  if (!("speechSynthesis" in window)) {
-    if (typeof onEnd === "function") onEnd();
-    return;
-  }
-  window.speechSynthesis.cancel();
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = "es-AR";
-  utterance.rate = 1.02;
-  utterance.pitch = 1.0;
-
-  const voices = window.speechSynthesis.getVoices();
-  const femaleKeywords = ["sabina", "monica", "paulina", "lucia", "maria", "elena", "sofia", "isabela"];
-  const maleKeywords = ["jorge", "diego", "carlos", "pablo", "tomas", "miguel"];
-
-  let selectedNativeVoice = null;
-  if (currentVoice.includes("male") && !currentVoice.includes("female")) {
-    selectedNativeVoice = voices.find(v => (v.lang.startsWith("es") || v.lang === "es-AR") && maleKeywords.some(k => v.name.toLowerCase().includes(k)));
-  } else {
-    selectedNativeVoice = voices.find(v => (v.lang.startsWith("es") || v.lang === "es-AR") && femaleKeywords.some(k => v.name.toLowerCase().includes(k)));
-  }
-
-  if (!selectedNativeVoice) {
-    selectedNativeVoice = voices.find(v => v.lang === "es-AR" || v.lang.startsWith("es"));
-  }
-
-  if (selectedNativeVoice) utterance.voice = selectedNativeVoice;
-
-  utterance.onend = () => {
-    if (typeof onEnd === "function") onEnd();
-  };
-  utterance.onerror = () => {
-    if (typeof onEnd === "function") onEnd();
-  };
-
-  window.speechSynthesis.speak(utterance);
-}
 
 // Helpers
 function escapeHtml(str) {
   return String(str || "").replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]);
 }
 
-function formatMarkdown(text) {
-  const parts = String(text || "").split(/```/);
-  if (parts.length === 1) return escapeHtml(text).replace(/\n/g, "<br>");
-
-  let html = "";
-  parts.forEach((part, i) => {
-    if (i % 2 === 0) {
-      html += escapeHtml(part).replace(/\n/g, "<br>");
-    } else {
-      const firstLine = part.indexOf("\n");
-      const lang = firstLine >= 0 ? part.slice(0, firstLine).trim() : "code";
-      const code = firstLine >= 0 ? part.slice(firstLine + 1) : part;
-      html += `
-        <div class="codebox">
-          <div class="codehead">
-            <span>${escapeHtml(lang)}</span>
-            <button class="copycode" onclick="navigator.clipboard.writeText(this.parentElement.nextElementSibling.textContent); this.textContent='¡Copiado! ✓'; setTimeout(()=>this.textContent='Copiar', 1500);">Copiar</button>
-          </div>
-          <pre>${escapeHtml(code)}</pre>
-        </div>
-      `;
-    }
-  });
-  return html;
-}
 
 // Modals & Menu toggles
-function togglePlusMenu() {
-  document.getElementById("plusMenuPopup").classList.toggle("open");
-}
-function closePlusMenu() {
-  document.getElementById("plusMenuPopup").classList.remove("open");
-}
-function toggleReasoningMode() {
-  isReasoningActive = !isReasoningActive;
-  document.getElementById("brainToggleBtn").classList.toggle("active", isReasoningActive);
-  document.getElementById("reasoningIndicator").classList.toggle("active", isReasoningActive);
-}
-function toggleChatMaximize() {
-  document.getElementById("chatShell").classList.toggle("fullscreen");
-  document.body.classList.toggle("fullscreen-chat");
-}
-function triggerFileInput(type) {
-  closePlusMenu();
-  if (type === "camera") document.getElementById("cameraInput").click();
-  else if (type === "photo") document.getElementById("photoInput").click();
-  else document.getElementById("fileInput").click();
-}
 
-function changeVoice(voiceId) {
-  currentVoice = voiceId;
-  const select1 = document.getElementById("voiceSelect");
-  const select2 = document.getElementById("callVoiceSelect");
-  if (select1) select1.value = voiceId;
-  if (select2) select2.value = voiceId;
-  const gSel = document.getElementById("genderSelect");
-  const wantGender = (voiceId.indexOf("female") === 0) ? "femenino" : "masculino";
-  if (gSel && gSel.value !== wantGender) {
-    gSel.value = wantGender;
-    gSel.dispatchEvent(new Event("change"));
-    if (select1) select1.value = voiceId;
-  }
 
-  const isMale = voiceId.includes("male") && !voiceId.includes("female");
-  const avatarImg = document.getElementById("callAvatarImg");
-  const nameDisplay = document.getElementById("callAgentNameDisplay");
-  if (avatarImg) {
-    // Quantum cybernetic neural brain image uploaded by user
-    avatarImg.src = "/media/agenticuantico-avatar.jpg";
-  }
-  if (nameDisplay) {
-    const voiceNames = {
-      female_ar_01: "Sofía · Voz Femenina (Argentina)",
-      male_ar_01: "Tomás · Voz Masculina (Argentina)",
-      female_es_01: "Elena · Voz Femenina (España)",
-      male_es_01: "Carlos · Voz Masculina (España)",
-      female_mx_01: "Valentina · Voz Femenina (Latam)",
-      male_cl_01: "Mateo · Voz Masculina (Latam)"
-    };
-    nameDisplay.textContent = voiceNames[voiceId] || (isMale ? "Voz Masculina" : "Voz Femenina");
-  }
-}
-
-function openAgentsModal() { document.getElementById("agentsModal").classList.add("open"); }
-function closeAgentsModal() { document.getElementById("agentsModal").classList.remove("open"); }
 function openAccountModal() { document.getElementById("accountModal").classList.add("open"); }
 function closeAccountModal() { document.getElementById("accountModal").classList.remove("open"); }
 function toggleMobileMenu() { document.getElementById("mobileNavPanel").classList.toggle("open"); }
@@ -1875,85 +1265,9 @@ function setAuthTab(tab) {
 }
 
 // Integration modal handling (GitHub & Cloudflare) with real SVG logos and Google account connection
-let currentIntType = "github";
-function openIntegrationModal(type) {
-  currentIntType = type;
-  const modal = document.getElementById("integrationModal");
-  const title = document.getElementById("intModalTitle");
-  const desc = document.getElementById("intModalDesc");
-  const logoBox = document.getElementById("intModalLogo");
-  const fieldGroup = document.getElementById("intFieldGroup");
 
-  if (type === "github") {
-    title.textContent = "Conectar con GitHub";
-    desc.textContent = "Vinculá tu repositorio de GitHub para permitir al agente explorar código, crear ramas y preparar Pull Requests sin tocar la consola.";
-    logoBox.innerHTML = `
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="#18181b">
-        <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
-      </svg>
-    `;
-    fieldGroup.innerHTML = `
-      <input id="intToken" type="password" placeholder="GitHub Personal Access Token (ghp_...)" style="width: 100%; height: 44px; padding: 0 14px; border: 1px solid #d4d4d8; border-radius: 12px; margin-bottom: 10px;">
-      <input id="intRepo" type="text" placeholder="Repositorio (ej: empresa/proyecto)" style="width: 100%; height: 44px; padding: 0 14px; border: 1px solid #d4d4d8; border-radius: 12px; margin-bottom: 10px;">
-    `;
-  } else {
-    title.textContent = "Conectar con Cloudflare";
-    desc.textContent = "Vinculá Cloudflare para gestionar Workers, DNS seguros y despliegues instantáneos de tus aplicaciones.";
-    logoBox.innerHTML = `
-      <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
-        <path fill="#F38020" d="M18.3 10.4c-.4-2.8-2.8-4.9-5.7-4.9-2.4 0-4.5 1.4-5.4 3.5-1.6.2-2.9 1.4-3.1 3-.1.5 0 1 .2 1.4-.8.5-1.3 1.4-1.3 2.4 0 1.7 1.3 3 3 3h12.5c2.5 0 4.5-2 4.5-4.5 0-2.1-1.4-3.8-3.3-4.3-.1.2-.2.3-.4.4z"/>
-        <path fill="#FAAE40" d="M18.8 14.5c0-.2 0-.3-.1-.5-.4-2.8-2.8-4.9-5.7-4.9-2.4 0-4.5 1.4-5.4 3.5-.1.2-.1.4-.1.7.3-.2.6-.3 1-.3.2 0 .4 0 .6.1.4-.8 1.1-1.5 2-1.9.9-.4 1.9-.5 2.9-.2 1 .3 1.9.9 2.5 1.8.6.9.9 1.9.9 3 0 .3 0 .6-.1.9h1.4c0-.7-.4-1.5-1-2.2z"/>
-      </svg>
-    `;
-    fieldGroup.innerHTML = `
-      <input id="intToken" type="password" placeholder="Cloudflare API Token" style="width: 100%; height: 44px; padding: 0 14px; border: 1px solid #d4d4d8; border-radius: 12px; margin-bottom: 10px;">
-      <input id="intAcc" type="text" placeholder="Account ID (opcional)" style="width: 100%; height: 44px; padding: 0 14px; border: 1px solid #d4d4d8; border-radius: 12px; margin-bottom: 10px;">
-    `;
-  }
-  document.getElementById("intStatusMsg").textContent = "";
-  modal.classList.add("open");
-}
 
-function closeIntegrationModal() {
-  document.getElementById("integrationModal").classList.remove("open");
-}
 
-async function connectIntegrationWithGoogle() {
-  const email = currentUser?.email || prompt("Ingresá tu correo de Google para vincular el complemento:", "usuario@gmail.com");
-  if (!email) return;
-
-  const endpoint = currentIntType === "github" ? "/api/integrations/github" : "/api/integrations/cloudflare";
-  try {
-    const res = await fetch(endpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ googleEmail: email })
-    });
-    const d = await res.json();
-    document.getElementById("intStatusMsg").textContent = `✓ Conectado exitosamente con ${email}`;
-    setTimeout(closeIntegrationModal, 1500);
-  } catch {
-    document.getElementById("intStatusMsg").textContent = "Error al conectar mediante Google.";
-  }
-}
-
-async function saveIntegration(e) {
-  e.preventDefault();
-  const token = document.getElementById("intToken")?.value;
-  const endpoint = currentIntType === "github" ? "/api/integrations/github" : "/api/integrations/cloudflare";
-  try {
-    const res = await fetch(endpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token, apiToken: token })
-    });
-    const d = await res.json();
-    document.getElementById("intStatusMsg").textContent = d.message || "Conexión guardada con éxito.";
-    setTimeout(closeIntegrationModal, 1500);
-  } catch {
-    document.getElementById("intStatusMsg").textContent = "Error al conectar.";
-  }
-}
 
 // Email Auth (Login & Register)
 async function handleEmailAuth(e) {
@@ -2124,10 +1438,6 @@ function handleCustomGoogleEmail(e) {
 (function () {
   if (!window.AGENTIC_DEMO) return;
   var SOON_LOGIN = "El acceso con cuenta (login y registro) estará disponible próximamente.";
-  window.connectIntegrationWithGoogle = function () {
-    var el = document.getElementById("intStatusMsg");
-    if (el) { el.style.color = "#2563eb"; el.textContent = "Las integraciones con GitHub y Cloudflare estarán disponibles próximamente."; }
-  };
   window.triggerGoogleLogin = function () {
     var modal = document.getElementById("googleAuthModal");
     if (modal) modal.classList.add("open");
@@ -2160,5 +1470,72 @@ function handleCustomGoogleEmail(e) {
 })();
 </script>
 <script src="/assets/neural-ui.js" defer></script>
+<script src="/app/config.js"></script>
+<script src="/app/i18n.js"></script>
+<script src="/app/md.js"></script>
+<script src="/app/engine.js"></script>
+<script src="/app/voice.js"></script>
+<script src="/app/embed.js"></script>
+<script>
+/* Chat conversacional embebido + cerebro 3D + equipo de agentes */
+(function () {
+  var embed = null;
+  function boot() {
+    embed = window.AC_EMBED && window.AC_EMBED.mount(document.getElementById("acEmbed"));
+    window.AC_EMBED_API = embed;
+    initBrain();
+    initTeam();
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot); else boot();
+
+  function hasWebGL() {
+    try { var c = document.createElement("canvas"); return !!(window.WebGLRenderingContext && (c.getContext("webgl2") || c.getContext("webgl"))); } catch (e) { return false; }
+  }
+  function initBrain() {
+    var stage = document.getElementById("brainStage"), badge = document.getElementById("brainBadgeText"), btn = document.getElementById("brainLoad");
+    if (!stage) return;
+    var started = false;
+    function fail(msg) { badge.textContent = msg; stage.classList.add("no-3d"); }
+    function load() {
+      if (started) return; started = true; btn.hidden = true; badge.textContent = "Cargando cerebro 3D…";
+      import("/assets/brain3d.min.js").then(function (m) { return m.mountBrain(stage, { src: stage.getAttribute("data-src"), label: "Cerebro 3D de AgentiCuántico: arrastrá para girar" }); })
+        .then(function () { badge.textContent = "Cerebro vivo · sinapsis activas"; stage.setAttribute("data-state", "ready"); })
+        .catch(function () { started = false; fail("Vista 3D no disponible en este dispositivo"); stage.setAttribute("data-state", "fallback"); });
+    }
+    if (!hasWebGL()) { fail("Tu navegador no soporta 3D · mostrando imagen"); stage.setAttribute("data-state", "fallback"); return; }
+    var saveData = navigator.connection && navigator.connection.saveData;
+    if (saveData) { badge.textContent = "Ahorro de datos activo"; btn.hidden = false; btn.onclick = load; return; }
+    if (!("IntersectionObserver" in window)) { load(); return; }
+    var io = new IntersectionObserver(function (es) { if (es[0].isIntersecting) { io.disconnect(); load(); } }, { rootMargin: "300px 0px" });
+    io.observe(stage);
+  }
+
+  function ago(iso) {
+    var t = Date.parse(iso); if (!t) return "";
+    var s = Math.max(0, (Date.now() - t) / 1000);
+    if (s < 90) return "hace instantes";
+    if (s < 3600) return "hace " + Math.round(s / 60) + " min";
+    if (s < 86400) return "hace " + Math.round(s / 3600) + " h";
+    return "hace " + Math.round(s / 86400) + " d";
+  }
+  function esc(x) { return String(x == null ? "" : x).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function initTeam() {
+    var grid = document.getElementById("teamGrid"), up = document.getElementById("teamUpdated");
+    if (!grid) return;
+    fetch("/agents-status.json", { cache: "no-cache" }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }).then(function (d) {
+      var list = Array.isArray(d.agents) ? d.agents : [];
+      grid.innerHTML = list.map(function (a) {
+        var st = a.status === "activo" ? "activo" : a.status === "revision" ? "revision" : "espera";
+        var label = st === "activo" ? "Activo" : st === "revision" ? "En revisión" : "En espera";
+        var link = a.pr && /^https:\/\/github\.com\/agenticuantico\/AgenticWeb\//.test(a.pr) ? '<a href="' + esc(a.pr) + '" target="_blank" rel="noopener">ver PR</a>' : "";
+        return '<article class="agent-card"><div class="agent-top"><span class="agent-emoji" aria-hidden="true">' + esc(a.emoji || "🤖") + '</span><div class="agent-name">' + esc(a.name) + "<small>" + esc(a.role) + '</small></div><span class="agent-state ' + st + '">' + label + '</span></div><p class="agent-last">' + esc(a.last_activity || "Preparando su primera tarea.") + '</p>' + (a.last_run || link ? '<div class="agent-meta"><span>' + esc(ago(a.last_run)) + "</span>" + link + "</div>" : "") + "</article>";
+      }).join("");
+      up.innerHTML = '<span class="hero-hud-dot"></span><span>Actualizado ' + esc(ago(d.updated) || "") + "</span>";
+    }).catch(function () {
+      up.innerHTML = '<span class="hero-hud-dot"></span><span>Estado no disponible</span>';
+    });
+  }
+})();
+</script>
 </body>
 </html>

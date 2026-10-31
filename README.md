@@ -1,14 +1,36 @@
 # AgentiCuantico · sitio público
 
 Sitio estático de **agenticuantico.dev.ar** con el diseño original: encabezado con orbe cuántico,
-hero con la super inteligencia de cerebro dorado y red neuronal animada, y chat
-"AgentiCuantico · Super Inteligencia".
+hero con la super inteligencia de cerebro dorado y red neuronal animada.
+
+## Portada
+
+* **Chat conversacional** (`#chat`): el mismo motor que `/app/` (`app/config.js`, `i18n.js`, `md.js`,
+  `engine.js`, `voice.js`) montado por `app/embed.js` + `app/embed.css`. Streaming, Markdown, código con
+  copiar, modos Rápido / Pensar / Agente (plan, pasos y archivos descargables) y modo demo automático.
+  Cabecera compacta (avatar + nombre + estado + bandera de voz) pensada para 360 px. El botón ⤢ abre
+  `/app/` y la conversación continúa ahí.
+* **Voz solo femenina** con banderas: 🇦🇷 es-AR (principal), es-ES, en-US, pt-BR, it-IT, fr-FR, de-DE.
+  Si el servidor anuncia `tts` en `/api/health` usa `POST /api/tts` (ElevenLabs); si no, la mejor voz
+  femenina del navegador para ese idioma. El avatar y el cerebro 3D laten con el nivel de la voz.
+* **Cerebro vivo 3D** (`#cerebro`): `media/cerebro.glb` (~1,1 MB) con `assets/brain3d.min.js`
+  (three.js, carga diferida). Sin WebGL o con *reduced motion* muestra la imagen.
+* **Equipo de agentes** (`#equipo`): lee `agents-status.json`, que actualiza el workflow
+  `Agentes 24/7 (sitio)` (solo datos).
+
+## Equipo de agentes 24/7
+
+`.github/workflows/agentes-web.yml` corre 4 veces por día (y a mano). Usa GitHub Models con el
+`GITHUB_TOKEN` del workflow, elige roles en rotación y abre PRs con etiqueta `agente/<rol>` limitadas a
+rutas seguras (HTML de texto, CSS, `app/i18n.js`). No agrega scripts, no toca workflows ni `CNAME`.
+**Auto-merge apagado**: cada PR se revisa y aprueba a mano (variable `AGENTS_AUTO_MERGE=true` lo activa).
+El job `estado` actualiza `agents-status.json` en `main` y pide una reconstrucción de Pages.
 
 ## Páginas
 
 | Ruta | Archivo |
 | --- | --- |
-| `/` | `index.html` (hero + chat; "empezar a conversar" abre `/app/`) |
+| `/` | `index.html` (hero, chat conversacional embebido, cerebro 3D y equipo de agentes) |
 | `/app/` | `app/index.html` (app de chat y agente) |
 | `/planes` | `planes.html` |
 | `/como-funciona` | `como-funciona.html` |
@@ -68,7 +90,7 @@ Aplicación completa en `app/` (HTML + CSS + JS sin dependencias ni build):
   Escribiendo código → Verificando), panel lateral **Computadora del agente** (plan, terminal y
   archivos con vista previa) y tarjetas de entregables descargables.
 * Compartir conversación por enlace, configuración (tema claro/oscuro/sistema, idioma ES/EN/PT,
-  voz Femenina/Masculina, exportar o borrar datos, estado de conexiones), menú de cuenta,
+  voz femenina por idioma con banderas, exportar o borrar datos, estado de conexiones), menú de cuenta,
   inicio de sesión por email/Google y planes Gratis / Pro / Empresa
   (Mercado Pago en ARS 15.600 / 46.800, PayPal en USD 10 / 30).
 * Conversaciones guardadas en `localStorage` del navegador.

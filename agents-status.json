@@ -1,0 +1,15 @@
+{
+  "updated": "2026-10-31T17:00:00Z",
+  "source": "agentes-24-7",
+  "note": "Estado público del equipo de agentes. Lo actualiza el workflow agentes-estado (solo datos).",
+  "agents": [
+    { "id": "programador-fullstack", "name": "Programador Full Stack", "role": "Integra frontend, backend y pruebas", "emoji": "🧑‍💻", "status": "espera", "last_activity": "Listo para su primera tarea programada.", "last_run": null, "pr": null },
+    { "id": "frontend", "name": "Frontend", "role": "Interfaz, accesibilidad y rendimiento", "emoji": "🖥️", "status": "espera", "last_activity": "Listo para su primera tarea programada.", "last_run": null, "pr": null },
+    { "id": "backend", "name": "Backend", "role": "API, datos y seguridad", "emoji": "🛠️", "status": "espera", "last_activity": "Listo para su primera tarea programada.", "last_run": null, "pr": null },
+    { "id": "ux-ui", "name": "Diseñador UX/UI", "role": "Flujos, textos y usabilidad", "emoji": "🧭", "status": "espera", "last_activity": "Listo para su primera tarea programada.", "last_run": null, "pr": null },
+    { "id": "disenador-grafico", "name": "Diseñador Gráfico", "role": "Identidad visual y piezas", "emoji": "🎨", "status": "espera", "last_activity": "Listo para su primera tarea programada.", "last_run": null, "pr": null },
+    { "id": "disenador-web", "name": "Diseñador Web", "role": "Maquetación responsive y CSS", "emoji": "🌐", "status": "espera", "last_activity": "Listo para su primera tarea programada.", "last_run": null, "pr": null },
+    { "id": "ilustrador", "name": "Ilustrador", "role": "Ilustraciones e íconos SVG", "emoji": "🖌️", "status": "espera", "last_activity": "Listo para su primera tarea programada.", "last_run": null, "pr": null },
+    { "id": "disenador-3d", "name": "Diseñador 3D", "role": "Modelos GLB y escenas WebGL", "emoji": "🧊", "status": "espera", "last_activity": "Listo para su primera tarea programada.", "last_run": null, "pr": null }
+  ]
+}

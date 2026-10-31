@@ -418,3 +418,11 @@ li.running .st, .st.running { border-color: var(--text); border-right-color: tra
 @media (hover: none) { .msg-actions { opacity: 1; } .chat-link .more { opacity: 1; } }
 @media (min-width: 768px) { #sbClose { display: inline-grid; } .main.is-empty .composer-wrap { margin-top: 0; } }
 @media (prefers-reduced-motion: reduce) { * { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+/* Voz femenina: idiomas con bandera y pulso de labios */
+.voice-langs { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; max-width: 300px; }
+.voice-langs .vl { display: inline-flex; flex-direction: column; align-items: center; gap: 1px; min-width: 52px; padding: 6px 6px 4px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); }
+.voice-langs .vl span { font-size: 20px; line-height: 1; }
+.voice-langs .vl small { font-size: 10px; color: var(--faint); }
+.voice-langs .vl.on { border-color: #65a30d; background: var(--lime-soft); }
+.orb { --lvl: 0; }
+.orb.speaking img { transform: scale(calc(1 + var(--lvl) * .08)); box-shadow: 0 0 calc(20px + var(--lvl) * 50px) rgba(159, 255, 0, calc(.3 + var(--lvl) * .5)); }

@@ -66,7 +66,8 @@
     s = s && typeof s === "object" ? s : {};
     s.chats = Array.isArray(s.chats) ? s.chats : [];
     s.projects = Array.isArray(s.projects) ? s.projects : [];
-    s.settings = Object.assign({ theme: "light", lang: detectLang(), voice: "female" }, s.settings || {});
+    s.settings = Object.assign({ theme: "light", lang: detectLang() }, s.settings || {});
+    delete s.settings.voice; // solo voz femenina
     s.mode = s.mode === "deep" || s.mode === "agent" ? s.mode : "fast";
     s.sbCollapsed = !!s.sbCollapsed;
     return s;
@@ -697,7 +698,8 @@
     if (tab === "general") {
       body += '<div class="set-row"><span>' + esc(t("theme")) + "</span>" + seg("theme", [["light", t("light")], ["dark", t("dark")], ["system", t("system")]], s.theme) + "</div>" +
         '<div class="set-row"><span>' + esc(t("language")) + "</span>" + seg("lang", [["es", "Español"], ["en", "English"], ["pt", "Português"]], s.lang) + "</div>" +
-        '<div class="set-row" style="border:0"><span>' + esc(t("voice")) + "</span>" + seg("voice", [["female", t("female")], ["male", t("male")]], s.voice) + "</div>";
+        '<div class="set-row" style="border:0;align-items:flex-start"><span>' + esc(t("voice")) + "<br><small style=\"color:var(--faint);font-weight:500\">♀ " + esc(t("female")) + '</small></span><div class="voice-langs">' +
+        window.AC_VOICE.LANGS.map(function (l) { return '<button type="button" class="vl' + (l.code === window.AC_VOICE.getLang() ? " on" : "") + '" data-vlang="' + l.code + '" title="' + esc(l.name) + '" aria-label="' + esc(l.name) + '"><span>' + window.AC_VOICE.flagSvg(l.code, 26) + "</span><small>" + esc(l.code) + "</small></button>"; }).join("") + "</div></div>";
     } else if (tab === "data") {
       body += '<div class="set-row"><span>' + esc(t("exportChats")) + '</span><button class="btn" type="button" id="exportBtn">' + icon("download") + esc(t("download")) + "</button></div>" +
         '<div class="set-row" style="border:0"><span>' + esc(t("deleteAll")) + '</span><button class="btn danger" type="button" id="wipeBtn">' + icon("trash") + esc(t("del")) + "</button></div>";
@@ -705,6 +707,7 @@
     var m = modal(t("settingsTitle"), body);
     m.onclick = function (e) {
       var st = e.target.closest("[data-stab]"); if (st) { openSettings(st.getAttribute("data-stab")); return; }
+      var vl = e.target.closest("[data-vlang]"); if (vl) { window.AC_VOICE.setLang(vl.getAttribute("data-vlang")); window.AC_VOICE.speak(t("voiceSample"), { lang: window.AC_VOICE.getLang() }); openSettings(tab); return; }
       var b = e.target.closest(".seg button"); if (b) {
         var k = b.parentNode.getAttribute("data-seg"); state.settings[k] = b.getAttribute("data-v"); save();
         if (k === "theme") applyTheme();
@@ -813,26 +816,13 @@
 
   /* ---------- Voz ---------- */
   var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  function langTag() { return state.settings.lang === "en" ? "en-US" : state.settings.lang === "pt" ? "pt-BR" : "es-AR"; }
-  function pickVoice() {
-    if (!window.speechSynthesis) return null;
-    var vs = speechSynthesis.getVoices(), lt = langTag().slice(0, 2);
-    var same = vs.filter(function (v) { return (v.lang || "").toLowerCase().indexOf(lt) === 0; });
-    var fem = /female|mujer|femen|paulina|monica|mónica|helena|sabina|luciana|francisca|camila|google español|zira|samantha|victoria|karen|joana|maria|elena|laura|sofia/i;
-    var mal = /male|hombre|mascul|jorge|diego|juan|carlos|pablo|raul|daniel|alex|david|fred|thomas|tom|felipe|ricardo|antonio|enrique/i;
-    var want = state.settings.voice === "male" ? mal : fem, avoid = state.settings.voice === "male" ? fem : mal;
-    return same.find(function (v) { return want.test(v.name) && !(state.settings.voice === "male" && /female/i.test(v.name)); }) || same.find(function (v) { return !avoid.test(v.name); }) || same[0] || null;
-  }
-  function plainText(md) { return String(md || "").replace(/```[\s\S]*?```/g, " ").replace(/[#*_`>|~-]+/g, " ").replace(/\[([^\]]+)\]\([^)]+\)/g, "$1").replace(/\s+/g, " ").trim(); }
+  function langTag() { return window.AC_VOICE.byCode(window.AC_VOICE.getLang()).sr; }
+  function plainText(md) { return window.AC_VOICE.plain(md); }
+  /* Voz: siempre femenina (servidor ElevenLabs si está disponible; si no, la mejor voz femenina del navegador). */
   function speak(text, onEnd) {
-    if (!window.speechSynthesis) { if (onEnd) onEnd(); return; }
-    speechSynthesis.cancel();
-    var u = new SpeechSynthesisUtterance(plainText(text).slice(0, 2500));
-    u.lang = langTag(); var v = pickVoice(); if (v) u.voice = v;
-    u.pitch = state.settings.voice === "male" ? 0.9 : 1.05;
-    u.onend = u.onerror = function () { if (onEnd) onEnd(); };
-    speechSynthesis.speak(u);
+    window.AC_VOICE.speak(text, { lang: window.AC_VOICE.getLang(), onStart: function () { var o = document.getElementById("orb"); if (o) o.classList.add("speaking"); }, onEnd: function () { if (onEnd) onEnd(); } });
   }
+  window.AC_VOICE.onLevel(function (lv) { var o = document.getElementById("orb"); if (o) o.style.setProperty("--lvl", lv.toFixed(3)); });
   var dictation = null;
   function toggleDictation() {
     if (!SR) { toast(t("micNo")); return; }
@@ -854,7 +844,7 @@
     else setS("voiceTap");
     var listen = function () {
       if (!SR || !ui.voice || !ui.voice.active) return;
-      if (window.speechSynthesis) speechSynthesis.cancel();
+      window.AC_VOICE.stop();
       var r = new SR(); r.lang = langTag(); r.interimResults = true;
       var said = "";
       r.onresult = function (e) { said = ""; for (var i = 0; i < e.results.length; i++) said += e.results[i][0].transcript; $("vText").textContent = said; };
@@ -877,7 +867,7 @@
   function closeVoice() {
     if (ui.voice && ui.voice.rec) try { ui.voice.rec.abort(); } catch (e) { /* ignore */ }
     ui.voice = null;
-    if (window.speechSynthesis) speechSynthesis.cancel();
+    window.AC_VOICE.stop();
     $("voiceOverlay").hidden = true; $("voiceOverlay").innerHTML = "";
   }
 
@@ -1010,6 +1000,7 @@
     var qs = new URLSearchParams(location.search);
     if (qs.get("mode") === "agent" || qs.get("mode") === "deep") state.mode = qs.get("mode");
     importShared();
+    try { var fromHome = sessionStorage.getItem("ac.app.open"); if (fromHome) { sessionStorage.removeItem("ac.app.open"); if (state.chats.some(function (c) { return c.id === fromHome; })) ui.currentId = fromHome; } } catch (e) { /* ignore */ }
     applyI18n();
     renderAll();
     renderAccount();

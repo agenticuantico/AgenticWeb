@@ -1,0 +1,100 @@
+name: Agentes 24/7 (sitio)
+
+# Equipo de agentes de IA para el sitio público. Solo rutas seguras (textos, CSS, i18n, accesibilidad).
+# Abre Pull Requests con etiqueta agente/<rol>; nunca hace merge salvo AGENTS_AUTO_MERGE=true.
+# El job "estado" actualiza agents-status.json en main (solo datos) y pide una reconstrucción de Pages.
+# No modifica la publicación: Pages sigue construyendo desde main (raíz) y se conserva CNAME.
+on:
+  schedule:
+    - cron: "41 3,9,15,21 * * *"
+  workflow_dispatch:
+    inputs:
+      role:
+        description: "Forzar un rol (opcional)"
+        required: false
+        default: ""
+      dry_run:
+        description: "Ensayo sin crear ramas ni PRs"
+        type: boolean
+        default: false
+
+concurrency:
+  group: agentes-web
+  cancel-in-progress: false
+
+jobs:
+  agentes:
+    name: Equipo de agentes (rutas seguras)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      models: read
+    env:
+      AGENTS_REPO_KIND: web
+      AGENTS_MODEL: ${{ vars.AGENTS_MODEL || 'openai/gpt-4.1-mini' }}
+      AGENTS_ROLES_PER_RUN: ${{ vars.AGENTS_ROLES_PER_RUN || '2' }}
+      AGENTS_MAX_FILES: ${{ vars.AGENTS_MAX_FILES || '2' }}
+      AGENTS_MAX_LINES: ${{ vars.AGENTS_MAX_LINES || '60' }}
+      AUTO_MERGE: ${{ vars.AGENTS_AUTO_MERGE || 'false' }}
+      AGENTS_ONLY_ROLE: ${{ github.event.inputs.role }}
+      AGENTS_DRY_RUN: ${{ github.event.inputs.dry_run == 'true' && 'true' || 'false' }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Pruebas del runner
+        run: node --test .github/agents/run-agents.test.mjs
+      - name: Ronda del equipo de agentes
+        run: node .github/agents/run-agents.mjs
+      - name: Guardar resumen
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: agents-run
+          path: agents-run.json
+          if-no-files-found: ignore
+          retention-days: 14
+
+  estado:
+    name: Estado público (agents-status.json)
+    needs: agentes
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      pull-requests: read
+      pages: write
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Descargar resumen de la ronda
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: agents-run
+      - name: Actualizar agents-status.json
+        run: node .github/agents/update-status.mjs
+      - name: Publicar solo datos en main
+        run: |
+          if git diff --quiet -- agents-status.json; then echo "Sin cambios de estado."; exit 0; fi
+          git config user.name "agentes-agenticuantico[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add agents-status.json
+          git commit -m "Estado del equipo de agentes (datos)"
+          git push origin HEAD:main
+          curl -fsS -X POST -H "Authorization: Bearer $GITHUB_TOKEN" -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/pages/builds" || echo "No se pudo pedir la reconstrucción de Pages (se hará en el próximo push)."

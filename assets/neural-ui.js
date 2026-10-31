@@ -1,4 +1,4 @@
-/* AgentiCuantico · hero neuronal, estado del chat y selector de voz */
+/* AgentiCuantico · hero neuronal sincronizado con el chat (pensando / hablando) */
 (function () {
   "use strict";
 
@@ -7,7 +7,7 @@
   var STATES = {
     idle: { status: "Vías neuronales activas · En espera", detail: "Sinapsis cuánticas: 432 Hz · Conectado al chat", sub: "Vías neuronales en línea · Lista", color: "#9fff00", speed: 1 },
     thinking: { status: "Procesando orden · Razonamiento profundo", detail: "Sinapsis en cascada · Analizando contexto", sub: "Vías neuronales en proceso · Pensando…", color: "#a855f7", speed: 2.6 },
-    speaking: { status: "Explicando solución · Voz y labios sincronizados", detail: "Vías de síntesis y fonemas activas", sub: "Vías neuronales en respuesta · Explicando", color: "#22c55e", speed: 1.8 }
+    speaking: { status: "Hablando · Voz femenina sincronizada", detail: "Vías de síntesis y fonemas activas", sub: "Vías neuronales en respuesta · Explicando", color: "#22c55e", speed: 1.8 }
   };
   var current = "idle";
   var idleTimer = null;
@@ -17,15 +17,10 @@
   function setState(name) {
     var s = STATES[name] || STATES.idle;
     current = name;
-    var st = $("heroHudStatus"), dt = $("heroHudDetail"), dot = $("heroHudDot"), sub = $("chatSubtitleStatus"), av = $("chatMiniAvatar");
+    var st = $("heroHudStatus"), dt = $("heroHudDetail"), dot = $("heroHudDot");
     if (st) st.textContent = s.status;
     if (dt) dt.textContent = s.detail;
     if (dot) { dot.style.background = s.color; dot.style.boxShadow = "0 0 10px " + s.color; }
-    if (sub) sub.textContent = s.sub;
-    if (av) {
-      av.classList.toggle("pulse-thinking", name === "thinking");
-      av.classList.toggle("pulse-speaking", name === "speaking");
-    }
   }
   window.setNeuralState = setState;
 
@@ -137,53 +132,14 @@
     if (!stage) return;
     stage.addEventListener("click", function () {
       var chat = $("chat"); if (chat) chat.scrollIntoView({ behavior: "smooth", block: "start" });
-      var input = $("userInputText"); if (input) setTimeout(function () { try { input.focus({ preventScroll: true }); } catch (e) {} }, 500);
+      var input = $("aceInput"); if (input) setTimeout(function () { try { input.focus({ preventScroll: true }); } catch (e) {} }, 500);
     });
-  }
-
-  // ---- Estado visual atado al envío de mensajes ----
-  function wrapChat() {
-    if (typeof window.sendMessage === "function") {
-      var origSend = window.sendMessage;
-      window.sendMessage = async function () {
-        var input = $("userInputText");
-        var text = (arguments[0] || (input && input.value) || "").trim();
-        if (text) { clearTimeout(idleTimer); setState("thinking"); }
-        try { return await origSend.apply(this, arguments); }
-        finally {
-          if (text) {
-            setState("speaking");
-            clearTimeout(idleTimer);
-            idleTimer = setTimeout(function () { setState("idle"); }, 4200);
-          }
-        }
-      };
-    }
-  }
-
-  // ---- Selector de género + voz ----
-  function initVoice() {
-    var gender = $("genderSelect"), voice = $("voiceSelect");
-    if (!gender || !voice) return;
-    var all = Array.prototype.map.call(voice.options, function (o) { return { v: o.value, t: o.textContent }; });
-    function apply(g, keep) {
-      var fem = g === "femenino";
-      var list = all.filter(function (o) { return fem ? o.v.indexOf("female") === 0 : o.v.indexOf("male") === 0; });
-      voice.innerHTML = list.map(function (o) { return '<option value="' + o.v + '">' + o.t + "</option>"; }).join("");
-      var pick = keep && list.some(function (o) { return o.v === keep; }) ? keep : (list[0] && list[0].v);
-      if (pick && typeof window.changeVoice === "function") window.changeVoice(pick);
-      else if (pick) voice.value = pick;
-    }
-    gender.addEventListener("change", function () { apply(gender.value); });
-    apply(gender.value, voice.value);
   }
 
   document.addEventListener("DOMContentLoaded", function () {
     initCanvas();
     initTilt();
     initHeroLink();
-    wrapChat();
-    initVoice();
     setState("idle");
   });
 })();

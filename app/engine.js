@@ -127,7 +127,7 @@
   }
 
   function markOffline() { S.live = false; S.base = ""; try { sessionStorage.removeItem("ac.health"); } catch (e) { /* ignore */ } if (window.AC_onConnection) window.AC_onConnection(); }
-  function langCode(l) { return l === "en" ? "en" : l === "pt" ? "pt-BR" : "es"; }
+  function langCode(l) { return l === "en" ? "en" : l === "pt" ? "pt-BR" : l === "it" || l === "fr" || l === "de" ? l : "es"; }
 
   /* ---------- Cuenta y pagos ---------- */
   function me() {
@@ -254,9 +254,9 @@
         "Escreva para **" + MAIL + "** com o assunto **\"Consulta Comercial\"**. Conte sobre sua empresa e o que quer automatizar.");
     }
     if (/voz|voice|llamad|call|habl|speak/.test(t)) {
-      return L(lang, "Tenés dos opciones de voz:\n\n- 🎙️ **Dictar**: tocá el micrófono y hablá; el texto aparece en el cuadro.\n- 🔊 **Modo voz**: conversación manos libres; te respondo en voz alta con la voz que elijas (*Femenina* o *Masculina*) en Configuración.",
-        "Two voice options:\n\n- 🎙️ **Dictate**: tap the mic and talk.\n- 🔊 **Voice mode**: hands-free conversation; I answer aloud with the voice you choose in Settings.",
-        "Duas opções de voz:\n\n- 🎙️ **Ditar**: toque no microfone e fale.\n- 🔊 **Modo voz**: conversa sem mãos; respondo em voz alta com a voz escolhida.");
+      return L(lang, "Tenés dos opciones de voz:\n\n- 🎙️ **Dictar**: tocá el micrófono y hablá; el texto aparece en el cuadro.\n- 🔊 **Modo voz**: conversación manos libres; te respondo en voz alta con la voz que elijas femenina, en el idioma que elijas con la bandera.",
+        "Two voice options:\n\n- 🎙️ **Dictate**: tap the mic and talk.\n- 🔊 **Voice mode**: hands-free conversation; I answer aloud with a female voice in the language you pick by flag.",
+        "Duas opções de voz:\n\n- 🎙️ **Ditar**: toque no microfone e fale.\n- 🔊 **Modo voz**: conversa sem mãos; respondo em voz alta com voz feminina no idioma escolhido pela bandeira.");
     }
     if (/qu[eé] es|qu[eé] hace|qui[eé]n|agenticu[aá]ntico|what is|who are|o que [eé]|sobre (vos|ti|voc)|about/.test(t)) {
       return L(lang, "**AgentiCuántico** es una plataforma argentina de IA agéntica para personas y empresas:\n\n- 💬 **Chat** con respuestas rápidas o **razonamiento profundo**.\n- 🤖 **Modo Agente**: planifica, ejecuta y verifica tareas (código, páginas web, informes).\n- 🧑‍💼 **Agentes especializados** (comercial, técnico, analista) en el plan Pro.\n- 🎙️ **Voz**: dictado y conversación manos libres.\n- 💳 Pagos con **Mercado Pago** (ARS) o **PayPal** (USD).\n\n¿Querés probar el modo Agente con una tarea real?",
