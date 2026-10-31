@@ -49,7 +49,7 @@ export function merge(current, run, prs, now = Date.now()) {
     if (pr && (!a.last_run || Date.parse(pr.created_at) > Date.parse(a.last_run))) { a.last_activity = `Propuso una mejora: ${String(pr.title).replace(/^\[[^\]]+\]\s*/, '').slice(0, 90)} (en revisión).`; a.last_run = pr.created_at; a.pr = pr.html_url; }
     const openPr = pr && pr.state === 'open';
     const fresh = a.last_run && now - Date.parse(a.last_run) < 6 * 3600e3;
-    a.status = openPr ? 'revision' : fresh && rec && !/unavailable|rate/.test(rec.status) ? 'activo' : 'espera';
+    a.status = openPr ? 'revision' : fresh && rec && /pr-opened|no-change|rejected|dry-run/.test(rec.status) ? 'activo' : 'espera';
     return a;
   });
   return { updated: new Date(now).toISOString(), source: 'agentes-24-7', note: 'Estado público del equipo de agentes. Lo actualiza el workflow Agentes 24/7 (solo datos).', agents };

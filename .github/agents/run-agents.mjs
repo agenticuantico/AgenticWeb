@@ -128,27 +128,38 @@ async function gh(path, opts = {}) {
 
 /* ---------- GitHub Models ---------- */
 export class ModelsUnavailable extends Error { constructor(status, detail) { super(`GitHub Models ${status}: ${detail}`); this.status = status; this.detail = detail; } }
+const FALLBACK_ENDPOINT = 'https://models.inference.ai.azure.com/chat/completions';
+async function postModel(url, model, messages, fetchFn) {
+  return fetchFn(url, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${TOKEN}`, 'Content-Type': 'application/json', Accept: 'application/json', 'X-GitHub-Api-Version': '2022-11-28' },
+    body: JSON.stringify({ model, messages, temperature: 0.3, max_tokens: 2500, response_format: { type: 'json_object' } })
+  });
+}
+/** Llama a GitHub Models (endpoint principal y, si responde algo que no es JSON o 404, el endpoint alternativo). */
 export async function callModel(messages, { fetchFn = fetch, retries = 2 } = {}) {
-  for (let attempt = 0; attempt <= retries; attempt++) {
-    const r = await fetchFn(ENDPOINT, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${TOKEN}`, 'Content-Type': 'application/json', Accept: 'application/json' },
-      body: JSON.stringify({ model: MODEL, messages, temperature: 0.3, max_tokens: 2500, response_format: { type: 'json_object' } })
-    });
-    const text = await r.text();
-    if (r.ok) {
-      const j = JSON.parse(text);
-      return String(j?.choices?.[0]?.message?.content || '');
+  const targets = [[ENDPOINT, MODEL], [FALLBACK_ENDPOINT, MODEL.replace(/^[^/]+\//, '')]];
+  let last = null;
+  for (const [url, model] of targets) {
+    for (let attempt = 0; attempt <= retries; attempt++) {
+      const r = await postModel(url, model, messages, fetchFn);
+      const text = await r.text();
+      const ctype = (r.headers && r.headers.get && r.headers.get('content-type')) || '';
+      let j = null; try { j = JSON.parse(text); } catch { /* no es JSON */ }
+      if (r.ok && j && j.choices) return String(j.choices[0]?.message?.content || '');
+      if (r.status === 429 && attempt < retries) {
+        const wait = Math.min(60, Number(r.headers.get('retry-after')) || 20 * (attempt + 1));
+        log(`límite de uso (429) en ${url}, reintento en ${wait}s`);
+        await new Promise((res) => setTimeout(res, wait * 1000));
+        continue;
+      }
+      last = new ModelsUnavailable(r.status, `${url} [${ctype}] ${text.slice(0, 300).replace(/\s+/g, ' ')}`);
+      log(`modelo no disponible: ${last.message}`);
+      if (r.status === 429) throw last;
+      break;
     }
-    if (r.status === 429 && attempt < retries) {
-      const wait = Math.min(60, Number(r.headers.get('retry-after')) || 20 * (attempt + 1));
-      log(`límite de uso (429), reintento en ${wait}s`);
-      await new Promise((res) => setTimeout(res, wait * 1000));
-      continue;
-    }
-    throw new ModelsUnavailable(r.status, text.slice(0, 400).replace(/\s+/g, ' '));
   }
-  throw new ModelsUnavailable(429, 'rate limited');
+  throw last || new ModelsUnavailable(0, 'sin respuesta');
 }
 
 export function parsePlan(raw) {

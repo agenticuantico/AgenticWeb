@@ -57,6 +57,10 @@ test('aplica ediciones y creaciones con reglas', () => {
 test('GitHub Models no disponible se informa sin fallar', async () => {
   const fetchFn = async () => new Response('{"error":{"code":"unauthorized"}}', { status: 401 });
   await assert.rejects(() => callModel([{ role: 'user', content: 'hola' }], { fetchFn, retries: 0 }), (e) => e instanceof ModelsUnavailable && e.status === 401);
+  const plain = async () => new Response('OK', { status: 200, headers: { 'content-type': 'text/plain' } });
+  await assert.rejects(() => callModel([{ role: 'user', content: 'hola' }], { fetchFn: plain, retries: 0 }), (e) => e instanceof ModelsUnavailable && /text\/plain/.test(e.detail));
+  let n = 0; const fallback = async (url) => { n++; return /azure/.test(url) ? new Response(JSON.stringify({ choices: [{ message: { content: '{"ok":1}' } }] }), { status: 200 }) : new Response('OK', { status: 200 }); };
+  assert.equal(await callModel([{ role: 'user', content: 'hola' }], { fetchFn: fallback, retries: 0 }), '{"ok":1}'); assert.equal(n, 2);
   const ok = async () => new Response(JSON.stringify({ choices: [{ message: { content: '{"title":"x","summary":"y","changes":[]}' } }] }), { status: 200 });
   assert.match(await callModel([{ role: 'user', content: 'hola' }], { fetchFn: ok }), /"title"/);
 });

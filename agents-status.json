@@ -28,8 +28,8 @@
       "name": "Backend",
       "role": "API, datos y seguridad",
       "emoji": "🛠️",
-      "status": "activo",
-      "last_activity": "La respuesta del modelo no fue válida; reintenta en la próxima ronda.",
+      "status": "espera",
+      "last_activity": "Preparando su próxima tarea.",
       "last_run": "2026-10-31T14:29:33.493Z",
       "pr": null
     },
@@ -38,8 +38,8 @@
       "name": "Diseñador UX/UI",
       "role": "Flujos, textos y usabilidad",
       "emoji": "🧭",
-      "status": "activo",
-      "last_activity": "La respuesta del modelo no fue válida; reintenta en la próxima ronda.",
+      "status": "espera",
+      "last_activity": "Preparando su próxima tarea.",
       "last_run": "2026-10-31T14:29:33.641Z",
       "pr": null
     },
