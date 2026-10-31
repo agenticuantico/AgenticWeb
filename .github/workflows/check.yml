@@ -1,0 +1,15 @@
+name: Checks
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  static:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Static checks (i18n, mailto, secrets)
+        run: node tools/check.mjs

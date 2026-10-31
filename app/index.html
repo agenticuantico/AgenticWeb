@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="es-AR" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<title>AgentiCuántico · App</title>
+<meta name="description" content="Asistente de IA agentic de AgentiCuántico: conversá con agentes especialistas, con voz y avatar 3D.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self' https:; font-src 'self'; worker-src 'self'; manifest-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self' https:">
+<meta name="theme-color" content="#070a11">
+<meta name="color-scheme" content="dark">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://agenticuantico.dev.ar/app/">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta property="og:title" content="AgentiCuántico · App">
+<meta property="og:image" content="https://agenticuantico.dev.ar/assets/img/og-image.png">
+<link rel="stylesheet" href="/assets/css/main.css">
+<link rel="stylesheet" href="/app/app.css">
+<script type="module" src="/app/app.js"></script>
+</head>
+<body class="app-body">
+<div class="app" data-app>
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar" aria-label="Conversaciones" data-i18n-attr="aria-label:app.sidebar">
+    <div class="sb-top">
+      <a class="brand" href="/" data-i18n-attr="aria-label:app.backToSite" aria-label="Volver al sitio">
+        <svg class="brand-mark" viewBox="0 0 48 48" aria-hidden="true"><use href="/assets/img/sprite.svg#logo"/></svg>
+        <span class="brand-name">Agenti<span>Cuántico</span></span>
+      </a>
+      <button class="icon-btn sb-close" type="button" data-close-sidebar data-i18n-attr="aria-label:app.closeSidebar;title:app.closeSidebar" aria-label="Cerrar panel">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <button class="new-chat" type="button" data-new-chat>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+      <span data-i18n="app.newChat">Nuevo chat</span>
+    </button>
+    <label class="sb-search">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>
+      <span class="sr-only" data-i18n="app.search">Buscar conversaciones</span>
+      <input type="search" data-search placeholder="Buscar" data-i18n-attr="placeholder:app.searchPh">
+    </label>
+    <nav class="conv-list" data-conv-list aria-label="Historial" data-i18n-attr="aria-label:app.history"></nav>
+    <div class="sb-bottom">
+      <button class="plan-cta" type="button" data-go-plans>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.1 1.2 6-5.4-3-5.4 3 1.2-6-4.5-4.1 6.1-.7z"/></svg>
+        <span><strong data-i18n="app.upgrade">Mejorar plan</strong><small data-i18n="app.upgradeSub">Pro y Empresa</small></span>
+      </button>
+      <div class="account">
+        <button class="account-btn" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="account-menu" data-account-btn>
+          <span class="avatar-initial" data-initial aria-hidden="true">?</span>
+          <span class="account-meta"><span class="account-name" data-account-name>Invitado</span><span class="plan-badge-sm" data-plan-badge>Gratis</span></span>
+          <svg class="chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 8l4-4 4 4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+        </button>
+        <div class="menu" id="account-menu" role="menu" hidden data-account-menu>
+          <button role="menuitem" type="button" data-action="login" data-i18n="app.login">Iniciar sesión</button>
+          <button role="menuitem" type="button" data-action="plans" data-i18n="app.plans">Planes y facturación</button>
+          <button role="menuitem" type="button" data-action="settings" data-i18n="app.settings">Configuración</button>
+          <a role="menuitem" href="/" data-i18n="app.backToSite">Volver al sitio</a>
+          <a role="menuitem" href="mailto:agenticuantico@gmail.com?subject=Consulta%20Comercial" class="cta-commercial" data-i18n="cta.commercial">Consulta comercial</a>
+          <button role="menuitem" type="button" data-action="logout" data-i18n="app.logout" hidden>Cerrar sesión</button>
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="scrim" data-scrim hidden></div>
+
+  <!-- Main -->
+  <main class="main" id="contenido">
+    <header class="topbar">
+      <button class="icon-btn menu-btn" type="button" data-open-sidebar aria-controls="sidebar" aria-expanded="false" data-i18n-attr="aria-label:app.openSidebar;title:app.openSidebar" aria-label="Abrir panel">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
+      </button>
+      <div class="agent-select">
+        <button class="agent-btn" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="agent-list" data-agent-btn>
+          <span class="agent-ico" data-agent-ico aria-hidden="true">✦</span>
+          <span data-agent-name>Agente General</span>
+          <svg class="chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 4l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+        </button>
+        <ul class="agent-list" id="agent-list" role="listbox" tabindex="-1" hidden data-agent-list></ul>
+      </div>
+      <span class="demo-badge" data-demo-badge title="" data-i18n="app.demoBadge">Modo demo</span>
+      <div class="topbar-actions">
+        <button class="icon-btn" type="button" data-toggle-avatar aria-pressed="false" data-i18n-attr="aria-label:app.toggleAvatar;title:app.toggleAvatar" aria-label="Mostrar avatar">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="4.5"/><path d="M4.5 20c1.4-3.6 4.2-5.4 7.5-5.4s6.1 1.8 7.5 5.4"/></svg>
+        </button>
+        <button class="icon-btn" type="button" data-open-settings data-i18n-attr="aria-label:app.settings;title:app.settings" aria-label="Configuración">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4M5.5 5.5l1.7 1.7M16.8 16.8l1.7 1.7M5.5 18.5l1.7-1.7M16.8 7.2l1.7-1.7"/></svg>
+        </button>
+        <button class="icon-btn only-mobile" type="button" data-new-chat data-i18n-attr="aria-label:app.newChat;title:app.newChat" aria-label="Nuevo chat">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z M13.5 6.5l4 4"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="view view-chat" data-view="chat">
+      <div class="thread-wrap" data-thread-wrap>
+        <section class="empty" data-empty>
+          <svg class="empty-logo" viewBox="0 0 48 48" aria-hidden="true"><use href="/assets/img/sprite.svg#logo"/></svg>
+          <h1 data-i18n="app.emptyTitle">¿En qué te ayudo hoy?</h1>
+          <p class="empty-sub" data-i18n="app.emptySub">Preguntá sobre AgentiCuántico, sus agentes, precios o cómo integrarlo en tu empresa.</p>
+          <div class="starters" data-starters></div>
+        </section>
+        <ol class="thread" data-thread aria-live="polite" aria-label="Mensajes" data-i18n-attr="aria-label:app.messages"></ol>
+      </div>
+      <form class="composer" data-composer autocomplete="off">
+        <div class="attachments" data-attachments hidden></div>
+        <div class="composer-box">
+          <label class="sr-only" for="prompt" data-i18n="app.promptLabel">Escribí un mensaje</label>
+          <textarea id="prompt" rows="1" maxlength="8000" enterkeyhint="send" placeholder="Escribí un mensaje…" data-i18n-attr="placeholder:app.promptPh" data-prompt></textarea>
+          <div class="composer-row">
+            <input type="file" id="file-input" class="sr-only" multiple data-file-input>
+            <label for="file-input" class="icon-btn" role="button" tabindex="0" data-attach-btn data-i18n-attr="aria-label:app.attach;title:app.attach" aria-label="Adjuntar archivo">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11.5l-7.8 7.8a5 5 0 01-7.1-7.1l8.5-8.5a3.3 3.3 0 014.7 4.7l-8.5 8.5a1.7 1.7 0 01-2.4-2.4L15 6.9"/></svg>
+            </label>
+            <button class="icon-btn" type="button" data-voice-btn aria-pressed="false" data-i18n-attr="aria-label:app.voice;title:app.voice" aria-label="Dictar por voz">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0013 0M12 17.5V21"/></svg>
+            </button>
+            <span class="composer-hint" data-composer-hint></span>
+            <button class="send-btn" type="submit" data-send-btn data-i18n-attr="aria-label:app.send;title:app.send" aria-label="Enviar">
+              <svg class="i-send" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg>
+              <svg class="i-stop" viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="2"/></svg>
+            </button>
+          </div>
+        </div>
+        <p class="disclaimer" data-i18n="app.disclaimer">AgentiCuántico puede cometer errores. Verificá la información importante.</p>
+      </form>
+    </div>
+
+    <div class="view view-plans" data-view="plans" hidden>
+      <div class="plans-wrap">
+        <button class="btn btn-ghost btn-sm back-chat" type="button" data-back-chat>← <span data-i18n="app.backToChat">Volver al chat</span></button>
+        <h1 data-i18n="app.plansTitle">Planes y facturación</h1>
+        <p class="section-lead" data-i18n="app.plansLead">Suscripción mensual. Mercado Pago cobra en pesos (ARS) y PayPal en dólares (USD). Cancelás cuando quieras.</p>
+        <div class="notice" data-plans-notice hidden></div>
+        <div class="currency-toggle" role="radiogroup" aria-label="Moneda" data-i18n-attr="aria-label:pricing.currency" data-currency-toggle>
+          <button type="button" role="radio" aria-checked="true" data-currency="ARS">ARS</button>
+          <button type="button" role="radio" aria-checked="false" data-currency="USD">USD</button>
+        </div>
+        <div class="pricing" data-app-pricing></div>
+        <p class="fineprint" data-i18n="pricing.note">Precios finales por mes.</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- Avatar panel -->
+  <aside class="avatar-panel" data-avatar-panel hidden aria-label="Avatar del Agente" data-i18n-attr="aria-label:app.avatarPanel">
+    <div class="avatar-panel-inner">
+      <canvas class="app-avatar-canvas" id="app-avatar-canvas" role="img" aria-label="Avatar 3D del Agente" data-i18n-attr="aria-label:agent.canvasLabel"></canvas>
+      <div class="agent-fallback" data-app-avatar-fallback hidden><svg viewBox="0 0 200 200" aria-hidden="true"><use href="/assets/img/sprite.svg#agent-face"/></svg></div>
+      <div class="agent-loading" data-app-avatar-loading><span class="spinner" aria-hidden="true"></span></div>
+      <div class="avatar-panel-bar">
+        <span class="avatar-status" data-avatar-status aria-live="polite" data-i18n="agent.statusIdle">Listo para conversar</span>
+        <button class="icon-btn" type="button" data-avatar-stop data-i18n-attr="aria-label:agent.stop;title:agent.stop" aria-label="Detener"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="2"/></svg></button>
+        <button class="icon-btn" type="button" data-toggle-avatar data-i18n-attr="aria-label:app.hideAvatar;title:app.hideAvatar" aria-label="Ocultar avatar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<!-- Settings dialog -->
+<dialog class="dialog" data-settings aria-labelledby="settings-title">
+  <form method="dialog" class="dialog-inner">
+    <header class="dialog-head"><h2 id="settings-title" data-i18n="app.settings">Configuración</h2><button class="icon-btn" value="close" data-i18n-attr="aria-label:app.close" aria-label="Cerrar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
+    <fieldset class="field">
+      <legend data-i18n="lang.label">Idioma</legend>
+      <div class="lang-options" data-lang-options></div>
+    </fieldset>
+    <label class="switch"><input type="checkbox" data-setting="readAloud"><span class="switch-ui" aria-hidden="true"></span><span><strong data-i18n="app.readAloud">Leer respuestas en voz alta</strong><small data-i18n="app.readAloudSub">El Agente habla cada respuesta.</small></span></label>
+    <label class="switch"><input type="checkbox" data-setting="showAvatar"><span class="switch-ui" aria-hidden="true"></span><span><strong data-i18n="app.showAvatar">Mostrar avatar 3D</strong><small data-i18n="app.showAvatarSub">El avatar mueve labios y manos al hablar.</small></span></label>
+    <p class="fineprint" data-voice-info></p>
+    <div class="field">
+      <p class="field-title" data-i18n="app.dataTitle">Datos</p>
+      <p class="fineprint" data-i18n="app.dataSub">En modo demo, tus conversaciones se guardan solo en este navegador.</p>
+      <button class="btn btn-ghost btn-sm danger" type="button" data-clear-all data-i18n="app.clearAll">Borrar conversaciones</button>
+    </div>
+    <p class="fineprint" data-mode-info></p>
+  </form>
+</dialog>
+
+<!-- Login dialog -->
+<dialog class="dialog" data-login aria-labelledby="login-title">
+  <form class="dialog-inner" data-login-form>
+    <header class="dialog-head"><h2 id="login-title" data-i18n="app.loginTitle">Ingresá a AgentiCuántico</h2><button class="icon-btn" type="button" data-close-dialog data-i18n-attr="aria-label:app.close" aria-label="Cerrar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
+    <p class="fineprint" data-i18n="app.loginSub">Te enviamos un enlace mágico a tu email. Sin contraseñas.</p>
+    <label class="input-label" for="login-email" data-i18n="app.email">Email</label>
+    <input class="input" id="login-email" type="email" required autocomplete="email" inputmode="email" placeholder="vos@empresa.com" data-login-email>
+    <button class="btn btn-primary" type="submit" data-i18n="app.sendLink">Enviarme el enlace</button>
+    <div class="or"><span data-i18n="app.or">o</span></div>
+    <button class="btn btn-ghost" type="button" data-google-login>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 12h7"/></svg>
+      <span data-i18n="app.google">Continuar con Google</span>
+    </button>
+    <p class="notice" data-login-notice hidden></p>
+  </form>
+</dialog>
+
+<div class="toast" role="status" aria-live="polite" data-toast hidden></div>
+</body>
+</html>

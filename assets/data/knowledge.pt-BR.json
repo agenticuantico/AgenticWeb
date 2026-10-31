@@ -1,0 +1,235 @@
+{
+ "lang": "pt-BR",
+ "version": 1,
+ "greeting": "Olá! Eu sou o Agente da AgentiCuántico. Pergunte o que fazemos, como funciona, preços ou como falar com a gente.",
+ "fallback": "Não tenho essa resposta na minha base pública. Para algo específico, escreva para agenticuantico@gmail.com com o assunto Consulta Comercial e responderemos.",
+ "suggestions": [
+  "O que é a AgentiCuántico?",
+  "Como funciona?",
+  "Quanto custa?",
+  "Meus dados estão seguros?",
+  "Sou investidor",
+  "Como entro em contato?"
+ ],
+ "intents": [
+  {
+   "id": "greet",
+   "keywords": [
+    "ola",
+    "oi",
+    "bom dia",
+    "boa tarde",
+    "tudo bem"
+   ],
+   "answer": "Olá! Eu sou o Agente da AgentiCuántico. Conte o que te interessa: o que fazemos, casos de uso, preços ou investimento.",
+   "weight": 0.8
+  },
+  {
+   "id": "what",
+   "keywords": [
+    "o que e",
+    "o que faz",
+    "agenticuantico",
+    "plataforma",
+    "servico",
+    "produto",
+    "o que voces fazem"
+   ],
+   "answer": "A AgentiCuántico é uma plataforma de inteligência artificial agentic feita na Argentina. Agentes autônomos entendem um objetivo, dividem em etapas, repartem o trabalho e respondem com voz e avatar, com a privacidade resolvida na arquitetura.",
+   "weight": 1
+  },
+  {
+   "id": "how",
+   "keywords": [
+    "como funciona",
+    "funcionamento",
+    "pipeline",
+    "processo",
+    "etapas",
+    "orquestracao",
+    "orquestrador"
+   ],
+   "answer": "Funciona em um pipeline agentic: recebe o sinal, compreende a intenção, planeja avaliando alternativas em paralelo, orquestra agentes especialistas, age com ferramentas autorizadas e verifica antes de responder.",
+   "weight": 1
+  },
+  {
+   "id": "quantum",
+   "keywords": [
+    "quantico",
+    "quantica",
+    "computador quantico",
+    "qubit",
+    "superposicao"
+   ],
+   "answer": "O quântico é uma abordagem inspirada na superposição: o cérebro explora várias hipóteses ao mesmo tempo e converge para a melhor. É uma metáfora de design; funciona em infraestrutura convencional, sem hardware quântico.",
+   "weight": 1
+  },
+  {
+   "id": "privacy",
+   "keywords": [
+    "privacidade",
+    "dados",
+    "seguro",
+    "seguranca",
+    "protecao",
+    "confidencial"
+   ],
+   "answer": "A privacidade está na arquitetura: o cérebro privado fica separado do site público, as chaves nunca chegam ao navegador e tratamos os dados conforme a Lei 25.326 da Argentina. Esta demo roda no seu navegador e não envia suas perguntas a servidores.",
+   "weight": 1
+  },
+  {
+   "id": "avatar",
+   "keywords": [
+    "avatar",
+    "voz",
+    "labios",
+    "maos",
+    "falar",
+    "fala",
+    "3d",
+    "gestos"
+   ],
+   "answer": "Sou um avatar 3D criado em tempo real. Falo com a voz do seu navegador, movo os lábios conforme os sons de cada palavra e gesticulo com as mãos enquanto explico.",
+   "weight": 1
+  },
+  {
+   "id": "langs",
+   "keywords": [
+    "idioma",
+    "idiomas",
+    "ingles",
+    "portugues",
+    "espanhol",
+    "lingua"
+   ],
+   "answer": "Falo espanhol rioplatense, inglês e português do Brasil. Troque o idioma pelas bandeiras no topo e minha voz muda junto.",
+   "weight": 1
+  },
+  {
+   "id": "pricing",
+   "keywords": [
+    "preco",
+    "precos",
+    "quanto custa",
+    "custo",
+    "plano",
+    "planos",
+    "assinatura",
+    "pro",
+    "gratis"
+   ],
+   "answer": "São três planos mensais: Grátis, Pro por {pro_usd} dólares ({pro_ars} pesos argentinos) e Empresa por {empresa_usd} dólares ({empresa_ars} pesos). Veja os detalhes na seção Preços.",
+   "weight": 1
+  },
+  {
+   "id": "payments",
+   "keywords": [
+    "pagar",
+    "pagamento",
+    "mercado pago",
+    "paypal",
+    "cartao",
+    "cobranca",
+    "cancelar"
+   ],
+   "answer": "Você pode pagar em pesos argentinos com Mercado Pago ou em dólares com PayPal. A assinatura renova todo mês e você cancela quando quiser.",
+   "weight": 1
+  },
+  {
+   "id": "cases",
+   "keywords": [
+    "casos",
+    "caso de uso",
+    "empresa",
+    "negocio",
+    "atendimento",
+    "vendas",
+    "clientes",
+    "industria"
+   ],
+   "answer": "Alguns casos: atendimento ao cliente 24/7, vendas e qualificação de leads, back-office, conhecimento interno, relatórios em linguagem natural e assistentes para indústria, energia e logística.",
+   "weight": 1
+  },
+  {
+   "id": "custom",
+   "keywords": [
+    "sob medida",
+    "personalizado",
+    "minha empresa",
+    "integracao",
+    "integracoes",
+    "conhecimento proprio"
+   ],
+   "answer": "Sim, podemos montar agentes com o conhecimento e as integrações da sua empresa. É o foco do plano Empresa. Escreva para nós e preparamos uma proposta.",
+   "weight": 1
+  },
+  {
+   "id": "investors",
+   "keywords": [
+    "investidor",
+    "investidores",
+    "investir",
+    "investimento",
+    "socio",
+    "parceiro",
+    "financiamento",
+    "roteiro"
+   ],
+   "answer": "Buscamos parceiros que compartilhem a visão de uma IA útil e privada para a América Latina. Estamos na etapa de fundações e o próximo passo são pilotos com empresas. Escreva para agenticuantico@gmail.com com o assunto Consulta Comercial e compartilhamos a apresentação.",
+   "weight": 1
+  },
+  {
+   "id": "contact",
+   "keywords": [
+    "contato",
+    "contatar",
+    "email",
+    "e mail",
+    "correio",
+    "escrever",
+    "falar com alguem",
+    "comercial"
+   ],
+   "answer": "Escreva para agenticuantico@gmail.com com o assunto Consulta Comercial, ou toque no botão Consulta comercial desta página.",
+   "weight": 1
+  },
+  {
+   "id": "app",
+   "keywords": [
+    "app",
+    "aplicativo",
+    "instalar",
+    "celular",
+    "android",
+    "baixar",
+    "experimentar"
+   ],
+   "answer": "Você pode experimentar o app web em agenticuantico.dev.ar/app. No Chrome para Android, abra o menu e escolha Instalar app para tê-lo na tela inicial.",
+   "weight": 1
+  },
+  {
+   "id": "where",
+   "keywords": [
+    "onde",
+    "argentina",
+    "pais",
+    "localizacao",
+    "quem sao"
+   ],
+   "answer": "A AgentiCuántico é um projeto nascido na Argentina, com foco na América Latina e em clientes de língua espanhola e portuguesa.",
+   "weight": 0.9
+  },
+  {
+   "id": "thanks",
+   "keywords": [
+    "obrigado",
+    "obrigada",
+    "otimo",
+    "perfeito",
+    "tchau"
+   ],
+   "answer": "Obrigado a você! Se quiser avançar, escreva com o assunto Consulta Comercial. Foi um prazer conversar.",
+   "weight": 0.8
+  }
+ ]
+}

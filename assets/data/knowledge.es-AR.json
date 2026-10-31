@@ -1,0 +1,238 @@
+{
+ "lang": "es-AR",
+ "version": 1,
+ "greeting": "¡Hola! Soy el Agente de AgentiCuántico. Preguntame qué hacemos, cómo funciona, precios o cómo contactarnos.",
+ "fallback": "No tengo esa respuesta en mi base pública. Para algo específico escribinos a agenticuantico@gmail.com con el asunto Consulta Comercial y te respondemos.",
+ "suggestions": [
+  "¿Qué es AgentiCuántico?",
+  "¿Cómo funciona?",
+  "¿Cuánto cuesta?",
+  "¿Es seguro con mis datos?",
+  "Soy inversor",
+  "¿Cómo los contacto?"
+ ],
+ "intents": [
+  {
+   "id": "greet",
+   "keywords": [
+    "hola",
+    "buenas",
+    "buen dia",
+    "buenas tardes",
+    "que tal",
+    "hey"
+   ],
+   "answer": "Hola, ¿cómo estás? Soy el Agente de AgentiCuántico. Contame qué te interesa: qué hacemos, casos de uso, precios o inversión.",
+   "weight": 0.8
+  },
+  {
+   "id": "what",
+   "keywords": [
+    "que es",
+    "que hace",
+    "agenticuantico",
+    "plataforma",
+    "servicio",
+    "producto",
+    "que hacen"
+   ],
+   "answer": "AgentiCuántico es una plataforma de inteligencia artificial agentic hecha en Argentina. Agentes autónomos entienden un objetivo, lo dividen en pasos, se reparten el trabajo y responden con voz y avatar, con la privacidad resuelta desde la arquitectura.",
+   "weight": 1
+  },
+  {
+   "id": "how",
+   "keywords": [
+    "como funciona",
+    "funcionamiento",
+    "pipeline",
+    "proceso",
+    "pasos",
+    "orquestacion",
+    "orquestador"
+   ],
+   "answer": "Funciona en un pipeline agentic: recibe la señal, comprende la intención, planifica evaluando alternativas en paralelo, orquesta agentes especialistas, actúa con herramientas autorizadas y verifica antes de responder.",
+   "weight": 1
+  },
+  {
+   "id": "quantum",
+   "keywords": [
+    "cuantico",
+    "cuantica",
+    "computadora cuantica",
+    "qubit",
+    "superposicion"
+   ],
+   "answer": "Lo cuántico es un enfoque inspirado en la superposición: el cerebro explora varias hipótesis a la vez y converge en la mejor. Es una metáfora de diseño; funciona en infraestructura convencional, sin hardware cuántico.",
+   "weight": 1
+  },
+  {
+   "id": "privacy",
+   "keywords": [
+    "privacidad",
+    "datos",
+    "seguro",
+    "seguridad",
+    "ley 25326",
+    "proteccion",
+    "confidencial"
+   ],
+   "answer": "La privacidad está en la arquitectura: el cerebro privado vive separado de la web pública, las claves nunca llegan al navegador y tratamos datos según la Ley 25.326. Esta demo funciona en tu navegador y no envía tus preguntas a servidores.",
+   "weight": 1
+  },
+  {
+   "id": "avatar",
+   "keywords": [
+    "avatar",
+    "voz",
+    "labios",
+    "manos",
+    "hablar",
+    "habla",
+    "3d",
+    "gestos"
+   ],
+   "answer": "Soy un avatar 3D creado en tiempo real. Hablo con la voz de tu navegador, muevo los labios según los sonidos de cada palabra y gesticulo con las manos mientras explico.",
+   "weight": 1
+  },
+  {
+   "id": "langs",
+   "keywords": [
+    "idioma",
+    "idiomas",
+    "ingles",
+    "portugues",
+    "espanol",
+    "lenguaje"
+   ],
+   "answer": "Hablo español rioplatense, inglés y portugués de Brasil. Podés cambiar el idioma con las banderas de arriba y mi voz cambia con él.",
+   "weight": 1
+  },
+  {
+   "id": "pricing",
+   "keywords": [
+    "precio",
+    "precios",
+    "cuanto cuesta",
+    "costo",
+    "plan",
+    "planes",
+    "suscripcion",
+    "pro",
+    "gratis"
+   ],
+   "answer": "Hay tres planes mensuales: Gratis, Pro por {pro_usd} dólares ({pro_ars} pesos) y Empresa por {empresa_usd} dólares ({empresa_ars} pesos). Podés ver el detalle en la sección Precios.",
+   "weight": 1
+  },
+  {
+   "id": "payments",
+   "keywords": [
+    "pagar",
+    "pago",
+    "mercado pago",
+    "paypal",
+    "tarjeta",
+    "cobro",
+    "cancelar"
+   ],
+   "answer": "Podés pagar en pesos con Mercado Pago o en dólares con PayPal. La suscripción se renueva cada mes y la cancelás cuando quieras.",
+   "weight": 1
+  },
+  {
+   "id": "cases",
+   "keywords": [
+    "casos",
+    "caso de uso",
+    "empresa",
+    "negocio",
+    "pyme",
+    "atencion",
+    "ventas",
+    "clientes",
+    "industria"
+   ],
+   "answer": "Algunos casos: atención al cliente 24/7, ventas y calificación de leads, back-office, conocimiento interno, reportes en lenguaje natural y asistentes para industria, energía y logística.",
+   "weight": 1
+  },
+  {
+   "id": "custom",
+   "keywords": [
+    "a medida",
+    "personalizado",
+    "mi empresa",
+    "integracion",
+    "integraciones",
+    "conocimiento propio"
+   ],
+   "answer": "Sí, podemos armar agentes con el conocimiento y las integraciones de tu empresa. Es el foco del plan Empresa. Escribinos y preparamos una propuesta.",
+   "weight": 1
+  },
+  {
+   "id": "investors",
+   "keywords": [
+    "inversor",
+    "inversores",
+    "invertir",
+    "inversion",
+    "socio",
+    "financiamiento",
+    "roadmap",
+    "hoja de ruta"
+   ],
+   "answer": "Buscamos socios que compartan la visión de una IA útil y privada para Latinoamérica. Estamos en la etapa de fundaciones y el próximo paso son pilotos con empresas. Escribinos a agenticuantico@gmail.com con el asunto Consulta Comercial y te compartimos la presentación.",
+   "weight": 1
+  },
+  {
+   "id": "contact",
+   "keywords": [
+    "contacto",
+    "contactar",
+    "email",
+    "mail",
+    "correo",
+    "escribir",
+    "hablar con alguien",
+    "comercial"
+   ],
+   "answer": "Escribinos a agenticuantico@gmail.com con el asunto Consulta Comercial, o tocá el botón Consulta comercial de esta página.",
+   "weight": 1
+  },
+  {
+   "id": "app",
+   "keywords": [
+    "app",
+    "aplicacion",
+    "instalar",
+    "celular",
+    "android",
+    "descargar",
+    "probar"
+   ],
+   "answer": "Podés probar la app web en agenticuantico.dev.ar/app. En Chrome para Android, abrí el menú y elegí Instalar app para tenerla en tu pantalla de inicio.",
+   "weight": 1
+  },
+  {
+   "id": "where",
+   "keywords": [
+    "donde",
+    "argentina",
+    "pais",
+    "ubicacion",
+    "quienes son"
+   ],
+   "answer": "AgentiCuántico es un proyecto nacido en Argentina, con foco en Latinoamérica y en clientes de habla hispana y portuguesa.",
+   "weight": 0.9
+  },
+  {
+   "id": "thanks",
+   "keywords": [
+    "gracias",
+    "genial",
+    "buenisimo",
+    "perfecto",
+    "chau"
+   ],
+   "answer": "¡Gracias a vos! Si querés avanzar, escribinos con el asunto Consulta Comercial. Fue un gusto charlar.",
+   "weight": 0.8
+  }
+ ]
+}

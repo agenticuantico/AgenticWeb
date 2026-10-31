@@ -1,0 +1,232 @@
+{
+ "lang": "en",
+ "version": 1,
+ "greeting": "Hi! I'm the AgentiCuántico Agent. Ask me what we do, how it works, pricing or how to reach us.",
+ "fallback": "I don't have that answer in my public knowledge base. For anything specific, email agenticuantico@gmail.com with the subject Consulta Comercial and we'll get back to you.",
+ "suggestions": [
+  "What is AgentiCuántico?",
+  "How does it work?",
+  "How much does it cost?",
+  "Is my data safe?",
+  "I'm an investor",
+  "How can I contact you?"
+ ],
+ "intents": [
+  {
+   "id": "greet",
+   "keywords": [
+    "hello",
+    "hi",
+    "hey",
+    "good morning",
+    "good afternoon"
+   ],
+   "answer": "Hello! I'm the AgentiCuántico Agent. Tell me what you're interested in: what we do, use cases, pricing or investing.",
+   "weight": 0.8
+  },
+  {
+   "id": "what",
+   "keywords": [
+    "what is",
+    "what does",
+    "agenticuantico",
+    "platform",
+    "service",
+    "product",
+    "what do you do"
+   ],
+   "answer": "AgentiCuántico is an agentic artificial intelligence platform made in Argentina. Autonomous agents understand a goal, break it into steps, share the work and respond with voice and an avatar, with privacy built into the architecture.",
+   "weight": 1
+  },
+  {
+   "id": "how",
+   "keywords": [
+    "how does it work",
+    "how it works",
+    "pipeline",
+    "process",
+    "steps",
+    "orchestration",
+    "orchestrator"
+   ],
+   "answer": "It works as an agentic pipeline: it receives the signal, understands the intent, plans by evaluating alternatives in parallel, orchestrates specialist agents, acts with authorized tools and verifies before answering.",
+   "weight": 1
+  },
+  {
+   "id": "quantum",
+   "keywords": [
+    "quantum",
+    "quantum computer",
+    "qubit",
+    "superposition"
+   ],
+   "answer": "Quantum here means an approach inspired by superposition: the brain explores several hypotheses at once and converges on the best one. It is a design metaphor; it runs on conventional infrastructure, with no quantum hardware.",
+   "weight": 1
+  },
+  {
+   "id": "privacy",
+   "keywords": [
+    "privacy",
+    "data",
+    "safe",
+    "secure",
+    "security",
+    "protection",
+    "confidential"
+   ],
+   "answer": "Privacy is in the architecture: the private brain lives apart from the public website, keys never reach the browser, and data is handled under Argentina's Law 25,326. This demo runs in your browser and does not send your questions to servers.",
+   "weight": 1
+  },
+  {
+   "id": "avatar",
+   "keywords": [
+    "avatar",
+    "voice",
+    "lips",
+    "hands",
+    "speak",
+    "talk",
+    "3d",
+    "gestures"
+   ],
+   "answer": "I'm a 3D avatar rendered in real time. I speak with your browser's voice, move my lips to the sounds of each word and gesture with my hands as I explain.",
+   "weight": 1
+  },
+  {
+   "id": "langs",
+   "keywords": [
+    "language",
+    "languages",
+    "english",
+    "portuguese",
+    "spanish"
+   ],
+   "answer": "I speak Rioplatense Spanish, English and Brazilian Portuguese. Switch languages with the flags at the top and my voice switches too.",
+   "weight": 1
+  },
+  {
+   "id": "pricing",
+   "keywords": [
+    "price",
+    "prices",
+    "pricing",
+    "how much",
+    "cost",
+    "plan",
+    "plans",
+    "subscription",
+    "pro",
+    "free"
+   ],
+   "answer": "There are three monthly plans: Gratis (free), Pro for {pro_usd} US dollars ({pro_ars} Argentine pesos) and Empresa (business) for {empresa_usd} US dollars ({empresa_ars} pesos). See the Pricing section for details.",
+   "weight": 1
+  },
+  {
+   "id": "payments",
+   "keywords": [
+    "pay",
+    "payment",
+    "mercado pago",
+    "paypal",
+    "card",
+    "billing",
+    "cancel"
+   ],
+   "answer": "You can pay in Argentine pesos with Mercado Pago or in US dollars with PayPal. The subscription renews monthly and you can cancel anytime.",
+   "weight": 1
+  },
+  {
+   "id": "cases",
+   "keywords": [
+    "use case",
+    "use cases",
+    "company",
+    "business",
+    "customer service",
+    "sales",
+    "customers",
+    "industry"
+   ],
+   "answer": "Some use cases: 24/7 customer service, sales and lead qualification, back office, internal knowledge, natural-language reporting, and assistants for industry, energy and logistics.",
+   "weight": 1
+  },
+  {
+   "id": "custom",
+   "keywords": [
+    "custom",
+    "tailored",
+    "my company",
+    "integration",
+    "integrations",
+    "own knowledge"
+   ],
+   "answer": "Yes, we can build agents with your company's knowledge and integrations. That's the focus of the Empresa plan. Write to us and we'll prepare a proposal.",
+   "weight": 1
+  },
+  {
+   "id": "investors",
+   "keywords": [
+    "investor",
+    "investors",
+    "invest",
+    "investment",
+    "partner",
+    "funding",
+    "roadmap"
+   ],
+   "answer": "We're looking for partners who share the vision of useful, private AI for Latin America. We're in the foundations stage and the next step is pilots with companies. Email agenticuantico@gmail.com with the subject Consulta Comercial and we'll share our deck.",
+   "weight": 1
+  },
+  {
+   "id": "contact",
+   "keywords": [
+    "contact",
+    "email",
+    "mail",
+    "reach",
+    "talk to someone",
+    "sales team"
+   ],
+   "answer": "Email agenticuantico@gmail.com with the subject Consulta Comercial, or tap the Business inquiry button on this page.",
+   "weight": 1
+  },
+  {
+   "id": "app",
+   "keywords": [
+    "app",
+    "application",
+    "install",
+    "phone",
+    "android",
+    "download",
+    "try"
+   ],
+   "answer": "You can try the web app at agenticuantico.dev.ar/app. In Chrome on Android, open the menu and choose Install app to add it to your home screen.",
+   "weight": 1
+  },
+  {
+   "id": "where",
+   "keywords": [
+    "where",
+    "argentina",
+    "country",
+    "location",
+    "who are you"
+   ],
+   "answer": "AgentiCuántico is a project born in Argentina, focused on Latin America and on Spanish- and Portuguese-speaking customers.",
+   "weight": 0.9
+  },
+  {
+   "id": "thanks",
+   "keywords": [
+    "thanks",
+    "thank you",
+    "great",
+    "perfect",
+    "bye"
+   ],
+   "answer": "Thank you! If you'd like to move forward, email us with the subject Consulta Comercial. It was a pleasure chatting.",
+   "weight": 0.8
+  }
+ ]
+}

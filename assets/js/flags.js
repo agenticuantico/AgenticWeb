@@ -1,0 +1,6 @@
+/** Inline SVG flags (simplified, original drawings). */
+export const FLAGS = {
+  'es-AR': '<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" fill="#74ACDF"/><rect y="6.67" width="30" height="6.67" fill="#fff"/><circle cx="15" cy="10" r="2.2" fill="#F6B40E" stroke="#85340A" stroke-width=".35"/></svg>',
+  en: '<svg viewBox="0 0 60 30" xmlns="http://www.w3.org/2000/svg"><clipPath id="fu"><path d="M0 0v30h60V0z"/></clipPath><clipPath id="fv"><path d="M30 15h30v15zv15H0zH0V0zV0h30z"/></clipPath><g clip-path="url(#fu)"><path d="M0 0v30h60V0z" fill="#012169"/><path d="M0 0l60 30m0-30L0 30" stroke="#fff" stroke-width="6"/><path d="M0 0l60 30m0-30L0 30" clip-path="url(#fv)" stroke="#C8102E" stroke-width="4"/><path d="M30 0v30M0 15h60" stroke="#fff" stroke-width="10"/><path d="M30 0v30M0 15h60" stroke="#C8102E" stroke-width="6"/></g></svg>',
+  'pt-BR': '<svg viewBox="0 0 30 21" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="21" fill="#009C3B"/><path d="M15 2.2 27.4 10.5 15 18.8 2.6 10.5z" fill="#FFDF00"/><circle cx="15" cy="10.5" r="4.6" fill="#002776"/><path d="M10.6 9.6c3-.7 6.2-.3 8.8 1.3" stroke="#fff" stroke-width=".8" fill="none"/></svg>'
+};
