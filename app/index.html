@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
+<meta name="theme-color" content="#EDEEF5">
+<title>AgentiCuántico · Chat y Agente</title>
+<meta name="description" content="Chateá con AgentiCuántico: respuestas rápidas, razonamiento profundo y un agente que planifica, ejecuta y verifica tareas.">
+<link rel="canonical" href="https://agenticuantico.dev.ar/app/">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta property="og:title" content="AgentiCuántico · Chat y Agente">
+<meta property="og:description" content="IA conversacional con razonamiento profundo y modo agente.">
+<meta property="og:image" content="https://agenticuantico.dev.ar/media/agenticuantico-og.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/app/app.css">
+</head>
+<body>
+<div class="app" id="app">
+  <div class="backdrop" id="backdrop" hidden></div>
+
+  <!-- Barra lateral -->
+  <aside class="sidebar" id="sidebar" aria-label="Historial">
+    <div class="sb-top">
+      <a class="brand" href="/app/" id="brandLink" aria-label="AgentiCuántico">
+        <img src="/media/agenticuantico-avatar.jpg" alt="" width="28" height="28">
+        <span>AgentiCuántico</span>
+      </a>
+      <button class="icon-btn" id="sbClose" type="button" data-i18n-title="closeSidebar"><svg data-icon="sidebar"></svg></button>
+    </div>
+    <nav class="sb-actions">
+      <button class="sb-item" id="sbNew" type="button"><svg data-icon="edit"></svg><span data-i18n="newChat"></span><kbd class="kbd">Ctrl ⇧ O</kbd></button>
+      <button class="sb-item" id="sbSearch" type="button"><svg data-icon="search"></svg><span data-i18n="searchChats"></span><kbd class="kbd">Ctrl K</kbd></button>
+      <button class="sb-item" id="sbAgent" type="button"><svg data-icon="agent"></svg><span data-i18n="agentTask"></span></button>
+    </nav>
+    <div class="sb-scroll" id="sbScroll">
+      <div class="sb-section">
+        <div class="sb-head"><span data-i18n="projects"></span><button class="icon-btn sm" id="sbNewProject" type="button" data-i18n-title="newProject"><svg data-icon="plus"></svg></button></div>
+        <div id="projectList"></div>
+      </div>
+      <div class="sb-section" id="historySection"></div>
+    </div>
+    <div class="sb-bottom">
+      <button class="upgrade-card" id="sbUpgrade" type="button">
+        <svg data-icon="spark"></svg>
+        <span><strong data-i18n="upgrade"></strong><small data-i18n="upgradeSub"></small></span>
+      </button>
+      <button class="account" id="accountBtn" type="button" aria-haspopup="menu">
+        <span class="avatar-initial" id="accountInitial">A</span>
+        <span class="acc-text"><strong id="accountName"></strong><small id="accountPlan"></small></span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Rail (barra lateral contraída en escritorio) -->
+  <div class="rail" id="rail">
+    <button class="icon-btn" id="railOpen" type="button" data-i18n-title="openSidebar"><svg data-icon="sidebar"></svg></button>
+    <button class="icon-btn" id="railNew" type="button" data-i18n-title="newChat"><svg data-icon="edit"></svg></button>
+    <button class="icon-btn" id="railSearch" type="button" data-i18n-title="searchChats"><svg data-icon="search"></svg></button>
+    <button class="icon-btn" id="railAgent" type="button" data-i18n-title="agentTask"><svg data-icon="agent"></svg></button>
+  </div>
+
+  <!-- Principal -->
+  <main class="main" id="main">
+    <header class="topbar">
+      <button class="icon-btn only-mobile" id="menuBtn" type="button" data-i18n-title="openSidebar"><svg data-icon="menu"></svg></button>
+      <div class="model-wrap">
+        <button class="model-btn" id="modelBtn" type="button" aria-haspopup="menu" aria-expanded="false">
+          <span id="modelLabel">AgentiCuántico</span><svg data-icon="chevron"></svg>
+        </button>
+        <div class="menu model-menu" id="modelMenu" role="menu" hidden></div>
+      </div>
+      <span class="chip demo-chip" id="connChip" hidden></span>
+      <div class="top-actions">
+        <button class="icon-btn only-mobile" id="newMobile" type="button" data-i18n-title="newChat"><svg data-icon="edit"></svg></button>
+        <button class="pill-btn" id="shareBtn" type="button" hidden><svg data-icon="share"></svg><span data-i18n="share"></span></button>
+        <button class="icon-btn" id="computerBtn" type="button" hidden data-i18n-title="computer"><svg data-icon="monitor"></svg></button>
+      </div>
+    </header>
+
+    <section class="thread" id="thread" aria-live="polite">
+      <div class="thread-inner" id="threadInner"></div>
+    </section>
+
+    <div class="empty" id="empty">
+      <img class="empty-avatar" src="/media/agenticuantico-avatar.jpg" alt="" width="64" height="64">
+      <h1 id="greeting"></h1>
+    </div>
+
+    <button class="scroll-down" id="scrollDown" type="button" hidden data-i18n-title="scrollDown"><svg data-icon="arrowDown"></svg></button>
+
+    <form class="composer-wrap" id="composerForm" autocomplete="off">
+      <div class="composer" id="composer">
+        <div class="attachments" id="attachments" hidden></div>
+        <textarea id="input" rows="1" data-i18n-ph="placeholder" enterkeyhint="send"></textarea>
+        <div class="composer-row">
+          <div class="left">
+            <button class="icon-btn round" id="attachBtn" type="button" data-i18n-title="attach"><svg data-icon="plus"></svg></button>
+            <div class="tools-wrap">
+              <button class="pill-btn ghost" id="toolsBtn" type="button" aria-haspopup="menu"><svg data-icon="tools"></svg><span class="hide-xs" data-i18n="tools"></span></button>
+              <div class="menu tools-menu" id="toolsMenu" role="menu" hidden></div>
+            </div>
+            <span class="mode-chip" id="modeChip" hidden></span>
+          </div>
+          <div class="right">
+            <button class="icon-btn round" id="micBtn" type="button" data-i18n-title="dictate"><svg data-icon="mic"></svg></button>
+            <button class="send-btn" id="voiceBtn" type="button" data-i18n-title="voiceMode"><svg data-icon="wave"></svg></button>
+            <button class="send-btn" id="sendBtn" type="submit" hidden data-i18n-title="send"><svg data-icon="arrowUp"></svg></button>
+            <button class="send-btn stop" id="stopBtn" type="button" hidden data-i18n-title="stop"><svg data-icon="stop"></svg></button>
+          </div>
+        </div>
+      </div>
+      <p class="disclaimer" data-i18n="disclaimer"></p>
+      <input type="file" id="fileInput" multiple hidden accept=".txt,.md,.csv,.json,.js,.ts,.py,.html,.css,.sql,.xml,.yaml,.yml,text/*,image/*">
+    </form>
+    <div class="suggestions" id="suggestions"></div>
+  </main>
+
+  <!-- Panel del agente -->
+  <aside class="agent-panel" id="agentPanel" hidden aria-label="Computadora del agente">
+    <div class="ap-head">
+      <div class="ap-title"><svg data-icon="monitor"></svg><span data-i18n="computer"></span></div>
+      <button class="icon-btn" id="apClose" type="button" data-i18n-title="close"><svg data-icon="close"></svg></button>
+    </div>
+    <div class="ap-body" id="apBody"></div>
+  </aside>
+</div>
+
+<!-- Menús flotantes, modales y avisos -->
+<div class="menu account-menu" id="accountMenu" role="menu" hidden></div>
+<div class="menu ctx-menu" id="ctxMenu" role="menu" hidden></div>
+<div class="modal-root" id="modalRoot" hidden></div>
+<div class="voice-overlay" id="voiceOverlay" hidden></div>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script src="/app/config.js"></script>
+<script src="/app/i18n.js"></script>
+<script src="/app/md.js"></script>
+<script src="/app/engine.js"></script>
+<script src="/app/app.js"></script>
+</body>
+</html>

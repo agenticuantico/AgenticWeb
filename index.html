@@ -1,0 +1,2164 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#EDEEF5">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<script src="/assets/agentic-static.js"></script>
+<title>AgentiCuantico | Super Inteligencia Artificial para Empresas</title>
+<meta name="description" content="AgentiCuantico: super inteligencia artificial agéntica con razonamiento profundo, equipo de agentes especializados, llamadas de voz en vivo y programación para empresas.">
+<meta name="keywords" content="AgentiCuantico, inteligencia artificial empresas, agentes de IA, super inteligencia, llamadas de voz con IA, programación con IA, razonamiento profundo, desarrollo de software, automatización, Argentina, B2B">
+<meta name="author" content="AgentiCuantico">
+<meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
+<meta name="googlebot" content="index,follow">
+<link rel="canonical" href="https://agenticuantico.dev.ar/">
+
+<!-- OpenGraph Social Cards -->
+<meta property="og:type" content="website">
+<meta property="og:locale" content="es_AR">
+<meta property="og:site_name" content="AgentiCuantico">
+<meta property="og:title" content="AgentiCuantico — Super Inteligencia Artificial para Empresas">
+<meta property="og:description" content="IA conversacional con razonamiento profundo, llamadas de voz en vivo y equipo de agentes con código para resolver desafíos empresariales.">
+<meta property="og:url" content="https://agenticuantico.dev.ar/">
+<meta property="og:image" content="https://agenticuantico.dev.ar/media/agenticuantico-og.jpg">
+
+<!-- Twitter / X Cards -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="AgentiCuantico — Super Inteligencia Artificial">
+<meta name="twitter:description" content="Conversá con razonamiento profundo, probá gratis la IA más potente y coordiná agentes especializados con código.">
+<meta name="twitter:image" content="https://agenticuantico.dev.ar/media/agenticuantico-og.jpg">
+
+<!-- Schema.org JSON-LD Structured Data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://agenticuantico.dev.ar/#organization",
+      "name": "AgentiCuantico",
+      "url": "https://agenticuantico.dev.ar/",
+      "logo": "https://agenticuantico.dev.ar/media/agenticuantico-og.jpg",
+      "email": "agenticuantico@gmail.com",
+      "description": "Super inteligencia artificial y ecosistema de agentes especializados para empresas, desarrollo de software y análisis de datos.",
+      "contactPoint": [
+        {
+          "@type": "ContactPoint",
+          "email": "agenticuantico@gmail.com",
+          "contactType": "Consulta Comercial",
+          "availableLanguage": ["Spanish", "English", "Portuguese"]
+        }
+      ]
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://agenticuantico.dev.ar/#software",
+      "name": "AgentiCuantico Super Inteligencia",
+      "applicationCategory": "BusinessApplication, DeveloperApplication",
+      "operatingSystem": "Web, Android, iOS, Windows, macOS",
+      "url": "https://agenticuantico.dev.ar/",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "ARS",
+        "description": "Prueba gratuita de 2 horas sin costo ni cobro de créditos para explorar la super inteligencia con razonamiento profundo."
+      }
+    }
+  ]
+}
+</script>
+
+<!-- Fonts: Outfit 400/500/600 & Inter -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap">
+
+<style>
+:root { --bg: #EDEEF5; --text: #18181b; --ink: #18181b; --lime: #9fff00; --lime-hover: #90ea00; --muted: #52525b; --border: rgba(24, 24, 27, 0.08); --card: rgba(255, 255, 255, 0.94); --blue: #2563eb; --blue-hover: #1d4ed8; --blue-light: #eff6ff; --shadow-lg: 0 30px 90px rgba(24, 24, 27, 0.08); --quantum-glow: 0 0 25px rgba(159, 255, 0, 0.45); }
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; background: var(--bg); }
+
+body { margin: 0px; background-color: var(--bg); color: var(--text); font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; overflow-x: hidden; position: relative; }
+
+body.fullscreen-chat { overflow: hidden; }
+
+a { color: inherit; text-decoration: none; }
+
+button, input, textarea, select { font: inherit; }
+
+#ambientCanvas { position: fixed; top: 0px; left: 0px; width: 100vw; height: 100vh; pointer-events: none; z-index: 0; opacity: 0.6; }
+
+.wrap { width: min(1200px, 100% - 36px); margin: 0px auto; position: relative; z-index: 10; }
+
+header { position: sticky; top: 0px; z-index: 80; background: rgba(237, 238, 245, 0.92); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
+
+.navbar { height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+
+.brand-group { display: flex; align-items: center; gap: 12px; text-decoration: none; cursor: pointer; user-select: none; }
+
+.quantum-logo-3d { position: relative; width: 44px; height: 44px; display: grid; place-items: center; flex: 0 0 auto; perspective: 600px; }
+
+.quantum-orb-3d { position: relative; width: 38px; height: 38px; border-radius: 50%; background: radial-gradient(circle at 32% 28%, rgb(255, 255, 255) 0%, rgb(163, 230, 53) 30%, rgb(30, 41, 59) 72%, rgb(9, 13, 22) 100%); box-shadow: rgba(0, 0, 0, 0.7) -3px -3px 8px inset, rgba(255, 255, 255, 0.9) 3px 3px 6px inset, rgba(163, 230, 53, 0.35) 0px 8px 24px, rgba(0, 0, 0, 0.15) 0px 2px 6px; display: grid; place-items: center; transition: transform 0.3s; }
+
+.quantum-logo-3d:hover .quantum-orb-3d { transform: rotateY(180deg) scale(1.05); }
+
+.quantum-nucleus { width: 11px; height: 11px; border-radius: 50%; background: radial-gradient(circle, rgb(255, 255, 255) 10%, rgb(159, 255, 0) 65%, rgb(37, 99, 235) 100%); box-shadow: rgb(159, 255, 0) 0px 0px 12px, rgb(255, 255, 255) 0px 0px 4px; animation: 2.4s ease-in-out 0s infinite alternate none running pulseNucleus; }
+
+@keyframes pulseNucleus { 
+  0% { transform: scale(0.85); box-shadow: rgb(159, 255, 0) 0px 0px 8px; }
+  100% { transform: scale(1.25); box-shadow: rgb(159, 255, 0) 0px 0px 16px, rgb(255, 255, 255) 0px 0px 6px; }
+}
+
+.quantum-ring { position: absolute; inset: -3px; border-radius: 50%; border-width: 1.5px; border-style: solid; border-color: rgba(37, 99, 235, 0.85) rgba(159, 255, 0, 0.7) rgba(159, 255, 0, 0.7); border-image: none; transform: rotateX(68deg) rotateY(18deg); animation: 4s linear 0s infinite normal none running spinRing; pointer-events: none; }
+
+.quantum-ring-2 { position: absolute; inset: -1px; border-radius: 50%; border-width: 1.5px; border-style: solid; border-color: rgba(37, 99, 235, 0.6) rgba(37, 99, 235, 0.6) rgba(159, 255, 0, 0.85); border-image: none; transform: rotateX(68deg) rotateY(-50deg); animation: 5.5s linear 0s infinite normal none running spinRingRev; pointer-events: none; }
+
+@keyframes spinRing { 
+  0% { transform: rotateX(68deg) rotateY(18deg) rotateZ(0deg); }
+  100% { transform: rotateX(68deg) rotateY(18deg) rotateZ(360deg); }
+}
+
+@keyframes spinRingRev { 
+  0% { transform: rotateX(68deg) rotateY(-50deg) rotateZ(360deg); }
+  100% { transform: rotateX(68deg) rotateY(-50deg) rotateZ(0deg); }
+}
+
+.brand-text-block { display: flex; flex-direction: column; }
+
+.brand-title-3d { font-family: Outfit, sans-serif; font-weight: 700; font-size: 21px; letter-spacing: -0.03em; color: rgb(17, 19, 24); display: flex; align-items: center; gap: 6px; line-height: 1.1; text-shadow: rgba(255, 255, 255, 0.8) 0px 1px 1px; }
+
+.brand-title-3d .lime-dot { color: rgb(101, 163, 13); }
+
+.brand-sub-badge { font-size: 9.5px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: rgb(100, 116, 139); margin-top: 1px; }
+
+.nav-menu { display: flex; align-items: center; gap: 6px; }
+
+.nav-link { font-size: 13.5px; font-weight: 500; color: rgb(63, 63, 70); padding: 8px 14px; border-radius: 999px; transition: 0.16s; }
+
+.nav-link:hover { color: rgb(24, 24, 27); background: rgba(255, 255, 255, 0.8); }
+
+.nav-contact-btn { background: rgb(24, 24, 27); font-weight: 600; font-size: 13.5px; padding: 8px 16px; border-radius: 999px; border: 1px solid rgb(24, 24, 27); transition: transform 0.16s, background-color 0.16s, box-shadow 0.16s; display: inline-flex; align-items: center; gap: 6px; color: rgb(255, 255, 255) !important; }
+
+.nav-contact-btn:hover { background: rgb(9, 9, 11); transform: translateY(-1px); box-shadow: rgba(0, 0, 0, 0.15) 0px 4px 14px; }
+
+.nav-cta-btn { background: linear-gradient(135deg, rgb(24, 24, 27), rgb(39, 39, 42)); font-weight: 600; font-size: 13.5px; padding: 9px 18px; border-radius: 999px; display: inline-flex; align-items: center; gap: 6px; transition: transform 0.16s, background-color 0.16s; color: rgb(255, 255, 255) !important; }
+
+.nav-cta-btn:hover { background: rgb(9, 9, 11); transform: translateY(-1px); }
+
+.trial-pill { display: inline-flex; align-items: center; gap: 6px; background: rgb(255, 255, 255); border: 1px solid rgb(203, 213, 225); border-radius: 999px; padding: 5px 12px; font-size: 11.5px; font-weight: 700; color: rgb(30, 41, 59); box-shadow: rgba(0, 0, 0, 0.03) 0px 2px 6px; }
+
+.trial-pill.unlimited { background: rgb(239, 246, 255); border-color: rgb(191, 219, 254); color: rgb(29, 78, 216); }
+
+.trial-pill .trial-dot { width: 7px; height: 7px; border-radius: 50%; background: rgb(34, 197, 94); animation: 2s ease 0s infinite normal none running pulseDot; }
+
+@keyframes pulseDot { 
+  0% { transform: scale(0.9); opacity: 0.6; }
+  50% { transform: scale(1.3); opacity: 1; }
+  100% { transform: scale(0.9); opacity: 0.6; }
+}
+
+.auth-btn-pill { border: 1px solid var(--border); background: rgb(255, 255, 255); border-radius: 999px; padding: 7px 14px; font-size: 13px; font-weight: 600; color: rgb(24, 24, 27); cursor: pointer; display: flex; align-items: center; gap: 7px; box-shadow: rgba(0, 0, 0, 0.03) 0px 2px 8px; }
+
+.auth-btn-pill:hover { background: rgb(250, 250, 250); }
+
+.mobile-toggle { display: none; width: 40px; height: 40px; border-radius: 12px; border: 1px solid var(--border); background: rgb(255, 255, 255); color: rgb(24, 24, 27); cursor: pointer; align-items: center; justify-content: center; }
+
+.mobile-nav-panel { display: none; position: absolute; top: 74px; left: 0px; right: 0px; background: rgb(237, 238, 245); border-bottom: 1px solid var(--border); padding: 16px 20px 24px; z-index: 75; box-shadow: rgba(0, 0, 0, 0.08) 0px 25px 60px; }
+
+.mobile-nav-panel.open { display: block; }
+
+.mobile-nav-panel .nav-link { display: block; padding: 12px 14px; font-size: 15px; border-bottom: 1px solid rgba(24, 24, 27, 0.05); }
+
+.hero-section { position: relative; padding-top: clamp(80px, 12vw, 140px); padding-bottom: 30px; text-align: center; }
+
+.hero-tag { display: inline-block; font-size: 11.5px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: rgb(82, 82, 91); background: rgba(255, 255, 255, 0.85); border: 1px solid var(--border); padding: 6px 16px; border-radius: 999px; margin-bottom: 22px; }
+
+.hero-title { font-family: Outfit, sans-serif; font-weight: 400; font-size: clamp(44px, 7vw, 92px); line-height: 0.98; letter-spacing: -0.03em; color: var(--text); margin: 0px auto 20px; max-width: 1050px; }
+
+.lime-box { display: inline-block; background-color: var(--lime); color: var(--text); border-radius: 16px; padding: 0px 0.15em; }
+
+.hero-lead { font-size: clamp(16px, 1.6vw, 18px); line-height: 1.6; color: var(--muted); max-width: 580px; margin: 0px auto 32px; }
+
+.hero-actions { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 40px; }
+
+.hero-btn-primary { background: rgb(24, 24, 27); color: rgb(255, 255, 255); font-size: 14.5px; font-weight: 600; padding: 13px 28px; border-radius: 999px; transition: transform 0.18s, background-color 0.18s; box-shadow: rgba(24, 24, 27, 0.15) 0px 4px 16px; }
+
+.hero-btn-primary:hover { background: rgb(9, 9, 11); transform: translateY(-2px); }
+
+.hero-btn-secondary { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); color: rgb(24, 24, 27); font-size: 14.5px; font-weight: 600; padding: 13px 26px; border-radius: 999px; border: 1px solid var(--border); transition: 0.18s; }
+
+.hero-btn-secondary:hover { background: rgb(255, 255, 255); transform: translateY(-2px); }
+
+.video-wrapper { position: relative; width: 100%; max-width: 1140px; margin: 10px auto 60px; border-radius: 32px; overflow: hidden; box-shadow: rgba(24, 24, 27, 0.09) 0px 35px 95px; background: rgb(237, 238, 245); height: clamp(320px, 50vw, 580px); }
+
+.video-element { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.video-fade-top { position: absolute; top: 0px; left: 0px; right: 0px; height: 110px; background: linear-gradient(rgb(237, 238, 245) 0%, rgba(237, 238, 245, 0.5) 45%, rgba(237, 238, 245, 0) 100%); pointer-events: none; }
+
+.chat-section { padding: 20px 0px 90px; position: relative; z-index: 20; }
+
+.chat-shell { width: 100%; max-width: 1140px; margin: 0px auto; height: min(780px, 84vh); min-height: 590px; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(24px); border: 1px solid rgba(24, 24, 27, 0.08); border-radius: 32px; box-shadow: rgba(18, 22, 33, 0.1) 0px 30px 100px; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+
+.chat-shell.fullscreen { position: fixed; inset: 0px; z-index: 9999; width: 100vw; height: 100vh; border-radius: 0px; margin: 0px; }
+
+.chat-header { height: 68px; display: flex; align-items: center; justify-content: space-between; padding: 0px 24px; border-bottom: 1px solid rgba(24, 24, 27, 0.06); background: rgba(255, 255, 255, 0.85); flex: 0 0 auto; }
+
+.chat-title-group { display: flex; align-items: center; gap: 12px; }
+
+.chat-status-dot { width: 9px; height: 9px; border-radius: 50%; background-color: rgb(34, 197, 94); box-shadow: rgba(34, 197, 94, 0.6) 0px 0px 10px; }
+
+.chat-title-text { font-family: Outfit, sans-serif; font-weight: 600; font-size: 16px; letter-spacing: -0.01em; }
+
+.chat-header-actions { display: flex; align-items: center; gap: 8px; }
+
+.voice-pill { display: flex; align-items: center; gap: 6px; background: rgba(237, 238, 245, 0.8); border: 1px solid rgba(24, 24, 27, 0.08); padding: 6px 12px; border-radius: 999px; font-size: 12.5px; font-weight: 600; color: rgb(39, 39, 42); cursor: pointer; }
+
+.voice-pill select { border: 0px; background: transparent; outline: none; font-weight: 600; color: rgb(24, 24, 27); cursor: pointer; }
+
+.call-btn-head { display: inline-flex; align-items: center; gap: 6px; background: rgb(37, 99, 235); color: rgb(255, 255, 255); border: 0px; border-radius: 999px; padding: 6px 14px; font-size: 12.5px; font-weight: 600; cursor: pointer; transition: transform 0.15s, background-color 0.15s; }
+
+.call-btn-head:hover { background: rgb(29, 78, 216); transform: translateY(-1px); }
+
+.header-tool-btn { width: 36px; height: 36px; border-radius: 10px; border: 1px solid rgba(24, 24, 27, 0.08); background: rgb(255, 255, 255); display: grid; place-items: center; font-size: 15px; color: rgb(63, 63, 70); cursor: pointer; }
+
+.chat-messages { flex: 1 1 0%; overflow-y: auto; padding: 24px 28px; background: linear-gradient(rgb(255, 255, 255), rgb(250, 250, 250)); }
+
+.message-row { display: flex; margin-bottom: 20px; }
+
+.message-row.user { justify-content: flex-end; }
+
+.message-bubble { max-width: min(840px, 86%); padding: 16px 20px; border-radius: 20px; background: rgb(244, 244, 245); color: rgb(24, 24, 27); font-size: 14.5px; line-height: 1.65; overflow-wrap: anywhere; white-space: normal; }
+
+.message-row.user .message-bubble { background: rgb(24, 24, 27); color: rgb(255, 255, 255); border-bottom-right-radius: 4px; }
+
+.message-row.ai .message-bubble { border-bottom-left-radius: 4px; background: rgb(248, 249, 250); border: 1px solid rgba(24, 24, 27, 0.05); }
+
+.agent-header-chip { display: inline-flex; align-items: center; gap: 6px; background: rgb(239, 246, 255); border: 1px solid rgb(191, 219, 254); color: rgb(30, 64, 175); border-radius: 999px; padding: 2px 10px; font-size: 11.5px; font-weight: 700; margin-bottom: 8px; }
+
+.codebox { margin: 14px 0px; border: 1px solid rgb(39, 39, 42); border-radius: 14px; overflow: hidden; background: rgb(9, 9, 11); color: rgb(250, 250, 250); }
+
+.codehead { display: flex; justify-content: space-between; align-items: center; padding: 8px 14px; background: rgb(24, 24, 27); border-bottom: 1px solid rgb(39, 39, 42); font-size: 11px; color: rgb(161, 161, 170); }
+
+.copycode { border: 0px; border-radius: 8px; background: rgb(39, 39, 42); color: rgb(250, 250, 250); padding: 4px 10px; font-size: 11px; cursor: pointer; }
+
+.copycode:hover { background: rgb(63, 63, 70); }
+
+.codebox pre { margin: 0px; padding: 14px; overflow-x: auto; font: 12.5px / 1.6 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+
+.chat-composer { position: relative; padding: 12px 18px 18px; background: rgb(255, 255, 255); border-top: 1px solid rgba(24, 24, 27, 0.06); flex: 0 0 auto; }
+
+.composer-status-bar { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 22px; margin-bottom: 6px; }
+
+.active-agents-tray { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+
+.agent-tag { background: rgb(244, 244, 245); border: 1px solid rgb(228, 228, 231); border-radius: 999px; padding: 3px 10px; font-size: 11.5px; font-weight: 600; color: rgb(63, 63, 70); display: flex; align-items: center; gap: 5px; }
+
+.agent-tag button { border: 0px; background: transparent; color: rgb(113, 113, 122); padding: 0px; cursor: pointer; }
+
+.reasoning-badge { display: none; align-items: center; gap: 6px; background: rgb(239, 246, 255); color: rgb(37, 99, 235); border: 1px solid rgb(191, 219, 254); border-radius: 999px; padding: 3px 12px; font-size: 12px; font-weight: 700; }
+
+.reasoning-badge.active { display: inline-flex; }
+
+.composer-capsule { border: 1.5px solid rgb(212, 212, 216); border-radius: 32px; background: rgb(255, 255, 255); padding: 6px 10px 6px 14px; display: flex; align-items: center; gap: 10px; box-shadow: rgba(0, 0, 0, 0.03) 0px 2px 10px; transition: border-color 0.2s; }
+
+.composer-capsule:focus-within { border-color: rgb(37, 99, 235); box-shadow: rgba(37, 99, 235, 0.1) 0px 0px 0px 4px; }
+
+.composer-plus-btn { width: 36px; height: 36px; border-radius: 50%; border: 0px; background: transparent; color: rgb(24, 24, 27); font-size: 24px; line-height: 1; cursor: pointer; display: grid; place-items: center; flex: 0 0 auto; transition: background-color 0.15s; }
+
+.composer-plus-btn:hover { background: rgb(244, 244, 245); }
+
+.composer-input { border: 0px; outline: 0px; resize: none; flex: 1 1 0%; min-height: 38px; max-height: 160px; background: transparent; color: rgb(24, 24, 27); line-height: 1.5; padding: 8px 4px; font-size: 15px; }
+
+.composer-actions-right { display: flex; align-items: center; gap: 5px; flex: 0 0 auto; }
+
+.action-icon-btn { width: 38px; height: 38px; border: 0px; background: transparent; border-radius: 50%; display: grid; place-items: center; cursor: pointer; color: rgb(113, 113, 122); flex: 0 0 auto; transition: 0.15s; }
+
+.action-icon-btn:hover { background: rgb(244, 244, 245); color: rgb(24, 24, 27); }
+
+.action-icon-btn.brain-btn.active { background: rgb(254, 240, 138) !important; color: rgb(133, 77, 14) !important; border: 1.5px solid rgb(250, 204, 21) !important; box-shadow: rgba(250, 204, 21, 0.7) 0px 0px 16px !important; }
+
+.action-icon-btn.mic-btn.active { animation: 1.3s ease 0s infinite alternate none running mic-glow-pulse; background: rgb(220, 252, 231) !important; color: rgb(21, 128, 61) !important; border: 1.5px solid rgb(34, 197, 94) !important; box-shadow: rgba(34, 197, 94, 0.75) 0px 0px 16px !important; }
+
+@keyframes mic-glow-pulse { 
+  0% { transform: scale(1); box-shadow: rgba(34, 197, 94, 0.5) 0px 0px 10px; }
+  100% { transform: scale(1.08); box-shadow: rgba(34, 197, 94, 0.95) 0px 0px 22px; }
+}
+
+.chat-mini-avatar.neural-yellow-glow { animation: 2s ease-in-out 0s infinite normal none running neural-pulse-yellow; border-color: rgb(250, 204, 21) !important; box-shadow: rgb(250, 204, 21) 0px 0px 24px, rgba(250, 204, 21, 0.75) 0px 0px 45px !important; }
+
+@keyframes neural-pulse-yellow { 
+  0%, 100% { box-shadow: rgb(250, 204, 21) 0px 0px 20px, rgba(250, 204, 21, 0.55) 0px 0px 35px; border-color: rgb(250, 204, 21); }
+  50% { box-shadow: rgb(250, 204, 21) 0px 0px 32px, rgba(250, 204, 21, 0.95) 0px 0px 60px; border-color: rgb(254, 240, 138); }
+}
+
+.chat-status-dot-mini.neural-yellow { background: rgb(250, 204, 21) !important; box-shadow: rgb(250, 204, 21) 0px 0px 12px !important; }
+
+.synaptic-beam-spark { position: fixed; width: 14px; height: 14px; border-radius: 50%; background: rgb(254, 240, 138); box-shadow: rgb(250, 204, 21) 0px 0px 20px, rgb(250, 204, 21) 0px 0px 40px; pointer-events: none; z-index: 999999; transition: transform 0.42s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.42s; }
+
+.status-card { border-radius: 18px; padding: 16px 18px; margin: 14px 0px; box-sizing: border-box; font-family: inherit; transition: transform 0.15s, box-shadow 0.15s; }
+
+.status-card:hover { transform: translateY(-1px); }
+
+.status-card.status-green { border: 1.5px solid rgb(34, 197, 94); background: rgb(255, 255, 255); box-shadow: rgba(34, 197, 94, 0.08) 0px 4px 18px; }
+
+.status-card.status-orange { border: 1.5px solid rgb(249, 115, 22); background: rgb(255, 255, 255); box-shadow: rgba(249, 115, 22, 0.08) 0px 4px 18px; }
+
+.status-card.status-red { border: 1.5px solid rgb(239, 68, 68); background: rgb(255, 255, 255); box-shadow: rgba(239, 68, 68, 0.08) 0px 4px 18px; }
+
+.status-pill { display: inline-block; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 700; margin-bottom: 10px; letter-spacing: -0.01em; }
+
+.status-pill.pill-green { background: rgb(220, 252, 231); color: rgb(21, 128, 61); }
+
+.status-pill.pill-orange { background: rgb(255, 237, 213); color: rgb(194, 65, 12); }
+
+.status-pill.pill-red { background: rgb(254, 226, 226); color: rgb(185, 28, 28); }
+
+.status-card-title { font-size: 16px; font-weight: 700; color: rgb(15, 23, 42); margin: 0px 0px 8px; line-height: 1.4; }
+
+.status-card-body { font-size: 14px; line-height: 1.6; color: rgb(51, 65, 85); margin: 0px; }
+
+.status-code-chip { background: rgb(241, 245, 249); color: rgb(15, 23, 42); padding: 3px 8px; border-radius: 6px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; border: 1px solid rgb(226, 232, 240); display: inline-block; margin: 4px 0px; word-break: break-all; }
+
+.quick-status-pills { display: flex; align-items: center; gap: 6px; overflow-x: auto; padding: 4px 0px 8px; scrollbar-width: none; }
+
+.quick-status-pills::-webkit-scrollbar { display: none; }
+
+.quick-pill-btn { border: 1px solid rgb(226, 232, 240); background: rgb(248, 250, 252); padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; color: rgb(71, 85, 105); cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px; transition: 0.15s; }
+
+.quick-pill-btn:hover { background: rgb(241, 245, 249); color: rgb(15, 23, 42); }
+
+.quick-pill-btn.pill-verif { border-color: rgb(187, 247, 208); background: rgb(240, 253, 244); color: rgb(22, 101, 52); }
+
+.quick-pill-btn.pill-pend { border-color: rgb(254, 215, 170); background: rgb(255, 247, 237); color: rgb(154, 52, 18); }
+
+.quick-pill-btn.pill-bloq { border-color: rgb(254, 202, 202); background: rgb(254, 242, 242); color: rgb(153, 27, 27); }
+
+.composer-send-btn { width: 40px; height: 40px; border: 0px; border-radius: 50%; background: rgb(37, 99, 235); color: rgb(255, 255, 255); display: grid; place-items: center; cursor: pointer; flex: 0 0 auto; box-shadow: rgba(37, 99, 235, 0.35) 0px 4px 14px; transition: transform 0.16s, background-color 0.16s; }
+
+.composer-send-btn:hover { background: rgb(29, 78, 216); transform: translateY(-1px); }
+
+.plus-popup-menu { position: absolute; bottom: 84px; left: 18px; width: 260px; background: rgb(255, 255, 255); border: 1px solid rgba(24, 24, 27, 0.1); border-radius: 22px; box-shadow: rgba(0, 0, 0, 0.16) 0px 20px 60px; padding: 8px; display: none; z-index: 50; }
+
+.plus-popup-menu.open { display: block; }
+
+.plus-menu-btn { width: 100%; border: 0px; background: transparent; border-radius: 12px; padding: 10px 12px; text-align: left; display: flex; align-items: center; gap: 12px; cursor: pointer; font-size: 13.5px; font-weight: 600; color: rgb(39, 39, 42); }
+
+.plus-menu-btn:hover { background: rgb(244, 244, 245); color: rgb(9, 9, 11); }
+
+.plus-menu-icon { width: 32px; height: 32px; border-radius: 50%; background: rgb(244, 244, 245); display: grid; place-items: center; font-size: 16px; flex: 0 0 auto; }
+
+.live-call-overlay { position: fixed; inset: 0px; background: rgba(12, 17, 24, 0.94); backdrop-filter: blur(16px); z-index: 150; display: none; flex-direction: column; align-items: center; justify-content: space-between; padding: 40px 20px 60px; color: rgb(255, 255, 255); }
+
+.live-call-overlay.open { display: flex; }
+
+.call-top-bar { text-align: center; }
+
+.call-title { font: 600 24px Outfit, sans-serif; margin: 0px 0px 6px; }
+
+.call-status { font-size: 14px; color: rgb(74, 222, 128); display: flex; align-items: center; justify-content: center; gap: 8px; }
+
+.call-avatar-stage { position: relative; display: flex; align-items: center; justify-content: center; margin: 14px 0px; }
+
+.call-avatar-card { position: relative; width: 170px; height: 170px; border-radius: 32px; overflow: hidden; box-shadow: rgba(159, 255, 0, 0.45) 0px 0px 50px, rgba(0, 0, 0, 0.7) 0px 20px 45px; border: 3px solid rgb(159, 255, 0); z-index: 5; background: rgb(15, 23, 42); display: flex; align-items: center; justify-content: center; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s, border-color 0.3s; animation: 4s ease-in-out 0s infinite alternate none running floatAvatar; }
+
+.call-avatar-card.speaking { transform: scale(1.08); border-color: rgb(56, 189, 248); box-shadow: rgba(56, 189, 248, 0.7) 0px 0px 70px, rgba(0, 0, 0, 0.8) 0px 25px 55px; }
+
+.call-avatar-card.listening { transform: scale(1.03); border-color: rgb(159, 255, 0); box-shadow: rgba(159, 255, 0, 0.7) 0px 0px 70px, rgba(0, 0, 0, 0.8) 0px 25px 55px; }
+
+.call-avatar-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+@keyframes floatAvatar { 
+  0% { transform: translateY(0px); }
+  100% { transform: translateY(-7px); }
+}
+
+.call-circle { width: 140px; height: 140px; border-radius: 50%; background: linear-gradient(135deg, rgb(37, 99, 235), rgb(147, 51, 234)); display: grid; place-items: center; font-size: 54px; box-shadow: rgba(37, 99, 235, 0.4) 0px 0px 60px; z-index: 2; }
+
+.call-wave { position: absolute; width: 170px; height: 170px; border-radius: 36px; border: 2px solid rgba(159, 255, 0, 0.5); animation: 2.4s ease 0s infinite normal none running pulseWave; }
+
+.call-wave:nth-child(2) { animation-delay: 0.8s; border-color: rgba(56, 189, 248, 0.5); }
+
+.call-wave:nth-child(3) { animation-delay: 1.6s; border-color: rgba(168, 85, 247, 0.5); }
+
+@keyframes pulseWave { 
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(2.3); opacity: 0; }
+}
+
+.call-transcript-box { max-width: 580px; min-height: 80px; text-align: center; font-size: 18px; line-height: 1.6; color: rgb(226, 232, 240); padding: 0px 20px; }
+
+.call-controls { display: flex; align-items: center; gap: 20px; }
+
+.call-end-btn { width: 68px; height: 68px; border-radius: 50%; background: rgb(239, 68, 68); color: rgb(255, 255, 255); border: 0px; font-size: 26px; display: grid; place-items: center; cursor: pointer; box-shadow: rgba(239, 68, 68, 0.4) 0px 10px 30px; transition: transform 0.16s; }
+
+.call-end-btn:hover { transform: scale(1.06); }
+
+.integration-modal { position: fixed; inset: 0px; background: rgba(16, 16, 24, 0.6); backdrop-filter: blur(8px); display: none; place-items: center; z-index: 120; padding: 16px; }
+
+.integration-modal.open { display: grid; }
+
+.modal-box { width: min(520px, 100%); background: rgb(255, 255, 255); border-radius: 28px; border: 1px solid var(--border); box-shadow: rgba(0, 0, 0, 0.25) 0px 30px 100px; padding: 30px 26px; position: relative; }
+
+.modal-close { position: absolute; top: 20px; right: 20px; width: 36px; height: 36px; border-radius: 50%; border: 0px; background: rgb(244, 244, 245); font-size: 18px; color: rgb(113, 113, 122); cursor: pointer; }
+
+.account-modal { position: fixed; inset: 0px; background: rgba(16, 16, 24, 0.65); backdrop-filter: blur(8px); display: none; place-items: center; z-index: 140; padding: 16px; }
+
+.account-modal.open { display: grid; }
+
+.subscription-card { background: rgb(248, 250, 252); border: 1.5px solid rgb(226, 232, 240); border-radius: 20px; padding: 18px; margin: 18px 0px; }
+
+.sub-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+
+.sub-plan-badge { background: var(--ink); color: rgb(255, 255, 255); padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+
+.sub-plan-badge.free { background: rgb(113, 113, 122); }
+
+.sub-detail-row { display: flex; justify-content: space-between; font-size: 13.5px; color: rgb(71, 85, 105); margin-bottom: 6px; }
+
+.auto-renew-row { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; padding-top: 12px; border-top: 1px solid rgb(226, 232, 240); font-size: 13px; }
+
+.cancel-renew-btn { border: 1px solid rgb(203, 213, 225); background: rgb(255, 255, 255); color: rgb(220, 38, 38); border-radius: 10px; padding: 6px 12px; font-size: 12px; font-weight: 600; cursor: pointer; }
+
+.cancel-renew-btn:hover { background: rgb(254, 226, 226); }
+
+footer { padding: 40px 0px 50px; border-top: 1px solid var(--border); color: rgb(113, 113, 122); font-size: 13px; }
+
+.footer-inner { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+
+@media (max-width: 860px) {
+  .nav-menu { display: none; }
+  .mobile-toggle { display: flex; }
+  .hero-actions { flex-direction: column; width: 100%; max-width: 320px; margin: 0px auto 36px; }
+  .hero-btn-primary, .hero-btn-secondary { width: 100%; text-align: center; }
+  .chat-shell { height: 78vh; min-height: 520px; border-radius: 24px; }
+  .chat-messages { padding: 16px; }
+}
+
+.hidden { display: none !important; }
+
+#fileInput, #photoInput, #cameraInput { display: none; }
+
+@keyframes pageEntrance { 
+  0% { opacity: 0; transform: translateY(14px); }
+  100% { opacity: 1; transform: translateY(0px); }
+}
+
+.hero-section { animation: 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0s 1 normal forwards running pageEntrance; }
+
+.chat-shell { animation: 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.1s 1 normal both running pageEntrance; transition: 0.35s; }
+
+.video-wrapper, .cyborg-hero-stage { position: relative; width: 100%; max-width: 1140px; margin: 10px auto 60px; border-radius: 32px; overflow: hidden; box-shadow: rgba(24, 24, 27, 0.14) 0px 35px 95px, rgba(255, 255, 255, 0.08) 0px 0px 0px 1px; background: rgb(8, 12, 20); height: clamp(380px, 54vw, 640px); perspective: 1200px; cursor: pointer; animation: 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0s 1 normal both running pageEntrance; }
+
+.cyborg-hero-inner { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform 0.15s ease-out; will-change: transform; }
+
+.cyborg-hero-image { position: absolute; top: 0px; left: 0px; width: 100%; height: 100%; object-fit: cover; object-position: center 30%; pointer-events: none; filter: saturate(1.05) contrast(1.03); user-select: none; }
+
+.hero-neural-canvas { position: absolute; top: 0px; left: 0px; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
+
+.hero-neural-hud { position: absolute; bottom: 24px; left: 24px; z-index: 10; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.16); border-radius: 20px; padding: 12px 20px; display: flex; flex-direction: column; gap: 3px; box-shadow: rgba(0, 0, 0, 0.3) 0px 12px 35px; transition: 0.3s; cursor: pointer; max-width: calc(100% - 48px); }
+
+.hero-neural-hud:hover { background: rgba(15, 23, 42, 0.95); transform: translateY(-2px); border-color: rgba(159, 255, 0, 0.5); box-shadow: rgba(159, 255, 0, 0.2) 0px 16px 40px; }
+
+.hero-hud-pill { display: flex; align-items: center; gap: 8px; font: 700 13.5px Outfit, sans-serif; color: rgb(255, 255, 255); }
+
+.hero-hud-dot { width: 9px; height: 9px; border-radius: 50%; background: rgb(159, 255, 0); box-shadow: rgb(159, 255, 0) 0px 0px 10px; animation: 1.6s ease-in-out 0s infinite normal none running pulseLed; }
+
+.hero-hud-detail { font-size: 12px; color: rgb(148, 163, 184); font-weight: 500; }
+
+@keyframes pulseLed { 
+  0%, 100% { opacity: 0.6; transform: scale(0.9); }
+  50% { opacity: 1; transform: scale(1.15); box-shadow: rgb(159, 255, 0) 0px 0px 14px; }
+}
+
+.chat-avatar-wrapper { position: relative; width: 40px; height: 40px; flex: 0 0 auto; }
+
+.chat-mini-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(159, 255, 0, 0.6); box-shadow: rgba(159, 255, 0, 0.35) 0px 0px 12px; transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s; }
+
+.chat-mini-avatar.pulse-thinking { border-color: rgb(168, 85, 247); box-shadow: rgb(168, 85, 247) 0px 0px 18px; }
+
+.chat-mini-avatar.pulse-speaking { border-color: rgb(34, 197, 94); box-shadow: rgb(34, 197, 94) 0px 0px 18px; }
+
+.chat-status-dot-mini { position: absolute; bottom: 0px; right: 0px; width: 10px; height: 10px; border-radius: 50%; background: rgb(34, 197, 94); border: 2px solid rgb(255, 255, 255); box-shadow: rgb(34, 197, 94) 0px 0px 8px; }
+
+.chat-title-col { display: flex; flex-direction: column; gap: 1px; }
+
+.chat-subtitle-text { font-size: 11.5px; color: rgb(100, 116, 139); font-weight: 500; transition: color 0.2s; }
+
+.cookie-banner { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: min(920px, 100% - 32px); z-index: 99999; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.16); border-radius: 20px; padding: 18px 24px; box-shadow: rgba(0, 0, 0, 0.5) 0px 25px 80px; color: rgb(248, 250, 252); animation: 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0s 1 normal forwards running slideUpBanner; }
+
+@keyframes slideUpBanner { 
+  0% { opacity: 0; transform: translate(-50%, 30px); }
+  100% { opacity: 1; transform: translate(-50%, 0px); }
+}
+
+.cookie-card-inner { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+
+.cookie-text-col { display: flex; align-items: flex-start; gap: 14px; flex: 1 1 0%; }
+
+.cookie-icon { font-size: 28px; flex: 0 0 auto; }
+
+.cookie-title { font: 700 15px Outfit, sans-serif; color: rgb(255, 255, 255); margin-bottom: 4px; }
+
+.cookie-desc { font-size: 13px; color: rgb(203, 213, 225); line-height: 1.55; margin: 0px; }
+
+.cookie-desc a { color: rgb(159, 255, 0); text-decoration: underline; font-weight: 600; }
+
+.cookie-actions { display: flex; align-items: center; gap: 10px; flex: 0 0 auto; }
+
+.cookie-btn-accept { background: rgb(159, 255, 0); color: rgb(11, 15, 23); border: 0px; padding: 10px 22px; border-radius: 999px; font-weight: 700; font-size: 13.5px; cursor: pointer; transition: 0.2s; white-space: nowrap; }
+
+.cookie-btn-accept:hover { background: rgb(174, 253, 40); transform: translateY(-1px); }
+
+.cookie-btn-link { background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.18); color: rgb(241, 245, 249); padding: 9px 18px; border-radius: 999px; font-size: 13px; font-weight: 600; text-decoration: none; cursor: pointer; white-space: nowrap; transition: 0.2s; }
+
+.cookie-btn-link:hover { background: rgba(255, 255, 255, 0.16); }
+
+@media (max-width: 760px) {
+  .cookie-card-inner { flex-direction: column; align-items: stretch; text-align: left; }
+  .cookie-actions { width: 100%; justify-content: flex-end; }
+  .cookie-btn-accept, .cookie-btn-link { flex: 1 1 0%; text-align: center; }
+}
+
+/* reglas heredadas */
+.human-caller-frame {
+  position: relative;
+  z-index: 5;
+  width: 155px;
+  height: 155px;
+  border-radius: 50%;
+  padding: 4px;
+  background: linear-gradient(135deg, #9fff00, #38bdf8);
+  box-shadow: 0 0 50px rgba(159, 255, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.human-caller-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  transition: transform 0.25s ease, filter 0.25s ease;
+}
+
+.human-caller-img.talking {
+  transform: scale(1.06);
+  filter: drop-shadow(0 0 24px #9fff00);
+  animation: talkPulse 1.2s ease-in-out infinite alternate;
+}
+
+.mic-listening-pill {
+  display: none;
+  align-items: center;
+  gap: 7px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  padding: 4px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  animation: pulseMic 1.4s infinite;
+}
+
+.mic-listening-pill.active { display: inline-flex; }
+
+@keyframes pulseMic {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+@keyframes talkPulse {
+  0% { transform: scale(1.02); }
+  100% { transform: scale(1.08); }
+}
+
+/* ajustes para hosting estático */
+.cyborg-hero-inner picture { position: absolute; inset: 0; display: block; }
+.cyborg-hero-stage { background: #f3f1ec; }
+.chat-header-actions { min-width: 0; }
+.voice-pill select { max-width: 150px; text-overflow: ellipsis; }
+@media (max-width: 560px) { .hero-neural-hud { left: 22px; bottom: 22px; max-width: calc(100% - 44px); } }
+</style>
+</head>
+<body>
+
+<canvas id="ambientCanvas"></canvas>
+
+<!-- Header -->
+<header>
+  <div class="wrap navbar">
+    <!-- 3D Quantum Brand Logo -->
+    <a class="brand-group" href="/" aria-label="AgentiCuantico Super Inteligencia">
+      <div class="quantum-logo-3d">
+        <div class="quantum-orb-3d">
+          <div class="quantum-nucleus"></div>
+          <div class="quantum-ring"></div>
+          <div class="quantum-ring-2"></div>
+        </div>
+      </div>
+      <div class="brand-text-block">
+        <div class="brand-title-3d">AgentiCuantico <span class="lime-dot">✦</span></div>
+        <span class="brand-sub-badge">Super Inteligencia</span>
+      </div>
+    </a>
+
+    <!-- Desktop Navigation -->
+    <nav class="nav-menu">
+      <a class="nav-link" href="#hero">inicio</a>
+      <a class="nav-link" href="/como-funciona">cómo funciona</a>
+      <a class="nav-link" href="/nosotros">nosotros</a>
+      <a class="nav-link" href="/planes" style="font-weight: 700; color: #2563eb;">planes</a>
+      <button class="nav-contact-btn" onclick="openContactModal()" title="Contacto comercial" style="border: 0; background: transparent; cursor: pointer;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        <span>Contacto</span>
+      </button>
+
+      <!-- Free Trial Quota Indicator -->
+      <div class="trial-pill" id="trialStatusPill" title="Tiempo de uso gratuito de la Super Inteligencia">
+        <span class="trial-dot"></span>
+        <span id="trialTimeRemaining">2h 00m gratis</span>
+      </div>
+
+      <!-- User Account Button -->
+      <button class="auth-btn-pill" id="btnUserAccount" onclick="openAccountModal()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+        <span id="navAccountLabel">Mi cuenta</span>
+      </button>
+
+      <a class="nav-cta-btn" href="/app/">empezar →</a>
+    </nav>
+
+    <!-- Mobile Toggle -->
+    <button class="mobile-toggle" id="mobileMenuBtn" aria-label="Abrir menú" onclick="toggleMobileMenu()">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+        <line x1="3" y1="6" x2="21" y2="6"/>
+        <line x1="3" y1="12" x2="21" y2="12"/>
+        <line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Mobile Nav Panel -->
+  <div class="mobile-nav-panel" id="mobileNavPanel">
+    <a class="nav-link" href="#hero" onclick="closeMobileMenu()">inicio</a>
+    <a class="nav-link" href="/como-funciona" onclick="closeMobileMenu()">cómo funciona</a>
+    <a class="nav-link" href="/nosotros" onclick="closeMobileMenu()">nosotros</a>
+    <a class="nav-link" href="/planes" onclick="closeMobileMenu()" style="font-weight: 700; color: #2563eb;">planes</a>
+    <a class="nav-link" href="javascript:void(0)" onclick="openContactModal(); closeMobileMenu();" style="font-weight: 700; color: #18181b;">Contacto comercial</a>
+    <a class="nav-link" href="javascript:void(0)" onclick="openAccountModal(); closeMobileMenu();">Mi cuenta</a>
+    <a class="nav-link" href="/app/" onclick="closeMobileMenu()" style="font-weight: 700;">empezar →</a>
+  </div>
+</header>
+
+<main>
+  <!-- Hero Section -->
+  <section class="hero-section" id="hero">
+    <div class="wrap">
+      <div class="hero-tag">super inteligencia artificial agéntica · online</div>
+
+      <h1 class="hero-title">
+        Tu idea merece<br>un <span class="lime-box">equipo</span> de verdad.
+      </h1>
+
+      <p class="hero-lead">
+        Super inteligencia artificial para conversar, programar soluciones con código, analizar archivos, coordinar agentes expertos y responder órdenes con razonamiento profundo.
+      </p>
+
+      <div class="hero-actions">
+        <a class="hero-btn-primary" href="/app/">empezar a conversar →</a>
+        <button class="hero-btn-secondary" onclick="openContactModal()" style="cursor: pointer;">contacto comercial ↗</button>
+        <a class="hero-btn-secondary" href="/planes">ver planes y agentes</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Hero visual: cyborg neuronal conectado al chat -->
+  <section class="wrap">
+    <div class="cyborg-hero-stage" id="heroVisualWrapper" title="AgentiCuantico · Hacé clic para conversar">
+      <div class="cyborg-hero-inner" id="heroVisualInner">
+        <picture>
+          <source type="image/webp" srcset="/media/agenticuantico-hero-960.webp 960w, /media/agenticuantico-hero.webp 1376w" sizes="(max-width: 1180px) 100vw, 1140px">
+          <img src="/media/agenticuantico-hero.jpg" srcset="/media/agenticuantico-hero-960.jpg 960w, /media/agenticuantico-hero.jpg 1376w" sizes="(max-width: 1180px) 100vw, 1140px" width="1376" height="768" alt="AgentiCuantico Super Inteligencia: rostro con cerebro de árbol dorado en casco de cristal" class="cyborg-hero-image" id="cyborgHeroImg" fetchpriority="high" decoding="async">
+        </picture>
+        <canvas id="heroNeuralCanvas" class="hero-neural-canvas" aria-hidden="true"></canvas>
+      </div>
+
+      <div class="hero-neural-hud" id="heroNeuralHud">
+        <div class="hero-hud-pill">
+          <span class="hero-hud-dot" id="heroHudDot"></span>
+          <span id="heroHudStatus">Vías neuronales activas · En espera</span>
+        </div>
+        <div class="hero-hud-detail" id="heroHudDetail">Sinapsis cuánticas: 432 Hz · Conectado al chat</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Chat Section -->
+  <section class="chat-section" id="chat">
+    <div class="wrap">
+      <div class="chat-shell" id="chatShell">
+        
+        <!-- Header Chat -->
+        <div class="chat-header">
+          <div class="chat-title-group">
+            <div class="chat-avatar-wrapper">
+              <img src="/media/agenticuantico-avatar.jpg" alt="AgentiCuantico" class="chat-mini-avatar" id="chatMiniAvatar" width="40" height="40">
+              <div class="chat-status-dot-mini" id="chatStatusDot"></div>
+            </div>
+            <div class="chat-title-col">
+              <div class="chat-title-text">AgentiCuantico · Super Inteligencia</div>
+              <div class="chat-subtitle-text" id="chatSubtitleStatus">Vías neuronales en línea · Lista</div>
+            </div>
+          </div>
+
+          <div class="chat-header-actions">
+            <!-- Voz y género -->
+            <div class="voice-pill" title="Seleccionar voz y género">
+              <span>🎙️</span>
+              <select id="genderSelect" aria-label="Género de la voz" style="border: 0; background: transparent; font-weight: 700; color: #18181b; outline: none; cursor: pointer; margin-right: 4px;">
+                <option value="femenino" selected>Femenina</option>
+                <option value="masculino">Masculina</option>
+              </select>
+              <select id="voiceSelect" aria-label="Voz del agente" onchange="changeVoice(this.value)">
+                <option value="female_ar_01" selected>🇦🇷 Sofía (Argentina · Femenina)</option>
+                <option value="male_ar_01">🇦🇷 Tomás (Argentina · Masculino)</option>
+                <option value="female_es_01">🇪🇸 Elena (España · Femenina)</option>
+                <option value="male_es_01">🇪🇸 Carlos (España · Masculino)</option>
+                <option value="female_mx_01">🇲🇽 Valentina (Latam · Femenina)</option>
+                <option value="male_cl_01">🇨🇱 Mateo (Latam · Masculino)</option>
+              </select>
+            </div>
+
+            <!-- Llamada de voz en vivo -->
+            <button class="call-btn-head" onclick="startLiveCall()" title="Iniciar llamada de voz a voz en vivo">
+              <span>📞</span>
+              <span>Llamada en vivo</span>
+            </button>
+
+            <!-- Pantalla completa -->
+            <button class="header-tool-btn" onclick="toggleChatMaximize()" title="Maximizar chat">⤢</button>
+          </div>
+        </div>
+
+        <!-- Messages Area (Welcome without mentioning github/cloudflare) -->
+        <div class="chat-messages" id="chatMessages">
+          <div class="message-row ai">
+            <div class="message-bubble welcome-bubble">
+              <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(159, 255, 0, 0.25); border: 1px solid rgba(159, 255, 0, 0.6); color: #18181b; border-radius: 999px; padding: 3px 12px; font-size: 11px; font-weight: 800; margin-bottom: 8px;">
+                <span>✦</span> <span>SUPER INTELIGENCIA AGÉNTICA CON RAZONAMIENTO PROFUNDO</span>
+              </div>
+              <h3 style="font: 700 20px 'Outfit', sans-serif; margin: 4px 0 8px; color: #111318;">¡Hola! Soy AgentiCuantico.</h3>
+              <p style="margin: 0 0 10px; color: #475569; line-height: 1.65; font-size: 14.5px;">
+                Tu <strong>super inteligencia artificial agéntica</strong> con razonamiento analítico avanzado y equipo multidisciplinario. Cumplo con exactitud las órdenes y desafíos que me solicites: podés pedirme programar soluciones completas con código limpio y probado, diseñar interfaces modernas, estructurar arquitecturas, redactar propuestas comerciales o coordinar agentes expertos en conjunto.
+              </p>
+              <div style="font-size: 12.5px; color: #64748b; line-height: 1.5; background: #f8fafc; padding: 8px 12px; border-radius: 12px; border: 1px solid #e2e8f0;">
+                🎙️ <strong>Interacción Voz a Voz humana:</strong> Podés presionar el micrófono para hablar y la IA te responderá con voz natural sin necesidad de tipear, permitiendo una conversación continua en tiempo real.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chat Composer -->
+        <div class="chat-composer">
+          <!-- Status bar: active agents, reasoning & mic listening indicator -->
+          <div class="composer-status-bar">
+            <div class="active-agents-tray" id="activeAgentsTray">
+              <!-- Dynamically injected agent chips -->
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <div class="mic-listening-pill" id="micLiveIndicator">
+                <span>🔴</span>
+                <span>Escuchando tu voz... Hablá con normalidad</span>
+              </div>
+              <div class="reasoning-badge" id="reasoningIndicator">
+                <span>🧠</span>
+                <span>Pensar más activado (Razonamiento profundo)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Floating (+) Menu with authentic official GitHub & Cloudflare SVGs -->
+          <div class="plus-popup-menu" id="plusMenuPopup">
+            <button class="plus-menu-btn" onclick="triggerFileInput('file')">
+              <span class="plus-menu-icon">📁</span>
+              <span>Subir Archivos</span>
+            </button>
+            <button class="plus-menu-btn" onclick="triggerFileInput('photo')">
+              <span class="plus-menu-icon">🖼️</span>
+              <span>Fotos / Imágenes</span>
+            </button>
+            <button class="plus-menu-btn" onclick="triggerFileInput('camera')">
+              <span class="plus-menu-icon">📷</span>
+              <span>Cámara</span>
+            </button>
+            <button class="plus-menu-btn" onclick="openAgentsModal(); closePlusMenu();">
+              <span class="plus-menu-icon">🤖</span>
+              <span>Equipo de Agentes con Rol</span>
+            </button>
+            <!-- Real Official GitHub SVG Logo -->
+            <button class="plus-menu-btn" onclick="openIntegrationModal('github'); closePlusMenu();">
+              <span class="plus-menu-icon" style="background: #18181b; color: #ffffff;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+                </svg>
+              </span>
+              <span>Conectar GitHub</span>
+            </button>
+            <!-- Real Official Cloudflare SVG Logo -->
+            <button class="plus-menu-btn" onclick="openIntegrationModal('cloudflare'); closePlusMenu();">
+              <span class="plus-menu-icon" style="background: #ffffff; border: 1px solid #fed7aa;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <path fill="#F38020" d="M18.3 10.4c-.4-2.8-2.8-4.9-5.7-4.9-2.4 0-4.5 1.4-5.4 3.5-1.6.2-2.9 1.4-3.1 3-.1.5 0 1 .2 1.4-.8.5-1.3 1.4-1.3 2.4 0 1.7 1.3 3 3 3h12.5c2.5 0 4.5-2 4.5-4.5 0-2.1-1.4-3.8-3.3-4.3-.1.2-.2.3-.4.4z"/>
+                  <path fill="#FAAE40" d="M18.8 14.5c0-.2 0-.3-.1-.5-.4-2.8-2.8-4.9-5.7-4.9-2.4 0-4.5 1.4-5.4 3.5-.1.2-.1.4-.1.7.3-.2.6-.3 1-.3.2 0 .4 0 .6.1.4-.8 1.1-1.5 2-1.9.9-.4 1.9-.5 2.9-.2 1 .3 1.9.9 2.5 1.8.6.9.9 1.9.9 3 0 .3 0 .6-.1.9h1.4c0-.7-.4-1.5-1-2.2z"/>
+                </svg>
+              </span>
+              <span>Conectar Cloudflare</span>
+            </button>
+            <button class="plus-menu-btn" onclick="startLiveCall(); closePlusMenu();">
+              <span class="plus-menu-icon">📞</span>
+              <span>Llamada de Voz en Vivo</span>
+            </button>
+          </div>
+
+          <!-- Capsule Input -->
+          <div class="composer-capsule">
+            <button class="composer-plus-btn" id="plusToggleBtn" title="Complementos y archivos" onclick="togglePlusMenu()">+</button>
+            <textarea class="composer-input" id="userInputText" rows="1" placeholder="Escribí una orden o mensaje..." onkeydown="handleInputKey(event)"></textarea>
+
+            <div class="composer-actions-right">
+              <!-- Brain toggle -->
+              <button class="action-icon-btn brain-btn" id="brainToggleBtn" title="Activar / desactivar Pensar más (Razonamiento profundo)" onclick="toggleReasoningMode()">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M9.5 2A4.5 4.5 0 0 0 5 6.5a4.48 4.48 0 0 0 .5 2.05A4.5 4.5 0 0 0 4 12a4.48 4.48 0 0 0 1.5 3.39A4.5 4.5 0 0 0 9.5 20H10V2h-.5Z"/>
+                  <path d="M14.5 2A4.5 4.5 0 0 1 19 6.5a4.48 4.48 0 0 1-.5 2.05A4.5 4.5 0 0 1 20 12a4.48 4.48 0 0 1 1.5 3.39A4.5 4.5 0 0 1 14.5 20H14V2h.5Z"/>
+                </svg>
+              </button>
+
+              <!-- Mic toggle (Continuous Voice-to-Voice) -->
+              <button class="action-icon-btn mic-btn" id="micToggleBtn" title="Hablar de voz a voz en vivo con la IA" onclick="toggleVoiceToVoiceMode()">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+                  <rect x="9" y="2" width="6" height="12" rx="3"/>
+                  <path d="M5 10a7 7 0 0 0 14 0"/>
+                  <line x1="12" y1="17" x2="12" y2="22"/>
+                  <line x1="8" y1="22" x2="16" y2="22"/>
+                </svg>
+              </button>
+
+              <!-- Send Button -->
+              <button class="composer-send-btn" id="sendMessageBtn" title="Enviar orden" onclick="sendMessage()">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#ffffff" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="19" x2="12" y2="5"/>
+                  <polyline points="5 12 12 5 19 12"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap footer-inner">
+    <div><strong>AgentiCuantico</strong> · © 2026 Super Inteligencia Artificial para Empresas</div>
+    <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+      <a href="/planes" style="text-decoration: underline;">Planes y Precios</a>
+      <button onclick="openContactModal()" style="font-weight: 700; color: #18181b; background: transparent; border: 0; cursor: pointer; padding: 0;">Contacto comercial ↗</button>
+    </div>
+  </div>
+</footer>
+
+<!-- Live Call Overlay (Voice-to-Voice with Human Agent) -->
+<div class="live-call-overlay" id="liveCallOverlay">
+  <div class="call-top-bar">
+    <div class="call-title">Llamada en Vivo con AgentiCuantico</div>
+    <div class="call-status">
+      <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 10px #4ade80;"></span>
+      <span id="callStatusText">Conectado · Voz a voz en tiempo real</span>
+    </div>
+    
+    <!-- Live in-call voice & gender selector -->
+    <div style="margin: 14px 0 6px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+      <span style="font-size: 13px; color: #94a3b8;">Voz y Género del Agente:</span>
+      <select id="callVoiceSelect" onchange="changeVoice(this.value)" style="border: 1.5px solid rgba(159,255,0,0.5); background: rgba(18,24,38,0.92); color: #fff; border-radius: 999px; padding: 7px 16px; font-size: 13.5px; font-weight: 700; outline: none; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.4);">
+        <option value="female_ar_01" selected>🇦🇷 Sofía (Argentina · Femenina)</option>
+        <option value="male_ar_01">🇦🇷 Tomás (Argentina · Masculino)</option>
+        <option value="female_es_01">🇪🇸 Elena (España · Femenina)</option>
+        <option value="male_es_01">🇪🇸 Carlos (España · Masculino)</option>
+        <option value="female_mx_01">🇲🇽 Valentina (Latam · Femenina)</option>
+        <option value="male_cl_01">🇨🇱 Mateo (Latam · Masculino)</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Real Quantum Call Stage: Neural Cybernetic Avatar with voice waves -->
+  <div class="call-avatar-stage">
+    <div class="call-wave"></div>
+    <div class="call-wave"></div>
+    <div class="call-wave"></div>
+    <div style="position: relative; z-index: 5; text-align: center;">
+      <div class="human-caller-frame">
+        <img id="callAvatarImg" src="/media/agenticuantico-avatar.jpg" alt="Agente cuántico de voz" class="human-caller-img">
+      </div>
+      <div style="margin-top: 10px; font-size: 13px; font-weight: 700; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); padding: 5px 14px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.18); display: inline-flex; align-items: center; gap: 6px;">
+        <span style="width: 8px; height: 8px; border-radius: 50%; background: #22c55e;"></span>
+        <span id="callAgentNameDisplay">Voz Femenina (Sofía · Argentina)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Animated Sound Equalizer -->
+  <div style="display: flex; gap: 5px; height: 32px; align-items: flex-end; justify-content: center;" id="callEqualizer">
+    <div style="width: 4px; height: 16px; background: #9fff00; border-radius: 999px; animation: bounceEq 0.8s ease-in-out infinite;"></div>
+    <div style="width: 4px; height: 26px; background: #38bdf8; border-radius: 999px; animation: bounceEq 0.6s ease-in-out infinite 0.15s;"></div>
+    <div style="width: 4px; height: 18px; background: #9fff00; border-radius: 999px; animation: bounceEq 0.7s ease-in-out infinite 0.3s;"></div>
+    <div style="width: 4px; height: 30px; background: #a855f7; border-radius: 999px; animation: bounceEq 0.5s ease-in-out infinite 0.1s;"></div>
+    <div style="width: 4px; height: 20px; background: #38bdf8; border-radius: 999px; animation: bounceEq 0.9s ease-in-out infinite 0.25s;"></div>
+  </div>
+
+  <div class="call-transcript-box" id="callTranscript">
+    Hablá con naturalidad. AgentiCuantico te está escuchando...
+  </div>
+
+  <div class="call-controls">
+    <button class="call-end-btn" onclick="endLiveCall()" title="Finalizar llamada">✕</button>
+  </div>
+</div>
+
+<!-- Modal Agentes con Rol y Skills (Multi-Agent Room) -->
+<div class="integration-modal" id="agentsModal">
+  <div class="modal-box" style="width: min(660px, 100%);">
+    <button class="modal-close" onclick="closeAgentsModal()">×</button>
+    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+      <span style="font-size: 24px;">🤖</span>
+      <h2 style="font: 700 22px 'Outfit', sans-serif; margin: 0;">Equipo de Agentes Especializados</h2>
+    </div>
+    <p style="color: var(--muted); font-size: 13.5px; margin: 0 0 16px;">
+      Cada agente cuenta con habilidades profesionales y genera código verificado. Podés darles órdenes por escrito o voz para que colaboren en conjunto como un equipo multidisciplinario.
+    </p>
+
+    <!-- Collaborative Synergy Mode Toggle -->
+    <div style="background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 16px; padding: 12px 16px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+      <div>
+        <div style="font-weight: 700; font-size: 13.5px; color: #1e3a8a;">Sinergia Colaborativa Multi-Agente</div>
+        <div style="font-size: 12px; color: #3b82f6;">Los agentes interactúan entre sí y coordinan para entregarte la mejor solución integral (Disponible en Planes Pro, Business y Enterprise).</div>
+      </div>
+      <input type="checkbox" id="teamCollaborationCheckbox" checked style="width: 22px; height: 22px; cursor: pointer;">
+    </div>
+
+    <div style="display: grid; gap: 12px; max-height: 340px; overflow-y: auto; padding-right: 6px;" id="agentsListContainer">
+      <!-- Injected dynamically -->
+    </div>
+
+    <div style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+      <a href="/planes" style="font-size: 13px; color: #2563eb; font-weight: 700;">Ver planes para desbloquear todos los agentes →</a>
+      <button class="hero-btn-primary" onclick="closeAgentsModal()" style="padding: 10px 22px; font-size: 13.5px;">Guardar y Continuar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Integración (GitHub / Cloudflare) con logos oficiales y conexión Google -->
+<div class="integration-modal" id="integrationModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeIntegrationModal()">×</button>
+    
+    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+      <div id="intModalLogo" style="width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: #f8fafc; border: 1px solid #e2e8f0;"></div>
+      <div>
+        <h2 id="intModalTitle" style="font: 700 21px 'Outfit', sans-serif; margin: 0;">Conectar Servicio</h2>
+        <div style="font-size: 12px; color: #16a34a; font-weight: 600;" id="intBrandVerified">✓ Integración Oficial Verificada</div>
+      </div>
+    </div>
+    
+    <p id="intModalDesc" style="color: var(--muted); font-size: 13.5px; margin: 0 0 18px;"></p>
+
+    <!-- Connect via Google Account option -->
+    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 14px; margin-bottom: 16px; text-align: center;">
+      <div style="font-size: 13px; font-weight: 600; color: #1e293b; margin-bottom: 8px;">Conexión rápida mediante cuenta de Google</div>
+      <button class="auth-btn-pill" style="width: 100%; height: 42px; justify-content: center; gap: 8px; font-weight: 700;" onclick="connectIntegrationWithGoogle()">
+        <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+        <span id="googleConnectBtnLabel">Vincular con correo de Google</span>
+      </button>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 10px; margin: 14px 0; color: #94a3b8; font-size: 12px;">
+      <div style="flex: 1; height: 1px; background: #e2e8f0;"></div>
+      <span>o ingresar token manualmente</span>
+      <div style="flex: 1; height: 1px; background: #e2e8f0;"></div>
+    </div>
+
+    <form onsubmit="saveIntegration(event)">
+      <div id="intFieldGroup"></div>
+      <button class="hero-btn-primary" type="submit" style="width: 100%; border: 0; padding: 12px; margin-top: 10px;">Guardar Conexión</button>
+    </form>
+    <div id="intStatusMsg" style="font-size: 13px; margin-top: 10px; text-align: center; color: #16a34a; font-weight: 600;"></div>
+  </div>
+</div>
+
+<!-- Modal Contacto Empresarial (Email protegido y oculto) -->
+<div class="integration-modal" id="contactModal">
+  <div class="modal-box" style="max-width: 490px;">
+    <button class="modal-close" onclick="closeContactModal()">×</button>
+    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+      <span style="font-size: 24px;">💬</span>
+      <h2 style="font: 700 22px 'Outfit', sans-serif; margin: 0;">Contacto Comercial</h2>
+    </div>
+    <p style="color: var(--muted); font-size: 13.5px; margin: 0 0 16px;">
+      Envianos tu consulta sobre planes para empresas, integraciones personalizadas o requerimientos específicos.
+    </p>
+
+    <form onsubmit="handleContactSubmit(event)">
+      <input id="contactName" type="text" placeholder="Tu nombre y apellido" required style="width: 100%; height: 44px; padding: 0 14px; border: 1px solid #d4d4d8; border-radius: 12px; margin-bottom: 10px; font-size: 14px; outline: none;">
+      <input id="contactEmail" type="email" placeholder="correo@empresa.com" required style="width: 100%; height: 44px; padding: 0 14px; border: 1px solid #d4d4d8; border-radius: 12px; margin-bottom: 10px; font-size: 14px; outline: none;">
+      <input id="contactCompany" type="text" placeholder="Empresa o proyecto (opcional)" style="width: 100%; height: 44px; padding: 0 14px; border: 1px solid #d4d4d8; border-radius: 12px; margin-bottom: 10px; font-size: 14px; outline: none;">
+      <textarea id="contactMessage" placeholder="Detallá tu consulta o propuesta..." rows="4" required style="width: 100%; padding: 12px 14px; border: 1px solid #d4d4d8; border-radius: 12px; margin-bottom: 14px; font-family: inherit; font-size: 14px; outline: none; resize: vertical;"></textarea>
+
+      <button class="hero-btn-primary" type="submit" style="width: 100%; border: 0; padding: 12px; font-size: 14.5px; cursor: pointer;">Enviar Mensaje Directo</button>
+    </form>
+    <div id="contactStatusMsg" style="font-size: 13px; margin-top: 10px; text-align: center; color: #16a34a; font-weight: 600;"></div>
+  </div>
+</div>
+
+<!-- Modal Límite de Prueba Gratuita (2 horas) -->
+<div class="integration-modal" id="trialExpiredModal">
+  <div class="modal-box" style="text-align: center; max-width: 480px;">
+    <div style="font-size: 38px; margin-bottom: 8px;">⏳</div>
+    <h2 style="font: 700 24px 'Outfit', sans-serif; margin: 0 0 10px; color: #111318;">Tu tiempo de prueba gratuito ha concluido</h2>
+    <p style="color: #475569; font-size: 14px; line-height: 1.6; margin: 0 0 20px;">
+      Completaste tus <strong>2 horas de prueba gratuita</strong> con AgentiCuantico Super Inteligencia. Para continuar conversando sin límites y desbloquear llamadas ilimitadas con agentes especializados, elegí un plan mensual auto-renovable o contactanos directamente.
+    </p>
+
+    <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px;">
+      <a class="hero-btn-primary" href="/planes" style="padding: 13px 20px; font-size: 14.5px; text-align: center;">Elegir Plan (Pro, Business o Enterprise) →</a>
+      <button class="hero-btn-secondary" onclick="openContactModal(); closeTrialModal();" style="width: 100%; padding: 12px 20px; font-size: 14px; cursor: pointer; border: 1px solid var(--border);">Contactar al equipo comercial ↗</button>
+    </div>
+
+    <button onclick="closeTrialModal()" style="border: 0; background: transparent; color: #64748b; font-size: 13px; cursor: pointer; text-decoration: underline;">Volver a la interfaz</button>
+  </div>
+</div>
+
+<!-- Modal Mi Cuenta & Panel de Suscripción -->
+<div class="account-modal" id="accountModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeAccountModal()">×</button>
+
+    <div id="accountLoggedOutView">
+      <h2 style="font: 600 24px 'Outfit', sans-serif; margin: 0 0 6px;">Acceso a tu Cuenta</h2>
+      <p style="color: var(--muted); font-size: 13.5px; margin: 0 0 16px;">Iniciá sesión o registrate para sincronizar tu plan y agentes especializados.</p>
+
+      <!-- Auth Mode Tabs -->
+      <div style="display: flex; gap: 8px; margin-bottom: 16px; background: #f4f4f5; padding: 4px; border-radius: 12px;">
+        <button id="tabLogin" onclick="setAuthTab('login')" style="flex: 1; padding: 8px; border: 0; border-radius: 8px; background: #fff; font-weight: 700; font-size: 13px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.06);">Iniciar Sesión</button>
+        <button id="tabRegister" onclick="setAuthTab('register')" style="flex: 1; padding: 8px; border: 0; border-radius: 8px; background: transparent; font-weight: 600; font-size: 13px; color: #71717a; cursor: pointer;">Crear Cuenta</button>
+      </div>
+
+      <!-- Google Sign In -->
+      <button class="auth-btn-pill" style="width: 100%; height: 46px; justify-content: center; margin-bottom: 16px; cursor: pointer;" onclick="triggerGoogleLogin()">
+        <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+        <span>Continuar con Google</span>
+      </button>
+
+      <div style="display: flex; align-items: center; gap: 10px; margin: 12px 0 16px; color: #a1a1aa; font-size: 12px;">
+        <div style="flex: 1; height: 1px; background: #e4e4e7;"></div>
+        <span>o con correo y clave</span>
+        <div style="flex: 1; height: 1px; background: #e4e4e7;"></div>
+      </div>
+
+      <form onsubmit="handleEmailAuth(event)">
+        <input id="authNameInput" type="text" placeholder="Tu nombre completo" style="display: none; width: 100%; height: 44px; padding: 0 14px; border: 1px solid #d4d4d8; border-radius: 12px; margin-bottom: 10px; outline: none; font-size: 14px;">
+        <input id="authEmailInput" type="email" placeholder="correo@ejemplo.com" required style="width: 100%; height: 44px; padding: 0 14px; border: 1px solid #d4d4d8; border-radius: 12px; margin-bottom: 10px; outline: none; font-size: 14px;">
+        <input id="authPassInput" type="password" placeholder="Tu contraseña" required style="width: 100%; height: 44px; padding: 0 14px; border: 1px solid #d4d4d8; border-radius: 12px; margin-bottom: 16px; outline: none; font-size: 14px;">
+        <button id="authSubmitBtn" class="hero-btn-primary" type="submit" style="width: 100%; border: 0; padding: 12px; font-size: 14.5px; cursor: pointer;">Iniciar Sesión</button>
+      </form>
+      <div id="authErrorMsg" style="color: #dc2626; font-size: 12px; text-align: center; margin-top: 10px;"></div>
+    </div>
+
+    <div id="accountLoggedInView" class="hidden">
+      <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 16px;">
+        <img id="userAvatarImg" src="" alt="Avatar" style="width: 52px; height: 52px; border-radius: 50%; object-fit: cover; background: #e4e4e7;">
+        <div>
+          <h3 id="userNameHeading" style="font: 600 18px 'Outfit', sans-serif; margin: 0;">Usuario</h3>
+          <div id="userEmailSub" style="color: #71717a; font-size: 13px;">usuario@gmail.com</div>
+        </div>
+      </div>
+
+      <!-- Subscription Card with 30 days cycle -->
+      <div class="subscription-card">
+        <div class="sub-header">
+          <span style="font-size: 13px; font-weight: 700; color: #334155; text-transform: uppercase;">Estado de Suscripción</span>
+          <span class="sub-plan-badge" id="userPlanBadge">Free (Básico)</span>
+        </div>
+
+        <div class="sub-detail-row">
+          <span>Fecha de inicio:</span>
+          <strong id="subStartDate">--</strong>
+        </div>
+        <div class="sub-detail-row">
+          <span>Fecha de vencimiento:</span>
+          <strong id="subEndDate">-- (30 días)</strong>
+        </div>
+        <div class="sub-detail-row">
+          <span>Días restantes:</span>
+          <strong id="subDaysLeft">-- días</strong>
+        </div>
+
+        <div class="auto-renew-row">
+          <div>
+            <div style="font-weight: 600; color: #1e293b;" id="autoRenewStatus">Renovación automática: Activa</div>
+            <small style="color: #64748b; font-size: 11px;">Se renueva cada 30 días para no cortar tus servicios</small>
+          </div>
+          <button class="cancel-renew-btn" id="btnCancelRenew" onclick="cancelAutoRenewal()">Desactivar auto-renovación</button>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-top: 16px;">
+        <a class="hero-btn-primary" href="/planes" style="flex: 1; text-align: center; padding: 11px;">Cambiar / Mejorar Plan</a>
+        <button class="hero-btn-secondary" onclick="logoutUser()" style="padding: 11px 18px;">Cerrar sesión</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Autenticación con Google -->
+<div class="integration-modal" id="googleAuthModal">
+  <div class="modal-box" style="max-width: 440px;">
+    <button class="modal-close" onclick="closeGoogleAuthModal()">×</button>
+    <div style="text-align: center; margin-bottom: 20px;">
+      <svg width="40" height="40" viewBox="0 0 24 24" style="margin-bottom: 10px;">
+        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+      </svg>
+      <h2 style="font: 700 22px 'Outfit', sans-serif; margin: 0 0 6px;">Acceder con Google</h2>
+      <p style="color: var(--muted); font-size: 13.5px; margin: 0;">Seleccioná tu cuenta de Google / Gmail para ingresar a tu panel de usuario.</p>
+    </div>
+
+    <div style="background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 14px; padding: 12px 14px; margin-bottom: 16px; font-size: 13px; color: #1e3a8a; line-height: 1.5; text-align: center;">
+      El acceso con Google estará disponible <strong>próximamente</strong>. Mientras tanto podés usar el chat libremente o escribirnos a <a href="mailto:agenticuantico@gmail.com" style="text-decoration: underline;">agenticuantico@gmail.com</a>.
+    </div>
+
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 10px; margin: 12px 0 16px; color: #a1a1aa; font-size: 12px;">
+      <div style="flex: 1; height: 1px; background: #e4e4e7;"></div>
+      <span>o usar otra cuenta de Google</span>
+      <div style="flex: 1; height: 1px; background: #e4e4e7;"></div>
+    </div>
+
+    <form onsubmit="handleCustomGoogleEmail(event)">
+      <input id="customGoogleEmail" type="email" placeholder="tu-cuenta@gmail.com" required style="width: 100%; height: 44px; padding: 0 14px; border: 1px solid #d4d4d8; border-radius: 12px; margin-bottom: 14px; outline: none; font-size: 14px;">
+      <button class="hero-btn-primary" type="submit" style="width: 100%; border: 0; padding: 12px; font-size: 14.5px; cursor: pointer;">Acceder con este correo</button>
+    </form>
+    <div id="googleAuthStatus" style="font-size: 12.5px; text-align: center; margin-top: 10px; font-weight: 600;"></div>
+  </div>
+</div>
+
+<input id="fileInput" type="file" multiple accept=".pdf,.doc,.docx,.txt,.md,.json,.csv,.py,.ts,.js,.html">
+<input id="photoInput" type="file" multiple accept="image/*">
+<input id="cameraInput" type="file" accept="image/*" capture="environment">
+
+<script>
+// State Management
+let currentUser = null;
+let currentVoice = "female_ar_01";
+let isReasoningActive = false;
+let isMicActive = false;
+let isVoiceToVoiceActive = false;
+let activeAgentList = []; // DevBot y agentes especializados solo intervienen cuando el usuario los selecciona explícitamente
+let allSpecializedAgents = [];
+let speechRecognizer = null;
+let liveCallActive = false;
+let trialSecondsRemaining = 120 * 60; // 2 horas gratis
+let isTrialUnlimited = false;
+let trialTimerInterval = null;
+
+// Initialize
+document.addEventListener("DOMContentLoaded", async () => {
+  initParticles();
+  initTrialQuota();
+  await loadAvailableAgents();
+  await checkUserSession();
+});
+
+// Trial Quota (1-2 Hours Free Quota Tracker)
+async function initTrialQuota() {
+  try {
+    const res = await fetch("/api/user/trial-config");
+    const data = await res.json();
+    if (data.ok && data.isUnlimited) {
+      setUnlimitedTrial();
+      return;
+    }
+  } catch {}
+
+  const saved = localStorage.getItem("aq_trial_seconds");
+  if (saved !== null) {
+    trialSecondsRemaining = Math.max(0, parseInt(saved, 10));
+  } else {
+    trialSecondsRemaining = 120 * 60; // 2 horas completas
+  }
+
+  updateTrialPillUI();
+
+  // Tick countdown every second
+  if (trialTimerInterval) clearInterval(trialTimerInterval);
+  trialTimerInterval = setInterval(() => {
+    if (isTrialUnlimited) return;
+    if (trialSecondsRemaining > 0) {
+      trialSecondsRemaining--;
+      localStorage.setItem("aq_trial_seconds", trialSecondsRemaining.toString());
+      updateTrialPillUI();
+    } else {
+      clearInterval(trialTimerInterval);
+      openTrialModal();
+    }
+  }, 1000);
+}
+
+function setUnlimitedTrial() {
+  isTrialUnlimited = true;
+  if (trialTimerInterval) clearInterval(trialTimerInterval);
+  const pill = document.getElementById("trialStatusPill");
+  if (pill) {
+    pill.classList.add("unlimited");
+    pill.innerHTML = `<span>✦</span> <span>Acceso Ilimitado</span>`;
+  }
+}
+
+function updateTrialPillUI() {
+  if (isTrialUnlimited) return;
+  const label = document.getElementById("trialTimeRemaining");
+  if (!label) return;
+  const hrs = Math.floor(trialSecondsRemaining / 3600);
+  const mins = Math.floor((trialSecondsRemaining % 3600) / 60);
+  const secs = trialSecondsRemaining % 60;
+  if (hrs > 0) {
+    label.textContent = `${hrs}h ${mins}m gratis`;
+  } else if (mins > 0) {
+    label.textContent = `${mins}m ${secs}s gratis`;
+  } else {
+    label.textContent = `0m restante`;
+  }
+}
+
+function openTrialModal() {
+  const modal = document.getElementById("trialExpiredModal");
+  if (modal) modal.classList.add("open");
+}
+
+function closeTrialModal() {
+  const modal = document.getElementById("trialExpiredModal");
+  if (modal) modal.classList.remove("open");
+}
+
+// Particles Ambient 3D Canvas
+function initParticles() {
+  const canvas = document.getElementById("ambientCanvas");
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+  let w = canvas.width = window.innerWidth;
+  let h = canvas.height = window.innerHeight;
+
+  window.addEventListener("resize", () => {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+  });
+
+  const particles = [];
+  for (let i = 0; i < 35; i++) {
+    particles.push({
+      x: Math.random() * w,
+      y: Math.random() * h,
+      vx: (Math.random() - 0.5) * 0.4,
+      vy: (Math.random() - 0.5) * 0.4,
+      r: Math.random() * 2 + 1,
+    });
+  }
+
+  function render() {
+    ctx.clearRect(0, 0, w, h);
+    for (let i = 0; i < particles.length; i++) {
+      let p = particles[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      if (p.x < 0 || p.x > w) p.vx *= -1;
+      if (p.y < 0 || p.y > h) p.vy *= -1;
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(159, 255, 0, 0.45)";
+      ctx.fill();
+
+      for (let j = i + 1; j < particles.length; j++) {
+        let p2 = particles[j];
+        let d = Math.hypot(p.x - p2.x, p.y - p2.y);
+        if (d < 110) {
+          ctx.beginPath();
+          ctx.strokeStyle = `rgba(24, 24, 27, ${0.05 * (1 - d / 110)})`;
+          ctx.moveTo(p.x, p.y);
+          ctx.lineTo(p2.x, p2.y);
+          ctx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(render);
+  }
+  render();
+}
+
+// Fetch Agents
+async function loadAvailableAgents() {
+  try {
+    const res = await fetch("/api/agents");
+    const data = await res.json();
+    if (data.ok) {
+      allSpecializedAgents = data.agents;
+      renderAgentsSelectionModal();
+      renderActiveAgentChips();
+    }
+  } catch (e) {
+    console.warn("Could not load agents catalog:", e);
+  }
+}
+
+function renderAgentsSelectionModal() {
+  const container = document.getElementById("agentsListContainer");
+  if (!container) return;
+  container.innerHTML = allSpecializedAgents.map(ag => {
+    const isChecked = activeAgentList.includes(ag.id);
+    return `
+      <div style="border: 1.5px solid ${isChecked ? '#2563eb' : '#e4e4e7'}; border-radius: 16px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; background: ${isChecked ? '#eff6ff' : '#fff'};">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <span style="font-size: 26px;">${ag.avatar}</span>
+          <div>
+            <div style="font-weight: 700; font-size: 14.5px; color: #18181b;">${ag.name} <small style="font-weight: 500; color: #71717a;">· ${ag.role}</small></div>
+            <div style="font-size: 12px; color: #52525b; margin-top: 2px;">${ag.description}</div>
+            <div style="margin-top: 6px; display: flex; gap: 5px; flex-wrap: wrap;">
+              ${ag.skills.map(s => `<span style="font-size: 10.5px; background: #e2e8f0; border-radius: 6px; padding: 2px 7px;">${s}</span>`).join('')}
+            </div>
+          </div>
+        </div>
+        <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleAgentActive('${ag.id}', this.checked)" style="width: 20px; height: 20px; cursor: pointer;">
+      </div>
+    `;
+  }).join('');
+}
+
+function toggleAgentActive(agentId, active) {
+  if (active && !activeAgentList.includes(agentId)) {
+    activeAgentList.push(agentId);
+  } else if (!active) {
+    activeAgentList = activeAgentList.filter(id => id !== agentId);
+  }
+  renderActiveAgentChips();
+  renderAgentsSelectionModal();
+}
+
+function renderActiveAgentChips() {
+  const tray = document.getElementById("activeAgentsTray");
+  if (!tray) return;
+  if (!activeAgentList.length) {
+    tray.innerHTML = `<span style="font-size: 12px; color: #a1a1aa;">Ningún agente seleccionado (Super Inteligencia activa)</span>`;
+    return;
+  }
+  tray.innerHTML = activeAgentList.map(id => {
+    const ag = allSpecializedAgents.find(a => a.id === id);
+    if (!ag) return "";
+    return `
+      <div class="agent-tag">
+        <span>${ag.avatar}</span>
+        <span>${ag.name}</span>
+        <button onclick="toggleAgentActive('${ag.id}', false)">×</button>
+      </div>
+    `;
+  }).join('');
+}
+
+// User Session & Subscription
+async function checkUserSession() {
+  try {
+    const res = await fetch("/api/auth/user");
+    const data = await res.json();
+    if (data.ok && data.user) {
+      currentUser = data.user;
+      updateUserUI();
+      if (currentUser.role === "owner" || currentUser.subscription?.planId !== "free") {
+        setUnlimitedTrial();
+      }
+    }
+  } catch {}
+}
+
+function updateUserUI() {
+  if (currentUser) {
+    document.getElementById("navAccountLabel").textContent = currentUser.name.split(" ")[0];
+    document.getElementById("userNameHeading").textContent = currentUser.name;
+    document.getElementById("userEmailSub").textContent = currentUser.email;
+    document.getElementById("userAvatarImg").src = currentUser.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(currentUser.name)}`;
+    
+    // Subscription details
+    const sub = currentUser.subscription || { planId: "free", planName: "Free (Básico)", autoRenew: false };
+    const badge = document.getElementById("userPlanBadge");
+    badge.textContent = sub.planName;
+    badge.className = "sub-plan-badge " + (sub.planId === "free" ? "free" : "");
+
+    const startDate = sub.startDate ? new Date(sub.startDate).toLocaleDateString("es-AR") : "Hoy";
+    const endDate = sub.endDate ? new Date(sub.endDate).toLocaleDateString("es-AR") : "30 días";
+    document.getElementById("subStartDate").textContent = startDate;
+    document.getElementById("subEndDate").textContent = endDate;
+
+    const daysLeft = sub.endDate ? Math.max(0, Math.ceil((new Date(sub.endDate).getTime() - Date.now()) / 86400000)) : 30;
+    document.getElementById("subDaysLeft").textContent = `${daysLeft} días restantes`;
+
+    const renewStatus = document.getElementById("autoRenewStatus");
+    const cancelBtn = document.getElementById("btnCancelRenew");
+    if (sub.autoRenew) {
+      renewStatus.textContent = "Renovación automática: Activa";
+      cancelBtn.style.display = "inline-block";
+    } else {
+      renewStatus.textContent = "Renovación automática: Desactivada";
+      cancelBtn.style.display = "none";
+    }
+
+    document.getElementById("accountLoggedOutView").classList.add("hidden");
+    document.getElementById("accountLoggedInView").classList.remove("hidden");
+  }
+}
+
+async function cancelAutoRenewal() {
+  if (!confirm("¿Deseás desactivar la renovación automática? Tu plan continuará activo hasta la fecha de vencimiento y no se te cobrará nada adicional.")) return;
+  try {
+    const res = await fetch("/api/user/subscription/cancel-renewal", { method: "POST" });
+    const data = await res.json();
+    if (data.ok) {
+      alert("Renovación automática desactivada con éxito.");
+      currentUser.subscription = data.subscription;
+      updateUserUI();
+    }
+  } catch {
+    alert("Error al comunicarse con el servidor.");
+  }
+}
+
+// Chat Send Logic
+async function sendMessage(textOverride = "", fromVoice = false) {
+  const input = document.getElementById("userInputText");
+  const text = (textOverride || input.value).trim();
+  if (!text) return;
+
+  if (!isTrialUnlimited && trialSecondsRemaining <= 0) {
+    openTrialModal();
+    return;
+  }
+
+  appendUserBubble(text);
+  if (!fromVoice) {
+    input.value = "";
+    input.style.height = "auto";
+  }
+
+  // Multi-Agent team execution
+  const isCollaboration = document.getElementById("teamCollaborationCheckbox")?.checked ?? true;
+  if (activeAgentList.length > 0) {
+    try {
+      const res = await fetch("/api/chat/agents", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text, activeAgentIds: activeAgentList, teamCollaboration: isCollaboration })
+      });
+      const data = await res.json();
+      if (data.ok && data.responses && data.responses.length > 0) {
+        data.responses.forEach(resp => {
+          appendAgentBubble(resp.agentName, resp.agentRole, resp.avatar, resp.reply);
+        });
+
+        // If in voice-to-voice mode, speak the main response out loud
+        if (fromVoice || isVoiceToVoiceActive) {
+          const spokenText = data.responses[0].reply.replace(/```[\s\S]*?```/g, "Te muestro la solución y el código en pantalla.");
+          playVoiceSynthesis(spokenText, () => {
+            if (isVoiceToVoiceActive) resumeVoiceToVoiceListening();
+          });
+        }
+        return;
+      }
+    } catch {}
+  }
+
+  // Fallback public super intelligence chat
+  try {
+    const res = await fetch("/api/public-chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: text, reasoning: isReasoningActive, language: "es-AR" })
+    });
+    const data = await res.json();
+    appendAiBubble(data.answer || "Respuesta recibida.");
+
+    if (fromVoice || isVoiceToVoiceActive) {
+      const spokenText = data.answer.replace(/```[\s\S]*?```/g, "Te preparé el código en pantalla para copiar.");
+      playVoiceSynthesis(spokenText, () => {
+        if (isVoiceToVoiceActive) resumeVoiceToVoiceListening();
+      });
+    }
+  } catch (err) {
+    appendAiBubble("No se pudo procesar tu mensaje. Por favor intentá nuevamente.");
+    if (isVoiceToVoiceActive) resumeVoiceToVoiceListening();
+  }
+}
+
+function handleInputKey(e) {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+}
+
+function appendUserBubble(text) {
+  const box = document.getElementById("chatMessages");
+  const row = document.createElement("div");
+  row.className = "message-row user";
+  row.innerHTML = `<div class="message-bubble">${escapeHtml(text)}</div>`;
+  box.appendChild(row);
+  box.scrollTop = box.scrollHeight;
+}
+
+function appendAiBubble(text) {
+  const box = document.getElementById("chatMessages");
+  const row = document.createElement("div");
+  row.className = "message-row ai";
+  row.innerHTML = `<div class="message-bubble">${formatMarkdown(text)}</div>`;
+  box.appendChild(row);
+  box.scrollTop = box.scrollHeight;
+}
+
+function appendAgentBubble(agentName, role, avatar, text) {
+  const box = document.getElementById("chatMessages");
+  const row = document.createElement("div");
+  row.className = "message-row ai";
+  row.innerHTML = `
+    <div class="message-bubble">
+      <div class="agent-header-chip">${avatar} ${agentName} · ${role}</div>
+      <div>${formatMarkdown(text)}</div>
+    </div>
+  `;
+  box.appendChild(row);
+  box.scrollTop = box.scrollHeight;
+}
+
+// Real Human Voice-to-Voice Continuous Hands-Free Interaction
+function toggleVoiceToVoiceMode() {
+  const btn = document.getElementById("micToggleBtn");
+  const indicator = document.getElementById("micLiveIndicator");
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return alert("El reconocimiento de voz no está soportado en este navegador. Te sugerimos utilizar Google Chrome o Microsoft Edge.");
+
+  if (isVoiceToVoiceActive) {
+    isVoiceToVoiceActive = false;
+    btn.classList.remove("active");
+    if (indicator) indicator.classList.remove("active");
+    if (speechRecognizer) {
+      try { speechRecognizer.stop(); } catch {}
+    }
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    return;
+  }
+
+  isVoiceToVoiceActive = true;
+  btn.classList.add("active");
+  if (indicator) indicator.classList.add("active");
+  resumeVoiceToVoiceListening();
+}
+
+function resumeVoiceToVoiceListening() {
+  if (!isVoiceToVoiceActive) return;
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return;
+
+  if (speechRecognizer) {
+    try { speechRecognizer.stop(); } catch {}
+  }
+
+  speechRecognizer = new SR();
+  speechRecognizer.lang = "es-AR";
+  speechRecognizer.interimResults = false;
+  speechRecognizer.maxAlternatives = 1;
+
+  speechRecognizer.onresult = (e) => {
+    const text = e.results?.[0]?.[0]?.transcript?.trim();
+    if (text) {
+      const input = document.getElementById("userInputText");
+      if (input) input.value = text;
+      sendMessage(text, true);
+    }
+  };
+
+  speechRecognizer.onerror = () => {
+    if (isVoiceToVoiceActive) {
+      setTimeout(resumeVoiceToVoiceListening, 800);
+    }
+  };
+
+  speechRecognizer.onend = () => {
+    if (isVoiceToVoiceActive && !window.speechSynthesis?.speaking) {
+      setTimeout(resumeVoiceToVoiceListening, 400);
+    }
+  };
+
+  try { speechRecognizer.start(); } catch {}
+}
+
+// Live Voice-to-Voice Call Overlay with Human Agent
+function startLiveCall() {
+  const overlay = document.getElementById("liveCallOverlay");
+  overlay.classList.add("open");
+  liveCallActive = true;
+  document.getElementById("callStatusText").textContent = "Conectado · Escuchando en vivo...";
+  document.getElementById("callTranscript").textContent = "Te escucho. Podés hablar con naturalidad con tu agente...";
+  changeVoice(currentVoice);
+
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (SR) {
+    speechRecognizer = new SR();
+    speechRecognizer.lang = "es-AR";
+    speechRecognizer.continuous = true;
+    speechRecognizer.interimResults = false;
+
+    speechRecognizer.onresult = async (e) => {
+      const transcript = e.results[e.results.length - 1][0].transcript.trim();
+      if (transcript && liveCallActive) {
+        document.getElementById("callTranscript").innerHTML = `<em>Vos:</em> "${escapeHtml(transcript)}"`;
+        document.getElementById("callStatusText").textContent = "Pensando respuesta...";
+
+        try {
+          const res = await fetch("/api/voice/live-call", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              transcript,
+              voiceId: currentVoice,
+              agentGender: currentVoice.includes("male") ? "masculino" : "femenino"
+            })
+          });
+          const data = await res.json();
+          if (data.ok && data.reply) {
+            document.getElementById("callTranscript").innerHTML = `<strong>${data.agentName || "AgentiCuantico"}:</strong> ${data.reply}`;
+            document.getElementById("callStatusText").textContent = "Hablando...";
+            const avatarImg = document.getElementById("callAvatarImg");
+            if (avatarImg) avatarImg.classList.add("talking");
+
+            playVoiceSynthesis(data.reply, () => {
+              if (avatarImg) avatarImg.classList.remove("talking");
+              if (liveCallActive) {
+                document.getElementById("callStatusText").textContent = "Conectado · Escuchando en vivo...";
+                // Restart listening immediately for seamless turn
+                try { speechRecognizer.start(); } catch {}
+              }
+            });
+          }
+        } catch {
+          document.getElementById("callStatusText").textContent = "Conectado · Escuchando en vivo...";
+        }
+      }
+    };
+
+    speechRecognizer.onerror = () => {};
+    try { speechRecognizer.start(); } catch {}
+  }
+}
+
+function endLiveCall() {
+  liveCallActive = false;
+  document.getElementById("liveCallOverlay").classList.remove("open");
+  const avatarImg = document.getElementById("callAvatarImg");
+  if (avatarImg) avatarImg.classList.remove("talking");
+  if (speechRecognizer) {
+    try { speechRecognizer.stop(); } catch {}
+    speechRecognizer = null;
+  }
+  if (window.speechSynthesis) window.speechSynthesis.cancel();
+}
+
+function playVoiceSynthesis(text, onEnd) {
+  if (!("speechSynthesis" in window)) {
+    if (typeof onEnd === "function") onEnd();
+    return;
+  }
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = "es-AR";
+  utterance.rate = 1.02;
+  utterance.pitch = 1.0;
+
+  const voices = window.speechSynthesis.getVoices();
+  const femaleKeywords = ["sabina", "monica", "paulina", "lucia", "maria", "elena", "sofia", "isabela"];
+  const maleKeywords = ["jorge", "diego", "carlos", "pablo", "tomas", "miguel"];
+
+  let selectedNativeVoice = null;
+  if (currentVoice.includes("male") && !currentVoice.includes("female")) {
+    selectedNativeVoice = voices.find(v => (v.lang.startsWith("es") || v.lang === "es-AR") && maleKeywords.some(k => v.name.toLowerCase().includes(k)));
+  } else {
+    selectedNativeVoice = voices.find(v => (v.lang.startsWith("es") || v.lang === "es-AR") && femaleKeywords.some(k => v.name.toLowerCase().includes(k)));
+  }
+
+  if (!selectedNativeVoice) {
+    selectedNativeVoice = voices.find(v => v.lang === "es-AR" || v.lang.startsWith("es"));
+  }
+
+  if (selectedNativeVoice) utterance.voice = selectedNativeVoice;
+
+  utterance.onend = () => {
+    if (typeof onEnd === "function") onEnd();
+  };
+  utterance.onerror = () => {
+    if (typeof onEnd === "function") onEnd();
+  };
+
+  window.speechSynthesis.speak(utterance);
+}
+
+// Helpers
+function escapeHtml(str) {
+  return String(str || "").replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]);
+}
+
+function formatMarkdown(text) {
+  const parts = String(text || "").split(/```/);
+  if (parts.length === 1) return escapeHtml(text).replace(/\n/g, "<br>");
+
+  let html = "";
+  parts.forEach((part, i) => {
+    if (i % 2 === 0) {
+      html += escapeHtml(part).replace(/\n/g, "<br>");
+    } else {
+      const firstLine = part.indexOf("\n");
+      const lang = firstLine >= 0 ? part.slice(0, firstLine).trim() : "code";
+      const code = firstLine >= 0 ? part.slice(firstLine + 1) : part;
+      html += `
+        <div class="codebox">
+          <div class="codehead">
+            <span>${escapeHtml(lang)}</span>
+            <button class="copycode" onclick="navigator.clipboard.writeText(this.parentElement.nextElementSibling.textContent); this.textContent='¡Copiado! ✓'; setTimeout(()=>this.textContent='Copiar', 1500);">Copiar</button>
+          </div>
+          <pre>${escapeHtml(code)}</pre>
+        </div>
+      `;
+    }
+  });
+  return html;
+}
+
+// Modals & Menu toggles
+function togglePlusMenu() {
+  document.getElementById("plusMenuPopup").classList.toggle("open");
+}
+function closePlusMenu() {
+  document.getElementById("plusMenuPopup").classList.remove("open");
+}
+function toggleReasoningMode() {
+  isReasoningActive = !isReasoningActive;
+  document.getElementById("brainToggleBtn").classList.toggle("active", isReasoningActive);
+  document.getElementById("reasoningIndicator").classList.toggle("active", isReasoningActive);
+}
+function toggleChatMaximize() {
+  document.getElementById("chatShell").classList.toggle("fullscreen");
+  document.body.classList.toggle("fullscreen-chat");
+}
+function triggerFileInput(type) {
+  closePlusMenu();
+  if (type === "camera") document.getElementById("cameraInput").click();
+  else if (type === "photo") document.getElementById("photoInput").click();
+  else document.getElementById("fileInput").click();
+}
+
+function changeVoice(voiceId) {
+  currentVoice = voiceId;
+  const select1 = document.getElementById("voiceSelect");
+  const select2 = document.getElementById("callVoiceSelect");
+  if (select1) select1.value = voiceId;
+  if (select2) select2.value = voiceId;
+  const gSel = document.getElementById("genderSelect");
+  const wantGender = (voiceId.indexOf("female") === 0) ? "femenino" : "masculino";
+  if (gSel && gSel.value !== wantGender) {
+    gSel.value = wantGender;
+    gSel.dispatchEvent(new Event("change"));
+    if (select1) select1.value = voiceId;
+  }
+
+  const isMale = voiceId.includes("male") && !voiceId.includes("female");
+  const avatarImg = document.getElementById("callAvatarImg");
+  const nameDisplay = document.getElementById("callAgentNameDisplay");
+  if (avatarImg) {
+    // Quantum cybernetic neural brain image uploaded by user
+    avatarImg.src = "/media/agenticuantico-avatar.jpg";
+  }
+  if (nameDisplay) {
+    const voiceNames = {
+      female_ar_01: "Sofía · Voz Femenina (Argentina)",
+      male_ar_01: "Tomás · Voz Masculina (Argentina)",
+      female_es_01: "Elena · Voz Femenina (España)",
+      male_es_01: "Carlos · Voz Masculina (España)",
+      female_mx_01: "Valentina · Voz Femenina (Latam)",
+      male_cl_01: "Mateo · Voz Masculina (Latam)"
+    };
+    nameDisplay.textContent = voiceNames[voiceId] || (isMale ? "Voz Masculina" : "Voz Femenina");
+  }
+}
+
+function openAgentsModal() { document.getElementById("agentsModal").classList.add("open"); }
+function closeAgentsModal() { document.getElementById("agentsModal").classList.remove("open"); }
+function openAccountModal() { document.getElementById("accountModal").classList.add("open"); }
+function closeAccountModal() { document.getElementById("accountModal").classList.remove("open"); }
+function toggleMobileMenu() { document.getElementById("mobileNavPanel").classList.toggle("open"); }
+function closeMobileMenu() { document.getElementById("mobileNavPanel").classList.remove("open"); }
+
+// Contact Modal Handling
+function openContactModal() { document.getElementById("contactModal").classList.add("open"); }
+function closeContactModal() { document.getElementById("contactModal").classList.remove("open"); }
+
+async function handleContactSubmit(e) {
+  e.preventDefault();
+  const name = document.getElementById("contactName").value.trim();
+  const email = document.getElementById("contactEmail").value.trim();
+  const company = document.getElementById("contactCompany").value.trim();
+  const message = document.getElementById("contactMessage").value.trim();
+  const statusMsg = document.getElementById("contactStatusMsg");
+
+  statusMsg.textContent = "Enviando mensaje...";
+  try {
+    const res = await fetch("/api/contact", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, email, company, message })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      statusMsg.textContent = "✓ ¡Mensaje recibido! Nos pondremos en contacto a la brevedad.";
+      setTimeout(() => {
+        closeContactModal();
+        e.target.reset();
+        statusMsg.textContent = "";
+      }, 1800);
+    } else {
+      statusMsg.textContent = data.error || "No se pudo enviar el mensaje.";
+    }
+  } catch {
+    statusMsg.textContent = "Error de conexión. Por favor intentá nuevamente.";
+  }
+}
+
+// Auth Tab Switching (Login vs Register)
+let currentAuthTab = "login";
+function setAuthTab(tab) {
+  currentAuthTab = tab;
+  const isReg = tab === "register";
+  document.getElementById("authNameInput").style.display = isReg ? "block" : "none";
+  document.getElementById("authSubmitBtn").textContent = isReg ? "Crear Cuenta Nueva" : "Iniciar Sesión";
+  document.getElementById("tabLogin").style.background = isReg ? "transparent" : "#fff";
+  document.getElementById("tabLogin").style.color = isReg ? "#71717a" : "#18181b";
+  document.getElementById("tabLogin").style.fontWeight = isReg ? "600" : "700";
+  document.getElementById("tabRegister").style.background = isReg ? "#fff" : "transparent";
+  document.getElementById("tabRegister").style.color = isReg ? "#18181b" : "#71717a";
+  document.getElementById("tabRegister").style.fontWeight = isReg ? "700" : "600";
+  document.getElementById("authErrorMsg").textContent = "";
+}
+
+// Integration modal handling (GitHub & Cloudflare) with real SVG logos and Google account connection
+let currentIntType = "github";
+function openIntegrationModal(type) {
+  currentIntType = type;
+  const modal = document.getElementById("integrationModal");
+  const title = document.getElementById("intModalTitle");
+  const desc = document.getElementById("intModalDesc");
+  const logoBox = document.getElementById("intModalLogo");
+  const fieldGroup = document.getElementById("intFieldGroup");
+
+  if (type === "github") {
+    title.textContent = "Conectar con GitHub";
+    desc.textContent = "Vinculá tu repositorio de GitHub para permitir al agente explorar código, crear ramas y preparar Pull Requests sin tocar la consola.";
+    logoBox.innerHTML = `
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="#18181b">
+        <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+      </svg>
+    `;
+    fieldGroup.innerHTML = `
+      <input id="intToken" type="password" placeholder="GitHub Personal Access Token (ghp_...)" style="width: 100%; height: 44px; padding: 0 14px; border: 1px solid #d4d4d8; border-radius: 12px; margin-bottom: 10px;">
+      <input id="intRepo" type="text" placeholder="Repositorio (ej: empresa/proyecto)" style="width: 100%; height: 44px; padding: 0 14px; border: 1px solid #d4d4d8; border-radius: 12px; margin-bottom: 10px;">
+    `;
+  } else {
+    title.textContent = "Conectar con Cloudflare";
+    desc.textContent = "Vinculá Cloudflare para gestionar Workers, DNS seguros y despliegues instantáneos de tus aplicaciones.";
+    logoBox.innerHTML = `
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+        <path fill="#F38020" d="M18.3 10.4c-.4-2.8-2.8-4.9-5.7-4.9-2.4 0-4.5 1.4-5.4 3.5-1.6.2-2.9 1.4-3.1 3-.1.5 0 1 .2 1.4-.8.5-1.3 1.4-1.3 2.4 0 1.7 1.3 3 3 3h12.5c2.5 0 4.5-2 4.5-4.5 0-2.1-1.4-3.8-3.3-4.3-.1.2-.2.3-.4.4z"/>
+        <path fill="#FAAE40" d="M18.8 14.5c0-.2 0-.3-.1-.5-.4-2.8-2.8-4.9-5.7-4.9-2.4 0-4.5 1.4-5.4 3.5-.1.2-.1.4-.1.7.3-.2.6-.3 1-.3.2 0 .4 0 .6.1.4-.8 1.1-1.5 2-1.9.9-.4 1.9-.5 2.9-.2 1 .3 1.9.9 2.5 1.8.6.9.9 1.9.9 3 0 .3 0 .6-.1.9h1.4c0-.7-.4-1.5-1-2.2z"/>
+      </svg>
+    `;
+    fieldGroup.innerHTML = `
+      <input id="intToken" type="password" placeholder="Cloudflare API Token" style="width: 100%; height: 44px; padding: 0 14px; border: 1px solid #d4d4d8; border-radius: 12px; margin-bottom: 10px;">
+      <input id="intAcc" type="text" placeholder="Account ID (opcional)" style="width: 100%; height: 44px; padding: 0 14px; border: 1px solid #d4d4d8; border-radius: 12px; margin-bottom: 10px;">
+    `;
+  }
+  document.getElementById("intStatusMsg").textContent = "";
+  modal.classList.add("open");
+}
+
+function closeIntegrationModal() {
+  document.getElementById("integrationModal").classList.remove("open");
+}
+
+async function connectIntegrationWithGoogle() {
+  const email = currentUser?.email || prompt("Ingresá tu correo de Google para vincular el complemento:", "usuario@gmail.com");
+  if (!email) return;
+
+  const endpoint = currentIntType === "github" ? "/api/integrations/github" : "/api/integrations/cloudflare";
+  try {
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ googleEmail: email })
+    });
+    const d = await res.json();
+    document.getElementById("intStatusMsg").textContent = `✓ Conectado exitosamente con ${email}`;
+    setTimeout(closeIntegrationModal, 1500);
+  } catch {
+    document.getElementById("intStatusMsg").textContent = "Error al conectar mediante Google.";
+  }
+}
+
+async function saveIntegration(e) {
+  e.preventDefault();
+  const token = document.getElementById("intToken")?.value;
+  const endpoint = currentIntType === "github" ? "/api/integrations/github" : "/api/integrations/cloudflare";
+  try {
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token, apiToken: token })
+    });
+    const d = await res.json();
+    document.getElementById("intStatusMsg").textContent = d.message || "Conexión guardada con éxito.";
+    setTimeout(closeIntegrationModal, 1500);
+  } catch {
+    document.getElementById("intStatusMsg").textContent = "Error al conectar.";
+  }
+}
+
+// Email Auth (Login & Register)
+async function handleEmailAuth(e) {
+  e.preventDefault();
+  const email = document.getElementById("authEmailInput").value.trim();
+  const password = document.getElementById("authPassInput").value.trim();
+  const name = document.getElementById("authNameInput")?.value.trim() || "";
+  const errBox = document.getElementById("authErrorMsg");
+  errBox.textContent = "";
+
+  const endpoint = currentAuthTab === "register" ? "/api/auth/register" : "/api/auth/login-email";
+  const body = currentAuthTab === "register" ? { email, password, name } : { email, password };
+
+  try {
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    });
+    const d = await res.json();
+    if (!res.ok) throw new Error(d.error || "No se pudo procesar la solicitud.");
+    currentUser = d.user;
+    updateUserUI();
+    if (currentUser.role === "owner" || currentUser.subscription?.planId !== "free") {
+      setUnlimitedTrial();
+    }
+  } catch (err) {
+    errBox.textContent = err.message;
+  }
+}
+
+async function logoutUser() {
+  await fetch("/api/auth/logout", { method: "POST" });
+  currentUser = null;
+  document.getElementById("navAccountLabel").textContent = "Mi cuenta";
+  document.getElementById("accountLoggedInView").classList.add("hidden");
+  document.getElementById("accountLoggedOutView").classList.remove("hidden");
+  initTrialQuota();
+}
+
+function handleGoogleCredentialResponse(response) {
+  if (response && response.credential) {
+    const statusEl = document.getElementById("googleAuthStatus");
+    if (statusEl) {
+      statusEl.style.color = "#2563eb";
+      statusEl.textContent = "Validando credencial de Google...";
+    }
+    fetch("/api/auth/google", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ credential: response.credential })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.ok) {
+        currentUser = data.user;
+        updateUserUI();
+        if (currentUser.role === "owner" || currentUser.subscription?.planId !== "free") {
+          setUnlimitedTrial();
+        }
+        if (statusEl) {
+          statusEl.style.color = "#16a34a";
+          statusEl.textContent = "✓ ¡Acceso exitoso con Google!";
+        }
+        setTimeout(() => {
+          closeGoogleAuthModal();
+          closeAccountModal();
+        }, 500);
+      } else if (statusEl) {
+        statusEl.style.color = "#dc2626";
+        statusEl.textContent = data.error || "No se pudo acceder con Google.";
+      }
+    })
+    .catch(() => {
+      if (statusEl) {
+        statusEl.style.color = "#dc2626";
+        statusEl.textContent = "Error al conectar con el servidor.";
+      }
+    });
+  }
+}
+
+function triggerGoogleLogin() {
+  if (window.google?.accounts?.id) {
+    try {
+      const clientId = document.querySelector('meta[name="google-signin-client_id"]')?.getAttribute('content') || "";
+      if (!clientId) throw new Error("sin client id");
+      window.google.accounts.id.initialize({
+        client_id: clientId,
+        callback: handleGoogleCredentialResponse,
+        auto_select: false,
+        cancel_on_tap_outside: true
+      });
+      window.google.accounts.id.prompt((notification) => {
+        if (notification && (notification.isNotDisplayed() || notification.isSkippedMoment())) {
+          const modal = document.getElementById("googleAuthModal");
+          if (modal) modal.classList.add("open");
+        }
+      });
+      return;
+    } catch {
+      // fallback to modal
+    }
+  }
+  const modal = document.getElementById("googleAuthModal");
+  if (modal) modal.classList.add("open");
+}
+
+function closeGoogleAuthModal() {
+  const modal = document.getElementById("googleAuthModal");
+  if (modal) modal.classList.remove("open");
+}
+
+async function loginWithSpecificGoogleEmail(email, name = "") {
+  const statusEl = document.getElementById("googleAuthStatus");
+  if (statusEl) {
+    statusEl.style.color = "#2563eb";
+    statusEl.textContent = "Conectando con tu cuenta de Google...";
+  }
+
+  try {
+    const res = await fetch("/api/auth/google", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, name: name || email.split("@")[0] })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      currentUser = data.user;
+      updateUserUI();
+      if (currentUser.role === "owner" || currentUser.subscription?.planId !== "free") {
+        setUnlimitedTrial();
+      }
+      if (statusEl) {
+        statusEl.style.color = "#16a34a";
+        statusEl.textContent = "✓ ¡Acceso exitoso con Google!";
+      }
+      setTimeout(() => {
+        closeGoogleAuthModal();
+        closeAccountModal();
+      }, 700);
+    } else {
+      if (statusEl) {
+        statusEl.style.color = "#dc2626";
+        statusEl.textContent = data.error || "No se pudo acceder con la cuenta de Google.";
+      }
+    }
+  } catch {
+    if (statusEl) {
+      statusEl.style.color = "#dc2626";
+      statusEl.textContent = "Error al conectar con el servidor.";
+    }
+  }
+}
+
+function handleCustomGoogleEmail(e) {
+  e.preventDefault();
+  const email = document.getElementById("customGoogleEmail")?.value?.trim();
+  if (email) {
+    loginWithSpecificGoogleEmail(email);
+  }
+}
+</script>
+
+
+<script>
+/* Sitio estático: acciones que requieren servidor muestran un aviso amable. */
+(function () {
+  if (!window.AGENTIC_DEMO) return;
+  var SOON_LOGIN = "El acceso con cuenta (login y registro) estará disponible próximamente.";
+  window.connectIntegrationWithGoogle = function () {
+    var el = document.getElementById("intStatusMsg");
+    if (el) { el.style.color = "#2563eb"; el.textContent = "Las integraciones con GitHub y Cloudflare estarán disponibles próximamente."; }
+  };
+  window.triggerGoogleLogin = function () {
+    var modal = document.getElementById("googleAuthModal");
+    if (modal) modal.classList.add("open");
+    var st = document.getElementById("googleAuthStatus");
+    if (st) { st.style.color = "#2563eb"; st.textContent = SOON_LOGIN; }
+  };
+  var origContact = window.handleContactSubmit;
+  window.handleContactSubmit = function (e) {
+    if (e && e.preventDefault) e.preventDefault();
+    var g = function (id) { var el = document.getElementById(id); return el ? el.value.trim() : ""; };
+    var body = "Nombre: " + g("contactName") + "\nEmpresa: " + g("contactCompany") + "\nEmail: " + g("contactEmail") + "\n\n" + g("contactMessage");
+    var st = document.getElementById("contactStatusMsg");
+    if (st) st.textContent = "Abrimos tu correo para enviar el mensaje a agenticuantico@gmail.com.";
+    window.location.href = "mailto:agenticuantico@gmail.com?subject=" + encodeURIComponent("Consulta comercial") + "&body=" + encodeURIComponent(body);
+  };
+  document.addEventListener("DOMContentLoaded", function () {
+    var label = document.getElementById("authSubmitBtn");
+    var box = document.getElementById("authErrorMsg");
+    if (box && !box.textContent) { box.style.color = "#2563eb"; }
+    var view = document.getElementById("accountLoggedOutView");
+    if (view && !document.getElementById("authSoonNote")) {
+      var n = document.createElement("div");
+      n.id = "authSoonNote";
+      n.style.cssText = "background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:14px;padding:10px 14px;margin:0 0 14px;font-size:12.5px;color:#1e3a8a;line-height:1.5;";
+      n.innerHTML = "Las cuentas de usuario llegan <strong>próximamente</strong>. Ya podés usar el chat de demostración sin registrarte.";
+      var h = view.querySelector("p");
+      if (h && h.parentNode) h.parentNode.insertBefore(n, h.nextSibling);
+    }
+  });
+})();
+</script>
+<script src="/assets/neural-ui.js" defer></script>
+</body>
+</html>
