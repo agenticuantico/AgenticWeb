@@ -5,6 +5,8 @@ name: Agentes 24/7 (sitio)
 # El job "estado" actualiza agents-status.json en main (solo datos) y pide una reconstrucción de Pages.
 # No modifica la publicación: Pages sigue construyendo desde main (raíz) y se conserva CNAME.
 on:
+  repository_dispatch:
+    types: [agent-order]
   schedule:
     - cron: "41 3,9,15,21 * * *"
   workflow_dispatch:
@@ -23,7 +25,43 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  control:
+    name: Control maestro de agentes
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    permissions:
+      contents: read
+      issues: read
+    outputs:
+      state: ${{ steps.gate.outputs.state }}
+      disabled: ${{ steps.gate.outputs.disabled }}
+      order: ${{ steps.gate.outputs.order }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: control
+      - id: gate
+        name: Leer control/agents-control.json y la parada de emergencia
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE: ${{ github.event.client_payload.issue }}
+        run: |
+          st=$(jq -r '.state // "activo"' control/agents-control.json 2>/dev/null || echo activo)
+          disabled=$(jq -r '[.agents // {} | to_entries[] | select(.value == false) | .key] | join(",")' control/agents-control.json 2>/dev/null || echo "")
+          ks=$(curl -fsS --max-time 8 "https://firestore.googleapis.com/v1/projects/agenticuantico-5f61e/databases/(default)/documents/config/system" | jq -r '.fields.killSwitch.booleanValue // false' 2>/dev/null || echo false)
+          fsst=$(curl -fsS --max-time 8 "https://firestore.googleapis.com/v1/projects/agenticuantico-5f61e/databases/(default)/documents/config/system" | jq -r '.fields.agents.mapValue.fields.state.stringValue // empty' 2>/dev/null || echo "")
+          if [ "$ks" = "true" ]; then st=detenido; fi
+          if [ -n "$fsst" ] && [ "$fsst" != "activo" ]; then st=$fsst; fi
+          echo "state=$st" >> "$GITHUB_OUTPUT"
+          echo "disabled=$disabled" >> "$GITHUB_OUTPUT"
+          order=""
+          if [ -n "$ISSUE" ]; then order=$(gh issue view "$ISSUE" -R "$GITHUB_REPOSITORY" --json body -q .body 2>/dev/null | head -c 3000 | tr '\n' ' ' || true); fi
+          { echo "order<<EOF_ORDER"; echo "$order"; echo "EOF_ORDER"; } >> "$GITHUB_OUTPUT"
+          if [ "$st" != "activo" ]; then echo "::notice::Agentes en estado '$st' (panel /admin/). Esta ejecución no hace nada."; fi
+
   agentes:
+    needs: control
+    if: needs.control.outputs.state == 'activo'
     name: Equipo de agentes (rutas seguras)
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -33,12 +71,14 @@ jobs:
       issues: write
       models: read
     env:
+      AGENTS_DISABLED: ${{ needs.control.outputs.disabled }}
+      AGENTS_ORDER: ${{ needs.control.outputs.order }}
       AGENTS_REPO_KIND: web
       AGENTS_MODEL: ${{ vars.AGENTS_MODEL || 'openai/gpt-4.1-mini' }}
       AGENTS_ROLES_PER_RUN: ${{ vars.AGENTS_ROLES_PER_RUN || '2' }}
       AGENTS_MAX_FILES: ${{ vars.AGENTS_MAX_FILES || '2' }}
       AGENTS_MAX_LINES: ${{ vars.AGENTS_MAX_LINES || '60' }}
-      AUTO_MERGE: ${{ vars.AGENTS_AUTO_MERGE || 'false' }}
+      AUTO_MERGE: 'false'   # los agentes nunca mergean; aprueba el dueño
       AGENTS_ONLY_ROLE: ${{ github.event.inputs.role }}
       AGENTS_DRY_RUN: ${{ github.event.inputs.dry_run == 'true' && 'true' || 'false' }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -64,7 +104,7 @@ jobs:
 
   estado:
     name: Estado público (agents-status.json)
-    needs: agentes
+    needs: [control, agentes]
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -73,6 +113,8 @@ jobs:
       pull-requests: read
       pages: write
     env:
+      AGENTS_DISABLED: ${{ needs.control.outputs.disabled }}
+      AGENTS_ORDER: ${{ needs.control.outputs.order }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v4

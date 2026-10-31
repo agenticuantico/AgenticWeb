@@ -4,7 +4,7 @@
  *
  * Cada ejecución elige roles en rotación, lee un conjunto acotado de archivos, pide al modelo
  * mejoras pequeñas y concretas y abre una Pull Request por rol con la etiqueta agente/<rol>.
- * Nunca hace merge salvo AUTO_MERGE=true. Nunca toca workflows, .env ni secretos.
+ * Nunca hace merge: el dueño aprueba cada PR desde /admin/. Nunca toca workflows, .env ni secretos.
  * Si GitHub Models no está disponible o hay límite de uso, deja un log y termina sin fallar.
  *
  * Variables (todas opcionales salvo GITHUB_TOKEN y GITHUB_REPOSITORY, que da Actions):
@@ -15,7 +15,8 @@
  *   AGENTS_MAX_LINES   120                           (líneas agregadas+borradas por PR)
  *   AGENTS_ONLY_ROLE   <id>                          (forzar un rol)
  *   AGENTS_DRY_RUN     true|false                    (no crea ramas ni PRs)
- *   AUTO_MERGE         false                         (true = mergea la PR si pasa las reglas)
+ *   AGENTS_DISABLED    ''                            (roles apagados desde el panel, separados por coma)
+ *   AGENTS_ORDER       ''                            (orden del dueño: texto del Issue agent-order)
  *   AGENTS_RESULT_FILE agents-run.json               (resumen para el job de estado)
  */
 import { execFileSync } from 'node:child_process';
@@ -30,7 +31,9 @@ const PER_RUN = clampInt(env.AGENTS_ROLES_PER_RUN, 2, 1, 4);
 const MAX_FILES = clampInt(env.AGENTS_MAX_FILES, 3, 1, 6);
 const MAX_LINES = clampInt(env.AGENTS_MAX_LINES, 120, 10, 400);
 const DRY = env.AGENTS_DRY_RUN === 'true';
-const AUTO_MERGE = env.AUTO_MERGE === 'true';
+const AUTO_MERGE = false; // política: los agentes nunca mergean a main
+const DISABLED = String(env.AGENTS_DISABLED || '').split(',').map((x) => x.trim()).filter(Boolean);
+const ORDER = String(env.AGENTS_ORDER || '').slice(0, 3000);
 const TOKEN = env.GITHUB_TOKEN || '';
 const REPO = env.GITHUB_REPOSITORY || '';
 const RUN_NO = Number(env.GITHUB_RUN_NUMBER || Math.floor(Date.now() / 3.6e6));
@@ -206,6 +209,7 @@ function systemPrompt(role, kind) {
   return [
     `Sos "${role.name}", un integrante del equipo de agentes de IA de AgentiCuántico (plataforma argentina de IA agéntica).`,
     `Tu foco: ${role.focus}.`,
+    ...(ORDER ? [`Orden prioritaria del dueño (cumplila dentro de tus límites): ${ORDER}`] : []),
     'Proponé UNA mejora pequeña, concreta y verificable sobre los archivos que te muestro. Español rioplatense en textos visibles.',
     'Reglas estrictas:',
     `- Máximo ${MAX_FILES} archivos y ${MAX_LINES} líneas cambiadas en total.`,
@@ -298,7 +302,7 @@ async function runRole(role, base) {
 
 export async function main() {
   const base = env.AGENTS_BASE || (env.GITHUB_REF_NAME && !env.GITHUB_REF_NAME.startsWith('agente/') ? env.GITHUB_REF_NAME : 'main');
-  const roles = pickRoles(RUN_NO, PER_RUN, env.AGENTS_ONLY_ROLE);
+  const roles = pickRoles(RUN_NO, PER_RUN, env.AGENTS_ONLY_ROLE).filter((r) => !DISABLED.includes(r.id));
   const result = { at: new Date().toISOString(), repo: REPO, kind: KIND, model: MODEL, run: RUN_NO, status: 'ok', roles: [] };
   log(`perfil=${KIND} modelo=${MODEL} roles=${roles.map((r) => r.id).join(',')} dry=${DRY} automerge=${AUTO_MERGE}`);
   if (!TOKEN) { result.status = 'no-token'; log('Sin GITHUB_TOKEN: no-op.'); }

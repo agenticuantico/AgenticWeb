@@ -1,5 +1,8 @@
 User-agent: *
 Allow: /
-Disallow: /api/
+Disallow: /admin/
+Disallow: /cuenta/
+Disallow: /compartido/
+Disallow: /app/preview.html
 
 Sitemap: https://agenticuantico.dev.ar/sitemap.xml

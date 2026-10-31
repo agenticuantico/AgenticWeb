@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<!-- Vista previa aislada del lienzo. Se carga en un iframe con sandbox="allow-scripts" (origen opaco):
+     no accede a cookies, almacenamiento ni a la sesión del sitio, y no puede hacer pedidos de red. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; frame-src 'self'; connect-src 'none'; form-action 'none'; base-uri 'none'">
+<title>Vista previa</title>
+<style>html,body{margin:0;height:100%;background:#fff}iframe{border:0;width:100%;height:100%;display:block}</style>
+<script>
+/* Recibe HTML del lienzo y lo muestra en un iframe hijo (hereda esta CSP estricta: sin red). */
+(function () {
+  var frame;
+  window.addEventListener('message', function (e) {
+    var d = e.data;
+    if (!d || d.type !== 'ac-preview' || typeof d.html !== 'string') return;
+    if (!frame) {
+      frame = document.createElement('iframe');
+      frame.setAttribute('sandbox', 'allow-scripts allow-modals');
+      frame.setAttribute('title', 'Contenido');
+      document.body.appendChild(frame);
+    }
+    frame.srcdoc = d.html.slice(0, 2000000);
+  });
+})();
+</script>
+</head>
+<body></body>
+</html>

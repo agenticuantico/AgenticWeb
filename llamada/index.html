@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="es-AR" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://apis.google.com https://www.gstatic.com https://*.firebaseio.com https://www.paypal.com https://*.paypal.com https://www.paypalobjects.com https://sdk.mercadopago.com https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self'; media-src 'self' blob: data:; connect-src 'self' blob: data: https://api.agenticuantico.dev.ar https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://www.cloudflare.com https://*.paypal.com https://api.mercadopago.com; frame-src 'self' https://agenticuantico-5f61e.firebaseapp.com https://*.paypal.com https://www.mercadopago.com.ar https://challenges.cloudflare.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self' https://*.paypal.com; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>Llamada con la Compañera · AgentiCuántico</title>
+<meta name="description" content="Hablá por voz, manos libres, con la Compañera de AgentiCuántico: una inteligencia artificial cálida que te escucha, te responde con voz natural y te recuerda día a día.">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<link rel="canonical" href="https://agenticuantico.dev.ar/llamada/">
+
+
+<meta name="theme-color" content="#faf8f4" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f0f13" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="AgentiCuántico">
+<meta property="og:locale" content="es_AR">
+<meta property="og:title" content="Llamada con la Compañera · AgentiCuántico">
+<meta property="og:description" content="Hablá por voz, manos libres, con la Compañera de AgentiCuántico: una inteligencia artificial cálida que te escucha, te responde con voz natural y te recuerda día a día.">
+<meta property="og:url" content="https://agenticuantico.dev.ar/llamada/">
+<meta property="og:image" content="https://agenticuantico.dev.ar/media/agenticuantico-og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="AgentiCuántico, plataforma de agentes de IA">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Llamada con la Compañera · AgentiCuántico">
+<meta name="twitter:description" content="Hablá por voz, manos libres, con la Compañera de AgentiCuántico: una inteligencia artificial cálida que te escucha, te responde con voz natural y te recuerda día a día.">
+<meta name="twitter:image" content="https://agenticuantico.dev.ar/media/agenticuantico-og.jpg">
+<link rel="preload" href="/assets/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/outfit-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/css/core.css?v=4.1.0"><link rel="stylesheet" href="/assets/css/chat.css?v=4.1.0"><link rel="stylesheet" href="/assets/css/call.css?v=4.1.0">
+
+<script src="/assets/js/theme-init.js?v=4.1.0"></script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Organization", "name": "AgentiCuántico", "url": "https://agenticuantico.dev.ar/", "logo": "https://agenticuantico.dev.ar/apple-touch-icon.png", "email": "agenticuantico@gmail.com", "address": {"@type": "PostalAddress", "addressLocality": "Bahía Blanca", "addressRegion": "Buenos Aires", "addressCountry": "AR"}, "sameAs": ["https://github.com/agenticuantico"]}</script>
+</head>
+<body class="call-body">
+<div class="call-shell" id="callShell" data-phase="start" data-state="ready">
+  <header class="call-top">
+    <a class="icon-btn" href="/app/" aria-label="Volver al chat"><span data-icon="arrowRight" class="flip"></span></a>
+    <div class="call-title"><strong>Compañera</strong><span class="call-sub"><span id="callStatus">Lista para hablar</span> · <span id="callTimer">0:00</span></span></div>
+    <span class="chip call-incog" aria-hidden="true"><span data-icon="ghost"></span>Incógnito</span>
+  </header>
+
+  <main class="call-main" id="main">
+    <div class="call-stage"><div id="callAvatar"></div></div>
+    <canvas class="call-wave" id="callWave" aria-hidden="true"></canvas>
+    <div class="crisis" id="crisis" role="alert" hidden></div>
+
+    <section class="call-start" aria-labelledby="startTitle">
+      <h1 id="startTitle">Hablá con tu Compañera</h1>
+      <p class="muted">Una inteligencia artificial cálida y curiosa para charlar de tu día, ideas, programación o lo que quieras. Te escucha y te responde con voz. No es una persona.</p>
+      <div class="call-options">
+        <div data-popover-host style="position:relative"><button class="lang-btn" type="button" id="callLang" aria-haspopup="menu" aria-expanded="false"><img class="flag" id="callFlag" alt="" width="26" height="26"><span id="callLangName"></span><span data-icon="chevron"></span></button></div>
+        <label class="check"><span class="switch"><input type="checkbox" id="incogToggle"><span></span></span><span>Llamada incógnito (no se guarda nada)</span></label>
+      </div>
+      <button class="call-btn" type="button" id="startCall"><span data-icon="phone"></span><span>Llamar</span></button>
+      <p class="tiny muted" id="quota"></p>
+      <p class="tiny muted" id="memNote">Ingresá con tu cuenta para que te recuerde día a día.</p>
+      <p class="tiny muted">Si estás pasando un momento difícil, llamá a la Línea 135 o al (011) 5275-1135 (24 h). Emergencias: 911.</p>
+    </section>
+
+    <section class="transcript" id="transcript" hidden aria-label="Transcripción"><div id="trList"></div></section>
+    <p class="tiny muted sr-note" id="srNote" hidden>Este navegador no transcribe la voz en el dispositivo. Para entenderte mejor, usá Chrome o Edge.</p>
+
+    <section class="call-summary" aria-live="polite">
+      <h2 id="summaryMsg">Llamada finalizada</h2>
+      <p class="muted" id="summaryTime"></p>
+      <p class="muted small" id="summaryMem"></p>
+      <div class="row" style="justify-content:center"><button class="btn btn-primary" type="button" id="again">Volver a llamar</button><a class="btn" href="/cuenta/#companera">Lo que recuerda de mí</a></div>
+    </section>
+  </main>
+
+  <footer class="call-controls" aria-label="Controles de la llamada">
+    <button class="ctrl" type="button" id="muteBtn" aria-pressed="false"><span data-icon="mic"></span><span>Silenciar</span></button>
+    <button class="ctrl hang" type="button" id="hangup" aria-label="Colgar"><span data-icon="phone"></span><span>Colgar</span></button>
+    <button class="ctrl" type="button" id="trToggle" aria-pressed="false"><span data-icon="file"></span><span>Ver transcripción</span></button>
+  </footer>
+</div>
+
+<script type="module" src="/assets/js/site.js?v=4.1.0"></script><script type="module" src="/assets/js/companion/call.js?v=4.1.0"></script>
+</body>
+</html>

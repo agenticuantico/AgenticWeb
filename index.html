@@ -1,1541 +1,239 @@
 <!doctype html>
-<html lang="es">
+<html lang="es-AR" data-theme="light">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#EDEEF5">
-<link rel="icon" href="/favicon.ico" sizes="any">
-<link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<script src="/assets/agentic-static.js"></script>
-<title>AgentiCuantico | Super Inteligencia Artificial para Empresas</title>
-<meta name="description" content="AgentiCuantico: super inteligencia artificial agéntica con razonamiento profundo, equipo de agentes especializados, llamadas de voz en vivo y programación para empresas.">
-<meta name="keywords" content="AgentiCuantico, inteligencia artificial empresas, agentes de IA, super inteligencia, llamadas de voz con IA, programación con IA, razonamiento profundo, desarrollo de software, automatización, Argentina, B2B">
-<meta name="author" content="AgentiCuantico">
-<meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
-<meta name="googlebot" content="index,follow">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://apis.google.com https://www.gstatic.com https://*.firebaseio.com https://www.paypal.com https://*.paypal.com https://www.paypalobjects.com https://sdk.mercadopago.com https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self'; media-src 'self' blob: data:; connect-src 'self' blob: data: https://api.agenticuantico.dev.ar https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://www.cloudflare.com https://*.paypal.com https://api.mercadopago.com; frame-src 'self' https://agenticuantico-5f61e.firebaseapp.com https://*.paypal.com https://www.mercadopago.com.ar https://challenges.cloudflare.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self' https://*.paypal.com; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>AgentiCuántico · Plataforma de agentes de IA con voz y avatar</title>
+<meta name="description" content="Conversá por voz o por escrito con AgentiCuántico: un avatar 3D con voz natural que planifica, usa herramientas, invita agentes especialistas y analiza tus documentos. Planes en pesos y dólares.">
+<meta name="robots" content="index, follow, max-image-preview:large">
 <link rel="canonical" href="https://agenticuantico.dev.ar/">
 
-<!-- OpenGraph Social Cards -->
+<meta name="keywords" content="agentes de IA, plataforma de agentes de IA, AI agents platform, asistente de IA con voz, automatización con IA">
+<meta name="theme-color" content="#faf8f4" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f0f13" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.webmanifest">
 <meta property="og:type" content="website">
+<meta property="og:site_name" content="AgentiCuántico">
 <meta property="og:locale" content="es_AR">
-<meta property="og:site_name" content="AgentiCuantico">
-<meta property="og:title" content="AgentiCuantico — Super Inteligencia Artificial para Empresas">
-<meta property="og:description" content="IA conversacional con razonamiento profundo, llamadas de voz en vivo y equipo de agentes con código para resolver desafíos empresariales.">
+<meta property="og:title" content="AgentiCuántico · IA agéntica que hace el trabajo por vos">
+<meta property="og:description" content="Conversá por voz o por escrito con AgentiCuántico: un avatar 3D con voz natural que planifica, usa herramientas, invita agentes especialistas y analiza tus documentos. Planes en pesos y dólares.">
 <meta property="og:url" content="https://agenticuantico.dev.ar/">
 <meta property="og:image" content="https://agenticuantico.dev.ar/media/agenticuantico-og.jpg">
-
-<!-- Twitter / X Cards -->
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="AgentiCuántico, plataforma de agentes de IA">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="AgentiCuantico — Super Inteligencia Artificial">
-<meta name="twitter:description" content="Conversá con razonamiento profundo, probá gratis la IA más potente y coordiná agentes especializados con código.">
+<meta name="twitter:title" content="AgentiCuántico · IA agéntica que hace el trabajo por vos">
+<meta name="twitter:description" content="Conversá por voz o por escrito con AgentiCuántico: un avatar 3D con voz natural que planifica, usa herramientas, invita agentes especialistas y analiza tus documentos. Planes en pesos y dólares.">
 <meta name="twitter:image" content="https://agenticuantico.dev.ar/media/agenticuantico-og.jpg">
-
-<!-- Schema.org JSON-LD Structured Data -->
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "Organization",
-      "@id": "https://agenticuantico.dev.ar/#organization",
-      "name": "AgentiCuantico",
-      "url": "https://agenticuantico.dev.ar/",
-      "logo": "https://agenticuantico.dev.ar/media/agenticuantico-og.jpg",
-      "email": "agenticuantico@gmail.com",
-      "description": "Super inteligencia artificial y ecosistema de agentes especializados para empresas, desarrollo de software y análisis de datos.",
-      "contactPoint": [
-        {
-          "@type": "ContactPoint",
-          "email": "agenticuantico@gmail.com",
-          "contactType": "Consulta Comercial",
-          "availableLanguage": ["Spanish", "English", "Portuguese"]
-        }
-      ]
-    },
-    {
-      "@type": "SoftwareApplication",
-      "@id": "https://agenticuantico.dev.ar/#software",
-      "name": "AgentiCuantico Super Inteligencia",
-      "applicationCategory": "BusinessApplication, DeveloperApplication",
-      "operatingSystem": "Web, Android, iOS, Windows, macOS",
-      "url": "https://agenticuantico.dev.ar/",
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "ARS",
-        "description": "Prueba gratuita de 2 horas sin costo ni cobro de créditos para explorar la super inteligencia con razonamiento profundo."
-      }
-    }
-  ]
-}
-</script>
-
-<!-- Fonts: Outfit 400/500/600 & Inter -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap">
-
-<style>
-:root { --bg: #EDEEF5; --text: #18181b; --ink: #18181b; --lime: #9fff00; --lime-hover: #90ea00; --muted: #52525b; --border: rgba(24, 24, 27, 0.08); --card: rgba(255, 255, 255, 0.94); --blue: #2563eb; --blue-hover: #1d4ed8; --blue-light: #eff6ff; --shadow-lg: 0 30px 90px rgba(24, 24, 27, 0.08); --quantum-glow: 0 0 25px rgba(159, 255, 0, 0.45); }
-
-* { box-sizing: border-box; }
-
-html { scroll-behavior: smooth; background: var(--bg); }
-
-body { margin: 0px; background-color: var(--bg); color: var(--text); font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; overflow-x: hidden; position: relative; }
-
-body.fullscreen-chat { overflow: hidden; }
-
-a { color: inherit; text-decoration: none; }
-
-button, input, textarea, select { font: inherit; }
-
-#ambientCanvas { position: fixed; top: 0px; left: 0px; width: 100vw; height: 100vh; pointer-events: none; z-index: 0; opacity: 0.6; }
-
-.wrap { width: min(1200px, 100% - 36px); margin: 0px auto; position: relative; z-index: 10; }
-
-header { position: sticky; top: 0px; z-index: 80; background: rgba(237, 238, 245, 0.92); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
-
-.navbar { height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-
-.brand-group { display: flex; align-items: center; gap: 12px; text-decoration: none; cursor: pointer; user-select: none; }
-
-.quantum-logo-3d { position: relative; width: 44px; height: 44px; display: grid; place-items: center; flex: 0 0 auto; perspective: 600px; }
-
-.quantum-orb-3d { position: relative; width: 38px; height: 38px; border-radius: 50%; background: radial-gradient(circle at 32% 28%, rgb(255, 255, 255) 0%, rgb(163, 230, 53) 30%, rgb(30, 41, 59) 72%, rgb(9, 13, 22) 100%); box-shadow: rgba(0, 0, 0, 0.7) -3px -3px 8px inset, rgba(255, 255, 255, 0.9) 3px 3px 6px inset, rgba(163, 230, 53, 0.35) 0px 8px 24px, rgba(0, 0, 0, 0.15) 0px 2px 6px; display: grid; place-items: center; transition: transform 0.3s; }
-
-.quantum-logo-3d:hover .quantum-orb-3d { transform: rotateY(180deg) scale(1.05); }
-
-.quantum-nucleus { width: 11px; height: 11px; border-radius: 50%; background: radial-gradient(circle, rgb(255, 255, 255) 10%, rgb(159, 255, 0) 65%, rgb(37, 99, 235) 100%); box-shadow: rgb(159, 255, 0) 0px 0px 12px, rgb(255, 255, 255) 0px 0px 4px; animation: 2.4s ease-in-out 0s infinite alternate none running pulseNucleus; }
-
-@keyframes pulseNucleus { 
-  0% { transform: scale(0.85); box-shadow: rgb(159, 255, 0) 0px 0px 8px; }
-  100% { transform: scale(1.25); box-shadow: rgb(159, 255, 0) 0px 0px 16px, rgb(255, 255, 255) 0px 0px 6px; }
-}
-
-.quantum-ring { position: absolute; inset: -3px; border-radius: 50%; border-width: 1.5px; border-style: solid; border-color: rgba(37, 99, 235, 0.85) rgba(159, 255, 0, 0.7) rgba(159, 255, 0, 0.7); border-image: none; transform: rotateX(68deg) rotateY(18deg); animation: 4s linear 0s infinite normal none running spinRing; pointer-events: none; }
-
-.quantum-ring-2 { position: absolute; inset: -1px; border-radius: 50%; border-width: 1.5px; border-style: solid; border-color: rgba(37, 99, 235, 0.6) rgba(37, 99, 235, 0.6) rgba(159, 255, 0, 0.85); border-image: none; transform: rotateX(68deg) rotateY(-50deg); animation: 5.5s linear 0s infinite normal none running spinRingRev; pointer-events: none; }
-
-@keyframes spinRing { 
-  0% { transform: rotateX(68deg) rotateY(18deg) rotateZ(0deg); }
-  100% { transform: rotateX(68deg) rotateY(18deg) rotateZ(360deg); }
-}
-
-@keyframes spinRingRev { 
-  0% { transform: rotateX(68deg) rotateY(-50deg) rotateZ(360deg); }
-  100% { transform: rotateX(68deg) rotateY(-50deg) rotateZ(0deg); }
-}
-
-.brand-text-block { display: flex; flex-direction: column; }
-
-.brand-title-3d { font-family: Outfit, sans-serif; font-weight: 700; font-size: 21px; letter-spacing: -0.03em; color: rgb(17, 19, 24); display: flex; align-items: center; gap: 6px; line-height: 1.1; text-shadow: rgba(255, 255, 255, 0.8) 0px 1px 1px; }
-
-.brand-title-3d .lime-dot { color: rgb(101, 163, 13); }
-
-.brand-sub-badge { font-size: 9.5px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: rgb(100, 116, 139); margin-top: 1px; }
-
-.nav-menu { display: flex; align-items: center; gap: 6px; }
-
-.nav-link { font-size: 13.5px; font-weight: 500; color: rgb(63, 63, 70); padding: 8px 14px; border-radius: 999px; transition: 0.16s; }
-
-.nav-link:hover { color: rgb(24, 24, 27); background: rgba(255, 255, 255, 0.8); }
-
-.nav-contact-btn { background: rgb(24, 24, 27); font-weight: 600; font-size: 13.5px; padding: 8px 16px; border-radius: 999px; border: 1px solid rgb(24, 24, 27); transition: transform 0.16s, background-color 0.16s, box-shadow 0.16s; display: inline-flex; align-items: center; gap: 6px; color: rgb(255, 255, 255) !important; }
-
-.nav-contact-btn:hover { background: rgb(9, 9, 11); transform: translateY(-1px); box-shadow: rgba(0, 0, 0, 0.15) 0px 4px 14px; }
-
-.nav-cta-btn { background: linear-gradient(135deg, rgb(24, 24, 27), rgb(39, 39, 42)); font-weight: 600; font-size: 13.5px; padding: 9px 18px; border-radius: 999px; display: inline-flex; align-items: center; gap: 6px; transition: transform 0.16s, background-color 0.16s; color: rgb(255, 255, 255) !important; }
-
-.nav-cta-btn:hover { background: rgb(9, 9, 11); transform: translateY(-1px); }
-
-.trial-pill { display: inline-flex; align-items: center; gap: 6px; background: rgb(255, 255, 255); border: 1px solid rgb(203, 213, 225); border-radius: 999px; padding: 5px 12px; font-size: 11.5px; font-weight: 700; color: rgb(30, 41, 59); box-shadow: rgba(0, 0, 0, 0.03) 0px 2px 6px; }
-
-.trial-pill.unlimited { background: rgb(239, 246, 255); border-color: rgb(191, 219, 254); color: rgb(29, 78, 216); }
-
-.trial-pill .trial-dot { width: 7px; height: 7px; border-radius: 50%; background: rgb(34, 197, 94); animation: 2s ease 0s infinite normal none running pulseDot; }
-
-@keyframes pulseDot { 
-  0% { transform: scale(0.9); opacity: 0.6; }
-  50% { transform: scale(1.3); opacity: 1; }
-  100% { transform: scale(0.9); opacity: 0.6; }
-}
-
-.auth-btn-pill { border: 1px solid var(--border); background: rgb(255, 255, 255); border-radius: 999px; padding: 7px 14px; font-size: 13px; font-weight: 600; color: rgb(24, 24, 27); cursor: pointer; display: flex; align-items: center; gap: 7px; box-shadow: rgba(0, 0, 0, 0.03) 0px 2px 8px; }
-
-.auth-btn-pill:hover { background: rgb(250, 250, 250); }
-
-.mobile-toggle { display: none; width: 40px; height: 40px; border-radius: 12px; border: 1px solid var(--border); background: rgb(255, 255, 255); color: rgb(24, 24, 27); cursor: pointer; align-items: center; justify-content: center; }
-
-.mobile-nav-panel { display: none; position: absolute; top: 74px; left: 0px; right: 0px; background: rgb(237, 238, 245); border-bottom: 1px solid var(--border); padding: 16px 20px 24px; z-index: 75; box-shadow: rgba(0, 0, 0, 0.08) 0px 25px 60px; }
-
-.mobile-nav-panel.open { display: block; }
-
-.mobile-nav-panel .nav-link { display: block; padding: 12px 14px; font-size: 15px; border-bottom: 1px solid rgba(24, 24, 27, 0.05); }
-
-.hero-section { position: relative; padding-top: clamp(80px, 12vw, 140px); padding-bottom: 30px; text-align: center; }
-
-.hero-tag { display: inline-block; font-size: 11.5px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: rgb(82, 82, 91); background: rgba(255, 255, 255, 0.85); border: 1px solid var(--border); padding: 6px 16px; border-radius: 999px; margin-bottom: 22px; }
-
-.hero-title { font-family: Outfit, sans-serif; font-weight: 400; font-size: clamp(44px, 7vw, 92px); line-height: 0.98; letter-spacing: -0.03em; color: var(--text); margin: 0px auto 20px; max-width: 1050px; }
-
-.lime-box { display: inline-block; background-color: var(--lime); color: var(--text); border-radius: 16px; padding: 0px 0.15em; }
-
-.hero-lead { font-size: clamp(16px, 1.6vw, 18px); line-height: 1.6; color: var(--muted); max-width: 580px; margin: 0px auto 32px; }
-
-.hero-actions { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 40px; }
-
-.hero-btn-primary { background: rgb(24, 24, 27); color: rgb(255, 255, 255); font-size: 14.5px; font-weight: 600; padding: 13px 28px; border-radius: 999px; transition: transform 0.18s, background-color 0.18s; box-shadow: rgba(24, 24, 27, 0.15) 0px 4px 16px; }
-
-.hero-btn-primary:hover { background: rgb(9, 9, 11); transform: translateY(-2px); }
-
-.hero-btn-secondary { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); color: rgb(24, 24, 27); font-size: 14.5px; font-weight: 600; padding: 13px 26px; border-radius: 999px; border: 1px solid var(--border); transition: 0.18s; }
-
-.hero-btn-secondary:hover { background: rgb(255, 255, 255); transform: translateY(-2px); }
-
-.video-wrapper { position: relative; width: 100%; max-width: 1140px; margin: 10px auto 60px; border-radius: 32px; overflow: hidden; box-shadow: rgba(24, 24, 27, 0.09) 0px 35px 95px; background: rgb(237, 238, 245); height: clamp(320px, 50vw, 580px); }
-
-.video-element { width: 100%; height: 100%; object-fit: cover; display: block; }
-
-.video-fade-top { position: absolute; top: 0px; left: 0px; right: 0px; height: 110px; background: linear-gradient(rgb(237, 238, 245) 0%, rgba(237, 238, 245, 0.5) 45%, rgba(237, 238, 245, 0) 100%); pointer-events: none; }
-
-.chat-section { padding: 20px 0px 90px; position: relative; z-index: 20; }
-
-.chat-shell { width: 100%; max-width: 1140px; margin: 0px auto; height: min(780px, 84vh); min-height: 590px; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(24px); border: 1px solid rgba(24, 24, 27, 0.08); border-radius: 32px; box-shadow: rgba(18, 22, 33, 0.1) 0px 30px 100px; display: flex; flex-direction: column; overflow: hidden; position: relative; }
-
-.chat-shell.fullscreen { position: fixed; inset: 0px; z-index: 9999; width: 100vw; height: 100vh; border-radius: 0px; margin: 0px; }
-
-.chat-header { height: 68px; display: flex; align-items: center; justify-content: space-between; padding: 0px 24px; border-bottom: 1px solid rgba(24, 24, 27, 0.06); background: rgba(255, 255, 255, 0.85); flex: 0 0 auto; }
-
-.chat-title-group { display: flex; align-items: center; gap: 12px; }
-
-.chat-status-dot { width: 9px; height: 9px; border-radius: 50%; background-color: rgb(34, 197, 94); box-shadow: rgba(34, 197, 94, 0.6) 0px 0px 10px; }
-
-.chat-title-text { font-family: Outfit, sans-serif; font-weight: 600; font-size: 16px; letter-spacing: -0.01em; }
-
-.chat-header-actions { display: flex; align-items: center; gap: 8px; }
-
-.voice-pill { display: flex; align-items: center; gap: 6px; background: rgba(237, 238, 245, 0.8); border: 1px solid rgba(24, 24, 27, 0.08); padding: 6px 12px; border-radius: 999px; font-size: 12.5px; font-weight: 600; color: rgb(39, 39, 42); cursor: pointer; }
-
-.voice-pill select { border: 0px; background: transparent; outline: none; font-weight: 600; color: rgb(24, 24, 27); cursor: pointer; }
-
-.call-btn-head { display: inline-flex; align-items: center; gap: 6px; background: rgb(37, 99, 235); color: rgb(255, 255, 255); border: 0px; border-radius: 999px; padding: 6px 14px; font-size: 12.5px; font-weight: 600; cursor: pointer; transition: transform 0.15s, background-color 0.15s; }
-
-.call-btn-head:hover { background: rgb(29, 78, 216); transform: translateY(-1px); }
-
-.header-tool-btn { width: 36px; height: 36px; border-radius: 10px; border: 1px solid rgba(24, 24, 27, 0.08); background: rgb(255, 255, 255); display: grid; place-items: center; font-size: 15px; color: rgb(63, 63, 70); cursor: pointer; }
-
-.chat-messages { flex: 1 1 0%; overflow-y: auto; padding: 24px 28px; background: linear-gradient(rgb(255, 255, 255), rgb(250, 250, 250)); }
-
-.message-row { display: flex; margin-bottom: 20px; }
-
-.message-row.user { justify-content: flex-end; }
-
-.message-bubble { max-width: min(840px, 86%); padding: 16px 20px; border-radius: 20px; background: rgb(244, 244, 245); color: rgb(24, 24, 27); font-size: 14.5px; line-height: 1.65; overflow-wrap: anywhere; white-space: normal; }
-
-.message-row.user .message-bubble { background: rgb(24, 24, 27); color: rgb(255, 255, 255); border-bottom-right-radius: 4px; }
-
-.message-row.ai .message-bubble { border-bottom-left-radius: 4px; background: rgb(248, 249, 250); border: 1px solid rgba(24, 24, 27, 0.05); }
-
-.agent-header-chip { display: inline-flex; align-items: center; gap: 6px; background: rgb(239, 246, 255); border: 1px solid rgb(191, 219, 254); color: rgb(30, 64, 175); border-radius: 999px; padding: 2px 10px; font-size: 11.5px; font-weight: 700; margin-bottom: 8px; }
-
-.codebox { margin: 14px 0px; border: 1px solid rgb(39, 39, 42); border-radius: 14px; overflow: hidden; background: rgb(9, 9, 11); color: rgb(250, 250, 250); }
-
-.codehead { display: flex; justify-content: space-between; align-items: center; padding: 8px 14px; background: rgb(24, 24, 27); border-bottom: 1px solid rgb(39, 39, 42); font-size: 11px; color: rgb(161, 161, 170); }
-
-.copycode { border: 0px; border-radius: 8px; background: rgb(39, 39, 42); color: rgb(250, 250, 250); padding: 4px 10px; font-size: 11px; cursor: pointer; }
-
-.copycode:hover { background: rgb(63, 63, 70); }
-
-.codebox pre { margin: 0px; padding: 14px; overflow-x: auto; font: 12.5px / 1.6 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
-
-.chat-composer { position: relative; padding: 12px 18px 18px; background: rgb(255, 255, 255); border-top: 1px solid rgba(24, 24, 27, 0.06); flex: 0 0 auto; }
-
-.composer-status-bar { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 22px; margin-bottom: 6px; }
-
-.active-agents-tray { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-
-.agent-tag { background: rgb(244, 244, 245); border: 1px solid rgb(228, 228, 231); border-radius: 999px; padding: 3px 10px; font-size: 11.5px; font-weight: 600; color: rgb(63, 63, 70); display: flex; align-items: center; gap: 5px; }
-
-.agent-tag button { border: 0px; background: transparent; color: rgb(113, 113, 122); padding: 0px; cursor: pointer; }
-
-.reasoning-badge { display: none; align-items: center; gap: 6px; background: rgb(239, 246, 255); color: rgb(37, 99, 235); border: 1px solid rgb(191, 219, 254); border-radius: 999px; padding: 3px 12px; font-size: 12px; font-weight: 700; }
-
-.reasoning-badge.active { display: inline-flex; }
-
-.composer-capsule { border: 1.5px solid rgb(212, 212, 216); border-radius: 32px; background: rgb(255, 255, 255); padding: 6px 10px 6px 14px; display: flex; align-items: center; gap: 10px; box-shadow: rgba(0, 0, 0, 0.03) 0px 2px 10px; transition: border-color 0.2s; }
-
-.composer-capsule:focus-within { border-color: rgb(37, 99, 235); box-shadow: rgba(37, 99, 235, 0.1) 0px 0px 0px 4px; }
-
-.composer-plus-btn { width: 36px; height: 36px; border-radius: 50%; border: 0px; background: transparent; color: rgb(24, 24, 27); font-size: 24px; line-height: 1; cursor: pointer; display: grid; place-items: center; flex: 0 0 auto; transition: background-color 0.15s; }
-
-.composer-plus-btn:hover { background: rgb(244, 244, 245); }
-
-.composer-input { border: 0px; outline: 0px; resize: none; flex: 1 1 0%; min-height: 38px; max-height: 160px; background: transparent; color: rgb(24, 24, 27); line-height: 1.5; padding: 8px 4px; font-size: 15px; }
-
-.composer-actions-right { display: flex; align-items: center; gap: 5px; flex: 0 0 auto; }
-
-.action-icon-btn { width: 38px; height: 38px; border: 0px; background: transparent; border-radius: 50%; display: grid; place-items: center; cursor: pointer; color: rgb(113, 113, 122); flex: 0 0 auto; transition: 0.15s; }
-
-.action-icon-btn:hover { background: rgb(244, 244, 245); color: rgb(24, 24, 27); }
-
-.action-icon-btn.brain-btn.active { background: rgb(254, 240, 138) !important; color: rgb(133, 77, 14) !important; border: 1.5px solid rgb(250, 204, 21) !important; box-shadow: rgba(250, 204, 21, 0.7) 0px 0px 16px !important; }
-
-.action-icon-btn.mic-btn.active { animation: 1.3s ease 0s infinite alternate none running mic-glow-pulse; background: rgb(220, 252, 231) !important; color: rgb(21, 128, 61) !important; border: 1.5px solid rgb(34, 197, 94) !important; box-shadow: rgba(34, 197, 94, 0.75) 0px 0px 16px !important; }
-
-@keyframes mic-glow-pulse { 
-  0% { transform: scale(1); box-shadow: rgba(34, 197, 94, 0.5) 0px 0px 10px; }
-  100% { transform: scale(1.08); box-shadow: rgba(34, 197, 94, 0.95) 0px 0px 22px; }
-}
-
-.chat-mini-avatar.neural-yellow-glow { animation: 2s ease-in-out 0s infinite normal none running neural-pulse-yellow; border-color: rgb(250, 204, 21) !important; box-shadow: rgb(250, 204, 21) 0px 0px 24px, rgba(250, 204, 21, 0.75) 0px 0px 45px !important; }
-
-@keyframes neural-pulse-yellow { 
-  0%, 100% { box-shadow: rgb(250, 204, 21) 0px 0px 20px, rgba(250, 204, 21, 0.55) 0px 0px 35px; border-color: rgb(250, 204, 21); }
-  50% { box-shadow: rgb(250, 204, 21) 0px 0px 32px, rgba(250, 204, 21, 0.95) 0px 0px 60px; border-color: rgb(254, 240, 138); }
-}
-
-.chat-status-dot-mini.neural-yellow { background: rgb(250, 204, 21) !important; box-shadow: rgb(250, 204, 21) 0px 0px 12px !important; }
-
-.synaptic-beam-spark { position: fixed; width: 14px; height: 14px; border-radius: 50%; background: rgb(254, 240, 138); box-shadow: rgb(250, 204, 21) 0px 0px 20px, rgb(250, 204, 21) 0px 0px 40px; pointer-events: none; z-index: 999999; transition: transform 0.42s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.42s; }
-
-.status-card { border-radius: 18px; padding: 16px 18px; margin: 14px 0px; box-sizing: border-box; font-family: inherit; transition: transform 0.15s, box-shadow 0.15s; }
-
-.status-card:hover { transform: translateY(-1px); }
-
-.status-card.status-green { border: 1.5px solid rgb(34, 197, 94); background: rgb(255, 255, 255); box-shadow: rgba(34, 197, 94, 0.08) 0px 4px 18px; }
-
-.status-card.status-orange { border: 1.5px solid rgb(249, 115, 22); background: rgb(255, 255, 255); box-shadow: rgba(249, 115, 22, 0.08) 0px 4px 18px; }
-
-.status-card.status-red { border: 1.5px solid rgb(239, 68, 68); background: rgb(255, 255, 255); box-shadow: rgba(239, 68, 68, 0.08) 0px 4px 18px; }
-
-.status-pill { display: inline-block; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 700; margin-bottom: 10px; letter-spacing: -0.01em; }
-
-.status-pill.pill-green { background: rgb(220, 252, 231); color: rgb(21, 128, 61); }
-
-.status-pill.pill-orange { background: rgb(255, 237, 213); color: rgb(194, 65, 12); }
-
-.status-pill.pill-red { background: rgb(254, 226, 226); color: rgb(185, 28, 28); }
-
-.status-card-title { font-size: 16px; font-weight: 700; color: rgb(15, 23, 42); margin: 0px 0px 8px; line-height: 1.4; }
-
-.status-card-body { font-size: 14px; line-height: 1.6; color: rgb(51, 65, 85); margin: 0px; }
-
-.status-code-chip { background: rgb(241, 245, 249); color: rgb(15, 23, 42); padding: 3px 8px; border-radius: 6px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; border: 1px solid rgb(226, 232, 240); display: inline-block; margin: 4px 0px; word-break: break-all; }
-
-.quick-status-pills { display: flex; align-items: center; gap: 6px; overflow-x: auto; padding: 4px 0px 8px; scrollbar-width: none; }
-
-.quick-status-pills::-webkit-scrollbar { display: none; }
-
-.quick-pill-btn { border: 1px solid rgb(226, 232, 240); background: rgb(248, 250, 252); padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; color: rgb(71, 85, 105); cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px; transition: 0.15s; }
-
-.quick-pill-btn:hover { background: rgb(241, 245, 249); color: rgb(15, 23, 42); }
-
-.quick-pill-btn.pill-verif { border-color: rgb(187, 247, 208); background: rgb(240, 253, 244); color: rgb(22, 101, 52); }
-
-.quick-pill-btn.pill-pend { border-color: rgb(254, 215, 170); background: rgb(255, 247, 237); color: rgb(154, 52, 18); }
-
-.quick-pill-btn.pill-bloq { border-color: rgb(254, 202, 202); background: rgb(254, 242, 242); color: rgb(153, 27, 27); }
-
-.composer-send-btn { width: 40px; height: 40px; border: 0px; border-radius: 50%; background: rgb(37, 99, 235); color: rgb(255, 255, 255); display: grid; place-items: center; cursor: pointer; flex: 0 0 auto; box-shadow: rgba(37, 99, 235, 0.35) 0px 4px 14px; transition: transform 0.16s, background-color 0.16s; }
-
-.composer-send-btn:hover { background: rgb(29, 78, 216); transform: translateY(-1px); }
-
-.plus-popup-menu { position: absolute; bottom: 84px; left: 18px; width: 260px; background: rgb(255, 255, 255); border: 1px solid rgba(24, 24, 27, 0.1); border-radius: 22px; box-shadow: rgba(0, 0, 0, 0.16) 0px 20px 60px; padding: 8px; display: none; z-index: 50; }
-
-.plus-popup-menu.open { display: block; }
-
-.plus-menu-btn { width: 100%; border: 0px; background: transparent; border-radius: 12px; padding: 10px 12px; text-align: left; display: flex; align-items: center; gap: 12px; cursor: pointer; font-size: 13.5px; font-weight: 600; color: rgb(39, 39, 42); }
-
-.plus-menu-btn:hover { background: rgb(244, 244, 245); color: rgb(9, 9, 11); }
-
-.plus-menu-icon { width: 32px; height: 32px; border-radius: 50%; background: rgb(244, 244, 245); display: grid; place-items: center; font-size: 16px; flex: 0 0 auto; }
-
-.live-call-overlay { position: fixed; inset: 0px; background: rgba(12, 17, 24, 0.94); backdrop-filter: blur(16px); z-index: 150; display: none; flex-direction: column; align-items: center; justify-content: space-between; padding: 40px 20px 60px; color: rgb(255, 255, 255); }
-
-.live-call-overlay.open { display: flex; }
-
-.call-top-bar { text-align: center; }
-
-.call-title { font: 600 24px Outfit, sans-serif; margin: 0px 0px 6px; }
-
-.call-status { font-size: 14px; color: rgb(74, 222, 128); display: flex; align-items: center; justify-content: center; gap: 8px; }
-
-.call-avatar-stage { position: relative; display: flex; align-items: center; justify-content: center; margin: 14px 0px; }
-
-.call-avatar-card { position: relative; width: 170px; height: 170px; border-radius: 32px; overflow: hidden; box-shadow: rgba(159, 255, 0, 0.45) 0px 0px 50px, rgba(0, 0, 0, 0.7) 0px 20px 45px; border: 3px solid rgb(159, 255, 0); z-index: 5; background: rgb(15, 23, 42); display: flex; align-items: center; justify-content: center; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s, border-color 0.3s; animation: 4s ease-in-out 0s infinite alternate none running floatAvatar; }
-
-.call-avatar-card.speaking { transform: scale(1.08); border-color: rgb(56, 189, 248); box-shadow: rgba(56, 189, 248, 0.7) 0px 0px 70px, rgba(0, 0, 0, 0.8) 0px 25px 55px; }
-
-.call-avatar-card.listening { transform: scale(1.03); border-color: rgb(159, 255, 0); box-shadow: rgba(159, 255, 0, 0.7) 0px 0px 70px, rgba(0, 0, 0, 0.8) 0px 25px 55px; }
-
-.call-avatar-img { width: 100%; height: 100%; object-fit: cover; display: block; }
-
-@keyframes floatAvatar { 
-  0% { transform: translateY(0px); }
-  100% { transform: translateY(-7px); }
-}
-
-.call-circle { width: 140px; height: 140px; border-radius: 50%; background: linear-gradient(135deg, rgb(37, 99, 235), rgb(147, 51, 234)); display: grid; place-items: center; font-size: 54px; box-shadow: rgba(37, 99, 235, 0.4) 0px 0px 60px; z-index: 2; }
-
-.call-wave { position: absolute; width: 170px; height: 170px; border-radius: 36px; border: 2px solid rgba(159, 255, 0, 0.5); animation: 2.4s ease 0s infinite normal none running pulseWave; }
-
-.call-wave:nth-child(2) { animation-delay: 0.8s; border-color: rgba(56, 189, 248, 0.5); }
-
-.call-wave:nth-child(3) { animation-delay: 1.6s; border-color: rgba(168, 85, 247, 0.5); }
-
-@keyframes pulseWave { 
-  0% { transform: scale(1); opacity: 0.8; }
-  100% { transform: scale(2.3); opacity: 0; }
-}
-
-.call-transcript-box { max-width: 580px; min-height: 80px; text-align: center; font-size: 18px; line-height: 1.6; color: rgb(226, 232, 240); padding: 0px 20px; }
-
-.call-controls { display: flex; align-items: center; gap: 20px; }
-
-.call-end-btn { width: 68px; height: 68px; border-radius: 50%; background: rgb(239, 68, 68); color: rgb(255, 255, 255); border: 0px; font-size: 26px; display: grid; place-items: center; cursor: pointer; box-shadow: rgba(239, 68, 68, 0.4) 0px 10px 30px; transition: transform 0.16s; }
-
-.call-end-btn:hover { transform: scale(1.06); }
-
-.integration-modal { position: fixed; inset: 0px; background: rgba(16, 16, 24, 0.6); backdrop-filter: blur(8px); display: none; place-items: center; z-index: 120; padding: 16px; }
-
-.integration-modal.open { display: grid; }
-
-.modal-box { width: min(520px, 100%); background: rgb(255, 255, 255); border-radius: 28px; border: 1px solid var(--border); box-shadow: rgba(0, 0, 0, 0.25) 0px 30px 100px; padding: 30px 26px; position: relative; }
-
-.modal-close { position: absolute; top: 20px; right: 20px; width: 36px; height: 36px; border-radius: 50%; border: 0px; background: rgb(244, 244, 245); font-size: 18px; color: rgb(113, 113, 122); cursor: pointer; }
-
-.account-modal { position: fixed; inset: 0px; background: rgba(16, 16, 24, 0.65); backdrop-filter: blur(8px); display: none; place-items: center; z-index: 140; padding: 16px; }
-
-.account-modal.open { display: grid; }
-
-.subscription-card { background: rgb(248, 250, 252); border: 1.5px solid rgb(226, 232, 240); border-radius: 20px; padding: 18px; margin: 18px 0px; }
-
-.sub-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-
-.sub-plan-badge { background: var(--ink); color: rgb(255, 255, 255); padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 700; }
-
-.sub-plan-badge.free { background: rgb(113, 113, 122); }
-
-.sub-detail-row { display: flex; justify-content: space-between; font-size: 13.5px; color: rgb(71, 85, 105); margin-bottom: 6px; }
-
-.auto-renew-row { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; padding-top: 12px; border-top: 1px solid rgb(226, 232, 240); font-size: 13px; }
-
-.cancel-renew-btn { border: 1px solid rgb(203, 213, 225); background: rgb(255, 255, 255); color: rgb(220, 38, 38); border-radius: 10px; padding: 6px 12px; font-size: 12px; font-weight: 600; cursor: pointer; }
-
-.cancel-renew-btn:hover { background: rgb(254, 226, 226); }
-
-footer { padding: 40px 0px 50px; border-top: 1px solid var(--border); color: rgb(113, 113, 122); font-size: 13px; }
-
-.footer-inner { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
-
-@media (max-width: 860px) {
-  .nav-menu { display: none; }
-  .mobile-toggle { display: flex; }
-  .hero-actions { flex-direction: column; width: 100%; max-width: 320px; margin: 0px auto 36px; }
-  .hero-btn-primary, .hero-btn-secondary { width: 100%; text-align: center; }
-  .chat-shell { height: 78vh; min-height: 520px; border-radius: 24px; }
-  .chat-messages { padding: 16px; }
-}
-
-.hidden { display: none !important; }
-
-#fileInput, #photoInput, #cameraInput { display: none; }
-
-@keyframes pageEntrance { 
-  0% { opacity: 0; transform: translateY(14px); }
-  100% { opacity: 1; transform: translateY(0px); }
-}
-
-.hero-section { animation: 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0s 1 normal forwards running pageEntrance; }
-
-.chat-shell { animation: 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.1s 1 normal both running pageEntrance; transition: 0.35s; }
-
-.video-wrapper, .cyborg-hero-stage { position: relative; width: 100%; max-width: 1140px; margin: 10px auto 60px; border-radius: 32px; overflow: hidden; box-shadow: rgba(24, 24, 27, 0.14) 0px 35px 95px, rgba(255, 255, 255, 0.08) 0px 0px 0px 1px; background: rgb(8, 12, 20); height: clamp(380px, 54vw, 640px); perspective: 1200px; cursor: pointer; animation: 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0s 1 normal both running pageEntrance; }
-
-.cyborg-hero-inner { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform 0.15s ease-out; will-change: transform; }
-
-.cyborg-hero-image { position: absolute; top: 0px; left: 0px; width: 100%; height: 100%; object-fit: cover; object-position: center 30%; pointer-events: none; filter: saturate(1.05) contrast(1.03); user-select: none; }
-
-.hero-neural-canvas { position: absolute; top: 0px; left: 0px; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
-
-.hero-neural-hud { position: absolute; bottom: 24px; left: 24px; z-index: 10; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.16); border-radius: 20px; padding: 12px 20px; display: flex; flex-direction: column; gap: 3px; box-shadow: rgba(0, 0, 0, 0.3) 0px 12px 35px; transition: 0.3s; cursor: pointer; max-width: calc(100% - 48px); }
-
-.hero-neural-hud:hover { background: rgba(15, 23, 42, 0.95); transform: translateY(-2px); border-color: rgba(159, 255, 0, 0.5); box-shadow: rgba(159, 255, 0, 0.2) 0px 16px 40px; }
-
-.hero-hud-pill { display: flex; align-items: center; gap: 8px; font: 700 13.5px Outfit, sans-serif; color: rgb(255, 255, 255); }
-
-.hero-hud-dot { width: 9px; height: 9px; border-radius: 50%; background: rgb(159, 255, 0); box-shadow: rgb(159, 255, 0) 0px 0px 10px; animation: 1.6s ease-in-out 0s infinite normal none running pulseLed; }
-
-.hero-hud-detail { font-size: 12px; color: rgb(148, 163, 184); font-weight: 500; }
-
-@keyframes pulseLed { 
-  0%, 100% { opacity: 0.6; transform: scale(0.9); }
-  50% { opacity: 1; transform: scale(1.15); box-shadow: rgb(159, 255, 0) 0px 0px 14px; }
-}
-
-.chat-avatar-wrapper { position: relative; width: 40px; height: 40px; flex: 0 0 auto; }
-
-.chat-mini-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(159, 255, 0, 0.6); box-shadow: rgba(159, 255, 0, 0.35) 0px 0px 12px; transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s; }
-
-.chat-mini-avatar.pulse-thinking { border-color: rgb(168, 85, 247); box-shadow: rgb(168, 85, 247) 0px 0px 18px; }
-
-.chat-mini-avatar.pulse-speaking { border-color: rgb(34, 197, 94); box-shadow: rgb(34, 197, 94) 0px 0px 18px; }
-
-.chat-status-dot-mini { position: absolute; bottom: 0px; right: 0px; width: 10px; height: 10px; border-radius: 50%; background: rgb(34, 197, 94); border: 2px solid rgb(255, 255, 255); box-shadow: rgb(34, 197, 94) 0px 0px 8px; }
-
-.chat-title-col { display: flex; flex-direction: column; gap: 1px; }
-
-.chat-subtitle-text { font-size: 11.5px; color: rgb(100, 116, 139); font-weight: 500; transition: color 0.2s; }
-
-.cookie-banner { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: min(920px, 100% - 32px); z-index: 99999; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.16); border-radius: 20px; padding: 18px 24px; box-shadow: rgba(0, 0, 0, 0.5) 0px 25px 80px; color: rgb(248, 250, 252); animation: 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0s 1 normal forwards running slideUpBanner; }
-
-@keyframes slideUpBanner { 
-  0% { opacity: 0; transform: translate(-50%, 30px); }
-  100% { opacity: 1; transform: translate(-50%, 0px); }
-}
-
-.cookie-card-inner { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
-
-.cookie-text-col { display: flex; align-items: flex-start; gap: 14px; flex: 1 1 0%; }
-
-.cookie-icon { font-size: 28px; flex: 0 0 auto; }
-
-.cookie-title { font: 700 15px Outfit, sans-serif; color: rgb(255, 255, 255); margin-bottom: 4px; }
-
-.cookie-desc { font-size: 13px; color: rgb(203, 213, 225); line-height: 1.55; margin: 0px; }
-
-.cookie-desc a { color: rgb(159, 255, 0); text-decoration: underline; font-weight: 600; }
-
-.cookie-actions { display: flex; align-items: center; gap: 10px; flex: 0 0 auto; }
-
-.cookie-btn-accept { background: rgb(159, 255, 0); color: rgb(11, 15, 23); border: 0px; padding: 10px 22px; border-radius: 999px; font-weight: 700; font-size: 13.5px; cursor: pointer; transition: 0.2s; white-space: nowrap; }
-
-.cookie-btn-accept:hover { background: rgb(174, 253, 40); transform: translateY(-1px); }
-
-.cookie-btn-link { background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.18); color: rgb(241, 245, 249); padding: 9px 18px; border-radius: 999px; font-size: 13px; font-weight: 600; text-decoration: none; cursor: pointer; white-space: nowrap; transition: 0.2s; }
-
-.cookie-btn-link:hover { background: rgba(255, 255, 255, 0.16); }
-
-@media (max-width: 760px) {
-  .cookie-card-inner { flex-direction: column; align-items: stretch; text-align: left; }
-  .cookie-actions { width: 100%; justify-content: flex-end; }
-  .cookie-btn-accept, .cookie-btn-link { flex: 1 1 0%; text-align: center; }
-}
-
-/* reglas heredadas */
-.human-caller-frame {
-  position: relative;
-  z-index: 5;
-  width: 155px;
-  height: 155px;
-  border-radius: 50%;
-  padding: 4px;
-  background: linear-gradient(135deg, #9fff00, #38bdf8);
-  box-shadow: 0 0 50px rgba(159, 255, 0, 0.45);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.human-caller-img {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  object-fit: cover;
-  transition: transform 0.25s ease, filter 0.25s ease;
-}
-
-.human-caller-img.talking {
-  transform: scale(1.06);
-  filter: drop-shadow(0 0 24px #9fff00);
-  animation: talkPulse 1.2s ease-in-out infinite alternate;
-}
-
-.mic-listening-pill {
-  display: none;
-  align-items: center;
-  gap: 7px;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  color: #b91c1c;
-  padding: 4px 14px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 700;
-  animation: pulseMic 1.4s infinite;
-}
-
-.mic-listening-pill.active { display: inline-flex; }
-
-@keyframes pulseMic {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.55; }
-}
-
-@keyframes talkPulse {
-  0% { transform: scale(1.02); }
-  100% { transform: scale(1.08); }
-}
-
-/* ajustes para hosting estático */
-.cyborg-hero-inner picture { position: absolute; inset: 0; display: block; }
-.cyborg-hero-stage { background: #f3f1ec; }
-.chat-header-actions { min-width: 0; }
-.voice-pill select { max-width: 150px; text-overflow: ellipsis; }
-@media (max-width: 560px) { .hero-neural-hud { left: 22px; bottom: 22px; max-width: calc(100% - 44px); } }
-
-/* ---- chat embebido, cerebro 3D y equipo ---- */
-.chat-section { padding: 10px 0 70px; }
-#chat, #cerebro, #equipo { scroll-margin-top: 84px; }
-.ace-host { animation: pageEntrance .9s cubic-bezier(.16,1,.3,1) .1s both; }
-.sec-tag { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: #52525b; background: rgba(255,255,255,.85); border: 1px solid var(--border); padding: 6px 14px; border-radius: 999px; margin-bottom: 16px; }
-.sec-title { font-family: Outfit, sans-serif; font-weight: 400; font-size: clamp(32px, 4.6vw, 58px); line-height: 1.02; letter-spacing: -.03em; margin: 0 0 14px; }
-.sec-lead { font-size: 16px; line-height: 1.6; color: var(--muted); margin: 0 0 18px; max-width: 560px; }
-.brain-section { padding: 30px 0 80px; position: relative; z-index: 10; }
-.brain-grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 36px; align-items: center; }
-.brain-points { list-style: none; padding: 0; margin: 0 0 14px; display: flex; flex-wrap: wrap; gap: 8px; }
-.brain-points li { background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 8px 12px; font-size: 13px; color: #3f3f46; }
-.brain-points strong { font-family: Outfit, sans-serif; font-size: 18px; color: #18181b; margin-right: 4px; }
-.brain-hint { font-size: 12.5px; color: #71717a; margin: 0; }
-.brain-stage { position: relative; height: clamp(360px, 46vw, 560px); border-radius: 32px; overflow: hidden; background: radial-gradient(ellipse at 50% 45%, #1d2a12 0%, #0b1020 55%, #05070d 100%); box-shadow: 0 35px 95px rgba(24,24,27,.18); isolation: isolate; }
-.brain-fallback, .brain-fallback img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 30%; transition: opacity .6s; }
-.brain-stage.is-3d .brain-fallback { opacity: 0; pointer-events: none; }
-.brain-glow { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(circle at 50% 50%, rgba(159,255,0,calc(.10 + var(--ac-voice-level, 0) * .25)), transparent 60%); z-index: 1; }
-.brain3d-canvas { position: absolute; inset: 0; width: 100% !important; height: 100% !important; display: block; z-index: 2; cursor: grab; }
-.brain3d-canvas:active { cursor: grabbing; }
-.brain-badge { position: absolute; left: 16px; bottom: 16px; z-index: 3; display: inline-flex; align-items: center; gap: 8px; background: rgba(15,23,42,.82); color: #fff; backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,.16); border-radius: 999px; padding: 7px 14px; font: 600 12.5px Outfit, sans-serif; max-width: calc(100% - 32px); }
-.brain-load { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 3; background: #9fff00; color: #18181b; border: 0; border-radius: 999px; padding: 12px 22px; font-weight: 700; cursor: pointer; box-shadow: 0 10px 30px rgba(159,255,0,.35); }
-.team-section { padding: 20px 0 90px; position: relative; z-index: 10; }
-.team-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; margin-bottom: 22px; }
-.team-updated { display: inline-flex; align-items: center; gap: 8px; background: #fff; border: 1px solid var(--border); border-radius: 999px; padding: 7px 14px; font-size: 12.5px; font-weight: 600; color: #3f3f46; white-space: nowrap; }
-.team-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
-.agent-card { background: rgba(255,255,255,.95); border: 1px solid var(--border); border-radius: 22px; padding: 16px; display: flex; flex-direction: column; gap: 10px; min-width: 0; box-shadow: 0 10px 30px rgba(24,24,27,.04); transition: transform .2s, box-shadow .2s; }
-.agent-card:hover { transform: translateY(-2px); box-shadow: 0 16px 40px rgba(24,24,27,.08); }
-.agent-top { display: flex; align-items: center; gap: 10px; min-width: 0; }
-.agent-emoji { width: 42px; height: 42px; flex: 0 0 42px; border-radius: 14px; display: grid; place-items: center; font-size: 22px; background: linear-gradient(135deg, rgba(159,255,0,.28), rgba(37,99,235,.12)); }
-.agent-name { font: 700 15px Outfit, sans-serif; line-height: 1.2; min-width: 0; flex: 1 1 auto; }
-.agent-top .agent-state { margin-left: auto; flex: 0 0 auto; }
-.agent-name small { display: block; font: 500 12px Inter, sans-serif; color: #71717a; margin-top: 2px; }
-.agent-state { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: #f4f4f5; color: #52525b; width: max-content; }
-.agent-state::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #a1a1aa; }
-.agent-state.activo { background: #dcfce7; color: #15803d; } .agent-state.activo::before { background: #22c55e; animation: pulseDot 1.6s infinite; }
-.agent-state.revision { background: #fef9c3; color: #a16207; } .agent-state.revision::before { background: #eab308; }
-.agent-last { font-size: 13px; line-height: 1.5; color: #3f3f46; margin: 0; overflow-wrap: anywhere; }
-.agent-meta { margin-top: auto; display: flex; justify-content: space-between; gap: 8px; font-size: 11.5px; color: #71717a; }
-.agent-meta a { color: #2563eb; font-weight: 600; text-decoration: underline; }
-@media (max-width: 1080px) { .team-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 860px) {
-  .brain-grid { grid-template-columns: 1fr; gap: 20px; }
-  .brain-stage { height: clamp(320px, 92vw, 460px); border-radius: 24px; }
-  .team-head { flex-direction: column; align-items: flex-start; }
-}
-@media (max-width: 520px) { .team-grid { grid-template-columns: 1fr; gap: 10px; } .agent-card { padding: 12px 14px; gap: 6px; border-radius: 18px; } .agent-emoji { width: 38px; height: 38px; flex-basis: 38px; font-size: 20px; } .chat-section { padding-bottom: 50px; } }
-@media (prefers-reduced-motion: reduce) { .agent-state.activo::before { animation: none; } }
-</style>
-<link rel="stylesheet" href="/app/embed.css">
+<link rel="preload" href="/assets/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/outfit-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/css/core.css?v=4.1.0"><link rel="stylesheet" href="/assets/css/site.css?v=4.1.0"><link rel="stylesheet" href="/assets/css/chat.css?v=4.1.0">
+
+<script src="/assets/js/theme-init.js?v=4.1.0"></script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Organization", "name": "AgentiCuántico", "url": "https://agenticuantico.dev.ar/", "logo": "https://agenticuantico.dev.ar/apple-touch-icon.png", "email": "agenticuantico@gmail.com", "address": {"@type": "PostalAddress", "addressLocality": "Bahía Blanca", "addressRegion": "Buenos Aires", "addressCountry": "AR"}, "sameAs": ["https://github.com/agenticuantico"]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebSite", "name": "AgentiCuántico", "url": "https://agenticuantico.dev.ar/", "inLanguage": ["es-AR", "en", "pt-BR", "it", "fr", "de"], "publisher": {"@type": "Organization", "name": "AgentiCuántico", "url": "https://agenticuantico.dev.ar/"}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "AgentiCuántico", "applicationCategory": "BusinessApplication", "operatingSystem": "Web", "url": "https://agenticuantico.dev.ar/", "inLanguage": ["es-AR", "en-US", "pt-BR"], "offers": [{"@type": "Offer", "name": "Gratis", "price": "0", "priceCurrency": "ARS"}, {"@type": "Offer", "name": "Pro", "price": "15600", "priceCurrency": "ARS"}, {"@type": "Offer", "name": "Pro", "price": "10", "priceCurrency": "USD"}, {"@type": "Offer", "name": "Empresa", "price": "46800", "priceCurrency": "ARS"}, {"@type": "Offer", "name": "Empresa", "price": "30", "priceCurrency": "USD"}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "¿Necesito crear una cuenta para usar AgentiCuántico?", "acceptedAnswer": {"@type": "Answer", "text": "No. Podés conversar sin cuenta y tus chats quedan solo en tu dispositivo. Con una cuenta gratuita se sincronizan entre dispositivos."}}, {"@type": "Question", "name": "¿Cuánto cuesta?", "acceptedAnswer": {"@type": "Answer", "text": "Gratis cuesta 0. Pro cuesta ARS 15.600 o USD 10 por mes y Empresa ARS 46.800 o USD 30 por mes. Se cancela cuando quieras."}}, {"@type": "Question", "name": "¿Me responde con voz?", "acceptedAnswer": {"@type": "Answer", "text": "Sí. Si le hablás con el micrófono, te responde con voz femenina natural y también por escrito. Si escribís, te responde con texto."}}, {"@type": "Question", "name": "¿Guardan mi tarjeta?", "acceptedAnswer": {"@type": "Answer", "text": "No. Los pagos se procesan en PayPal o Mercado Pago. AgentiCuántico nunca ve ni guarda números de tarjeta."}}]}</script>
 </head>
-<body>
-
-<canvas id="ambientCanvas"></canvas>
-
-<!-- Header -->
-<header>
-  <div class="wrap navbar">
-    <!-- 3D Quantum Brand Logo -->
-    <a class="brand-group" href="/" aria-label="AgentiCuantico Super Inteligencia">
-      <div class="quantum-logo-3d">
-        <div class="quantum-orb-3d">
-          <div class="quantum-nucleus"></div>
-          <div class="quantum-ring"></div>
-          <div class="quantum-ring-2"></div>
-        </div>
-      </div>
-      <div class="brand-text-block">
-        <div class="brand-title-3d">AgentiCuantico <span class="lime-dot">✦</span></div>
-        <span class="brand-sub-badge">Super Inteligencia</span>
-      </div>
-    </a>
-
-    <!-- Desktop Navigation -->
-    <nav class="nav-menu">
-      <a class="nav-link" href="#chat">chat</a>
-      <a class="nav-link" href="#cerebro">cerebro 3D</a>
-      <a class="nav-link" href="#equipo">equipo</a>
-      <a class="nav-link" href="/como-funciona">cómo funciona</a>
-      <a class="nav-link" href="/nosotros">nosotros</a>
-      <a class="nav-link" href="/planes" style="font-weight: 700; color: #2563eb;">planes</a>
-      <button class="nav-contact-btn" onclick="openContactModal()" title="Contacto comercial" style="border: 0; background: transparent; cursor: pointer;">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-        <span>Contacto</span>
-      </button>
-
-      <!-- Free Trial Quota Indicator -->
-      <div class="trial-pill" id="trialStatusPill" title="Tiempo de uso gratuito de la Super Inteligencia">
-        <span class="trial-dot"></span>
-        <span id="trialTimeRemaining">2h 00m gratis</span>
-      </div>
-
-      <!-- User Account Button -->
-      <button class="auth-btn-pill" id="btnUserAccount" onclick="openAccountModal()">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-          <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
-          <circle cx="12" cy="7" r="4"/>
-        </svg>
-        <span id="navAccountLabel">Mi cuenta</span>
-      </button>
-
-      <a class="nav-cta-btn" href="/app/">empezar →</a>
-    </nav>
-
-    <!-- Mobile Toggle -->
-    <button class="mobile-toggle" id="mobileMenuBtn" aria-label="Abrir menú" onclick="toggleMobileMenu()">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-        <line x1="3" y1="6" x2="21" y2="6"/>
-        <line x1="3" y1="12" x2="21" y2="12"/>
-        <line x1="3" y1="18" x2="21" y2="18"/>
-      </svg>
-    </button>
-  </div>
-
-  <!-- Mobile Nav Panel -->
-  <div class="mobile-nav-panel" id="mobileNavPanel">
-    <a class="nav-link" href="#chat" onclick="closeMobileMenu()">chat</a>
-    <a class="nav-link" href="#cerebro" onclick="closeMobileMenu()">cerebro 3D</a>
-    <a class="nav-link" href="#equipo" onclick="closeMobileMenu()">equipo de agentes</a>
-    <a class="nav-link" href="/como-funciona" onclick="closeMobileMenu()">cómo funciona</a>
-    <a class="nav-link" href="/nosotros" onclick="closeMobileMenu()">nosotros</a>
-    <a class="nav-link" href="/planes" onclick="closeMobileMenu()" style="font-weight: 700; color: #2563eb;">planes</a>
-    <a class="nav-link" href="javascript:void(0)" onclick="openContactModal(); closeMobileMenu();" style="font-weight: 700; color: #18181b;">Contacto comercial</a>
-    <a class="nav-link" href="javascript:void(0)" onclick="openAccountModal(); closeMobileMenu();">Mi cuenta</a>
-    <a class="nav-link" href="/app/" onclick="closeMobileMenu()" style="font-weight: 700;">empezar →</a>
+<body class="">
+<a class="skip-link" href="#main">Saltar al contenido</a>
+<header class="site-header">
+  <div class="container">
+    <a class="brand" href="/" aria-label="AgentiCuántico, inicio"><svg class="brand-mark" viewBox="0 0 32 32" width="32" height="32" aria-hidden="true" focusable="false"><defs><linearGradient id="bm-h" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e6c579"/><stop offset="1" stop-color="#a97b27"/></linearGradient></defs><rect width="32" height="32" rx="9" fill="#16151a"/><ellipse cx="16" cy="16" rx="11" ry="4.4" fill="none" stroke="url(#bm-h)" stroke-width="1.6" transform="rotate(-32 16 16)"/><ellipse cx="16" cy="16" rx="11" ry="4.4" fill="none" stroke="url(#bm-h)" stroke-width="1.6" transform="rotate(32 16 16)"/><circle cx="16" cy="16" r="3.1" fill="url(#bm-h)"/></svg><span class="brand-word">Agenti<b>Cuántico</b></span></a>
+    <nav class="nav" id="siteNav" aria-label="Principal"><a href="/como-funciona.html">Producto</a><a href="/soluciones/">Soluciones</a><a href="/planes.html">Precios</a><a href="/inversores/">Inversores y empresas</a><a href="/nosotros.html">Nosotros</a><a href="/contacto/">Contacto</a></nav>
+    <div class="header-actions">
+      <a class="btn btn-sm call-link" href="/llamada/" aria-label="Llamar"><span data-icon="phone"></span><span class="hide-sm">Llamar</span></a>
+      <button class="icon-btn" type="button" data-theme-toggle aria-label="Cambiar tema"></button>
+      <a class="btn btn-sm account-link" id="headerAccount" href="/cuenta/"><span data-icon="user"></span><span class="hide-sm">Mi cuenta</span></a>
+      <button class="icon-btn menu-toggle" id="menuToggle" type="button" aria-label="Abrir menú" aria-controls="siteNav" aria-expanded="false"><span data-icon="menu"></span></button>
+    </div>
   </div>
 </header>
-
-<main>
-  <!-- Hero Section -->
-  <section class="hero-section" id="hero">
-    <div class="wrap">
-      <div class="hero-tag">super inteligencia artificial agéntica · online</div>
-
-      <h1 class="hero-title">
-        Tu idea merece<br>un <span class="lime-box">equipo</span> de verdad.
-      </h1>
-
-      <p class="hero-lead">
-        Super inteligencia artificial para conversar, programar soluciones con código, analizar archivos, coordinar agentes expertos y responder órdenes con razonamiento profundo.
-      </p>
-
-      <div class="hero-actions">
-        <a class="hero-btn-primary" href="#chat">empezar a conversar →</a>
-        <button class="hero-btn-secondary" onclick="openContactModal()" style="cursor: pointer;">contacto comercial ↗</button>
-        <a class="hero-btn-secondary" href="/planes">ver planes y agentes</a>
+<main id="main">
+<section class="hero" aria-labelledby="heroTitle">
+  <div class="container">
+    <div class="hero-head">
+      <span class="eyebrow">Inteligencia artificial agéntica · Hecha en Argentina</span>
+      <h1 id="heroTitle">Tu idea merece un <span class="accent">equipo</span> de verdad.</h1>
+      <p class="lead">Hablale o escribile. AgentiCuántico entiende, planifica, usa herramientas, suma especialistas y te entrega el trabajo terminado. Con voz natural y un avatar que te mira, piensa y gesticula.</p>
+      <div class="hero-ctas">
+        <a class="btn btn-primary btn-lg" href="#probar">Hablar con AgentiCuántico <span data-icon="arrowDown"></span></a>
+        <a class="btn btn-lg" href="/planes.html">Ver planes</a>
+      </div>
+      <div class="trust" aria-label="Destacados">
+        <span><span data-icon="speaker"></span>Voz natural en 7 idiomas</span>
+        <span><span data-icon="users"></span>Agentes especialistas</span>
+        <span><span data-icon="shield"></span>Sin guardar tarjetas</span>
       </div>
     </div>
-  </section>
-
-  <!-- Hero visual: cyborg neuronal conectado al chat -->
-  <section class="wrap">
-    <div class="cyborg-hero-stage" id="heroVisualWrapper" title="AgentiCuantico · Hacé clic para conversar">
-      <div class="cyborg-hero-inner" id="heroVisualInner">
-        <picture>
-          <source type="image/webp" srcset="/media/agenticuantico-hero-960.webp 960w, /media/agenticuantico-hero.webp 1376w" sizes="(max-width: 1180px) 100vw, 1140px">
-          <img src="/media/agenticuantico-hero.jpg" srcset="/media/agenticuantico-hero-960.jpg 960w, /media/agenticuantico-hero.jpg 1376w" sizes="(max-width: 1180px) 100vw, 1140px" width="1376" height="768" alt="AgentiCuantico Super Inteligencia: rostro con cerebro de árbol dorado en casco de cristal" class="cyborg-hero-image" id="cyborgHeroImg" fetchpriority="high" decoding="async">
-        </picture>
-        <canvas id="heroNeuralCanvas" class="hero-neural-canvas" aria-hidden="true"></canvas>
+    <div class="stage" id="probar">
+      <div class="stage-avatar">
+        <div class="stage-caption"><span class="chip gold"><span data-icon="speaker"></span>Asistente con voz</span></div>
+        <div id="heroAvatar"></div>
       </div>
+      <div class="stage-chat"><div id="homeChat" class="chat-host" aria-label="Chat con AgentiCuántico"></div></div>
+    </div>
+  </div>
+</section>
 
-      <div class="hero-neural-hud" id="heroNeuralHud">
-        <div class="hero-hud-pill">
-          <span class="hero-hud-dot" id="heroHudDot"></span>
-          <span id="heroHudStatus">Vías neuronales activas · En espera</span>
-        </div>
-        <div class="hero-hud-detail" id="heroHudDetail">Sinapsis cuánticas: 432 Hz · Conectado al chat</div>
+<section class="section" aria-labelledby="flagTitle" style="padding-top:clamp(24px,4vw,56px)">
+  <div class="container flagship">
+    <div>
+      <span class="eyebrow">El modo insignia</span>
+      <h2 id="flagTitle">Un agente que hace todo por vos.</h2>
+      <p class="lead">Describí el resultado que querés. AgentiCuántico arma el plan, ejecuta cada paso con herramientas, convoca a los especialistas que hagan falta y te muestra el avance en tiempo real.</p>
+      <ul class="checklist">
+        <li><span data-icon="check"></span><span><strong>Planifica y verifica:</strong> pasos claros, revisión final y entregables descargables.</span></li>
+        <li><span data-icon="check"></span><span><strong>Usa herramientas:</strong> documentos, calculadora exacta, lienzo de código con vista previa aislada.</span></li>
+        <li><span data-icon="check"></span><span><strong>Te pide permiso:</strong> nada con consecuencias (enviar, publicar, pagar) sin tu confirmación.</span></li>
+      </ul>
+      <a class="btn btn-gold" href="/app/?modo=auto">Probar «Hace todo por vos»</a>
+    </div>
+    <div class="flag-visual" aria-hidden="true">
+      <ol class="flag-steps">
+        <li class="done"><span class="n">✓</span><span>Entender la tarea y definir criterios</span><span class="chip ok">Listo</span></li>
+        <li class="done"><span class="n">✓</span><span>Leer «propuesta-cliente.pdf» (12 págs.)</span><span class="chip ok">Listo</span></li>
+        <li class="done"><span class="n">✓</span><span>Investigadora: comparar 3 competidores</span><span class="chip ok">Listo</span></li>
+        <li class="wait"><span class="n">4</span><span>Redactora: borrador del correo</span><span class="chip gold">En curso</span></li>
+        <li><span class="n">5</span><span>Pedir tu confirmación antes de enviar</span><span class="chip">Pendiente</span></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="background:var(--bg-2)" aria-labelledby="featTitle">
+  <div class="container">
+    <div class="section-head center">
+      <span class="eyebrow">Todo en un lugar</span>
+      <h2 id="featTitle">Lo que podés hacer hoy</h2>
+      <p class="lead">Herramientas profesionales con una interfaz simple. Lo que necesita servidor lo indicamos con claridad.</p>
+    </div>
+    <div class="features">
+      <article class="feature"><span class="f-ic" data-icon="bolt"></span><h3>Chat rápido o profundo</h3><p>Respuestas al instante o razonamiento paso a paso para problemas complejos.</p></article>
+      <article class="feature"><span class="f-ic" data-icon="users"></span><h3>Agentes invitables</h3><p>Programador, Investigadora, Diseñador, Legal, Ciberseguridad y más. Mencionalos con @.</p><span class="chip gold">Pro y Empresa</span></article>
+      <article class="feature"><span class="f-ic" data-icon="file"></span><h3>Documentos y cámara</h3><p>PDF, Word, Excel, CSV e imágenes. Escaneá con la cámara del celular. Se leen en tu dispositivo.</p></article>
+      <article class="feature"><span class="f-ic" data-icon="mic"></span><h3>Voz y avatar 3D</h3><p>Mandá notas de voz y te contesta hablando, con labios sincronizados. Modo manos libres.</p></article>
+      <article class="feature"><span class="f-ic" data-icon="code"></span><h3>Lienzo de código</h3><p>Editá código y documentos al lado del chat, con vista previa segura y descarga.</p></article>
+      <article class="feature"><span class="f-ic" data-icon="clock"></span><h3>Automatizaciones</h3><p>Programá tareas recurrentes. Se guardan hoy y se ejecutan al activarse el servidor.</p><span class="chip">Requiere servidor</span></article>
+      <article class="feature"><span class="f-ic" data-icon="memory"></span><h3>Memoria e instrucciones</h3><p>Decile «Recordá que…» y lo tiene en cuenta. Ves, editás y borrás todo lo que recuerda.</p></article>
+      <article class="feature"><span class="f-ic" data-icon="ghost"></span><h3>Incógnito y privacidad</h3><p>Chats que no se guardan, exportación a Markdown o PDF y control total de tus datos.</p></article>
+    </div>
+  </div>
+</section>
+
+<section class="section" aria-labelledby="plansTitle">
+  <div class="container">
+    <div class="section-head center">
+      <span class="eyebrow">Planes</span>
+      <h2 id="plansTitle">Empezá gratis. Crecé cuando lo necesites.</h2>
+      <p class="lead">Mensual, sin permanencia. Pagás en pesos con Mercado Pago o en dólares con PayPal.</p>
+    </div>
+    <div id="plansMount" data-compact="1"></div>
+  </div>
+</section>
+
+<section class="section" style="background:var(--bg-2)" aria-labelledby="teamTitle">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">Equipo de agentes · 24/7</span>
+      <h2 id="teamTitle">Un equipo de IA que mejora AgentiCuántico todos los días</h2>
+      <p class="lead">Agentes internos proponen cambios pequeños y verificables. Una persona los revisa antes de publicarlos. Este es su estado público.</p>
+    </div>
+    <div class="team" id="team" aria-live="polite"><div class="skeleton" style="height:96px"></div><div class="skeleton" style="height:96px"></div><div class="skeleton" style="height:96px"></div><div class="skeleton" style="height:96px"></div></div>
+    <p class="small muted" id="teamUpdated" style="margin-top:12px"></p>
+  </div>
+</section>
+
+<section class="section" aria-labelledby="secTitle">
+  <div class="container">
+    <div class="section-head center">
+      <span class="eyebrow">Seguridad y privacidad</span>
+      <h2 id="secTitle">Tus datos, bajo tu control</h2>
+    </div>
+    <div class="security-grid">
+      <div class="card"><span data-icon="lock" style="display:inline-grid;color:var(--gold)"></span><h3 style="margin-top:10px">Pagos sin tarjetas guardadas</h3><p class="muted small">PayPal y Mercado Pago procesan los cobros. Solo conservamos el identificador de la suscripción.</p></div>
+      <div class="card"><span data-icon="shield" style="display:inline-grid;color:var(--gold)"></span><h3 style="margin-top:10px">Ley 25.326 y RGPD</h3><p class="muted small">Acceso, rectificación y supresión de tus datos cuando lo pidas. Analítica solo con tu consentimiento y sin IP.</p></div>
+      <div class="card"><span data-icon="eye" style="display:inline-grid;color:var(--gold)"></span><h3 style="margin-top:10px">Revisión de seguridad continua</h3><p class="muted small">Análisis automático de código, dependencias y secretos en cada cambio. <a href="/legal/seguridad.html">Ver política</a>.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" aria-labelledby="invHomeTitle">
+  <div class="container">
+    <div class="band band-inv">
+      <div>
+        <p class="eyebrow">Inversores y empresas</p>
+        <h2 id="invHomeTitle">Sumate al crecimiento de AgentiCuántico</h2>
+        <p>Buscamos inversores y empresas socias en América, Europa y el resto del mundo: integración por API, reventa con tu marca, pilotos enterprise e inversión.</p>
+      </div>
+      <div class="row" style="justify-content:flex-end">
+        <a class="btn btn-lg" href="/inversores/">Inversores y empresas</a>
+        <a class="btn btn-lg btn-ghost" href="/en/investors/" hreflang="en" lang="en">Investors (EN)</a>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- Chat conversacional (mismo motor que /app/) -->
-  <section class="chat-section" id="chat" aria-label="Chat con AgentiCuántico">
-    <div class="wrap">
-      <div id="acEmbed" class="ace-host"></div>
-      <noscript><p style="text-align:center">Activá JavaScript para conversar o abrí <a href="/app/">la app de chat</a>.</p></noscript>
+<section class="section" style="background:var(--bg-2)" aria-labelledby="faqTitle">
+  <div class="container">
+    <div class="section-head center"><span class="eyebrow">Preguntas frecuentes</span><h2 id="faqTitle">Lo que suelen preguntarnos</h2></div>
+    <div class="faq">
+      <details><summary>¿Necesito crear una cuenta?</summary><p>No. Podés conversar sin cuenta y tus chats quedan solo en tu dispositivo. Con una cuenta gratuita se sincronizan entre dispositivos y podés compartirlos.</p></details>
+      <details><summary>¿Me responde con voz?</summary><p>Sí. Si le hablás con el micrófono, la nota de voz se envía sola y te responde hablando (y por escrito). Si escribís, te responde con texto; igual podés escucharla con el botón de altavoz.</p></details>
+      <details><summary>¿Cuánto cuesta y cómo se paga?</summary><p>Gratis cuesta 0. Pro: ARS 15.600 o USD 10 por mes. Empresa: ARS 46.800 o USD 30 por mes. Pagás en pesos con Mercado Pago o en dólares con PayPal. Cancelás cuando quieras desde tu cuenta.</p></details>
+      <details><summary>¿Guardan mi tarjeta?</summary><p>No. Los datos de la tarjeta se cargan en las ventanas seguras de PayPal o Mercado Pago. AgentiCuántico nunca los ve ni los guarda.</p></details>
+      <details><summary>¿Qué funciona hoy y qué necesita el servidor?</summary><p>Hoy funcionan el chat con base local, la voz, el avatar, los documentos, la cámara, el lienzo, las cuentas y las suscripciones con PayPal. Las respuestas abiertas con el modelo completo, la búsqueda web, los conectores y la ejecución de automatizaciones se activan con el servidor de AgentiCuántico; en la interfaz lo vas a ver indicado.</p></details>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- Cerebro vivo 3D -->
-  <section class="brain-section" id="cerebro" aria-labelledby="brainTitle">
-    <div class="wrap brain-grid">
-      <div class="brain-copy">
-        <span class="sec-tag">cerebro vivo · 3D</span>
-        <h2 class="sec-title" id="brainTitle">Un cerebro que <span class="lime-box">piensa</span> en red.</h2>
-        <p class="sec-lead">Cada nodo es una habilidad y cada rama dorada, una conexión entre agentes. Cuando AgentiCuántico razona o te habla, las sinapsis se encienden en tiempo real.</p>
-        <ul class="brain-points">
-          <li><strong>460</strong> nodos neuronales</li>
-          <li><strong>860</strong> sinapsis activas</li>
-          <li><strong>8</strong> agentes especialistas</li>
-        </ul>
-        <p class="brain-hint" id="brainHint">Arrastrá para girarlo · se mueve solo</p>
+<section class="section">
+  <div class="container">
+    <div class="band">
+      <div>
+        <h2>¿Querés AgentiCuántico en tu empresa?</h2>
+        <p>Agentes a medida, integraciones y acompañamiento. Contanos qué querés automatizar.</p>
       </div>
-      <div class="brain-stage" id="brainStage" data-src="/media/cerebro.glb">
-        <picture class="brain-fallback">
-          <source type="image/webp" srcset="/media/agenticuantico-hero-960.webp">
-          <img src="/media/agenticuantico-hero-960.jpg" alt="Cerebro dorado de AgentiCuántico" width="960" height="536" loading="lazy" decoding="async">
-        </picture>
-        <div class="brain-glow" aria-hidden="true"></div>
-        <button class="brain-load" id="brainLoad" type="button" hidden>Ver en 3D</button>
-        <div class="brain-badge" id="brainBadge"><span class="hero-hud-dot"></span><span id="brainBadgeText">Cargando cerebro 3D…</span></div>
+      <div class="row" style="justify-content:flex-end">
+        <a class="btn btn-lg" href="mailto:agenticuantico@gmail.com?subject=Consulta%20Comercial">Contacto comercial</a>
+        <a class="btn btn-lg btn-ghost" href="/app/">Abrir el chat</a>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- Equipo de agentes en vivo -->
-  <section class="team-section" id="equipo" aria-labelledby="teamTitle">
-    <div class="wrap">
-      <div class="team-head">
-        <div>
-          <span class="sec-tag">equipo de agentes · 24/7</span>
-          <h2 class="sec-title" id="teamTitle">Un equipo de IA que trabaja <span class="lime-box">todo el día</span>.</h2>
-          <p class="sec-lead">Ocho especialistas mejoran AgentiCuántico varias veces por día: proponen cambios pequeños y verificables que un humano revisa antes de publicar.</p>
-        </div>
-        <div class="team-updated" id="teamUpdated"><span class="hero-hud-dot"></span><span>Conectando…</span></div>
-      </div>
-      <div class="team-grid" id="teamGrid" aria-live="polite"></div>
-    </div>
-  </section>
 </main>
-
-<footer>
-  <div class="wrap footer-inner">
-    <div><strong>AgentiCuantico</strong> · © 2026 Super Inteligencia Artificial para Empresas</div>
-    <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
-      <a href="/planes" style="text-decoration: underline;">Planes y Precios</a>
-      <button onclick="openContactModal()" style="font-weight: 700; color: #18181b; background: transparent; border: 0; cursor: pointer; padding: 0;">Contacto comercial ↗</button>
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <a class="brand" href="/" aria-label="AgentiCuántico, inicio"><svg class="brand-mark" viewBox="0 0 32 32" width="32" height="32" aria-hidden="true" focusable="false"><defs><linearGradient id="bm-f" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e6c579"/><stop offset="1" stop-color="#a97b27"/></linearGradient></defs><rect width="32" height="32" rx="9" fill="#16151a"/><ellipse cx="16" cy="16" rx="11" ry="4.4" fill="none" stroke="url(#bm-f)" stroke-width="1.6" transform="rotate(-32 16 16)"/><ellipse cx="16" cy="16" rx="11" ry="4.4" fill="none" stroke="url(#bm-f)" stroke-width="1.6" transform="rotate(32 16 16)"/><circle cx="16" cy="16" r="3.1" fill="url(#bm-f)"/></svg><span class="brand-word">Agenti<b>Cuántico</b></span></a>
+        <p style="margin-top:14px;max-width:340px">Plataforma de agentes de inteligencia artificial para personas y empresas. Bahía Blanca, Argentina.</p>
+        <p><a href="/contacto/">Contacto</a> · <a href="mailto:agenticuantico@gmail.com?subject=Consulta%20Comercial">agenticuantico@gmail.com</a></p>
+      </div>
+      <div><h2 class="footer-h">Producto</h2><ul>
+        <li><a href="/como-funciona.html">Cómo funciona</a></li><li><a href="/app/">Chat y agente</a></li><li><a href="/llamada/">Llamada por voz</a></li>
+        <li><a href="/soluciones/">Soluciones</a></li><li><a href="/planes.html">Precios</a></li></ul></div>
+      <div><h2 class="footer-h">Empresa</h2><ul>
+        <li><a href="/nosotros.html">Nosotros</a></li><li><a href="/inversores/">Inversores y empresas</a></li><li><a href="/contacto/">Contacto</a></li>
+        <li><a href="/etica/">Ética e IA responsable</a></li><li><a href="/legal/seguridad.html">Seguridad</a></li></ul></div>
+      <div><h2 class="footer-h">Legales</h2><ul>
+        <li><a href="/legal/terminos.html">Términos y condiciones</a></li><li><a href="/legal/privacidad.html">Privacidad</a></li>
+        <li><a href="/legal/cookies.html">Cookies</a></li><li><a href="/legal/aviso-legal.html">Aviso legal</a></li>
+        <li><a href="/legal/reembolsos.html">Reembolsos y arrepentimiento</a></li><li><a href="/legal/uso-aceptable.html">Uso aceptable de IA</a></li><li><a href="/legal/creditos.html">Créditos y licencias</a></li></ul></div>
+    </div>
+    <nav class="footer-langs" aria-label="Inversores en otros idiomas"><a href="/inversores/" hreflang="es" lang="es">Español</a><a href="/en/investors/" hreflang="en" lang="en">English</a><a href="/pt/investidores/" hreflang="pt" lang="pt">Português</a><a href="/it/investitori/" hreflang="it" lang="it">Italiano</a><a href="/fr/investisseurs/" hreflang="fr" lang="fr">Français</a><a href="/de/investoren/" hreflang="de" lang="de">Deutsch</a></nav>
+    <div class="footer-bottom">
+      <span>© 2026 AgentiCuántico. Todos los derechos reservados.</span>
+      <span class="row"><button class="linklike" type="button" data-consent-open>Preferencias de cookies</button><a href="/legal/reembolsos.html#arrepentimiento">Botón de arrepentimiento</a></span>
     </div>
   </div>
 </footer>
-
-<!-- Modal Contacto Empresarial (Email protegido y oculto) -->
-<div class="integration-modal" id="contactModal">
-  <div class="modal-box" style="max-width: 490px;">
-    <button class="modal-close" onclick="closeContactModal()">×</button>
-    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
-      <span style="font-size: 24px;">💬</span>
-      <h2 style="font: 700 22px 'Outfit', sans-serif; margin: 0;">Contacto Comercial</h2>
-    </div>
-    <p style="color: var(--muted); font-size: 13.5px; margin: 0 0 16px;">
-      Envianos tu consulta sobre planes para empresas, integraciones personalizadas o requerimientos específicos.
-    </p>
-
-    <form onsubmit="handleContactSubmit(event)">
-      <input id="contactName" type="text" placeholder="Tu nombre y apellido" required style="width: 100%; height: 44px; padding: 0 14px; border: 1px solid #d4d4d8; border-radius: 12px; margin-bottom: 10px; font-size: 14px; outline: none;">
-      <input id="contactEmail" type="email" placeholder="correo@empresa.com" required style="width: 100%; height: 44px; padding: 0 14px; border: 1px solid #d4d4d8; border-radius: 12px; margin-bottom: 10px; font-size: 14px; outline: none;">
-      <input id="contactCompany" type="text" placeholder="Empresa o proyecto (opcional)" style="width: 100%; height: 44px; padding: 0 14px; border: 1px solid #d4d4d8; border-radius: 12px; margin-bottom: 10px; font-size: 14px; outline: none;">
-      <textarea id="contactMessage" placeholder="Detallá tu consulta o propuesta..." rows="4" required style="width: 100%; padding: 12px 14px; border: 1px solid #d4d4d8; border-radius: 12px; margin-bottom: 14px; font-family: inherit; font-size: 14px; outline: none; resize: vertical;"></textarea>
-
-      <button class="hero-btn-primary" type="submit" style="width: 100%; border: 0; padding: 12px; font-size: 14.5px; cursor: pointer;">Enviar Mensaje Directo</button>
-    </form>
-    <div id="contactStatusMsg" style="font-size: 13px; margin-top: 10px; text-align: center; color: #16a34a; font-weight: 600;"></div>
-  </div>
-</div>
-
-<!-- Modal Límite de Prueba Gratuita (2 horas) -->
-<div class="integration-modal" id="trialExpiredModal">
-  <div class="modal-box" style="text-align: center; max-width: 480px;">
-    <div style="font-size: 38px; margin-bottom: 8px;">⏳</div>
-    <h2 style="font: 700 24px 'Outfit', sans-serif; margin: 0 0 10px; color: #111318;">Tu tiempo de prueba gratuito ha concluido</h2>
-    <p style="color: #475569; font-size: 14px; line-height: 1.6; margin: 0 0 20px;">
-      Completaste tus <strong>2 horas de prueba gratuita</strong> con AgentiCuantico Super Inteligencia. Para continuar conversando sin límites y desbloquear llamadas ilimitadas con agentes especializados, elegí un plan mensual auto-renovable o contactanos directamente.
-    </p>
-
-    <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px;">
-      <a class="hero-btn-primary" href="/planes" style="padding: 13px 20px; font-size: 14.5px; text-align: center;">Elegir Plan (Pro, Business o Enterprise) →</a>
-      <button class="hero-btn-secondary" onclick="openContactModal(); closeTrialModal();" style="width: 100%; padding: 12px 20px; font-size: 14px; cursor: pointer; border: 1px solid var(--border);">Contactar al equipo comercial ↗</button>
-    </div>
-
-    <button onclick="closeTrialModal()" style="border: 0; background: transparent; color: #64748b; font-size: 13px; cursor: pointer; text-decoration: underline;">Volver a la interfaz</button>
-  </div>
-</div>
-
-<!-- Modal Mi Cuenta & Panel de Suscripción -->
-<div class="account-modal" id="accountModal">
-  <div class="modal-box">
-    <button class="modal-close" onclick="closeAccountModal()">×</button>
-
-    <div id="accountLoggedOutView">
-      <h2 style="font: 600 24px 'Outfit', sans-serif; margin: 0 0 6px;">Acceso a tu Cuenta</h2>
-      <p style="color: var(--muted); font-size: 13.5px; margin: 0 0 16px;">Iniciá sesión o registrate para sincronizar tu plan y agentes especializados.</p>
-
-      <!-- Auth Mode Tabs -->
-      <div style="display: flex; gap: 8px; margin-bottom: 16px; background: #f4f4f5; padding: 4px; border-radius: 12px;">
-        <button id="tabLogin" onclick="setAuthTab('login')" style="flex: 1; padding: 8px; border: 0; border-radius: 8px; background: #fff; font-weight: 700; font-size: 13px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.06);">Iniciar Sesión</button>
-        <button id="tabRegister" onclick="setAuthTab('register')" style="flex: 1; padding: 8px; border: 0; border-radius: 8px; background: transparent; font-weight: 600; font-size: 13px; color: #71717a; cursor: pointer;">Crear Cuenta</button>
-      </div>
-
-      <!-- Google Sign In -->
-      <button class="auth-btn-pill" style="width: 100%; height: 46px; justify-content: center; margin-bottom: 16px; cursor: pointer;" onclick="triggerGoogleLogin()">
-        <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
-        <span>Continuar con Google</span>
-      </button>
-
-      <div style="display: flex; align-items: center; gap: 10px; margin: 12px 0 16px; color: #a1a1aa; font-size: 12px;">
-        <div style="flex: 1; height: 1px; background: #e4e4e7;"></div>
-        <span>o con correo y clave</span>
-        <div style="flex: 1; height: 1px; background: #e4e4e7;"></div>
-      </div>
-
-      <form onsubmit="handleEmailAuth(event)">
-        <input id="authNameInput" type="text" placeholder="Tu nombre completo" style="display: none; width: 100%; height: 44px; padding: 0 14px; border: 1px solid #d4d4d8; border-radius: 12px; margin-bottom: 10px; outline: none; font-size: 14px;">
-        <input id="authEmailInput" type="email" placeholder="correo@ejemplo.com" required style="width: 100%; height: 44px; padding: 0 14px; border: 1px solid #d4d4d8; border-radius: 12px; margin-bottom: 10px; outline: none; font-size: 14px;">
-        <input id="authPassInput" type="password" placeholder="Tu contraseña" required style="width: 100%; height: 44px; padding: 0 14px; border: 1px solid #d4d4d8; border-radius: 12px; margin-bottom: 16px; outline: none; font-size: 14px;">
-        <button id="authSubmitBtn" class="hero-btn-primary" type="submit" style="width: 100%; border: 0; padding: 12px; font-size: 14.5px; cursor: pointer;">Iniciar Sesión</button>
-      </form>
-      <div id="authErrorMsg" style="color: #dc2626; font-size: 12px; text-align: center; margin-top: 10px;"></div>
-    </div>
-
-    <div id="accountLoggedInView" class="hidden">
-      <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 16px;">
-        <img id="userAvatarImg" src="" alt="Avatar" style="width: 52px; height: 52px; border-radius: 50%; object-fit: cover; background: #e4e4e7;">
-        <div>
-          <h3 id="userNameHeading" style="font: 600 18px 'Outfit', sans-serif; margin: 0;">Usuario</h3>
-          <div id="userEmailSub" style="color: #71717a; font-size: 13px;">usuario@gmail.com</div>
-        </div>
-      </div>
-
-      <!-- Subscription Card with 30 days cycle -->
-      <div class="subscription-card">
-        <div class="sub-header">
-          <span style="font-size: 13px; font-weight: 700; color: #334155; text-transform: uppercase;">Estado de Suscripción</span>
-          <span class="sub-plan-badge" id="userPlanBadge">Free (Básico)</span>
-        </div>
-
-        <div class="sub-detail-row">
-          <span>Fecha de inicio:</span>
-          <strong id="subStartDate">--</strong>
-        </div>
-        <div class="sub-detail-row">
-          <span>Fecha de vencimiento:</span>
-          <strong id="subEndDate">-- (30 días)</strong>
-        </div>
-        <div class="sub-detail-row">
-          <span>Días restantes:</span>
-          <strong id="subDaysLeft">-- días</strong>
-        </div>
-
-        <div class="auto-renew-row">
-          <div>
-            <div style="font-weight: 600; color: #1e293b;" id="autoRenewStatus">Renovación automática: Activa</div>
-            <small style="color: #64748b; font-size: 11px;">Se renueva cada 30 días para no cortar tus servicios</small>
-          </div>
-          <button class="cancel-renew-btn" id="btnCancelRenew" onclick="cancelAutoRenewal()">Desactivar auto-renovación</button>
-        </div>
-      </div>
-
-      <div style="display: flex; gap: 10px; margin-top: 16px;">
-        <a class="hero-btn-primary" href="/planes" style="flex: 1; text-align: center; padding: 11px;">Cambiar / Mejorar Plan</a>
-        <button class="hero-btn-secondary" onclick="logoutUser()" style="padding: 11px 18px;">Cerrar sesión</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Modal Autenticación con Google -->
-<div class="integration-modal" id="googleAuthModal">
-  <div class="modal-box" style="max-width: 440px;">
-    <button class="modal-close" onclick="closeGoogleAuthModal()">×</button>
-    <div style="text-align: center; margin-bottom: 20px;">
-      <svg width="40" height="40" viewBox="0 0 24 24" style="margin-bottom: 10px;">
-        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-      </svg>
-      <h2 style="font: 700 22px 'Outfit', sans-serif; margin: 0 0 6px;">Acceder con Google</h2>
-      <p style="color: var(--muted); font-size: 13.5px; margin: 0;">Seleccioná tu cuenta de Google / Gmail para ingresar a tu panel de usuario.</p>
-    </div>
-
-    <div style="background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 14px; padding: 12px 14px; margin-bottom: 16px; font-size: 13px; color: #1e3a8a; line-height: 1.5; text-align: center;">
-      El acceso con Google estará disponible <strong>próximamente</strong>. Mientras tanto podés usar el chat libremente o escribirnos a <a href="mailto:agenticuantico@gmail.com" style="text-decoration: underline;">agenticuantico@gmail.com</a>.
-    </div>
-
-    </div>
-
-    <div style="display: flex; align-items: center; gap: 10px; margin: 12px 0 16px; color: #a1a1aa; font-size: 12px;">
-      <div style="flex: 1; height: 1px; background: #e4e4e7;"></div>
-      <span>o usar otra cuenta de Google</span>
-      <div style="flex: 1; height: 1px; background: #e4e4e7;"></div>
-    </div>
-
-    <form onsubmit="handleCustomGoogleEmail(event)">
-      <input id="customGoogleEmail" type="email" placeholder="tu-cuenta@gmail.com" required style="width: 100%; height: 44px; padding: 0 14px; border: 1px solid #d4d4d8; border-radius: 12px; margin-bottom: 14px; outline: none; font-size: 14px;">
-      <button class="hero-btn-primary" type="submit" style="width: 100%; border: 0; padding: 12px; font-size: 14.5px; cursor: pointer;">Acceder con este correo</button>
-    </form>
-    <div id="googleAuthStatus" style="font-size: 12.5px; text-align: center; margin-top: 10px; font-weight: 600;"></div>
-  </div>
-</div>
-
-
-<script>
-// State Management
-let currentUser = null;
-let trialSecondsRemaining = 120 * 60; // 2 horas gratis
-let isTrialUnlimited = false;
-let trialTimerInterval = null;
-
-// Initialize
-document.addEventListener("DOMContentLoaded", async () => {
-  initParticles();
-  initTrialQuota();
-  await checkUserSession();
-});
-
-// Trial Quota (1-2 Hours Free Quota Tracker)
-async function initTrialQuota() {
-  try {
-    const res = await fetch("/api/user/trial-config");
-    const data = await res.json();
-    if (data.ok && data.isUnlimited) {
-      setUnlimitedTrial();
-      return;
-    }
-  } catch {}
-
-  const saved = localStorage.getItem("aq_trial_seconds");
-  if (saved !== null) {
-    trialSecondsRemaining = Math.max(0, parseInt(saved, 10));
-  } else {
-    trialSecondsRemaining = 120 * 60; // 2 horas completas
-  }
-
-  updateTrialPillUI();
-
-  // Tick countdown every second
-  if (trialTimerInterval) clearInterval(trialTimerInterval);
-  trialTimerInterval = setInterval(() => {
-    if (isTrialUnlimited) return;
-    if (trialSecondsRemaining > 0) {
-      trialSecondsRemaining--;
-      localStorage.setItem("aq_trial_seconds", trialSecondsRemaining.toString());
-      updateTrialPillUI();
-    } else {
-      clearInterval(trialTimerInterval);
-      openTrialModal();
-    }
-  }, 1000);
-}
-
-function setUnlimitedTrial() {
-  isTrialUnlimited = true;
-  if (trialTimerInterval) clearInterval(trialTimerInterval);
-  const pill = document.getElementById("trialStatusPill");
-  if (pill) {
-    pill.classList.add("unlimited");
-    pill.innerHTML = `<span>✦</span> <span>Acceso Ilimitado</span>`;
-  }
-}
-
-function updateTrialPillUI() {
-  if (isTrialUnlimited) return;
-  const label = document.getElementById("trialTimeRemaining");
-  if (!label) return;
-  const hrs = Math.floor(trialSecondsRemaining / 3600);
-  const mins = Math.floor((trialSecondsRemaining % 3600) / 60);
-  const secs = trialSecondsRemaining % 60;
-  if (hrs > 0) {
-    label.textContent = `${hrs}h ${mins}m gratis`;
-  } else if (mins > 0) {
-    label.textContent = `${mins}m ${secs}s gratis`;
-  } else {
-    label.textContent = `0m restante`;
-  }
-}
-
-function openTrialModal() {
-  const modal = document.getElementById("trialExpiredModal");
-  if (modal) modal.classList.add("open");
-}
-
-function closeTrialModal() {
-  const modal = document.getElementById("trialExpiredModal");
-  if (modal) modal.classList.remove("open");
-}
-
-// Particles Ambient 3D Canvas
-function initParticles() {
-  const canvas = document.getElementById("ambientCanvas");
-  if (!canvas) return;
-  const ctx = canvas.getContext("2d");
-  let w = canvas.width = window.innerWidth;
-  let h = canvas.height = window.innerHeight;
-
-  window.addEventListener("resize", () => {
-    w = canvas.width = window.innerWidth;
-    h = canvas.height = window.innerHeight;
-  });
-
-  const particles = [];
-  for (let i = 0; i < 35; i++) {
-    particles.push({
-      x: Math.random() * w,
-      y: Math.random() * h,
-      vx: (Math.random() - 0.5) * 0.4,
-      vy: (Math.random() - 0.5) * 0.4,
-      r: Math.random() * 2 + 1,
-    });
-  }
-
-  function render() {
-    ctx.clearRect(0, 0, w, h);
-    for (let i = 0; i < particles.length; i++) {
-      let p = particles[i];
-      p.x += p.vx;
-      p.y += p.vy;
-      if (p.x < 0 || p.x > w) p.vx *= -1;
-      if (p.y < 0 || p.y > h) p.vy *= -1;
-
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      ctx.fillStyle = "rgba(159, 255, 0, 0.45)";
-      ctx.fill();
-
-      for (let j = i + 1; j < particles.length; j++) {
-        let p2 = particles[j];
-        let d = Math.hypot(p.x - p2.x, p.y - p2.y);
-        if (d < 110) {
-          ctx.beginPath();
-          ctx.strokeStyle = `rgba(24, 24, 27, ${0.05 * (1 - d / 110)})`;
-          ctx.moveTo(p.x, p.y);
-          ctx.lineTo(p2.x, p2.y);
-          ctx.stroke();
-        }
-      }
-    }
-    requestAnimationFrame(render);
-  }
-  render();
-}
-
-// Fetch Agents
-
-
-
-
-// User Session & Subscription
-async function checkUserSession() {
-  try {
-    const res = await fetch("/api/auth/user");
-    const data = await res.json();
-    if (data.ok && data.user) {
-      currentUser = data.user;
-      updateUserUI();
-      if (currentUser.role === "owner" || currentUser.subscription?.planId !== "free") {
-        setUnlimitedTrial();
-      }
-    }
-  } catch {}
-}
-
-function updateUserUI() {
-  if (currentUser) {
-    document.getElementById("navAccountLabel").textContent = currentUser.name.split(" ")[0];
-    document.getElementById("userNameHeading").textContent = currentUser.name;
-    document.getElementById("userEmailSub").textContent = currentUser.email;
-    document.getElementById("userAvatarImg").src = currentUser.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(currentUser.name)}`;
-    
-    // Subscription details
-    const sub = currentUser.subscription || { planId: "free", planName: "Free (Básico)", autoRenew: false };
-    const badge = document.getElementById("userPlanBadge");
-    badge.textContent = sub.planName;
-    badge.className = "sub-plan-badge " + (sub.planId === "free" ? "free" : "");
-
-    const startDate = sub.startDate ? new Date(sub.startDate).toLocaleDateString("es-AR") : "Hoy";
-    const endDate = sub.endDate ? new Date(sub.endDate).toLocaleDateString("es-AR") : "30 días";
-    document.getElementById("subStartDate").textContent = startDate;
-    document.getElementById("subEndDate").textContent = endDate;
-
-    const daysLeft = sub.endDate ? Math.max(0, Math.ceil((new Date(sub.endDate).getTime() - Date.now()) / 86400000)) : 30;
-    document.getElementById("subDaysLeft").textContent = `${daysLeft} días restantes`;
-
-    const renewStatus = document.getElementById("autoRenewStatus");
-    const cancelBtn = document.getElementById("btnCancelRenew");
-    if (sub.autoRenew) {
-      renewStatus.textContent = "Renovación automática: Activa";
-      cancelBtn.style.display = "inline-block";
-    } else {
-      renewStatus.textContent = "Renovación automática: Desactivada";
-      cancelBtn.style.display = "none";
-    }
-
-    document.getElementById("accountLoggedOutView").classList.add("hidden");
-    document.getElementById("accountLoggedInView").classList.remove("hidden");
-  }
-}
-
-async function cancelAutoRenewal() {
-  if (!confirm("¿Deseás desactivar la renovación automática? Tu plan continuará activo hasta la fecha de vencimiento y no se te cobrará nada adicional.")) return;
-  try {
-    const res = await fetch("/api/user/subscription/cancel-renewal", { method: "POST" });
-    const data = await res.json();
-    if (data.ok) {
-      alert("Renovación automática desactivada con éxito.");
-      currentUser.subscription = data.subscription;
-      updateUserUI();
-    }
-  } catch {
-    alert("Error al comunicarse con el servidor.");
-  }
-}
-
-// Chat Send Logic
-
-
-
-
-
-// Real Human Voice-to-Voice Continuous Hands-Free Interaction
-
-
-// Live Voice-to-Voice Call Overlay with Human Agent
-
-
-
-// Helpers
-function escapeHtml(str) {
-  return String(str || "").replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]);
-}
-
-
-// Modals & Menu toggles
-
-
-function openAccountModal() { document.getElementById("accountModal").classList.add("open"); }
-function closeAccountModal() { document.getElementById("accountModal").classList.remove("open"); }
-function toggleMobileMenu() { document.getElementById("mobileNavPanel").classList.toggle("open"); }
-function closeMobileMenu() { document.getElementById("mobileNavPanel").classList.remove("open"); }
-
-// Contact Modal Handling
-function openContactModal() { document.getElementById("contactModal").classList.add("open"); }
-function closeContactModal() { document.getElementById("contactModal").classList.remove("open"); }
-
-async function handleContactSubmit(e) {
-  e.preventDefault();
-  const name = document.getElementById("contactName").value.trim();
-  const email = document.getElementById("contactEmail").value.trim();
-  const company = document.getElementById("contactCompany").value.trim();
-  const message = document.getElementById("contactMessage").value.trim();
-  const statusMsg = document.getElementById("contactStatusMsg");
-
-  statusMsg.textContent = "Enviando mensaje...";
-  try {
-    const res = await fetch("/api/contact", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, company, message })
-    });
-    const data = await res.json();
-    if (data.ok) {
-      statusMsg.textContent = "✓ ¡Mensaje recibido! Nos pondremos en contacto a la brevedad.";
-      setTimeout(() => {
-        closeContactModal();
-        e.target.reset();
-        statusMsg.textContent = "";
-      }, 1800);
-    } else {
-      statusMsg.textContent = data.error || "No se pudo enviar el mensaje.";
-    }
-  } catch {
-    statusMsg.textContent = "Error de conexión. Por favor intentá nuevamente.";
-  }
-}
-
-// Auth Tab Switching (Login vs Register)
-let currentAuthTab = "login";
-function setAuthTab(tab) {
-  currentAuthTab = tab;
-  const isReg = tab === "register";
-  document.getElementById("authNameInput").style.display = isReg ? "block" : "none";
-  document.getElementById("authSubmitBtn").textContent = isReg ? "Crear Cuenta Nueva" : "Iniciar Sesión";
-  document.getElementById("tabLogin").style.background = isReg ? "transparent" : "#fff";
-  document.getElementById("tabLogin").style.color = isReg ? "#71717a" : "#18181b";
-  document.getElementById("tabLogin").style.fontWeight = isReg ? "600" : "700";
-  document.getElementById("tabRegister").style.background = isReg ? "#fff" : "transparent";
-  document.getElementById("tabRegister").style.color = isReg ? "#18181b" : "#71717a";
-  document.getElementById("tabRegister").style.fontWeight = isReg ? "700" : "600";
-  document.getElementById("authErrorMsg").textContent = "";
-}
-
-// Integration modal handling (GitHub & Cloudflare) with real SVG logos and Google account connection
-
-
-
-
-// Email Auth (Login & Register)
-async function handleEmailAuth(e) {
-  e.preventDefault();
-  const email = document.getElementById("authEmailInput").value.trim();
-  const password = document.getElementById("authPassInput").value.trim();
-  const name = document.getElementById("authNameInput")?.value.trim() || "";
-  const errBox = document.getElementById("authErrorMsg");
-  errBox.textContent = "";
-
-  const endpoint = currentAuthTab === "register" ? "/api/auth/register" : "/api/auth/login-email";
-  const body = currentAuthTab === "register" ? { email, password, name } : { email, password };
-
-  try {
-    const res = await fetch(endpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body)
-    });
-    const d = await res.json();
-    if (!res.ok) throw new Error(d.error || "No se pudo procesar la solicitud.");
-    currentUser = d.user;
-    updateUserUI();
-    if (currentUser.role === "owner" || currentUser.subscription?.planId !== "free") {
-      setUnlimitedTrial();
-    }
-  } catch (err) {
-    errBox.textContent = err.message;
-  }
-}
-
-async function logoutUser() {
-  await fetch("/api/auth/logout", { method: "POST" });
-  currentUser = null;
-  document.getElementById("navAccountLabel").textContent = "Mi cuenta";
-  document.getElementById("accountLoggedInView").classList.add("hidden");
-  document.getElementById("accountLoggedOutView").classList.remove("hidden");
-  initTrialQuota();
-}
-
-function handleGoogleCredentialResponse(response) {
-  if (response && response.credential) {
-    const statusEl = document.getElementById("googleAuthStatus");
-    if (statusEl) {
-      statusEl.style.color = "#2563eb";
-      statusEl.textContent = "Validando credencial de Google...";
-    }
-    fetch("/api/auth/google", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ credential: response.credential })
-    })
-    .then(res => res.json())
-    .then(data => {
-      if (data.ok) {
-        currentUser = data.user;
-        updateUserUI();
-        if (currentUser.role === "owner" || currentUser.subscription?.planId !== "free") {
-          setUnlimitedTrial();
-        }
-        if (statusEl) {
-          statusEl.style.color = "#16a34a";
-          statusEl.textContent = "✓ ¡Acceso exitoso con Google!";
-        }
-        setTimeout(() => {
-          closeGoogleAuthModal();
-          closeAccountModal();
-        }, 500);
-      } else if (statusEl) {
-        statusEl.style.color = "#dc2626";
-        statusEl.textContent = data.error || "No se pudo acceder con Google.";
-      }
-    })
-    .catch(() => {
-      if (statusEl) {
-        statusEl.style.color = "#dc2626";
-        statusEl.textContent = "Error al conectar con el servidor.";
-      }
-    });
-  }
-}
-
-function triggerGoogleLogin() {
-  if (window.google?.accounts?.id) {
-    try {
-      const clientId = document.querySelector('meta[name="google-signin-client_id"]')?.getAttribute('content') || "";
-      if (!clientId) throw new Error("sin client id");
-      window.google.accounts.id.initialize({
-        client_id: clientId,
-        callback: handleGoogleCredentialResponse,
-        auto_select: false,
-        cancel_on_tap_outside: true
-      });
-      window.google.accounts.id.prompt((notification) => {
-        if (notification && (notification.isNotDisplayed() || notification.isSkippedMoment())) {
-          const modal = document.getElementById("googleAuthModal");
-          if (modal) modal.classList.add("open");
-        }
-      });
-      return;
-    } catch {
-      // fallback to modal
-    }
-  }
-  const modal = document.getElementById("googleAuthModal");
-  if (modal) modal.classList.add("open");
-}
-
-function closeGoogleAuthModal() {
-  const modal = document.getElementById("googleAuthModal");
-  if (modal) modal.classList.remove("open");
-}
-
-async function loginWithSpecificGoogleEmail(email, name = "") {
-  const statusEl = document.getElementById("googleAuthStatus");
-  if (statusEl) {
-    statusEl.style.color = "#2563eb";
-    statusEl.textContent = "Conectando con tu cuenta de Google...";
-  }
-
-  try {
-    const res = await fetch("/api/auth/google", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, name: name || email.split("@")[0] })
-    });
-    const data = await res.json();
-    if (data.ok) {
-      currentUser = data.user;
-      updateUserUI();
-      if (currentUser.role === "owner" || currentUser.subscription?.planId !== "free") {
-        setUnlimitedTrial();
-      }
-      if (statusEl) {
-        statusEl.style.color = "#16a34a";
-        statusEl.textContent = "✓ ¡Acceso exitoso con Google!";
-      }
-      setTimeout(() => {
-        closeGoogleAuthModal();
-        closeAccountModal();
-      }, 700);
-    } else {
-      if (statusEl) {
-        statusEl.style.color = "#dc2626";
-        statusEl.textContent = data.error || "No se pudo acceder con la cuenta de Google.";
-      }
-    }
-  } catch {
-    if (statusEl) {
-      statusEl.style.color = "#dc2626";
-      statusEl.textContent = "Error al conectar con el servidor.";
-    }
-  }
-}
-
-function handleCustomGoogleEmail(e) {
-  e.preventDefault();
-  const email = document.getElementById("customGoogleEmail")?.value?.trim();
-  if (email) {
-    loginWithSpecificGoogleEmail(email);
-  }
-}
-</script>
-
-
-<script>
-/* Sitio estático: acciones que requieren servidor muestran un aviso amable. */
-(function () {
-  if (!window.AGENTIC_DEMO) return;
-  var SOON_LOGIN = "El acceso con cuenta (login y registro) estará disponible próximamente.";
-  window.triggerGoogleLogin = function () {
-    var modal = document.getElementById("googleAuthModal");
-    if (modal) modal.classList.add("open");
-    var st = document.getElementById("googleAuthStatus");
-    if (st) { st.style.color = "#2563eb"; st.textContent = SOON_LOGIN; }
-  };
-  var origContact = window.handleContactSubmit;
-  window.handleContactSubmit = function (e) {
-    if (e && e.preventDefault) e.preventDefault();
-    var g = function (id) { var el = document.getElementById(id); return el ? el.value.trim() : ""; };
-    var body = "Nombre: " + g("contactName") + "\nEmpresa: " + g("contactCompany") + "\nEmail: " + g("contactEmail") + "\n\n" + g("contactMessage");
-    var st = document.getElementById("contactStatusMsg");
-    if (st) st.textContent = "Abrimos tu correo para enviar el mensaje a agenticuantico@gmail.com.";
-    window.location.href = "mailto:agenticuantico@gmail.com?subject=" + encodeURIComponent("Consulta comercial") + "&body=" + encodeURIComponent(body);
-  };
-  document.addEventListener("DOMContentLoaded", function () {
-    var label = document.getElementById("authSubmitBtn");
-    var box = document.getElementById("authErrorMsg");
-    if (box && !box.textContent) { box.style.color = "#2563eb"; }
-    var view = document.getElementById("accountLoggedOutView");
-    if (view && !document.getElementById("authSoonNote")) {
-      var n = document.createElement("div");
-      n.id = "authSoonNote";
-      n.style.cssText = "background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:14px;padding:10px 14px;margin:0 0 14px;font-size:12.5px;color:#1e3a8a;line-height:1.5;";
-      n.innerHTML = "Las cuentas de usuario llegan <strong>próximamente</strong>. Ya podés usar el chat de demostración sin registrarte.";
-      var h = view.querySelector("p");
-      if (h && h.parentNode) h.parentNode.insertBefore(n, h.nextSibling);
-    }
-  });
-})();
-</script>
-<script src="/assets/neural-ui.js" defer></script>
-<script src="/app/config.js"></script>
-<script src="/app/i18n.js"></script>
-<script src="/app/md.js"></script>
-<script src="/app/engine.js"></script>
-<script src="/app/voice.js"></script>
-<script src="/app/embed.js"></script>
-<script>
-/* Chat conversacional embebido + cerebro 3D + equipo de agentes */
-(function () {
-  var embed = null;
-  function boot() {
-    embed = window.AC_EMBED && window.AC_EMBED.mount(document.getElementById("acEmbed"));
-    window.AC_EMBED_API = embed;
-    initBrain();
-    initTeam();
-  }
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot); else boot();
-
-  function hasWebGL() {
-    try { var c = document.createElement("canvas"); return !!(window.WebGLRenderingContext && (c.getContext("webgl2") || c.getContext("webgl"))); } catch (e) { return false; }
-  }
-  function initBrain() {
-    var stage = document.getElementById("brainStage"), badge = document.getElementById("brainBadgeText"), btn = document.getElementById("brainLoad");
-    if (!stage) return;
-    var started = false;
-    function fail(msg) { badge.textContent = msg; stage.classList.add("no-3d"); }
-    function load() {
-      if (started) return; started = true; btn.hidden = true; badge.textContent = "Cargando cerebro 3D…";
-      import("/assets/brain3d.min.js").then(function (m) { return m.mountBrain(stage, { src: stage.getAttribute("data-src"), label: "Cerebro 3D de AgentiCuántico: arrastrá para girar" }); })
-        .then(function () { badge.textContent = "Cerebro vivo · sinapsis activas"; stage.setAttribute("data-state", "ready"); })
-        .catch(function () { started = false; fail("Vista 3D no disponible en este dispositivo"); stage.setAttribute("data-state", "fallback"); });
-    }
-    if (!hasWebGL()) { fail("Tu navegador no soporta 3D · mostrando imagen"); stage.setAttribute("data-state", "fallback"); return; }
-    var saveData = navigator.connection && navigator.connection.saveData;
-    if (saveData) { badge.textContent = "Ahorro de datos activo"; btn.hidden = false; btn.onclick = load; return; }
-    if (!("IntersectionObserver" in window)) { load(); return; }
-    var io = new IntersectionObserver(function (es) { if (es[0].isIntersecting) { io.disconnect(); load(); } }, { rootMargin: "300px 0px" });
-    io.observe(stage);
-  }
-
-  function ago(iso) {
-    var t = Date.parse(iso); if (!t) return "";
-    var s = Math.max(0, (Date.now() - t) / 1000);
-    if (s < 90) return "hace instantes";
-    if (s < 3600) return "hace " + Math.round(s / 60) + " min";
-    if (s < 86400) return "hace " + Math.round(s / 3600) + " h";
-    return "hace " + Math.round(s / 86400) + " d";
-  }
-  function esc(x) { return String(x == null ? "" : x).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
-  function initTeam() {
-    var grid = document.getElementById("teamGrid"), up = document.getElementById("teamUpdated");
-    if (!grid) return;
-    fetch("/agents-status.json", { cache: "no-cache" }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }).then(function (d) {
-      var list = Array.isArray(d.agents) ? d.agents : [];
-      grid.innerHTML = list.map(function (a) {
-        var st = a.status === "activo" ? "activo" : a.status === "revision" ? "revision" : "espera";
-        var label = st === "activo" ? "Activo" : st === "revision" ? "En revisión" : "En espera";
-        var link = a.pr && /^https:\/\/github\.com\/agenticuantico\/AgenticWeb\//.test(a.pr) ? '<a href="' + esc(a.pr) + '" target="_blank" rel="noopener">ver PR</a>' : "";
-        return '<article class="agent-card"><div class="agent-top"><span class="agent-emoji" aria-hidden="true">' + esc(a.emoji || "🤖") + '</span><div class="agent-name">' + esc(a.name) + "<small>" + esc(a.role) + '</small></div><span class="agent-state ' + st + '">' + label + '</span></div><p class="agent-last">' + esc(a.last_activity || "Preparando su primera tarea.") + '</p>' + (a.last_run || link ? '<div class="agent-meta"><span>' + esc(ago(a.last_run)) + "</span>" + link + "</div>" : "") + "</article>";
-      }).join("");
-      up.innerHTML = '<span class="hero-hud-dot"></span><span>Actualizado ' + esc(ago(d.updated) || "") + "</span>";
-    }).catch(function () {
-      up.innerHTML = '<span class="hero-hud-dot"></span><span>Estado no disponible</span>';
-    });
-  }
-})();
-</script>
+<script type="module" src="/assets/js/site.js?v=4.1.0"></script><script type="module" src="/assets/js/home.js?v=4.1.0"></script>
 </body>
 </html>
