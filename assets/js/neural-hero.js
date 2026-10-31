@@ -1,7 +1,4 @@
-/* AgentiCuantico · hero neuronal sincronizado con el chat (pensando / hablando) */
-(function () {
-  "use strict";
-
+/* AgentiCuántico · hero neuronal clásico sincronizado con el chat (en espera / pensando / hablando) */
   var IMG_W = 1376, IMG_H = 768;           // tamaño real de la foto del hero
   var POS_Y = 0.30;                         // object-position: center 30%
   var STATES = {
@@ -22,7 +19,6 @@
     if (dt) dt.textContent = s.detail;
     if (dot) { dot.style.background = s.color; dot.style.boxShadow = "0 0 10px " + s.color; }
   }
-  window.setNeuralState = setState;
 
   // ---- Canvas de sinapsis sobre el cerebro dorado ----
   // Nodos en coordenadas de la foto original (zona del árbol dorado).
@@ -103,8 +99,12 @@
         ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, Math.PI * 2); ctx.fill();
       });
       ctx.shadowBlur = 0;
-      if (!reduce) requestAnimationFrame(frame);
+      if (!reduce && onscreen && !document.hidden) requestAnimationFrame(frame); else running = false;
     }
+    var onscreen = true, running = true;
+    function kick() { if (!running && onscreen && !document.hidden && !reduce) { running = true; requestAnimationFrame(frame); } }
+    if ("IntersectionObserver" in window) new IntersectionObserver(function (es) { onscreen = es[0].isIntersecting; kick(); }).observe(stage);
+    document.addEventListener("visibilitychange", kick);
     requestAnimationFrame(frame);
   }
 
@@ -132,14 +132,10 @@
     if (!stage) return;
     stage.addEventListener("click", function () {
       var chat = $("chat"); if (chat) chat.scrollIntoView({ behavior: "smooth", block: "start" });
-      var input = $("aceInput"); if (input) setTimeout(function () { try { input.focus({ preventScroll: true }); } catch (e) {} }, 500);
+      var input = document.querySelector("#homeChat textarea"); if (input) setTimeout(function () { try { input.focus({ preventScroll: true }); } catch (e) {} }, 500);
     });
   }
 
-  document.addEventListener("DOMContentLoaded", function () {
-    initCanvas();
-    initTilt();
-    initHeroLink();
-    setState("idle");
-  });
-})();
+
+export function setNeuralState(name) { setState(name); }
+export function initNeuralHero() { initCanvas(); initTilt(); initHeroLink(); setState("idle"); }

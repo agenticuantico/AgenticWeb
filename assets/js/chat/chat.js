@@ -98,7 +98,9 @@ export class ChatApp {
           <div class="thread-inner" data-role="inner"></div>
         </div>
         <div class="chat-empty" data-role="empty">
+          <span class="chat-hello-face" aria-hidden="true"><img src="/media/agenticuantico-avatar.jpg" alt="" width="96" height="96"></span>
           <p class="chat-greeting" data-role="greeting"></p>
+          <p class="chat-hello-sub" data-role="greetingSub"></p>
           <div class="suggestions" data-role="suggestions"></div>
         </div>
         <button class="scroll-down icon-btn" type="button" data-act="scrollDown" aria-label="Ir al final" hidden>${icon('arrowDown')}</button>
@@ -146,6 +148,7 @@ export class ChatApp {
     this.$('flag').src = flagUrl(this.lang);
     this.$('langShort').textContent = this.lang.short;
     this.$('greeting').textContent = this.lang.greeting;
+    if (this.$('greetingSub')) this.$('greetingSub').textContent = this.lang.sub || '';
     this.root.querySelector('[data-act="lang"]').setAttribute('aria-label', `Idioma: ${this.lang.name} (${this.lang.region})`);
   }
   renderMode() {

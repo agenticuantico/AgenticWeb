@@ -22,14 +22,56 @@ watchUser(async (u) => {
   if (pm) mountPlans(pm, { user: u, profile });
 });
 
-/* Equipo de agentes 24/7 */
+/* Hero neuronal (diseño clásico): estados sincronizados con el avatar del chat */
+import('./neural-hero.js').then((m) => {
+  m.initNeuralHero();
+  const orig = avatar.setState.bind(avatar);
+  avatar.setState = (st) => { orig(st); m.setNeuralState(st === 'thinking' ? 'thinking' : st === 'talking' ? 'speaking' : 'idle'); };
+}).catch(() => {});
+
+/* Cerebro vivo 3D */
+(function initBrain() {
+  const stage = document.getElementById('brainStage');
+  if (!stage) return;
+  const badge = document.getElementById('brainBadgeText');
+  const btn = document.getElementById('brainLoad');
+  let started = false;
+  const fail = (msg) => { badge.textContent = msg; stage.classList.add('no-3d'); stage.setAttribute('data-state', 'fallback'); };
+  const load = () => {
+    if (started) return; started = true; btn.hidden = true; badge.textContent = 'Cargando cerebro 3D…';
+    import('./brain3d.min.js')
+      .then((m) => m.mountBrain(stage, { src: stage.getAttribute('data-src'), label: 'Cerebro 3D de AgentiCuántico: arrastrá para girar' }))
+      .then(() => { badge.textContent = 'Cerebro vivo · sinapsis activas'; stage.setAttribute('data-state', 'ready'); })
+      .catch(() => { started = false; fail('Vista 3D no disponible en este dispositivo'); });
+  };
+  let gl = false;
+  try { const c = document.createElement('canvas'); gl = !!(window.WebGLRenderingContext && (c.getContext('webgl2') || c.getContext('webgl'))); } catch (e) { gl = false; }
+  if (!gl) { fail('Tu navegador no soporta 3D · mostrando imagen'); return; }
+  if (navigator.connection && navigator.connection.saveData) { badge.textContent = 'Ahorro de datos activo'; btn.hidden = false; btn.onclick = load; return; }
+  if (!('IntersectionObserver' in window)) { load(); return; }
+  const io = new IntersectionObserver((es) => { if (es[0].isIntersecting) { io.disconnect(); load(); } }, { threshold: 0.3 });
+  io.observe(stage);
+})();
+
+/* Equipo de agentes 24/7 (tarjetas clásicas) */
+function ago(iso) {
+  const t = Date.parse(iso); if (!t) return '';
+  const s = Math.max(0, (Date.now() - t) / 1000);
+  if (s < 90) return 'hace instantes';
+  if (s < 3600) return 'hace ' + Math.round(s / 60) + ' min';
+  if (s < 86400) return 'hace ' + Math.round(s / 3600) + ' h';
+  return 'hace ' + Math.round(s / 86400) + ' d';
+}
 fetch('/agents-status.json', { cache: 'no-cache' })
   .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
   .then((d) => {
-    const team = document.getElementById('team');
-    const label = { activo: 'Trabajando', espera: 'En espera', error: 'Con aviso', pausa: 'En pausa' };
-    team.innerHTML = (d.agents || []).slice(0, 12).map((a) => `<article class="team-card"><div class="t-top"><span class="t-emoji" aria-hidden="true">${esc(a.emoji || '🤖')}</span><strong>${esc(a.name)}</strong></div><p>${esc(a.role || '')}</p><span class="chip ${a.status === 'activo' ? 'ok' : ''}">${esc(label[a.status] || a.status || 'En espera')}</span><p class="small">${esc(a.last_activity || '')}</p>${a.pr && /^https:\/\/github\.com\//.test(a.pr) ? `<a class="small" href="${esc(a.pr)}" rel="noopener" target="_blank">Ver propuesta</a>` : ''}</article>`).join('');
-    const upd = Date.parse(d.updated);
-    document.getElementById('teamUpdated').textContent = 'Última actualización: ' + (isNaN(upd) ? (d.updated || '—') : new Date(upd).toLocaleString('es-AR'));
+    const grid = document.getElementById('teamGrid');
+    grid.innerHTML = (d.agents || []).slice(0, 12).map((a) => {
+      const st = a.status === 'activo' ? 'activo' : a.status === 'revision' ? 'revision' : 'espera';
+      const label = st === 'activo' ? 'Activo' : st === 'revision' ? 'En revisión' : 'En espera';
+      const link = a.pr && /^https:\/\/github\.com\/agenticuantico\//.test(a.pr) ? `<a href="${esc(a.pr)}" target="_blank" rel="noopener">ver PR</a>` : '';
+      return `<article class="agent-card"><div class="agent-top"><span class="agent-emoji" aria-hidden="true">${esc(a.emoji || '🤖')}</span><div class="agent-name">${esc(a.name)}<small>${esc(a.role || '')}</small></div><span class="agent-state ${st}">${label}</span></div><p class="agent-last">${esc(a.last_activity || 'Listo para su primera tarea programada.')}</p>${a.last_run || link ? `<div class="agent-meta"><span>${esc(ago(a.last_run))}</span>${link}</div>` : ''}</article>`;
+    }).join('');
+    document.getElementById('teamUpdated').innerHTML = `<span class="hero-hud-dot"></span><span>Actualizado ${esc(ago(d.updated) || '')}</span>`;
   })
-  .catch(() => { document.getElementById('team').innerHTML = '<p class="muted">El estado del equipo no está disponible en este momento.</p>'; });
+  .catch(() => { document.getElementById('teamUpdated').innerHTML = '<span class="hero-hud-dot"></span><span>Estado no disponible</span>'; });
