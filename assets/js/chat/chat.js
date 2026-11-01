@@ -83,6 +83,7 @@ export class ChatApp {
     this.user = user; this.profile = profile;
     engine.setIdTokenProvider(user ? () => user.getIdToken() : null);
     this.renderParticipants();
+    if (user && /conectar=github/.test(location.hash || '')) import('./connectors.js').then((m) => m.handleReturn(this)).catch(() => {});
   }
 
   /* =================== Render base =================== */
@@ -873,7 +874,8 @@ export class ChatApp {
         h('strong', {}, art.name),
         h('small', {}, `${Math.max(1, Math.round(String(art.content || '').length / 1024))} KB`),
         h('button', { class: 'ace-ib', type: 'button', title: 'Ver', 'aria-label': 'Ver ' + art.name, html: icon('eye'), onclick: () => this.openAgentPanel(m, 'files', i) }),
-        h('button', { class: 'ace-ib', type: 'button', title: 'Descargar', 'aria-label': 'Descargar ' + art.name, html: icon('download'), onclick: () => download(art.name, art.content, art.mime || 'text/plain') })));
+        h('button', { class: 'ace-ib', type: 'button', title: 'Descargar', 'aria-label': 'Descargar ' + art.name, html: icon('download'), onclick: () => download(art.name, art.content, art.mime || 'text/plain') }),
+        h('button', { class: 'ace-ib', type: 'button', title: 'Publicar en GitHub o Cloudflare', 'aria-label': 'Publicar ' + art.name, html: icon('upload'), onclick: () => import('./connectors.js').then((mod) => mod.publishArtifact(this, art)) })));
     });
     return box;
   }

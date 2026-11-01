@@ -85,10 +85,15 @@ function habilidades(pane, chat) {
 }
 
 function conectores(pane, chat) {
+  // GitHub y Cloudflare se conectan de verdad (por usuario); el resto queda en «Próximamente».
+  import('./connectors.js').then((mod) => mod.renderConnectors(pane, chat, (p) => proximamente(p, chat))).catch(() => proximamente(pane, chat));
+}
+
+function proximamente(pane, chat) {
   const ws = chat.store.ws;
-  pane.append(h('div', { class: 'alert info' }, h('span', { html: icon('info') }), h('div', {}, h('strong', {}, 'En preparación. '), 'Los conectores usan inicios de sesión OAuth que se completan en el servidor de AgentiCuántico. Marcá los que te interesan y te avisamos cuando estén listos. Nunca se conectan sin tu autorización explícita.')));
+  pane.append(h('h3', { class: 'conn-subtitle' }, 'Próximamente'));
   const list = h('div', { class: 'hub-list' });
-  for (const c of CONNECTORS) {
+  for (const c of CONNECTORS.filter((x) => x.id !== 'github' && x.id !== 'cloudflare')) {
     const want = (ws.connectorsWanted || []).includes(c.id);
     const b = h('button', { class: 'btn btn-sm' + (want ? '' : ' btn-ghost'), type: 'button', 'aria-pressed': String(want) }, want ? 'Te avisamos' : 'Avisarme');
     b.addEventListener('click', () => {
@@ -97,7 +102,7 @@ function conectores(pane, chat) {
       chat.store.saveWorkspace();
       b.textContent = on ? 'Te avisamos' : 'Avisarme'; b.classList.toggle('btn-ghost', !on); b.setAttribute('aria-pressed', String(on));
     });
-    list.append(h('div', { class: 'hub-item' }, h('span', { class: 'hub-ic', html: icon('plug') }), h('div', {}, h('strong', {}, c.name), h('p', { class: 'muted small' }, c.desc)), h('span', { class: 'chip' }, 'Requiere configuración'), b));
+    list.append(h('div', { class: 'hub-item' }, h('span', { class: 'hub-ic', html: icon('plug') }), h('div', {}, h('strong', {}, c.name), h('p', { class: 'muted small' }, c.desc)), b));
   }
   pane.append(list);
 }
