@@ -8,7 +8,7 @@ import * as auth from './auth.js';
 import { getStore, getRtdb, friendlyError } from './firebase.js';
 import { DEFAULT_SYSTEM, clearSystemCache } from './sysconfig.js';
 import { renderLeads, renderAgentsControl } from './admin-control.js';
-import { revenueKpi, renderRevenueCard } from './admin-revenue.js';
+import { revenueKpis, renderRevenueCard } from './admin-revenue.js';
 import { renderGovernance } from './admin-governance.js';
 
 const root = document.getElementById('adminRoot');
@@ -207,7 +207,7 @@ async function renderDashboard(user) {
     kpi('Visitantes únicos', totalVisitors.toLocaleString('es-AR'), 'por día, sumados', 'users'),
     h('div', { class: 'kpi live' }, h('span', { class: 'kpi-ic', html: icon('globe') }), h('div', {}, h('small', {}, 'En línea ahora'), liveEl, h('span', { class: 'muted tiny' }, 'presencia en tiempo real'))),
     kpi('Registros', totalSignups.toLocaleString('es-AR'), (typeof counts.all === 'number' ? counts.all.toLocaleString('es-AR') : '—') + ' usuarios en total', 'userPlus'),
-    revenueKpi(user));
+    ...revenueKpis(user));
   // Ingresos reales por moneda (Mercado Pago ARS · PayPal USD), desde el Worker (D1)
   renderRevenueCard(grid, user);
   if (statsErr) grid.append(h('div', { class: 'alert warn wide' }, h('span', { html: icon('warn') }), h('div', {}, 'No se pudieron leer las estadísticas: ', statsErr, ' Publicá las reglas de Firestore (firebase/firestore.rules).')));

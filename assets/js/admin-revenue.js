@@ -35,18 +35,25 @@ export async function fetchRevenue(user, { force = false } = {}) {
   } finally { clearTimeout(t); }
 }
 
-/** KPI compacto para la fila superior: ARS del mes y USD del mes, por separado. */
-export function revenueKpi(user) {
-  const ars = h('strong', { class: 'rev-kpi-ars', 'data-no-i18n': '' }, '—');
-  const usd = h('span', { class: 'rev-kpi-usd', 'data-no-i18n': '' }, '—');
+/** KPIs compactos para la fila superior: uno en pesos (Mercado Pago) y otro en dólares (PayPal), nunca sumados. */
+function oneKpi(label, logoSrc, logoAlt, logoW) {
+  const val = h('strong', { 'data-no-i18n': '' }, '—');
   const el = h('div', { class: 'kpi rev-kpi' }, h('span', { class: 'kpi-ic', html: icon('card') }),
-    h('div', {}, h('small', {}, 'Ingresos estimados'), ars, h('span', { class: 'muted tiny rev-kpi-sub' }, usd, h('span', {}, ' · este mes'))));
-  fetchRevenue(user).then((d) => {
-    ars.textContent = money(d.providers.mercadopago.monthCents, 'ARS');
-    usd.textContent = money(d.providers.paypal.monthCents, 'USD');
-  }).catch(() => { ars.textContent = '—'; usd.textContent = 'US$ —'; });
-  return el;
+    h('div', {}, h('small', {}, label), val,
+      h('span', { class: 'muted tiny rev-kpi-sub' }, h('img', { class: 'rev-kpi-logo', src: logoSrc, alt: logoAlt, width: logoW, height: 14 }), h('span', {}, ' · este mes'))));
+  return { el, val };
 }
+export function revenueKpis(user) {
+  const a = oneKpi('Ingresos en pesos (ARS)', '/assets/brands/mercadopago-oficial.svg', 'Mercado Pago', 54);
+  const u = oneKpi('Ingresos en dólares (USD)', '/assets/brands/paypal-oficial.svg', 'PayPal', 50);
+  fetchRevenue(user).then((d) => {
+    a.val.textContent = money(d.providers.mercadopago.monthCents, 'ARS');
+    u.val.textContent = money(d.providers.paypal.monthCents, 'USD');
+  }).catch(() => { a.val.textContent = '$ —'; u.val.textContent = 'US$ —'; });
+  return [a.el, u.el];
+}
+/** Compatibilidad: devuelve solo el KPI en pesos. */
+export function revenueKpi(user) { return revenueKpis(user)[0]; }
 
 function providerBlock(name, cur, p, logo) {
   const stat = (label, value) => h('div', { class: 'rev-stat' }, h('small', {}, label), h('b', { 'data-no-i18n': '' }, value));
