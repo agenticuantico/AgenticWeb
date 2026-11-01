@@ -1,0 +1,228 @@
+{
+ "lang": "es",
+ "template": "immersive",
+ "theme": "saas",
+ "brand": "Nexo",
+ "brandMark": "Nx",
+ "palette": {
+  "bg": "#070914",
+  "bg2": "#0c1022",
+  "surface": "#f4f5fb",
+  "ink": "#eef1ff",
+  "inkDark": "#0f1226",
+  "muted": "#a3a9c7",
+  "accent": "#7c5cff",
+  "accent2": "#36e0c8",
+  "onAccent": "#ffffff"
+ },
+ "fonts": {
+  "href": "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap",
+  "display": "\"Space Grotesk\",system-ui,sans-serif",
+  "body": "Inter,system-ui,sans-serif",
+  "weight": "600",
+  "tracking": "-.03em"
+ },
+ "shape": {
+  "radius": "20px"
+ },
+ "ui": {
+  "skip": "Saltar al contenido",
+  "menu": "Menú",
+  "close": "Cerrar",
+  "scroll": "Deslizá",
+  "name": "Nombre",
+  "email": "Email",
+  "message": "Mensaje",
+  "sent": "¡Gracias! Te respondemos a la brevedad."
+ },
+ "title": "Nexo · La plataforma que conecta a tu equipo",
+ "description": "Automatizá procesos, centralizá datos y tomá mejores decisiones con una plataforma simple y segura.",
+ "nav": [
+  {
+   "label": "Producto",
+   "href": "#intro"
+  },
+  {
+   "label": "Cómo funciona",
+   "href": "#experiencia"
+  },
+  {
+   "label": "Planes",
+   "href": "#oferta"
+  },
+  {
+   "label": "Clientes",
+   "href": "#opiniones"
+  },
+  {
+   "label": "Contacto",
+   "href": "#contacto"
+  }
+ ],
+ "navCta": "Probar gratis",
+ "hero": {
+  "eyebrow": "Plataforma · Automatización · Datos",
+  "title": "Tu operación,",
+  "titleEm": "en piloto automático.",
+  "lead": "Conectá tus herramientas, automatizá las tareas repetitivas y mirá todo en tiempo real desde un solo lugar.",
+  "primary": "Ver planes",
+  "secondary": "Agendar una demo",
+  "images": []
+ },
+ "intro": {
+  "eyebrow": "Producto",
+  "title": "Menos tareas manuales. Más tiempo para lo importante.",
+  "body": "Integraciones listas, flujos visuales y reportes claros para que cada equipo trabaje con la misma información.",
+  "body2": "Seguridad de nivel empresarial, permisos por rol y soporte en español.",
+  "stats": [
+   {
+    "value": "15 min",
+    "label": "para dejar tu primer flujo andando"
+   },
+   {
+    "value": "+80",
+    "label": "integraciones disponibles"
+   },
+   {
+    "value": "99,9%",
+    "label": "de disponibilidad objetivo"
+   }
+  ]
+ },
+ "steps": {
+  "eyebrow": "Cómo funciona",
+  "title": "Tres pasos",
+  "items": [
+   {
+    "kicker": "01 · Conectá",
+    "title": "Tus herramientas, unidas.",
+    "text": "Sumá correo, planillas, CRM y pagos en minutos, sin código.",
+    "image": "",
+    "art": "2"
+   },
+   {
+    "kicker": "02 · Automatizá",
+    "title": "Flujos que trabajan solos.",
+    "text": "Definí reglas y dejá que la plataforma haga el resto, con alertas cuando importa.",
+    "image": "",
+    "art": "3"
+   },
+   {
+    "kicker": "03 · Decidí",
+    "title": "Datos claros, en vivo.",
+    "text": "Tableros listos para compartir con tu equipo y tus clientes.",
+    "image": "",
+    "art": "1"
+   }
+  ],
+  "count": 3
+ },
+ "offer": {
+  "eyebrow": "Planes",
+  "title": "Elegí cómo empezar.",
+  "lead": "Sin permanencia. Cambiá de plan cuando quieras.",
+  "items": [
+   {
+    "name": "Inicial",
+    "desc": "Para equipos chicos que dan sus primeros pasos",
+    "price": "Gratis",
+    "tag": "",
+    "cta": "Empezar",
+    "image": "",
+    "art": "6"
+   },
+   {
+    "name": "Profesional",
+    "desc": "Flujos ilimitados, integraciones premium y soporte prioritario",
+    "price": "USD 29/mes",
+    "tag": "Recomendado",
+    "cta": "Elegir",
+    "image": "",
+    "art": "5"
+   },
+   {
+    "name": "Empresa",
+    "desc": "SSO, auditoría y acompañamiento dedicado",
+    "price": "A medida",
+    "tag": "",
+    "cta": "Hablar con ventas",
+    "image": "",
+    "art": "4"
+   }
+  ]
+ },
+ "gallery": {
+  "eyebrow": "Producto",
+  "title": "Diseñado para que se entienda solo.",
+  "items": [
+   {
+    "src": "",
+    "alt": "Tablero de métricas en tiempo real",
+    "caption": "Tableros en vivo",
+    "art": "1"
+   },
+   {
+    "src": "",
+    "alt": "Editor visual de flujos",
+    "caption": "Editor de flujos",
+    "art": "2"
+   },
+   {
+    "src": "",
+    "alt": "Panel de integraciones",
+    "caption": "Integraciones",
+    "art": "4"
+   }
+  ]
+ },
+ "testimonials": {
+  "eyebrow": "Clientes",
+  "title": "Equipos que ya trabajan distinto.",
+  "items": [
+   {
+    "quote": "Pasamos de planillas sueltas a un tablero único. Ahorramos horas cada semana.",
+    "name": "Valeria P.",
+    "role": "Gerenta de operaciones"
+   },
+   {
+    "quote": "La implementación fue rapidísima y el soporte responde en serio.",
+    "name": "Tomás F.",
+    "role": "CTO"
+   },
+   {
+    "quote": "Por fin todo el equipo mira los mismos números.",
+    "name": "Julieta S.",
+    "role": "Directora comercial"
+   }
+  ]
+ },
+ "contact": {
+  "eyebrow": "Contacto",
+  "title": "Hablemos de tu equipo.",
+  "lead": "Contanos qué querés automatizar y te mostramos cómo en una demo de 20 minutos.",
+  "address": "Atención 100% online",
+  "city": "Respuesta en menos de 24 h hábiles",
+  "hours": [
+   {
+    "days": "Lunes a viernes",
+    "time": "9:00 – 18:00"
+   },
+   {
+    "days": "Soporte crítico",
+    "time": "24/7 en plan Empresa"
+   }
+  ],
+  "email": "hola@tuempresa.com",
+  "cta": "Solicitar demo"
+ },
+ "final": {
+  "title": "Empezá hoy. Escalá mañana.",
+  "lead": "Probalo gratis, sin tarjeta.",
+  "cta": "Probar gratis",
+  "cta2": "Ver planes"
+ },
+ "footer": {
+  "tagline": "Automatización simple para equipos que crecen.",
+  "rights": "Todos los derechos reservados."
+ }
+}

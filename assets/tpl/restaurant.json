@@ -1,0 +1,232 @@
+{
+ "lang": "es",
+ "template": "immersive",
+ "theme": "restaurant",
+ "brand": "Brasa Norte",
+ "brandMark": "BN",
+ "palette": {
+  "bg": "#0e0806",
+  "bg2": "#170e0a",
+  "surface": "#f5ede2",
+  "ink": "#f6eee4",
+  "inkDark": "#22160f",
+  "muted": "#c4b2a0",
+  "accent": "#d9733b",
+  "accent2": "#f0c27b",
+  "onAccent": "#1a0d06"
+ },
+ "fonts": {
+  "href": "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Work+Sans:wght@400;500;600;700&display=swap",
+  "display": "\"Cormorant Garamond\",Georgia,serif",
+  "body": "\"Work Sans\",system-ui,sans-serif",
+  "weight": "500",
+  "tracking": "-.01em"
+ },
+ "shape": {
+  "radius": "18px"
+ },
+ "ui": {
+  "skip": "Saltar al contenido",
+  "menu": "Menú",
+  "close": "Cerrar",
+  "scroll": "Deslizá",
+  "name": "Nombre",
+  "email": "Email",
+  "message": "Mensaje",
+  "sent": "¡Gracias! Te respondemos a la brevedad."
+ },
+ "title": "Brasa Norte · Cocina a las brasas de estación",
+ "description": "Restaurante de cocina a las brasas con producto de estación, vinos de autor y una mesa para celebrar.",
+ "nav": [
+  {
+   "label": "La casa",
+   "href": "#intro"
+  },
+  {
+   "label": "Experiencia",
+   "href": "#experiencia"
+  },
+  {
+   "label": "Carta",
+   "href": "#oferta"
+  },
+  {
+   "label": "Galería",
+   "href": "#galeria"
+  },
+  {
+   "label": "Reservas",
+   "href": "#contacto"
+  }
+ ],
+ "navCta": "Reservar",
+ "hero": {
+  "eyebrow": "Cocina de fuego · Producto de estación",
+  "title": "Fuego lento,",
+  "titleEm": "sabores que se recuerdan.",
+  "lead": "Cocinamos con leña y carbón, a la vista, con lo mejor de cada temporada. Una mesa cálida para compartir sin apuro.",
+  "primary": "Ver la carta",
+  "secondary": "Reservar mesa",
+  "images": []
+ },
+ "intro": {
+  "eyebrow": "La casa",
+  "title": "Una cocina honesta, alrededor del fuego.",
+  "body": "Trabajamos con productores cercanos y cortes seleccionados. Cada plato pasa por las brasas el tiempo justo para encontrar su punto.",
+  "body2": "Vinos de pequeñas bodegas, pan de masa madre propio y un servicio atento que te hace sentir en casa.",
+  "stats": [
+   {
+    "value": "12 h",
+    "label": "de cocción lenta en nuestros clásicos"
+   },
+   {
+    "value": "40+",
+    "label": "etiquetas de bodegas boutique"
+   },
+   {
+    "value": "Km 0",
+    "label": "verduras de huertas cercanas"
+   }
+  ]
+ },
+ "steps": {
+  "eyebrow": "La experiencia",
+  "title": "Cómo cocinamos",
+  "items": [
+   {
+    "kicker": "01 · Producto",
+    "title": "Elegimos cada ingrediente.",
+    "text": "Visitamos a quienes producen y traemos solo lo que está en su mejor momento.",
+    "image": "",
+    "art": "2"
+   },
+   {
+    "kicker": "02 · Fuego",
+    "title": "Leña, carbón y paciencia.",
+    "text": "Las brasas marcan el ritmo: sellado intenso, cocción lenta y reposo.",
+    "image": "",
+    "art": "5"
+   },
+   {
+    "kicker": "03 · Mesa",
+    "title": "Platos para compartir.",
+    "text": "Servimos al centro, para conversar, probar y repetir.",
+    "image": "",
+    "art": "1"
+   }
+  ],
+  "count": 3
+ },
+ "offer": {
+  "eyebrow": "La carta",
+  "title": "Clásicos de la casa.",
+  "lead": "Una selección que cambia con la estación. Precios de referencia.",
+  "items": [
+   {
+    "name": "Ojo de bife a la leña",
+    "desc": "Maduración de 21 días, chimichurri de hierbas frescas",
+    "price": "$ 24.500",
+    "tag": "Firma",
+    "cta": "Reservar",
+    "image": "",
+    "art": "4"
+   },
+   {
+    "name": "Verduras de huerta asadas",
+    "desc": "Hummus ahumado, aceite de oliva y semillas tostadas",
+    "price": "$ 12.900",
+    "tag": "",
+    "cta": "Reservar",
+    "image": "",
+    "art": "5"
+   },
+   {
+    "name": "Flan de dulce de leche",
+    "desc": "Receta de la abuela con crema batida",
+    "price": "$ 6.800",
+    "tag": "Postre",
+    "cta": "Reservar",
+    "image": "",
+    "art": "1"
+   }
+  ]
+ },
+ "gallery": {
+  "eyebrow": "Galería",
+  "title": "El fuego, la mesa y la gente.",
+  "items": [
+   {
+    "src": "",
+    "alt": "Parrilla encendida con cortes a las brasas",
+    "caption": "Nuestra parrilla a la vista",
+    "art": "2"
+   },
+   {
+    "src": "",
+    "alt": "Mesa servida con platos para compartir",
+    "caption": "Para compartir",
+    "art": "3"
+   },
+   {
+    "src": "",
+    "alt": "Copa de vino tinto junto al fuego",
+    "caption": "Vinos de autor",
+    "art": "6"
+   }
+  ]
+ },
+ "testimonials": {
+  "eyebrow": "Opiniones",
+  "title": "Mesas que vuelven.",
+  "items": [
+   {
+    "quote": "El mejor ojo de bife que comí en años. Atención impecable y un ambiente cálido.",
+    "name": "Sofía L.",
+    "role": "Cena de aniversario"
+   },
+   {
+    "quote": "Las verduras asadas son una sorpresa. Se nota el cuidado en cada detalle.",
+    "name": "Diego A.",
+    "role": "Cliente frecuente"
+   },
+   {
+    "quote": "Ideal para ir con amigos: platos al centro, buen vino y sobremesa larga.",
+    "name": "Paula R.",
+    "role": "Cumpleaños"
+   }
+  ]
+ },
+ "contact": {
+  "eyebrow": "Reservas",
+  "title": "Te guardamos una mesa.",
+  "lead": "Escribinos y confirmamos tu reserva en el día.",
+  "address": "Calle y número del restaurante",
+  "city": "Tu ciudad",
+  "hours": [
+   {
+    "days": "Martes a jueves",
+    "time": "20:00 – 00:00"
+   },
+   {
+    "days": "Viernes y sábados",
+    "time": "20:00 – 01:00"
+   },
+   {
+    "days": "Domingos",
+    "time": "12:30 – 16:00"
+   }
+  ],
+  "email": "reservas@turestaurante.com",
+  "cta": "Pedir reserva"
+ },
+ "final": {
+  "title": "La próxima sobremesa empieza acá.",
+  "lead": "Reservá tu mesa para esta semana.",
+  "cta": "Reservar mesa",
+  "cta2": "Ver la carta"
+ },
+ "footer": {
+  "tagline": "Cocina de fuego con producto de estación.",
+  "rights": "Todos los derechos reservados."
+ }
+}

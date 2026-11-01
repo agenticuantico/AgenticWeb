@@ -6,8 +6,9 @@
 <meta name="robots" content="noindex">
 <!-- Vista previa aislada del lienzo. Se carga en un iframe con sandbox="allow-scripts" (origen opaco) o en una pestaña
      propia: el contenido va SIEMPRE en un iframe hijo sandbox (sin allow-same-origin), así no accede a cookies,
-     almacenamiento ni a la sesión del sitio, y la CSP impide pedidos de red. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; frame-src 'self'; connect-src 'none'; form-action 'none'; base-uri 'none'">
+     almacenamiento ni a la sesión del sitio. La CSP solo deja cargar librerías fijadas de jsDelivr/unpkg (three.js…),
+     Google Fonts e imágenes https (las que genera el agente); ningún fetch/XHR/WebSocket (connect-src 'none'). -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'unsafe-inline' https://fonts.googleapis.com; img-src data: blob: https:; media-src data: blob: https:; font-src data: https://fonts.gstatic.com; frame-src 'self'; connect-src 'none'; form-action 'none'; base-uri 'none'">
 <title>Vista previa</title>
 <style>
 html,body{margin:0;height:100%;background:#fff;overflow:hidden}

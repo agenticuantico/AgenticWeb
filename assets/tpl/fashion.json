@@ -1,0 +1,228 @@
+{
+ "lang": "es",
+ "template": "immersive",
+ "theme": "fashion",
+ "brand": "Atelier Sur",
+ "brandMark": "AS",
+ "palette": {
+  "bg": "#f6f1ea",
+  "bg2": "#ece4d8",
+  "surface": "#fbf8f3",
+  "ink": "#1d1b19",
+  "inkDark": "#1d1b19",
+  "muted": "#6f675d",
+  "accent": "#1d1b19",
+  "accent2": "#b08d57",
+  "onAccent": "#fbf8f3"
+ },
+ "fonts": {
+  "href": "https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400..700&family=Jost:wght@400;500;600&display=swap",
+  "display": "\"Bodoni Moda\",Didot,Georgia,serif",
+  "body": "Jost,system-ui,sans-serif",
+  "weight": "400",
+  "tracking": "-.02em"
+ },
+ "shape": {
+  "radius": "4px"
+ },
+ "ui": {
+  "skip": "Saltar al contenido",
+  "menu": "Menú",
+  "close": "Cerrar",
+  "scroll": "Deslizá",
+  "name": "Nombre",
+  "email": "Email",
+  "message": "Mensaje",
+  "sent": "¡Gracias! Te respondemos a la brevedad."
+ },
+ "title": "Atelier Sur · Colección de autor",
+ "description": "Prendas de diseño de autor, confeccionadas en series cortas con materiales nobles.",
+ "nav": [
+  {
+   "label": "Colección",
+   "href": "#oferta"
+  },
+  {
+   "label": "Atelier",
+   "href": "#intro"
+  },
+  {
+   "label": "Proceso",
+   "href": "#experiencia"
+  },
+  {
+   "label": "Lookbook",
+   "href": "#galeria"
+  },
+  {
+   "label": "Contacto",
+   "href": "#contacto"
+  }
+ ],
+ "navCta": "Comprar",
+ "hero": {
+  "eyebrow": "Nueva colección · Otoño",
+  "title": "Diseño que",
+  "titleEm": "dura más que una temporada.",
+  "lead": "Series cortas, materiales nobles y confección cuidada. Prendas pensadas para acompañarte durante años.",
+  "primary": "Ver colección",
+  "secondary": "Visitar el atelier",
+  "images": []
+ },
+ "intro": {
+  "eyebrow": "El atelier",
+  "title": "Hecho a mano, en series cortas.",
+  "body": "Cada pieza nace en nuestro taller: patronaje propio, telas seleccionadas y terminaciones a mano.",
+  "body2": "Producimos poco y mejor, para que cada prenda tenga una historia.",
+  "stats": [
+   {
+    "value": "100%",
+    "label": "fibras naturales en la colección"
+   },
+   {
+    "value": "50",
+    "label": "unidades por modelo"
+   },
+   {
+    "value": "2 años",
+    "label": "de garantía de confección"
+   }
+  ]
+ },
+ "steps": {
+  "eyebrow": "El proceso",
+  "title": "De la idea a la prenda",
+  "items": [
+   {
+    "kicker": "01 · Diseño",
+    "title": "Bocetos y patronaje.",
+    "text": "Cada silueta se prueba y ajusta hasta que cae perfecto.",
+    "image": "",
+    "art": "3"
+   },
+   {
+    "kicker": "02 · Materiales",
+    "title": "Telas que se sienten.",
+    "text": "Lino, lana merino y algodón orgánico de proveedores trazables.",
+    "image": "",
+    "art": "2"
+   },
+   {
+    "kicker": "03 · Confección",
+    "title": "Terminaciones a mano.",
+    "text": "Costuras reforzadas y detalles que se notan con el uso.",
+    "image": "",
+    "art": "4"
+   }
+  ],
+  "count": 3
+ },
+ "offer": {
+  "eyebrow": "Colección",
+  "title": "Piezas esenciales.",
+  "lead": "Envíos a todo el país. Cambios sin costo.",
+  "items": [
+   {
+    "name": "Saco de lino",
+    "desc": "Corte relajado, botones de corozo",
+    "price": "$ 189.000",
+    "tag": "Nuevo",
+    "cta": "Comprar",
+    "image": "",
+    "art": "1"
+   },
+   {
+    "name": "Sweater de merino",
+    "desc": "Tejido fino, cuello redondo",
+    "price": "$ 124.000",
+    "tag": "",
+    "cta": "Comprar",
+    "image": "",
+    "art": "6"
+   },
+   {
+    "name": "Pantalón sastrero",
+    "desc": "Lana fría con pinzas y bajo terminado",
+    "price": "$ 142.000",
+    "tag": "Edición limitada",
+    "cta": "Comprar",
+    "image": "",
+    "art": "5"
+   }
+  ]
+ },
+ "gallery": {
+  "eyebrow": "Lookbook",
+  "title": "La colección, en movimiento.",
+  "items": [
+   {
+    "src": "",
+    "alt": "Modelo con saco de lino en luz natural",
+    "caption": "Saco de lino arena",
+    "art": "3"
+   },
+   {
+    "src": "",
+    "alt": "Detalle de textura de tejido",
+    "caption": "Merino fino",
+    "art": "2"
+   },
+   {
+    "src": "",
+    "alt": "Prendas colgadas en el atelier",
+    "caption": "El atelier",
+    "art": "4"
+   }
+  ]
+ },
+ "testimonials": {
+  "eyebrow": "Clientas",
+  "title": "Prendas que se eligen otra vez.",
+  "items": [
+   {
+    "quote": "La calidad se nota al tocarla. Mi saco favorito desde hace dos inviernos.",
+    "name": "Inés C.",
+    "role": "Clienta"
+   },
+   {
+    "quote": "Atención personalizada y un calce perfecto.",
+    "name": "Mora V.",
+    "role": "Clienta"
+   },
+   {
+    "quote": "Diseño sobrio, materiales nobles. Exactamente lo que buscaba.",
+    "name": "Lucas B.",
+    "role": "Cliente"
+   }
+  ]
+ },
+ "contact": {
+  "eyebrow": "Contacto",
+  "title": "Visitá el atelier.",
+  "lead": "Probate la colección con asesoramiento personalizado.",
+  "address": "Dirección del atelier",
+  "city": "Tu ciudad",
+  "hours": [
+   {
+    "days": "Lunes a viernes",
+    "time": "11:00 – 19:00"
+   },
+   {
+    "days": "Sábados",
+    "time": "11:00 – 15:00"
+   }
+  ],
+  "email": "hola@tumarca.com",
+  "cta": "Agendar visita"
+ },
+ "final": {
+  "title": "Menos, pero mejor.",
+  "lead": "Descubrí la nueva colección.",
+  "cta": "Comprar ahora",
+  "cta2": "Ver colección"
+ },
+ "footer": {
+  "tagline": "Diseño de autor en series cortas.",
+  "rights": "Todos los derechos reservados."
+ }
+}

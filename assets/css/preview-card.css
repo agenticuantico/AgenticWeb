@@ -25,3 +25,9 @@
 .ace-panel .file-view.has-preview .preview-frame.is-live { min-height: 52vh; }
 .ace-panel .ap-writing { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; color: #4d7c0f; margin: 0 0 8px; }
 .ace-panel .ap-writing::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: #9fff00; animation: pvc-pulse 1s ease-in-out infinite; }
+
+/* Sitios web: se puede hacer scroll dentro de la tarjeta (el botón ⤢ y «Expandir» siguen abriendo la vista completa). */
+.pvc-html .pvc-stage { height: 420px; cursor: default; }
+.pvc-html .pvc-frame { pointer-events: auto; }
+.pvc-html .pvc-max { z-index: 2; pointer-events: auto; cursor: zoom-in; }
+@media (min-width: 720px) { .pvc-html .pvc-stage { height: 480px; } }

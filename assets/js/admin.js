@@ -3,11 +3,12 @@
  * (admins/{uid} o correo verificado del dueño); esta interfaz solo lo refleja.
  */
 import { h, icon, esc, toast, confirmDialog, fmtDate, timeAgo, hydrateIcons } from './ui.js';
-import { CONFIG, formatARS } from './config.js';
+import { CONFIG } from './config.js';
 import * as auth from './auth.js';
 import { getStore, getRtdb, friendlyError } from './firebase.js';
 import { DEFAULT_SYSTEM, clearSystemCache } from './sysconfig.js';
 import { renderLeads, renderAgentsControl } from './admin-control.js';
+import { revenueKpi, renderRevenueCard } from './admin-revenue.js';
 
 const root = document.getElementById('adminRoot');
 const CC_NAMES = new Intl.DisplayNames(['es'], { type: 'region' });
@@ -194,7 +195,6 @@ async function renderDashboard(user) {
     const [all, pro, emp] = await Promise.all([fs.getCount(col), fs.getCount(fs.query(col, fs.where('plan', '==', 'pro'))), fs.getCount(fs.query(col, fs.where('plan', '==', 'empresa')))]);
     counts.all = all.data().count; counts.pro = pro.data().count; counts.empresa = emp.data().count; counts.gratis = Math.max(0, counts.all - counts.pro - counts.empresa);
   } catch (e) { counts.err = friendlyError(e); }
-  const mrrArs = (counts.pro || 0) * CONFIG.PRICES.pro.ars + (counts.empresa || 0) * CONFIG.PRICES.empresa.ars;
 
   const kpi = (label, value, sub, ic) => h('div', { class: 'kpi' }, h('span', { class: 'kpi-ic', html: icon(ic) }), h('div', {}, h('small', {}, label), h('strong', {}, value), sub ? h('span', { class: 'muted tiny' }, sub) : null));
   const liveEl = h('strong', {}, '—');
@@ -203,7 +203,9 @@ async function renderDashboard(user) {
     kpi('Visitantes únicos', totalVisitors.toLocaleString('es-AR'), 'por día, sumados', 'users'),
     h('div', { class: 'kpi live' }, h('span', { class: 'kpi-ic', html: icon('globe') }), h('div', {}, h('small', {}, 'En línea ahora'), liveEl, h('span', { class: 'muted tiny' }, 'presencia en tiempo real'))),
     kpi('Registros', totalSignups.toLocaleString('es-AR'), (typeof counts.all === 'number' ? counts.all.toLocaleString('es-AR') : '—') + ' usuarios en total', 'userPlus'),
-    kpi('Ingreso mensual estimado', counts.err ? '—' : formatARS(mrrArs), 'según planes activos (sin confirmar cobros)', 'card'));
+    revenueKpi(user));
+  // Ingresos reales por moneda (Mercado Pago ARS · PayPal USD), desde el Worker (D1)
+  renderRevenueCard(grid, user);
   if (statsErr) grid.append(h('div', { class: 'alert warn wide' }, h('span', { html: icon('warn') }), h('div', {}, 'No se pudieron leer las estadísticas: ', statsErr, ' Publicá las reglas de Firestore (firebase/firestore.rules).')));
 
   card('Visitas por día', 'span-2').insertAdjacentHTML('beforeend', areaChart(series));

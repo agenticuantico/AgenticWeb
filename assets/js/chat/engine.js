@@ -8,6 +8,7 @@
  */
 import { CONFIG, formatARS } from '../config.js';
 import { analyzeLocally } from './docs-local.js';
+import { isWebDesign, localSite } from './webdesign.js';
 
 export const state = { live: false, checked: false, caps: null, base: '' };
 const P = CONFIG.PRICES;
@@ -164,10 +165,12 @@ export async function autoRun(o) {
         await readSSE(res, (d) => { if (d !== '[DONE]') { got = true; o.onEvent(d); } }, o.signal);
         return { local: false };
       }
+      o.reason = noticeFor(res.status);
     } catch (e) {
       if (e.name === 'AbortError') throw e;
       if (got) return { local: false };
       markOffline();
+      o.reason = 'offline';
     }
   }
   return localAuto(o);
@@ -333,28 +336,34 @@ async function localChat(o) {
 const CONSEQUENTIAL = /(env[ií]a|mand[aá]|public[aá]|pag[aá]|compr[aá]|borr[aá]|elimin[aá]|send|publish|pay|buy|delete|transfer)/i;
 function deliverableFor(task) {
   const t = task.toLowerCase();
-  if (/landing|p[aá]gina web|\bhtml\b|sitio web|website|web page|p[aá]gina/.test(t)) return { name: 'index.html', kind: 'html', mime: 'text/html' };
+  if (isWebDesign(task) || /landing|p[aá]gina web|\bhtml\b|sitio web|website|web page/.test(t)) return { name: 'index.html', kind: 'html', mime: 'text/html' };
   if (/python|\.py\b/.test(t)) return { name: 'script.py', kind: 'code', mime: 'text/x-python' };
   if (/javascript|node|typescript|\bjs\b|c[oó]digo|\bcode\b|script|funci[oó]n|function|programa/.test(t)) return { name: 'script.js', kind: 'code', mime: 'text/javascript' };
   if (/correo|email|mail/.test(t)) return { name: 'borrador-correo.md', kind: 'markdown', mime: 'text/markdown' };
   return { name: 'informe.md', kind: 'markdown', mime: 'text/markdown' };
 }
 function artifactFor(d, task, lang, extras) {
-  const title = task.replace(/^(arm[aá]|hac[eé]|cre[aá]|escrib[ií]|build|write|make|create)\s+(me\s+)?/i, '').trim().slice(0, 80) || 'Entregable';
-  if (d.kind === 'html') {
-    const biz = ((task.match(/para (una|un|mi)?\s*([\wáéíóúñ ]{3,40})/i) || [])[2] || 'tu negocio').trim();
-    const Biz = biz.charAt(0).toUpperCase() + biz.slice(1);
-    return `<!doctype html>\n<html lang="es">\n<head>\n  <meta charset="utf-8">\n  <meta name="viewport" content="width=device-width,initial-scale=1">\n  <title>${Biz}</title>\n  <style>\n    :root { --ink: #16151a; --bg: #faf8f4; --gold: #c99a3c; }\n    * { box-sizing: border-box; }\n    body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, sans-serif; color: var(--ink); background: var(--bg); }\n    header { display: flex; justify-content: space-between; align-items: center; padding: 18px 6vw; }\n    .logo { font-weight: 800; letter-spacing: -.02em; }\n    .hero { padding: 12vh 6vw; display: grid; gap: 18px; max-width: 760px; }\n    h1 { font-size: clamp(2rem, 6vw, 3.6rem); line-height: 1.05; margin: 0; }\n    p { font-size: 1.1rem; color: #55545c; margin: 0; }\n    .btn { display: inline-block; background: var(--ink); color: #fff; padding: 14px 24px; border-radius: 999px; font-weight: 700; text-decoration: none; width: max-content; }\n    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; padding: 0 6vw 10vh; }\n    .card { background: #fff; border: 1px solid #e7e3da; border-radius: 18px; padding: 22px; }\n    footer { padding: 24px 6vw; color: #77767e; font-size: .9rem; }\n  </style>\n</head>\n<body>\n  <header><span class="logo">${Biz}</span><a class="btn" href="#contacto">Contacto</a></header>\n  <section class="hero">\n    <h1>Bienvenido a ${Biz}</h1>\n    <p>Una propuesta clara, cercana y de calidad.</p>\n    <a class="btn" href="#contacto">Quiero saber más</a>\n  </section>\n  <section class="cards">\n    <div class="card"><h3>Calidad</h3><p>Seleccionamos cada detalle.</p></div>\n    <div class="card"><h3>Atención</h3><p>Te respondemos en el día.</p></div>\n    <div class="card" id="contacto"><h3>Contacto</h3><p>Escribinos y coordinamos.</p></div>\n  </section>\n  <footer>© ${new Date().getFullYear()} ${Biz}</footer>\n</body>\n</html>\n`;
-  }
-  if (d.name.endsWith('.py')) return `"""\n${title}\n"""\n\nfrom typing import Iterable\n\n\ndef ordenar_precios(precios: Iterable[float], descendente: bool = False) -> list[float]:\n    """Devuelve los precios ordenados, ignorando valores inválidos."""\n    validos = [float(p) for p in precios if isinstance(p, (int, float)) and p >= 0]\n    return sorted(validos, reverse=descendente)\n\n\ndef formatear_ars(valor: float) -> str:\n    """15600 -> 'ARS 15.600'"""\n    return "ARS " + f"{valor:,.0f}".replace(",", ".")\n\n\nif __name__ == "__main__":\n    for p in ordenar_precios([46800, 0, 15600, -1]):\n        print(formatear_ars(p))\n`;
-  if (d.kind === 'code') return `/**\n * ${title}\n */\n\n/** Ordena una lista de precios sin modificar la original. */\nexport function ordenarPrecios(precios, { descendente = false } = {}) {\n  const validos = precios.filter((p) => Number.isFinite(p) && p >= 0);\n  return [...validos].sort((a, b) => (descendente ? b - a : a - b));\n}\n\n/** 15600 -> "ARS 15.600" */\nexport function formatearARS(valor) {\n  return 'ARS ' + new Intl.NumberFormat('es-AR', { maximumFractionDigits: 0 }).format(valor);\n}\n\nconsole.log(ordenarPrecios([46800, 0, 15600]).map(formatearARS));\n`;
-  const parts = [`# ${title}`, '', `**Objetivo:** ${task}`, ''];
+  // Sin servidor no se inventa contenido: solo se entregan resultados reales (código de ejemplo, cálculos,
+  // documentos leídos, aportes de agentes). Los sitios web usan la plantilla premium (localSite). Nunca un informe genérico.
+  if (d.kind === 'html') return '';
+  if (d.name.endsWith('.py')) return `"""\nOrdenar y formatear precios\n"""\n\nfrom typing import Iterable\n\n\ndef ordenar_precios(precios: Iterable[float], descendente: bool = False) -> list[float]:\n    """Devuelve los precios ordenados, ignorando valores inválidos."""\n    validos = [float(p) for p in precios if isinstance(p, (int, float)) and p >= 0]\n    return sorted(validos, reverse=descendente)\n\n\ndef formatear_ars(valor: float) -> str:\n    """15600 -> 'ARS 15.600'"""\n    return "ARS " + f"{valor:,.0f}".replace(",", ".")\n\n\nif __name__ == "__main__":\n    for p in ordenar_precios([46800, 0, 15600, -1]):\n        print(formatear_ars(p))\n`;
+  if (d.kind === 'code') return `/**\n * Ordenar y formatear precios (ejemplo)\n */\n\n/** Ordena una lista de precios sin modificar la original. */\nexport function ordenarPrecios(precios, { descendente = false } = {}) {\n  const validos = precios.filter((p) => Number.isFinite(p) && p >= 0);\n  return [...validos].sort((a, b) => (descendente ? b - a : a - b));\n}\n\n/** 15600 -> "ARS 15.600" */\nexport function formatearARS(valor) {\n  return 'ARS ' + new Intl.NumberFormat('es-AR', { maximumFractionDigits: 0 }).format(valor);\n}\n\nconsole.log(ordenarPrecios([46800, 0, 15600]).map(formatearARS));\n`;
+  const parts = [];
   if (extras.calcLine) parts.push('## Cálculo', '', extras.calcLine, '');
   if (extras.docSummary) parts.push('## Documentos analizados', '', extras.docSummary, '');
   for (const c of extras.contributions || []) parts.push(`## Aporte de ${c.name}`, '', c.text, '');
-  parts.push('## Plan de acción', '', '1. **Diagnóstico**: relevar procesos, tiempos y costos actuales.', '2. **Prioridades**: elegir 1–2 tareas repetitivas de mayor impacto.', '3. **Piloto**: automatizarlas durante 2–4 semanas.', '4. **Medición**: horas ahorradas, errores y satisfacción.', '5. **Escala**: extender a otras áreas.', '', '## Próximos pasos', '', '- [ ] Validar el objetivo con el equipo', '- [ ] Elegir el primer proceso piloto', `- [ ] Pedir una propuesta a medida desde ${MAIL}`, '');
-  return parts.join('\n');
+  if (!parts.length) return '';
+  return ['# Resultados', '', ...parts].join('\n');
 }
+
+const REASON = {
+  quota: ['Llegaste al límite diario del modelo de IA completo.', 'You reached the daily limit of the full AI model.', 'Você atingiu o limite diário do modelo de IA completo.'],
+  upgrade: ['Llegaste al límite diario de tu plan.', 'You reached your plan\'s daily limit.', 'Você atingiu o limite diário do seu plano.'],
+  login: ['Para usar el modelo de IA completo tenés que iniciar sesión.', 'Sign in to use the full AI model.', 'Entre na sua conta para usar o modelo de IA completo.'],
+  offline: ['No pude conectar con el servidor de IA en este momento.', 'I could not reach the AI server right now.', 'Não consegui conectar ao servidor de IA agora.'],
+  fallback: ['El servidor de IA no respondió a tiempo.', 'The AI server did not respond in time.', 'O servidor de IA não respondeu a tempo.']
+};
+const reasonText = (r, lang) => { const x = REASON[r] || REASON.offline; return L(lang, x[0], x[1], x[2]); };
 
 async function localAuto(o) {
   const { task, lang, signal: sig, onEvent: emit } = o;
@@ -383,7 +392,9 @@ async function localAuto(o) {
     if (s.tool === 'calc') { try { extras.calcLine = `${expr} = ${fmtNum(calc(expr), lang)}`; } catch { extras.calcLine = `${expr} = ?`; } emit({ type: 'log', id: s.id, text: extras.calcLine }); }
     if (s.tool === 'agent') { const text = agentLocal(s.agent, task, lang); extras.contributions.push({ name: s.agent.name, text }); emit({ type: 'agent', id: s.id, agent: { id: s.agent.id, name: s.agent.name, color: s.agent.color }, text }); }
     if (s.tool === 'write') {
-      content = artifactFor(d, task, lang, extras);
+      if (d.kind === 'html') { try { const site = await localSite(task, lang); content = site.html; extras.site = site; } catch { content = ''; } }
+      else content = artifactFor(d, task, lang, extras);
+      if (!content) { emit({ type: 'log', id: s.id, text: reasonText(o.reason, lang) }); emit({ type: 'step', id: s.id, status: 'done', phase: s.phase, title: s.title }); continue; }
       // El archivo llega por partes: la vista previa se va dibujando mientras se escribe.
       const n = 10, size = Math.ceil(content.length / n);
       for (let k = 0; k < content.length; k += size) { emit({ type: 'artifact_delta', name: d.name, mime: d.mime, delta: content.slice(k, k + size) }); await sleep(140, sig); }
@@ -396,8 +407,22 @@ async function localAuto(o) {
     if (s.tool === 'verify') emit({ type: 'log', id: s.id, text: 'OK · el entregable cumple los criterios.' });
     emit({ type: 'step', id: s.id, status: 'done', phase: s.phase, title: s.title });
   }
-  emit({ type: 'artifact', name: d.name, mime: d.mime, content });
-  const summary = `Listo. Preparé **${d.name}**: planifiqué, ${o.docs && o.docs.length ? 'leí tus documentos, ' : ''}${extras.calcLine ? `calculé (${extras.calcLine}), ` : ''}${extras.contributions.length ? `sumé los aportes de ${extras.contributions.map((c) => c.name).join(', ')}, ` : ''}lo redacté y lo verifiqué.\n\n${d.kind === 'html' || d.kind === 'markdown' ? 'La vista previa está acá arriba: tocá **Expandir** para verla en grande, o descargalo.' : 'Podés abrirlo en el lienzo, editarlo y descargarlo.'}`;
+  if (content) emit({ type: 'artifact', name: d.name, mime: d.mime, content });
+  const why = reasonText(o.reason, lang);
+  let summary;
+  if (d.kind === 'html' && content) {
+    const brand = (extras.site && extras.site.data && extras.site.data.brand) || '';
+    summary = L(lang,
+      `Listo: diseñé **${d.name}**${brand ? ` (marca de ejemplo: **${brand}**)` : ''} con nuestro diseño prediseñado premium del rubro: escena inmersiva, secciones completas y textos profesionales.\n\n${why} Por eso no pude escribir textos ni imágenes a medida para tu pedido; cuando el servicio vuelva, pedímelo de nuevo y lo personalizo. Tocá **Expandir** para verlo en pantalla completa.`,
+      `Done: I designed **${d.name}** with our premium pre-built design for this industry.\n\n${why} So I could not write custom copy or images; ask again when the service is back and I will personalise it. Tap **Expand** to view it full screen.`,
+      `Pronto: criei **${d.name}** com nosso design premium pré-construído do setor.\n\n${why} Por isso não consegui escrever textos ou imagens sob medida; peça de novo quando o serviço voltar. Toque em **Expandir** para ver em tela cheia.`);
+  } else if (content) {
+    summary = `Listo. Preparé **${d.name}** con lo que pude resolver en tu dispositivo.\n\n${why} ${d.kind === 'markdown' ? 'La vista previa está acá arriba.' : 'Podés abrirlo en el lienzo, editarlo y descargarlo.'}`;
+  } else {
+    summary = L(lang, `${why} Para esta tarea necesito el modelo completo, así que no voy a entregarte un documento genérico. Probá de nuevo en un rato${o.reason === 'login' ? ' o iniciá sesión' : o.reason === 'quota' || o.reason === 'upgrade' ? ' o mirá los [planes](/planes.html)' : ''}.`,
+      `${why} This task needs the full model, so I will not hand you a generic document. Please try again shortly.`,
+      `${why} Esta tarefa precisa do modelo completo, então não vou entregar um documento genérico. Tente novamente em instantes.`);
+  }
   await stream(summary, (c) => emit({ delta: c }), sig);
   emit({ type: 'done' });
   return { local: true };

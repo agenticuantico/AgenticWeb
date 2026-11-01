@@ -1,0 +1,154 @@
+{
+  "lang": "es",
+  "brand": "Grano & Brasa",
+  "brandMark": "G&B",
+  "title": "Grano & Brasa · Café de especialidad y granos tostados en casa",
+  "description": "Cafetería de especialidad y tostadores: espresso, filtrados y granos frescos de origen único. Vení a probarlos o llevalos a tu casa.",
+  "nav": [
+    { "label": "Historia", "href": "#historia" },
+    { "label": "Carta", "href": "#carta" },
+    { "label": "Orígenes", "href": "#origenes" },
+    { "label": "Tienda", "href": "#tienda" },
+    { "label": "Visitanos", "href": "#visitanos" }
+  ],
+  "navCta": "Reservar mesa",
+  "hero": {
+    "eyebrow": "Tostadores de especialidad · Desde la semilla a la taza",
+    "title": "El café que",
+    "titleEm": "se siente antes",
+    "titleEnd": "de probarlo.",
+    "lead": "Seleccionamos granos de origen único, los tostamos en pequeños lotes cada semana y los servimos en su punto exacto. Una cafetería para quedarse y una tienda para llevarse el aroma a casa.",
+    "primary": "Ver la carta",
+    "secondary": "Comprar granos",
+    "scrollHint": "Deslizá para servir"
+  },
+  "scenes": [
+    { "kicker": "01 · Tostado lento", "title": "Lotes pequeños, perfil preciso.", "text": "Cada origen tiene su curva de tueste. La afinamos hasta que el dulzor natural del grano aparece sin amargor." },
+    { "kicker": "02 · Extracción", "title": "Una explosión de aroma.", "text": "Molienda al momento, agua a 93 °C y una receta medida al gramo. Así se libera todo lo que el grano tiene para dar." },
+    { "kicker": "03 · Servido", "title": "Tu taza, en su mejor momento.", "text": "Crema densa, cuerpo sedoso y un final largo. El ritual de siempre, hecho con el cuidado de la primera vez." }
+  ],
+  "story": {
+    "eyebrow": "Nuestra historia",
+    "title": "Empezamos tostando para amigos. Hoy tostamos para un barrio entero.",
+    "body": "Grano & Brasa nació de una obsesión simple: entender por qué un café puede saber a frutos rojos, a chocolate o a flores. Viajamos a las fincas, aprendimos de quienes cultivan y volvimos con una certeza: el buen café es trabajo de muchas manos.",
+    "body2": "Compramos directo a productores, pagamos por calidad y tostamos en el local, a la vista. Lo que tomás en la barra es exactamente lo que te llevás en la bolsa.",
+    "stats": [
+      { "value": "48 h", "label": "del tostador a tu taza" },
+      { "value": "6", "label": "orígenes en rotación" },
+      { "value": "100%", "label": "arábica de especialidad" }
+    ]
+  },
+  "menu": {
+    "eyebrow": "La carta",
+    "title": "Espresso, filtrados y algo rico para acompañar.",
+    "lead": "Precios de referencia. Preguntá en la barra por el origen de la semana.",
+    "groups": [
+      { "name": "Barra de espresso", "note": "Doble shot, leche entera o vegetal", "items": [
+        { "name": "Espresso", "desc": "Origen de la semana, 18 g en 36 g", "price": "$ 2.400" },
+        { "name": "Cortado", "desc": "Espresso con un toque de leche texturizada", "price": "$ 2.700" },
+        { "name": "Flat white", "desc": "Doble ristretto y microespuma sedosa", "price": "$ 3.400" },
+        { "name": "Cappuccino", "desc": "Equilibrio clásico de café, leche y espuma", "price": "$ 3.300" }
+      ] },
+      { "name": "Métodos de filtrado", "note": "Para descubrir cada origen", "items": [
+        { "name": "V60", "desc": "Limpio y floral, ideal para cafés africanos", "price": "$ 3.600" },
+        { "name": "Chemex para dos", "desc": "Cuerpo ligero y dulzor prolongado", "price": "$ 6.200" },
+        { "name": "Cold brew", "desc": "Infusión en frío durante 18 horas", "price": "$ 3.800" }
+      ] },
+      { "name": "Para acompañar", "note": "Horneado cada mañana", "items": [
+        { "name": "Medialunas de manteca", "desc": "Hojaldre de 72 horas", "price": "$ 1.500" },
+        { "name": "Budín de naranja y cardamomo", "desc": "Húmedo, cítrico y especiado", "price": "$ 2.900" },
+        { "name": "Tostado de masa madre", "desc": "Jamón natural y queso de campo", "price": "$ 5.400" }
+      ] }
+    ]
+  },
+  "origins": {
+    "eyebrow": "Orígenes",
+    "title": "Cada grano cuenta de dónde viene.",
+    "lead": "Trabajamos con fincas que cuidan la tierra y la cosecha. Estos son los cafés que hoy están en nuestra barra.",
+    "items": [
+      { "country": "Etiopía", "region": "Yirgacheffe", "notes": "Jazmín · bergamota · durazno blanco", "process": "Lavado", "altitude": "1.900–2.200 m" },
+      { "country": "Colombia", "region": "Huila", "notes": "Panela · cereza · cacao", "process": "Honey", "altitude": "1.650–1.850 m" },
+      { "country": "Brasil", "region": "Cerrado Mineiro", "notes": "Chocolate con leche · avellana · caramelo", "process": "Natural", "altitude": "1.100–1.250 m" }
+    ]
+  },
+  "shop": {
+    "eyebrow": "Tienda de granos",
+    "title": "Llevate el aroma a casa.",
+    "lead": "Tostado de esta semana, en bolsas con válvula. Elegí grano entero o molido para tu método.",
+    "products": [
+      { "name": "Etiopía Yirgacheffe", "notes": "Floral y cítrico", "price": "$ 14.900", "weight": "250 g", "tag": "Más vendido", "tone": "#c9a46a" },
+      { "name": "Colombia Huila", "notes": "Dulce y frutal", "price": "$ 13.500", "weight": "250 g", "tag": "Nuevo lote", "tone": "#b3633f" },
+      { "name": "Blend de la casa", "notes": "Chocolate y caramelo", "price": "$ 11.900", "weight": "250 g", "tag": "Para espresso", "tone": "#6f7d5a" }
+    ]
+  },
+  "gallery": {
+    "eyebrow": "El lugar",
+    "title": "Un rincón para hacer una pausa.",
+    "items": [
+      { "src": "", "alt": "Barista sirviendo un flat white con arte latte", "caption": "Arte latte en cada taza", "art": "1" },
+      { "src": "", "alt": "Granos de café recién tostados", "caption": "Tostado a la vista", "art": "2" },
+      { "src": "", "alt": "Mesa de madera con taza de café y medialunas", "caption": "Mesas con luz natural", "art": "3" }
+    ]
+  },
+  "testimonials": {
+    "eyebrow": "Lo que dicen",
+    "title": "Clientes que vuelven por otra taza.",
+    "items": [
+      { "quote": "El flat white más equilibrado que probé. Y te explican de dónde viene cada café sin una gota de pretensión.", "name": "Lucía M.", "role": "Clienta desde la apertura" },
+      { "quote": "Compro la bolsa de Etiopía todas las semanas. Se nota que está recién tostado: el aroma al abrirla es otra cosa.", "name": "Martín R.", "role": "Suscriptor de granos" },
+      { "quote": "Un lugar tranquilo, buena música y café en serio. Mi oficina de los viernes.", "name": "Carla G.", "role": "Diseñadora" }
+    ]
+  },
+  "visit": {
+    "eyebrow": "Visitanos",
+    "title": "Te esperamos con la máquina encendida.",
+    "lead": "Vení a tomar algo, conocer el tostador o retirar tu pedido de granos.",
+    "address": "Calle y número del local",
+    "city": "Tu ciudad",
+    "hours": [
+      { "days": "Lunes a viernes", "time": "8:00 – 20:00" },
+      { "days": "Sábados", "time": "9:00 – 21:00" },
+      { "days": "Domingos y feriados", "time": "9:00 – 14:00" }
+    ],
+    "email": "hola@tucafe.com",
+    "directions": "Cómo llegar",
+    "mapLabel": "Mapa de ubicación del local"
+  },
+  "final": {
+    "title": "Tu próxima taza favorita te está esperando.",
+    "lead": "Reservá una mesa o pedí tus granos para retirar hoy mismo.",
+    "cta": "Reservar mesa",
+    "cta2": "Pedir granos"
+  },
+  "footer": {
+    "tagline": "Café de especialidad, tostado con paciencia.",
+    "newsletterLabel": "Recibí el origen de la semana",
+    "newsletterPlaceholder": "Tu email",
+    "newsletterCta": "Suscribirme",
+    "newsletterThanks": "¡Listo! Te escribimos cuando salga el próximo lote.",
+    "rights": "Todos los derechos reservados."
+  },
+  "ui": {
+    "skip": "Saltar al contenido",
+    "menu": "Menú",
+    "close": "Cerrar",
+    "add": "Agregar",
+    "added": "Agregado",
+    "cart": "Pedido",
+    "grind": "Molienda",
+    "process": "Proceso",
+    "altitude": "Altura",
+    "grinds": ["Grano entero", "Espresso", "Filtro"]
+  },
+  "palette": {
+    "bg": "#120c08",
+    "bg2": "#1c130d",
+    "surface": "#f4ece1",
+    "ink": "#f3e9dc",
+    "inkDark": "#1d140e",
+    "muted": "#bfae9a",
+    "accent": "#c8894b",
+    "accent2": "#e7c79a",
+    "cup": "#f2ebe1"
+  }
+}

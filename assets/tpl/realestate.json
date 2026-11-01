@@ -1,0 +1,228 @@
+{
+ "lang": "es",
+ "template": "immersive",
+ "theme": "realestate",
+ "brand": "Horizonte",
+ "brandMark": "H",
+ "palette": {
+  "bg": "#f3efe7",
+  "bg2": "#e9e3d7",
+  "surface": "#fbf9f4",
+  "ink": "#1c2621",
+  "inkDark": "#1c2621",
+  "muted": "#5d6a63",
+  "accent": "#24493b",
+  "accent2": "#d9b77a",
+  "onAccent": "#f4f1ea"
+ },
+ "fonts": {
+  "href": "https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@400;500;600;700&display=swap",
+  "display": "\"DM Serif Display\",Georgia,serif",
+  "body": "\"DM Sans\",system-ui,sans-serif",
+  "weight": "400",
+  "tracking": "-.01em"
+ },
+ "shape": {
+  "radius": "14px"
+ },
+ "ui": {
+  "skip": "Saltar al contenido",
+  "menu": "Menú",
+  "close": "Cerrar",
+  "scroll": "Deslizá",
+  "name": "Nombre",
+  "email": "Email",
+  "message": "Mensaje",
+  "sent": "¡Gracias! Te respondemos a la brevedad."
+ },
+ "title": "Horizonte · Desarrollos inmobiliarios",
+ "description": "Departamentos y casas en ubicaciones elegidas, con diseño, eficiencia y financiación a medida.",
+ "nav": [
+  {
+   "label": "Proyecto",
+   "href": "#intro"
+  },
+  {
+   "label": "Experiencia",
+   "href": "#experiencia"
+  },
+  {
+   "label": "Unidades",
+   "href": "#oferta"
+  },
+  {
+   "label": "Galería",
+   "href": "#galeria"
+  },
+  {
+   "label": "Contacto",
+   "href": "#contacto"
+  }
+ ],
+ "navCta": "Agendar visita",
+ "hero": {
+  "eyebrow": "Desarrollo residencial · Preventa",
+  "title": "Viví donde",
+  "titleEm": "todo queda cerca.",
+  "lead": "Unidades luminosas, amenities pensados para la vida diaria y financiación en pesos durante la obra.",
+  "primary": "Ver unidades",
+  "secondary": "Agendar visita",
+  "images": []
+ },
+ "intro": {
+  "eyebrow": "El proyecto",
+  "title": "Arquitectura que mejora el día a día.",
+  "body": "Plantas eficientes, ventilación cruzada y materiales de primera calidad en cada unidad.",
+  "body2": "Un entorno verde, con servicios y transporte a pocos minutos.",
+  "stats": [
+   {
+    "value": "48",
+    "label": "unidades de 1 a 3 ambientes"
+   },
+   {
+    "value": "A+",
+    "label": "eficiencia energética objetivo"
+   },
+   {
+    "value": "36",
+    "label": "cuotas de financiación en obra"
+   }
+  ]
+ },
+ "steps": {
+  "eyebrow": "La experiencia",
+  "title": "Por qué elegirnos",
+  "items": [
+   {
+    "kicker": "01 · Ubicación",
+    "title": "Conectado con la ciudad.",
+    "text": "Escuelas, comercios y espacios verdes a una caminata.",
+    "image": "",
+    "art": "1"
+   },
+   {
+    "kicker": "02 · Diseño",
+    "title": "Luz natural en cada ambiente.",
+    "text": "Ventanales amplios y balcones aterrazados.",
+    "image": "",
+    "art": "3"
+   },
+   {
+    "kicker": "03 · Amenities",
+    "title": "Espacios para compartir.",
+    "text": "Piscina, gimnasio, cowork y terraza con parrillas.",
+    "image": "",
+    "art": "2"
+   }
+  ],
+  "count": 3
+ },
+ "offer": {
+  "eyebrow": "Unidades",
+  "title": "Elegí tu próximo hogar.",
+  "lead": "Valores de referencia en preventa.",
+  "items": [
+   {
+    "name": "Monoambiente",
+    "desc": "34 m² con balcón",
+    "price": "Desde USD 68.000",
+    "tag": "Preventa",
+    "cta": "Consultar",
+    "image": "",
+    "art": "6"
+   },
+   {
+    "name": "2 ambientes",
+    "desc": "52 m² con balcón aterrazado",
+    "price": "Desde USD 96.000",
+    "tag": "Más elegido",
+    "cta": "Consultar",
+    "image": "",
+    "art": "3"
+   },
+   {
+    "name": "3 ambientes",
+    "desc": "78 m², cochera opcional",
+    "price": "Desde USD 139.000",
+    "tag": "",
+    "cta": "Consultar",
+    "image": "",
+    "art": "4"
+   }
+  ]
+ },
+ "gallery": {
+  "eyebrow": "Galería",
+  "title": "Imaginate viviendo acá.",
+  "items": [
+   {
+    "src": "",
+    "alt": "Fachada del edificio al atardecer",
+    "caption": "Fachada",
+    "art": "1"
+   },
+   {
+    "src": "",
+    "alt": "Living luminoso con ventanal",
+    "caption": "Living",
+    "art": "3"
+   },
+   {
+    "src": "",
+    "alt": "Terraza con piscina",
+    "caption": "Amenities",
+    "art": "5"
+   }
+  ]
+ },
+ "testimonials": {
+  "eyebrow": "Propietarios",
+  "title": "Familias que ya eligieron.",
+  "items": [
+   {
+    "quote": "Compramos en preventa y la obra se entregó en fecha. Excelente terminación.",
+    "name": "Andrea y Pablo",
+    "role": "Propietarios"
+   },
+   {
+    "quote": "La financiación en pesos nos permitió dar el paso.",
+    "name": "Gonzalo M.",
+    "role": "Propietario"
+   },
+   {
+    "quote": "Luz todo el día y un barrio tranquilo. Lo que buscábamos.",
+    "name": "Carolina D.",
+    "role": "Propietaria"
+   }
+  ]
+ },
+ "contact": {
+  "eyebrow": "Contacto",
+  "title": "Coordiná tu visita.",
+  "lead": "Recorré el showroom y conocé las unidades disponibles.",
+  "address": "Dirección del showroom",
+  "city": "Tu ciudad",
+  "hours": [
+   {
+    "days": "Lunes a viernes",
+    "time": "10:00 – 18:00"
+   },
+   {
+    "days": "Sábados",
+    "time": "10:00 – 13:00"
+   }
+  ],
+  "email": "ventas@tudesarrollo.com",
+  "cta": "Quiero visitar"
+ },
+ "final": {
+  "title": "Tu próximo hogar empieza con una visita.",
+  "lead": "Unidades limitadas en preventa.",
+  "cta": "Agendar visita",
+  "cta2": "Ver unidades"
+ },
+ "footer": {
+  "tagline": "Desarrollos pensados para vivir mejor.",
+  "rights": "Todos los derechos reservados."
+ }
+}
