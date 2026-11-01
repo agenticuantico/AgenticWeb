@@ -35,11 +35,31 @@ Sitio: https://agenticuantico.dev.ar/ · Contacto comercial: agenticuantico@gmai
 - [Inicio](https://agenticuantico.dev.ar/)
 - [Cómo funciona](https://agenticuantico.dev.ar/como-funciona.html)
 - [Soluciones](https://agenticuantico.dev.ar/soluciones/)
+- [Guías prácticas](https://agenticuantico.dev.ar/guias/)
 - [Planes y precios](https://agenticuantico.dev.ar/planes.html)
 - [Nosotros](https://agenticuantico.dev.ar/nosotros.html)
 - [Contacto](https://agenticuantico.dev.ar/contacto/)
 - [Ética e IA responsable](https://agenticuantico.dev.ar/etica/)
 - [Términos](https://agenticuantico.dev.ar/legal/terminos.html) · [Privacidad](https://agenticuantico.dev.ar/legal/privacidad.html) · [Uso aceptable de IA](https://agenticuantico.dev.ar/legal/uso-aceptable.html) · [Reembolsos](https://agenticuantico.dev.ar/legal/reembolsos.html)
+
+## Soluciones por rubro
+- [IA para agencias de marketing: informes y propuestas](https://agenticuantico.dev.ar/soluciones/agencias-de-marketing/): IA para agencias de marketing: informes de campañas desde tus CSV, propuestas comerciales, calendarios de contenido y landings con vista previa. Probala gratis.
+- [IA para e-commerce: fichas de producto y ventas](https://agenticuantico.dev.ar/soluciones/ecommerce/): IA para e-commerce y tiendas online: descripciones de productos desde tu planilla, respuestas a clientes, políticas y análisis de ventas. Probala gratis.
+- [IA para estudios contables: extractos e informes](https://agenticuantico.dev.ar/soluciones/estudios-contables/): IA para estudios contables: analizá extractos y planillas, prepará informes para clientes, ordená documentación y redactá respuestas, con revisión profesional.
+- [IA para inmobiliarias: fichas, consultas y contratos](https://agenticuantico.dev.ar/soluciones/inmobiliarias/): IA para inmobiliarias en Argentina: redactá fichas de propiedades, respuestas a consultas, resúmenes de contratos e informes para propietarios. Probala gratis.
+
+## Guías prácticas
+- [Agentes de IA para pymes: qué son y cómo empezar](https://agenticuantico.dev.ar/guias/agentes-de-ia-para-pymes/): Qué es un agente de IA, qué tareas conviene delegar primero en una pyme, cómo pedirlas bien, cómo controlar el resultado y un plan de una semana para empezar.
+- [Fichas de propiedades con IA, sin inventar datos](https://agenticuantico.dev.ar/guias/descripciones-de-propiedades-con-ia/): Cómo redactar fichas de propiedades con IA: qué datos juntar, un pedido listo para copiar, un ejemplo, errores comunes y checklist antes de publicar.
+- [Cómo usar IA en un estudio contable, paso a paso](https://agenticuantico.dev.ar/guias/ia-para-estudios-contables-paso-a-paso/): Guía práctica de IA para estudios contables: qué delegar, pedidos de ejemplo para extractos, informes y comprobantes, controles y cuidado de datos.
+- [Guías prácticas de IA para pymes y profesionales](https://agenticuantico.dev.ar/guias/): Guías paso a paso para usar inteligencia artificial en una pyme, una inmobiliaria, un estudio contable o una agencia: pedidos de ejemplo, controles y límites.
+- [Informe mensual de campañas con IA: guía para agencias](https://agenticuantico.dev.ar/guias/informe-mensual-de-campanas-con-ia/): Cómo armar el informe mensual de campañas con IA: estructura, preparación de los CSV, un pedido listo para copiar y controles antes de enviarlo.
+
+## Em português (Brasil)
+- [IA para agências de marketing: relatórios e propostas](https://agenticuantico.dev.ar/pt/solucoes/agencias-de-marketing/): IA para agências de marketing: relatórios de campanhas a partir dos seus CSV, propostas, calendários de conteúdo e landing pages com pré-visualização.
+- [IA para e-commerce: descrições de produtos e vendas](https://agenticuantico.dev.ar/pt/solucoes/ecommerce/): IA para e-commerce e lojas virtuais: descrições de produtos a partir da planilha, respostas a clientes, políticas de troca e análise de vendas. Teste grátis.
+- [IA para escritórios de contabilidade: extratos e relatórios](https://agenticuantico.dev.ar/pt/solucoes/escritorios-de-contabilidade/): IA para escritórios de contabilidade: analise extratos e planilhas, prepare relatórios, organize documentos e redija e-mails, com revisão profissional.
+- [IA para imobiliárias: anúncios, atendimento e contratos](https://agenticuantico.dev.ar/pt/solucoes/imobiliarias/): IA para imobiliárias e corretores: escreva descrições de imóveis, respostas a interessados, resumos de contratos e relatórios para proprietários. Teste grátis.
 
 ## In English
 AgentiCuántico is an Argentine voice-first AI agents platform: voice or text chat, an agent mode that plans and runs multi-step tasks with human approval for consequential actions, invitable specialist agents, document analysis and a code canvas. Plans: Free, Pro (USD 10/month) and Business «Empresa» (USD 30/month, custom agents and priority support). Custom integrations, measurable pilots and white-label resale are arranged through sales contact; there is no public self-serve API.
