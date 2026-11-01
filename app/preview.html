@@ -2,29 +2,76 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<!-- Vista previa aislada del lienzo. Se carga en un iframe con sandbox="allow-scripts" (origen opaco):
-     no accede a cookies, almacenamiento ni a la sesión del sitio, y no puede hacer pedidos de red. -->
+<!-- Vista previa aislada del lienzo. Se carga en un iframe con sandbox="allow-scripts" (origen opaco) o en una pestaña
+     propia: el contenido va SIEMPRE en un iframe hijo sandbox (sin allow-same-origin), así no accede a cookies,
+     almacenamiento ni a la sesión del sitio, y la CSP impide pedidos de red. -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; frame-src 'self'; connect-src 'none'; form-action 'none'; base-uri 'none'">
 <title>Vista previa</title>
-<style>html,body{margin:0;height:100%;background:#fff}iframe{border:0;width:100%;height:100%;display:block}</style>
+<style>
+html,body{margin:0;height:100%;background:#fff;overflow:hidden}
+#wrap{position:absolute;inset:0;overflow:hidden}
+iframe{border:0;display:block;transform-origin:0 0;background:#fff}
+</style>
 <script>
-/* Recibe HTML del lienzo y lo muestra en un iframe hijo (hereda esta CSP estricta: sin red). */
+/*
+ * Recibe HTML ({type:'ac-preview', html, fit}) y lo muestra en un iframe hijo (hereda esta CSP estricta: sin red).
+ * fit=true (por defecto): si el diseño es más ancho que el espacio, lo renderiza a su ancho real y lo escala para que
+ * entre completo, sin cortes a la derecha. El hijo informa su ancho real con un script mínimo inyectado.
+ */
 (function () {
-  var frame;
-  window.addEventListener('message', function (e) {
-    var d = e.data;
-    if (!d || d.type !== 'ac-preview' || typeof d.html !== 'string') return;
+  var frame, wrap, natural = 0, fit = true, last = '';
+  var PROBE = '<script>(function(){function m(){var d=document.documentElement,w=Math.max(d.scrollWidth,document.body?document.body.scrollWidth:0),r=0,l=1e9,els=document.body?document.body.getElementsByTagName("*"):[];for(var i=0;i<els.length&&i<4000;i++){var b=els[i].getBoundingClientRect();if(b.width>0&&b.height>0){if(b.right>r&&b.right<20000)r=b.right;}}try{var tw=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT),rg=document.createRange(),n,k=0;while((n=tw.nextNode())&&k++<3000){if(!n.nodeValue.trim())continue;rg.selectNodeContents(n);var q=rg.getBoundingClientRect();if(q.width>0){if(q.right>r&&q.right<20000)r=q.right;if(q.left>=0&&q.left<l)l=q.left;}}}catch(_){}var pad=l<1e9?Math.min(l,64):0;parent.postMessage({type:"ac-preview-size",w:Math.ceil(Math.max(w,r>innerWidth?r+pad:0))},"*");}addEventListener("load",function(){m();setTimeout(m,400);setTimeout(m,1500);});addEventListener("resize",function(){setTimeout(m,60)});})();<\/script>';
+  function inject(html) {
+    var s = String(html).slice(0, 2000000);
+    if (/<\/body>/i.test(s)) return s.replace(/<\/body>/i, PROBE + '</body>');
+    return s + PROBE;
+  }
+  function layout() {
+    if (!frame) return;
+    var W = wrap.clientWidth, H = wrap.clientHeight;
+    var need = fit && natural > W + 2 ? natural : W;
+    var scale = W / need;
+    frame.style.width = need + 'px';
+    frame.style.height = Math.ceil(H / scale) + 'px';
+    frame.style.transform = scale < 1 ? 'scale(' + scale + ')' : '';
+  }
+  function show(html, f) {
+    fit = f !== false;
+    wrap = wrap || document.getElementById('wrap');
     if (!frame) {
       frame = document.createElement('iframe');
       frame.setAttribute('sandbox', 'allow-scripts allow-modals');
       frame.setAttribute('title', 'Contenido');
-      document.body.appendChild(frame);
+      wrap.appendChild(frame);
     }
-    frame.srcdoc = d.html.slice(0, 2000000);
+    natural = 0; last = html;
+    layout();
+    frame.srcdoc = inject(html);
+  }
+  window.addEventListener('message', function (e) {
+    var d = e.data;
+    if (!d || typeof d !== 'object') return;
+    if (d.type === 'ac-preview-size' && frame && e.source === frame.contentWindow) {
+      var w = Number(d.w) || 0;
+      // Solo crece: al escalar, el hijo se vuelve a medir con el ancho nuevo y no debe achicarse en bucle.
+      if (w > natural) { natural = w; layout(); }
+      return;
+    }
+    if (d.type === 'ac-preview' && typeof d.html === 'string') show(d.html, d.fit);
+  });
+  window.addEventListener('resize', function () { natural = 0; if (last) { layout(); try { frame.contentWindow.postMessage({ type: 'ac-remeasure' }, '*'); } catch (_) {} } });
+  window.addEventListener('orientationchange', function () { setTimeout(layout, 250); });
+  // Pestaña propia ("Abrir en una pestaña nueva"): pide el contenido a la página que la abrió.
+  window.addEventListener('DOMContentLoaded', function () {
+    if (location.hash === '#tab' && window.opener) {
+      document.title = 'Vista previa del diseño';
+      try { window.opener.postMessage({ type: 'ac-preview-ready' }, location.origin); } catch (_) {}
+    }
   });
 })();
 </script>
 </head>
-<body></body>
+<body><div id="wrap"></div></body>
 </html>

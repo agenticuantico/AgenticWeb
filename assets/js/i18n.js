@@ -37,8 +37,8 @@ export function siteLangInfo(id = current) { return SITE_LANGS.find((l) => l.id 
 
 /* Patrones con partes variables */
 const PATTERNS = {
-  'en-US': [[/^hace instantes$/, 'just now'], [/^hace (\d+) min$/, '$1 min ago'], [/^hace (\d+) h$/, '$1 h ago'], [/^hace (\d+) d$/, '$1 d ago'], [/^Actualizado (.+)$/, 'Updated $1'], [/^Cargando avatar… (\d+)%$/, 'Loading avatar… $1%'], [/^Idioma: (.+)$/, 'Language: $1'], [/^Te respondo en (.+) con voz femenina\.$/, 'I’ll answer in $1 with a female voice.']],
-  'pt-BR': [[/^hace instantes$/, 'agora mesmo'], [/^hace (\d+) min$/, 'há $1 min'], [/^hace (\d+) h$/, 'há $1 h'], [/^hace (\d+) d$/, 'há $1 d'], [/^Actualizado (.+)$/, 'Atualizado $1'], [/^Cargando avatar… (\d+)%$/, 'Carregando avatar… $1%'], [/^Idioma: (.+)$/, 'Idioma: $1'], [/^Te respondo en (.+) con voz femenina\.$/, 'Vou responder em $1 com voz feminina.']],
+  'en-US': [[/^hace instantes$/, 'just now'], [/^hace (\d+) min$/, '$1 min ago'], [/^hace (\d+) h$/, '$1 h ago'], [/^hace (\d+) d$/, '$1 d ago'], [/^Actualizado (.+)$/, 'Updated $1'], [/^Cargando avatar… (\d+)%$/, 'Loading avatar… $1%'], [/^Idioma: (.+)$/, 'Language: $1'], [/^Te respondo en (.+) con voz femenina\.$/, 'I’ll answer in $1 with a female voice.'], [/^Abrir ([a-z0-9.-]+\.[a-z]{2,})$/, 'Open $1'], [/^Tocar «(.+)»$/, 'Tap “$1”'], [/^Escribir en «(.+)»$/, 'Type in “$1”'], [/^Cancelado por vos: (.+)$/, 'Canceled by you: $1'], [/^(.+) \(aprobado\)$/, '$1 (approved)']],
+  'pt-BR': [[/^hace instantes$/, 'agora mesmo'], [/^hace (\d+) min$/, 'há $1 min'], [/^hace (\d+) h$/, 'há $1 h'], [/^hace (\d+) d$/, 'há $1 d'], [/^Actualizado (.+)$/, 'Atualizado $1'], [/^Cargando avatar… (\d+)%$/, 'Carregando avatar… $1%'], [/^Idioma: (.+)$/, 'Idioma: $1'], [/^Te respondo en (.+) con voz femenina\.$/, 'Vou responder em $1 com voz feminina.'], [/^Abrir ([a-z0-9.-]+\.[a-z]{2,})$/, 'Abrir $1'], [/^Tocar «(.+)»$/, 'Tocar em “$1”'], [/^Escribir en «(.+)»$/, 'Digitar em “$1”'], [/^Cancelado por vos: (.+)$/, 'Cancelado por você: $1'], [/^(.+) \(aprobado\)$/, '$1 (aprovado)']],
   'es-ES': [[/^Te respondo en (.+) con voz femenina\.$/, 'Te respondo en $1 con voz femenina.']],
 };
 function tr(s) {

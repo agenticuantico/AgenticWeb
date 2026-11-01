@@ -19,6 +19,7 @@ import { speak, stop as stopSpeech } from './voice.js';
 import { VoiceRecorder, fmtClock } from './recorder.js';
 import { readFile, fmtSize } from './docs.js';
 import { needsWebAction, AgentBrowserCard } from '../agent-browser.js';
+import { cleanArtifact, cleanThought } from './clean.js';
 
 const MODES = {
   fast: { label: 'Rápido', short: 'Rápido', icon: 'bolt', desc: 'Respuestas al instante' },
@@ -578,6 +579,7 @@ export class ChatApp {
     // transcripción del servidor si está disponible (más precisa)
     const server = await engine.transcribe(res.blob, this.lang.code);
     if (server) msg.voice.transcript = server;
+    if (msg.voice.transcript) msg.voice.transcript = cleanThought(msg.voice.transcript).trim();
     msg.content = msg.voice.transcript;
     this.updateMessage(msg);
     if (!msg.content) {
@@ -603,6 +605,7 @@ export class ChatApp {
   }
   async send(text) {
     if (this.busy) return;
+    text = cleanThought(text).trim() || text;
     if (this.system && (!this.flag('chat') || this.system.killSwitch)) { toast('El chat está pausado momentáneamente.'); return; }
     const input = this.$('input');
     input.value = ''; this.autosize();
@@ -614,6 +617,7 @@ export class ChatApp {
     this.syncSend();
     // Acciones en la web (iniciar sesión, enviar correos, postular, formularios): tarjeta del navegador del agente.
     if (needsWebAction(text)) {
+      msg._browser = true;
       this.browserCard = new AgentBrowserCard({ thread: this.$('inner'), composer: this.$('form'), text, isPaid: this.isPaid, idToken: this.user ? () => this.user.getIdToken() : null, onScroll: () => this.scrollToEnd(true) });
     }
     // "Recordá que…" → memoria explícita
@@ -663,6 +667,19 @@ export class ChatApp {
     const docs = this.chat.messages.flatMap((m) => m._docs || []);
     let finalText = '';
     try {
+      // Con la computadora del agente activa, la tarea la hace el navegador real: no se pide otra respuesta al modelo
+      // (evita que el chat diga que no puede navegar mientras la computadora trabaja).
+      if (userMsg._browser && engine.state.live && engine.state.caps && engine.state.caps.browser) {
+        const a = { id: uid('m'), role: 'assistant', content: ({
+          'en-US': "I opened the **agent computer** to do it in a real browser. You'll see every step live; before sending, buying, applying or posting I'll ask for your approval, and if a sign-in is needed you take control and type it yourself.",
+          'pt-BR': 'Abri o **computador do agente** para fazer isso em um navegador real. Você vai ver cada passo ao vivo; antes de enviar, comprar, se candidatar ou publicar eu peço sua aprovação, e se for preciso entrar em uma conta, você assume o controle e digita.',
+          'es-ES': 'He abierto el **ordenador del agente** para hacerlo en un navegador real. Verás cada paso en directo; antes de enviar, comprar, postularme o publicar te pediré aprobación y, si hace falta iniciar sesión, tomas el control y lo escribes tú.'
+        })[this.lang.id] || 'Abrí la **computadora del agente** para hacerlo en un navegador real. Vas a ver cada paso en vivo; antes de enviar, comprar, postular o publicar te pido aprobación, y si hace falta iniciar sesión, tomás el control y lo escribís vos.', at: Date.now() };
+        this.pushMessage(a);
+        this.persist();
+        this.finish();
+        return;
+      }
       // Pedidos de acción en la web sin navegador en la nube: respuesta honesta (guía), sin pasos simulados.
       const webOnly = needsWebAction(userMsg.content) && !(engine.state.live && engine.state.caps && engine.state.caps.browser);
       if (this.mode === 'auto' && !webOnly) {
@@ -686,7 +703,7 @@ export class ChatApp {
           finalText = finalText || r.text;
         }
       }
-      if (this.chat.title === 'Nueva conversación') this.chat.title = (userMsg.content || 'Nota de voz').replace(/\s+/g, ' ').slice(0, 60);
+      if (this.chat.title === 'Nueva conversación') this.chat.title = (cleanThought(userMsg.content || '').trim() || 'Nota de voz').replace(/\s+/g, ' ').slice(0, 60);
       this.persist();
     } catch (e) {
       if (e.name !== 'AbortError') { console.error(e); this.addNotice('Algo falló al responder. Probá de nuevo.', 'warn'); }
@@ -730,7 +747,7 @@ export class ChatApp {
         else if (ev.type === 'step') { const s = a.steps.find((x) => x.id === ev.id); if (s) s.status = ev.status; else a.steps.push({ id: ev.id, title: ev.title, phase: ev.phase, status: ev.status }); this.busy && (this.busy.label = ev.title + '…', this.updateStatus()); this.avatar && this.avatar.pulse(0.4); }
         else if (ev.type === 'log') { (a.logs[ev.id] = a.logs[ev.id] || []).push(ev.text); }
         else if (ev.type === 'agent') { (a.logs[ev.id] = a.logs[ev.id] || []).push(`${ev.agent.name}: listo.`); this.pushMessage({ id: uid('m'), role: 'assistant', content: ev.text, at: Date.now(), agent: ev.agent }); }
-        else if (ev.type === 'artifact') a.artifacts.push({ name: ev.name, mime: ev.mime, content: ev.content });
+        else if (ev.type === 'artifact') a.artifacts.push({ name: ev.name, mime: ev.mime, content: cleanArtifact(ev.content, ev.name) });
         else if (typeof ev.delta === 'string') a.content += ev.delta;
         else if (ev.type === 'error') a.content += '\n\n' + (ev.message || 'Hubo un error en un paso.');
         this.updateMessage(a);
@@ -874,7 +891,7 @@ export class ChatApp {
         h('strong', {}, art.name),
         h('small', {}, `${Math.max(1, Math.round(String(art.content || '').length / 1024))} KB`),
         h('button', { class: 'ace-ib', type: 'button', title: 'Ver', 'aria-label': 'Ver ' + art.name, html: icon('eye'), onclick: () => this.openAgentPanel(m, 'files', i) }),
-        h('button', { class: 'ace-ib', type: 'button', title: 'Descargar', 'aria-label': 'Descargar ' + art.name, html: icon('download'), onclick: () => download(art.name, art.content, art.mime || 'text/plain') }),
+        h('button', { class: 'ace-ib', type: 'button', title: 'Descargar', 'aria-label': 'Descargar ' + art.name, html: icon('download'), onclick: () => download(art.name, cleanArtifact(art.content, art.name), art.mime || 'text/plain') }),
         h('button', { class: 'ace-ib', type: 'button', title: 'Publicar en GitHub o Cloudflare', 'aria-label': 'Publicar ' + art.name, html: icon('upload'), onclick: () => import('./connectors.js').then((mod) => mod.publishArtifact(this, art)) })));
     });
     return box;
@@ -900,7 +917,7 @@ export class ChatApp {
       const running = m.streaming;
       const task = (() => { const i = this.chat.messages.indexOf(m); for (let k = i - 1; k >= 0; k--) if (this.chat.messages[k].role === 'user') return this.chat.messages[k].content; return ''; })();
       body.innerHTML = '';
-      if (task) body.append(h('div', { class: 'ap-task' }, h('strong', {}, task.slice(0, 220))));
+      if (task) body.append(h('div', { class: 'ap-task' }, h('strong', {}, cleanThought(task).trim().slice(0, 220))));
       body.append(h('div', { class: 'ap-status' }, h('span', {}, running ? 'El agente está trabajando…' : done < steps.length ? 'Tarea detenida' : 'Tarea completada'), h('span', {}, steps.length ? `${done} de ${steps.length} pasos` : '')));
       body.append(h('div', { class: 'progress' }, h('i', { style: `width:${steps.length ? Math.round(done / steps.length * 100) : 0}%` })));
       const tabs = h('div', { class: 'ace-tabs', role: 'tablist' });
@@ -927,19 +944,21 @@ export class ChatApp {
       } else {
         if (!arts.length) body.append(h('p', { class: 'ap-empty' }, 'Todavía no hay archivos.'));
         else {
-          const fi = Math.min(ui.fi, arts.length - 1), f = arts[fi];
+          const fi = Math.min(ui.fi, arts.length - 1), f = { ...arts[fi], content: cleanArtifact(arts[fi].content, arts[fi].name) };
           const isHtml = f.mime === 'text/html' || /\.html?$/i.test(f.name);
           body.append(h('div', { class: 'file-tabs' }, ...arts.map((x, i) => h('button', { class: 'file-tab' + (i === fi ? ' on' : ''), type: 'button', onclick: () => { ui.fi = i; ui.preview = false; render(); } }, x.name))));
           body.append(h('div', { class: 'file-acts' },
             h('button', { class: 'ace-pill-btn', type: 'button', onclick: () => navigator.clipboard.writeText(f.content).then(() => toast('Copiado')) }, h('span', { html: icon('copy') }), 'Copiar'),
             h('button', { class: 'ace-pill-btn', type: 'button', onclick: () => download(f.name, f.content, f.mime || 'text/plain') }, h('span', { html: icon('download') }), 'Descargar'),
             isHtml ? h('button', { class: 'ace-pill-btn', type: 'button', onclick: () => { ui.preview = !ui.preview; render(); } }, h('span', { html: icon(ui.preview ? 'code' : 'eye') }), ui.preview ? 'Código' : 'Vista previa') : null,
-            h('button', { class: 'ace-pill-btn', type: 'button', onclick: () => { close(); this.openCanvas(f); } }, h('span', { html: icon('canvas') }), 'Lienzo')));
+            h('button', { class: 'ace-pill-btn', type: 'button', onclick: () => { close(); this.openCanvas(f); } }, h('span', { html: icon('canvas') }), 'Lienzo'),
+            isHtml ? h('button', { class: 'ace-pill-btn ace-expand', type: 'button', title: 'Expandir', 'aria-label': 'Expandir', onclick: () => openDesign(f) }, h('span', { html: icon('expand') }), 'Expandir') : null));
           const view = h('div', { class: 'file-view' });
           if (isHtml && ui.preview) {
             const fr = h('iframe', { class: 'preview-frame', title: f.name, sandbox: 'allow-scripts', src: '/app/preview.html', referrerpolicy: 'no-referrer' });
-            fr.addEventListener('load', () => fr.contentWindow && fr.contentWindow.postMessage({ type: 'ac-preview', html: f.content }, '*'));
-            view.append(fr);
+            fr.addEventListener('load', () => fr.contentWindow && fr.contentWindow.postMessage({ type: 'ac-preview', html: f.content, fit: true }, '*'));
+            view.classList.add('has-preview');
+            view.append(fr, h('button', { class: 'preview-max', type: 'button', title: 'Expandir', 'aria-label': 'Expandir', html: icon('expand'), onclick: () => openDesign(f) }));
           } else if (f.mime === 'text/markdown' || /\.md$/i.test(f.name)) { const d = h('div', { class: 'md' }); d.innerHTML = renderMarkdown(f.content); view.append(d); }
           else { const d = h('div', { class: 'md' }); d.innerHTML = renderMarkdown('```' + (f.name.split('.').pop() || '') + '\n' + f.content + '\n```'); view.append(d); }
           body.append(view);
@@ -960,7 +979,8 @@ export class ChatApp {
   }
 
   /* =================== Lienzo (código / documentos con vista previa aislada) =================== */
-  openCanvas(art) {
+  openCanvas(art0) {
+    const art = { ...art0, content: cleanArtifact(art0.content, art0.name) };
     const isHtml = art.mime === 'text/html' || /\.html?$/.test(art.name);
     const ta = h('textarea', { class: 'canvas-code', spellcheck: 'false', 'aria-label': 'Contenido editable' });
     ta.value = art.content;
@@ -1080,6 +1100,41 @@ export class ChatApp {
   openHub(tab = 'agentes') {
     import('./hub.js').then((m) => m.openHub(this, tab));
   }
+}
+
+/**
+ * Diseño a pantalla completa: overlay que ocupa toda la ventana con el HTML en un iframe aislado (sandbox, sin red),
+ * botón para cerrar (también Esc), abrir en una pestaña nueva y adaptación al girar el teléfono.
+ */
+export function openDesign(f) {
+  const html = cleanArtifact(f.content, f.name);
+  document.querySelector('.design-full')?.remove();
+  const frame = h('iframe', { class: 'design-full-frame', title: f.name, sandbox: 'allow-scripts', src: '/app/preview.html', referrerpolicy: 'no-referrer', allow: 'fullscreen' });
+  const send = (fit) => frame.contentWindow && frame.contentWindow.postMessage({ type: 'ac-preview', html, fit }, '*');
+  let fit = true;
+  frame.addEventListener('load', () => send(fit));
+  const fitBtn = h('button', { class: 'design-full-btn', type: 'button', 'aria-pressed': 'true', title: 'Ajustar al ancho', 'aria-label': 'Ajustar al ancho', html: icon('collapse'),
+    onclick: () => { fit = !fit; fitBtn.setAttribute('aria-pressed', String(fit)); send(fit); } });
+  const openTab = () => {
+    const w = window.open('/app/preview.html#tab', '_blank');
+    if (!w) { toast('Permití las ventanas emergentes para abrir el diseño en otra pestaña.'); return; }
+    const onReady = (e) => { if (e.source === w && e.data && e.data.type === 'ac-preview-ready') { w.postMessage({ type: 'ac-preview', html, fit: false }, location.origin); window.removeEventListener('message', onReady); } };
+    window.addEventListener('message', onReady);
+    setTimeout(() => window.removeEventListener('message', onReady), 15000);
+  };
+  const close = () => { wrap.remove(); document.body.classList.remove('design-lock'); document.removeEventListener('keydown', onKey, true); prevFocus && prevFocus.focus && prevFocus.focus({ preventScroll: true }); };
+  const onKey = (e) => { if (e.key === 'Escape') { e.stopPropagation(); close(); } };
+  const prevFocus = document.activeElement;
+  const bar = h('div', { class: 'design-full-bar' },
+    h('span', { class: 'design-full-name', 'data-no-i18n': '' }, f.name),
+    fitBtn,
+    h('button', { class: 'design-full-btn', type: 'button', title: 'Abrir en una pestaña nueva', 'aria-label': 'Abrir en una pestaña nueva', html: icon('external'), onclick: openTab }),
+    h('button', { class: 'design-full-btn design-full-close', type: 'button', title: 'Cerrar', 'aria-label': 'Cerrar', html: icon('close'), onclick: close }));
+  const wrap = h('div', { class: 'design-full', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Diseño a pantalla completa' }, bar, frame);
+  document.body.append(wrap);
+  document.body.classList.add('design-lock');
+  document.addEventListener('keydown', onKey, true);
+  requestAnimationFrame(() => bar.querySelector('.design-full-close').focus({ preventScroll: true }));
 }
 
 export function download(name, content, mime = 'text/plain') {

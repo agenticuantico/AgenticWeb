@@ -233,3 +233,22 @@ body.ace-lock { overflow: hidden; }
 .ace-flag svg.lp-chev { width: 16px !important; height: 16px !important; color: #33363d; }
 .chat .lang-menu { background: #fff; }
 @media (max-width: 520px) { .chat.ace .ace-flag, .ace-flag { height: 36px; gap: 6px; padding: 0 8px 0 6px; } .ace-flag .lp-flag { width: 27px; height: 18px; border-radius: 5px; } .ace-flag svg.lp-chev { width: 14px !important; height: 14px !important; } }
+
+/* ---- Vista previa de diseños: ajustada al ancho + pantalla completa ---- */
+.ace-panel .file-acts .ace-expand { margin-left: auto; background: #18181b; color: #fff; border-color: #18181b; }
+.ace-panel .file-acts .ace-expand:hover { background: #000; }
+.ace-panel .file-view.has-preview { position: relative; }
+.ace-panel .file-view.has-preview .preview-frame { display: block; overflow: hidden; }
+.preview-max { position: absolute; top: 10px; right: 10px; width: 40px; height: 40px; display: grid; place-items: center; border-radius: 12px; border: 1px solid rgba(255, 255, 255, .25); background: rgba(24, 24, 27, .78); color: #fff; cursor: pointer; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); box-shadow: 0 4px 14px rgba(0, 0, 0, .25); }
+.preview-max:hover { background: #18181b; }
+.preview-max svg { width: 18px; height: 18px; }
+.preview-max:focus-visible, .design-full-btn:focus-visible { outline: 2px solid #9fff00; outline-offset: 2px; }
+.design-full { position: fixed; inset: 0; z-index: 2000; background: #0c0c0f; display: flex; flex-direction: column; width: 100vw; height: 100vh; height: 100dvh; }
+.design-full-bar { display: flex; align-items: center; gap: 6px; padding: max(8px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) 8px max(14px, env(safe-area-inset-left)); color: #f4f4f5; background: #18181b; flex: none; }
+.design-full-name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 600 14px/1.2 Inter, system-ui, sans-serif; }
+.design-full-btn { width: 40px; height: 40px; display: grid; place-items: center; flex: none; border-radius: 12px; border: 0; background: #27272a; color: #fff; cursor: pointer; }
+.design-full-btn:hover { background: #3f3f46; }
+.design-full-btn[aria-pressed="true"] { background: #9fff00; color: #18181b; }
+.design-full-btn svg { width: 18px; height: 18px; }
+.design-full-frame { flex: 1 1 auto; width: 100%; min-height: 0; border: 0; background: #fff; padding-bottom: env(safe-area-inset-bottom); }
+body.design-lock { overflow: hidden; }
