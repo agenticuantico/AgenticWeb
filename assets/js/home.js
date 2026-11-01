@@ -3,6 +3,7 @@ import { ChatApp } from './chat/chat.js';
 import { ChatStore } from './chat/store.js';
 import { mountPlans } from './plans.js';
 import { watchUser, getProfile } from './auth.js';
+import { setIdTokenProvider } from './chat/engine.js';
 import { esc } from './ui.js';
 
 /* Sin avatar 3D: un objeto liviano recibe los estados del chat y los refleja en el hero neuronal. */
@@ -14,6 +15,8 @@ document.addEventListener('keydown', (e) => { if (document.activeElement && docu
 const pm = document.getElementById('plansMount');
 if (pm) mountPlans(pm, {});
 watchUser(async (u) => {
+  // El token va primero: un mensaje enviado mientras carga el perfil ya sale con la cuenta (no como invitado).
+  setIdTokenProvider(u ? () => u.getIdToken() : null);
   if (!u) return;
   const p = await getProfile(u.uid);
   const profile = p && !p._error ? p : null;

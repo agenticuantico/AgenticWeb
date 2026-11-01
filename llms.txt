@@ -1,0 +1,45 @@
+# AgentiCuántico
+
+> Plataforma argentina (Bahía Blanca, Buenos Aires) de agentes de inteligencia artificial con voz. Se conversa por voz o por escrito; un agente planifica y ejecuta tareas en pasos, suma agentes especialistas y analiza documentos. Funciona en la web, en teléfonos, tablets y computadoras. Planes Gratis, Pro y Empresa, en pesos (Mercado Pago) o dólares (PayPal).
+
+Sitio: https://agenticuantico.dev.ar/ · Contacto comercial: agenticuantico@gmail.com (asunto «Consulta Comercial») o https://agenticuantico.dev.ar/contacto/
+
+## Qué hace hoy
+- Chat por texto y por voz: si se le habla, responde con voz femenina natural (español rioplatense y otros idiomas, 7 en total) y por escrito; llamada de voz manos libres.
+- Modo «Hace todo por vos»: arma un plan, usa herramientas, convoca especialistas, muestra cada paso y pide confirmación antes de cualquier acción con consecuencias (comprar, pagar, enviar, publicar).
+- Agentes especialistas invitables (programación, diseño, legal, ciberseguridad, investigación) y agentes propios (planes Pro y Empresa).
+- Documentos: PDF, Word, Excel, CSV e imágenes; cámara para escanear.
+- Lienzo de código con vista previa, informes y archivos descargables.
+- Cuentas con chats sincronizados y compartibles; modo incógnito, exportación y memoria.
+- Interfaz en español (Argentina y España), inglés y portugués.
+
+## Próximamente (según el propio sitio)
+- Búsqueda web en vivo, conectores (Drive, Gmail, GitHub…) y automatizaciones programadas.
+
+## Para empresas y agencias
+- Plan Empresa: agentes personalizados para la empresa, prioridad en la cola de procesamiento y soporte prioritario por correo.
+- Proyectos a medida: agentes a medida, integraciones con los sistemas de la empresa, pilotos acotados con objetivos medibles y reventa con marca propia. Se acuerdan por contacto comercial.
+- No hay una API pública documentada de autoservicio para clientes; las integraciones se hacen a medida.
+
+## Planes (precio final por mes, sin permanencia)
+- Gratis: 0 · 20 mensajes por día.
+- Pro: ARS 15.600 o USD 10 · 500 mensajes por día.
+- Empresa: ARS 46.800 o USD 30 · 3000 mensajes por día.
+- Mercado Pago cobra en pesos y PayPal en dólares. Se cancela desde la cuenta; botón de arrepentimiento de 10 días (Res. 424/2020).
+
+## Privacidad y seguridad
+- AgentiCuántico nunca ve ni guarda números de tarjeta: se cargan en PayPal o Mercado Pago.
+- Sin cuenta, los chats quedan solo en el dispositivo. Datos personales según la Ley 25.326 (Argentina).
+
+## Páginas
+- [Inicio](https://agenticuantico.dev.ar/)
+- [Cómo funciona](https://agenticuantico.dev.ar/como-funciona.html)
+- [Soluciones](https://agenticuantico.dev.ar/soluciones/)
+- [Planes y precios](https://agenticuantico.dev.ar/planes.html)
+- [Nosotros](https://agenticuantico.dev.ar/nosotros.html)
+- [Contacto](https://agenticuantico.dev.ar/contacto/)
+- [Ética e IA responsable](https://agenticuantico.dev.ar/etica/)
+- [Términos](https://agenticuantico.dev.ar/legal/terminos.html) · [Privacidad](https://agenticuantico.dev.ar/legal/privacidad.html) · [Uso aceptable de IA](https://agenticuantico.dev.ar/legal/uso-aceptable.html) · [Reembolsos](https://agenticuantico.dev.ar/legal/reembolsos.html)
+
+## In English
+AgentiCuántico is an Argentine voice-first AI agents platform: voice or text chat, an agent mode that plans and runs multi-step tasks with human approval for consequential actions, invitable specialist agents, document analysis and a code canvas. Plans: Free, Pro (USD 10/month) and Business «Empresa» (USD 30/month, custom agents and priority support). Custom integrations, measurable pilots and white-label resale are arranged through sales contact; there is no public self-serve API.

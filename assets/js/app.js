@@ -2,6 +2,7 @@
 import { ChatApp } from './chat/chat.js';
 import { ChatStore } from './chat/store.js';
 import { watchUser, getProfile } from './auth.js';
+import { setIdTokenProvider } from './chat/engine.js';
 import { h, icon, esc, modal, popover, confirmDialog, uid, timeAgo } from './ui.js';
 import { prefs } from './consent.js';
 
@@ -116,6 +117,8 @@ document.addEventListener('keydown', (e) => {
 
 /* ---------- Cuenta ---------- */
 watchUser(async (u) => {
+  // El token va primero: un mensaje enviado mientras carga el perfil ya sale con la cuenta (no como invitado).
+  setIdTokenProvider(u ? () => u.getIdToken() : null);
   if (!u) { store.attachUser(null); return; }
   const profile = await getProfile(u.uid);
   const p = profile && !profile._error ? profile : null;

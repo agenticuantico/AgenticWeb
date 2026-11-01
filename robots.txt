@@ -1,9 +1,11 @@
+# AgentiCuántico — https://agenticuantico.dev.ar
 User-agent: *
 Allow: /
+Disallow: /app/
 Disallow: /admin/
+Disallow: /api/
 Disallow: /control/
 Disallow: /cuenta/
 Disallow: /compartido/
-Disallow: /app/preview.html
 
 Sitemap: https://agenticuantico.dev.ar/sitemap.xml
