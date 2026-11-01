@@ -19,6 +19,7 @@ import { speak, stop as stopSpeech } from './voice.js';
 import { VoiceRecorder, fmtClock } from './recorder.js';
 import { readFile, fmtSize } from './docs.js';
 import { needsWebAction, AgentBrowserCard } from '../agent-browser.js';
+import { detectMediaIntent, mediaMessage, mediaCard, isMediaMessage, runMedia as runMediaTask } from './media.js';
 import { cleanArtifact, cleanThought } from './clean.js';
 
 const MODES = {
@@ -616,7 +617,7 @@ export class ChatApp {
     this.pushMessage(msg);
     this.syncSend();
     // Acciones en la web (iniciar sesión, enviar correos, postular, formularios): tarjeta del navegador del agente.
-    if (needsWebAction(text)) {
+    if (!detectMediaIntent(text) && needsWebAction(text)) {
       msg._browser = true;
       this.browserCard = new AgentBrowserCard({ thread: this.$('inner'), composer: this.$('form'), text, isPaid: this.isPaid, idToken: this.user ? () => this.user.getIdToken() : null, onScroll: () => this.scrollToEnd(true) });
     }
@@ -655,7 +656,27 @@ export class ChatApp {
     return out;
   }
 
+  /* =================== Imágenes y clips animados (en los tres modos) =================== */
+  async createMedia(intent) {
+    const m = mediaMessage(intent);
+    this.pushMessage(m);
+    await this.runMedia(m);
+    if (this.chat.title === 'Nueva conversación') this.chat.title = intent.prompt.replace(/\s+/g, ' ').slice(0, 60);
+    this.persist();
+  }
+  async runMedia(m) {
+    if (this.busy) return;
+    const ctrl = new AbortController();
+    this.busy = { ctrl, label: m.kind === 'video' ? 'Creando clip animado…' : 'Creando imagen…' };
+    this.updateStatus(); this.syncSend();
+    this.avatar && (this.avatar.pulse(1), this.avatar.setState('thinking'));
+    try { await runMediaTask(m, { signal: ctrl.signal, onScroll: () => this.scrollToEnd() }); }
+    finally { this.finish(); m._card && m._card._render(); }
+  }
+
   async respond(userMsg, { voice }) {
+    const media = userMsg && userMsg.role === 'user' ? detectMediaIntent(userMsg.content) : null;
+    if (media) { await this.createMedia(media); return; }
     const ctrl = new AbortController();
     this.busy = { ctrl, label: this.mode === 'auto' ? 'Trabajando…' : this.mode === 'deep' ? 'Pensando…' : 'Escribiendo…' };
     this.updateStatus(); this.syncSend();
@@ -817,6 +838,7 @@ export class ChatApp {
     const face = ag ? h('span', { class: 'p-badge ace-mava-badge' }, initials(ag.name)) : h('img', { class: 'ace-mava', src: FACE, alt: '', width: 30, height: 30 });
     const body = h('div', { class: 'msg-body ace-body' });
     if (ag) body.append(h('div', { class: 'msg-who' }, h('strong', {}, ag.name), h('span', { class: 'chip' }, 'agente')));
+    if (isMediaMessage(m)) { body.append(mediaCard(m, this)); el.append(face, body); return el; }
     if (m.steps && m.steps.length) body.append(this.timeline(m));
     if (m.artifacts && m.artifacts.length) body.append(this.filesList(m));
     const md = h('div', { class: 'md' });

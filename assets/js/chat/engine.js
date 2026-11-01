@@ -51,6 +51,8 @@ let idToken = null;
 /** El chat informa el token de Firebase del usuario para que el servidor verifique la cuenta. */
 export function setIdTokenProvider(fn) { idToken = fn; }
 
+/** Llamada autenticada al servidor (la usan media.js y otros módulos del chat). */
+export function apiFetch(path, opts) { return api(path, opts); }
 async function api(path, { method = 'GET', body, signal, raw } = {}) {
   const headers = {};
   if (body && !raw) headers['Content-Type'] = 'application/json';
