@@ -55,8 +55,8 @@ export function openPayModal(plan, user, onChange) {
       h('li', { html: icon('refresh') + `<span><strong>Renovación automática</strong> cada 30 días (próxima: ${renew} aprox.). La desactivás cuando quieras desde Mi cuenta y conservás el acceso hasta el fin del período.</span>` }),
       h('li', { html: icon('lock') + '<span><strong>Pago seguro</strong> en Mercado Pago o PayPal. AgentiCuántico nunca ve ni guarda tu tarjeta.</span>' })),
     h('div', { class: 'pay-methods' },
-      h('div', {}, h('p', { class: 'label' }, 'Pesos argentinos · ' + formatARS(price.ars) + '/mes'), mpBox),
-      h('div', {}, h('p', { class: 'label' }, 'Dólares · USD ' + price.usd + '/mes'), ppBox)),
+      h('div', {}, h('p', { class: 'label pay-label' }, h('img', { src: '/assets/brands/mercadopago-oficial.svg', alt: 'Mercado Pago', width: 77, height: 20 }), h('span', {}, 'Pesos argentinos · ' + formatARS(price.ars) + '/mes')), mpBox),
+      h('div', {}, h('p', { class: 'label pay-label' }, h('img', { src: '/assets/brands/paypal-oficial.svg', alt: 'PayPal', width: 71, height: 20 }), h('span', {}, 'Dólares · USD ' + price.usd + '/mes')), ppBox)),
     h('p', { class: 'tiny muted', html: 'Al suscribirte aceptás los <a href="/legal/terminos.html" target="_blank">Términos y condiciones</a> y la política de <a href="/legal/reembolsos.html" target="_blank">Reembolsos y cancelación</a> (incluye el botón de arrepentimiento de 10 días). El plan queda «en verificación» hasta que el procesador confirma el cobro.' }));
   const m = modal({ title: 'Suscribirte a ' + p.name, body, label: 'Pago del plan ' + p.name });
   import('./payments.js').then((pm) => {

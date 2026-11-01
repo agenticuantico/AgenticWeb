@@ -83,7 +83,7 @@ export function renderMercadoPago(container, { plan, user }) {
     return;
   }
   if (!user) { container.append(h('a', { class: 'btn btn-block', href: '/cuenta/?registro=1&siguiente=planes' }, 'Ingresá para pagar con Mercado Pago')); return; }
-  const a = h('a', { class: 'btn btn-block btn-mp', href: PAYMENTS.mercadopago.checkout[plan], rel: 'noopener', html: '<img src="/assets/brands/mercadopago.svg" alt="" width="22" height="22"><span>Pagar con Mercado Pago</span>' });
+  const a = h('a', { class: 'btn btn-block btn-mp', href: PAYMENTS.mercadopago.checkout[plan], rel: 'noopener', 'aria-label': 'Pagar con Mercado Pago', html: '<span>Pagar con</span><img src="/assets/brands/mercadopago-blanco.svg" alt="Mercado Pago" width="92" height="24">' });
   // El checkout de planes no acepta referencias propias: recordamos el plan elegido para registrar
   // la suscripción como pendiente al volver (back_url /cuenta/?preapproval_id=...).
   a.addEventListener('click', () => { try { sessionStorage.setItem('ac.mpPending', JSON.stringify({ plan, uid: user.uid, at: Date.now() })); } catch {} });
