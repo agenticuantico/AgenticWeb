@@ -696,7 +696,7 @@ export class ChatApp {
   async runMedia(m) {
     if (this.busy) return;
     const ctrl = new AbortController();
-    this.busy = { ctrl, label: m.kind === 'video' ? 'Creando clip animado…' : 'Creando imagen…' };
+    this.busy = { ctrl, label: m.kind === 'video' ? 'Creando video…' : 'Creando imagen…' };
     this.updateStatus(); this.syncSend();
     this.avatar && (this.avatar.pulse(1), this.avatar.setState('thinking'));
     try { await runMediaTask(m, { signal: ctrl.signal, onScroll: () => this.scrollToEnd() }); }

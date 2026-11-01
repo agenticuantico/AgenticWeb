@@ -9,6 +9,7 @@ import { getStore, getRtdb, friendlyError } from './firebase.js';
 import { DEFAULT_SYSTEM, clearSystemCache } from './sysconfig.js';
 import { renderLeads, renderAgentsControl } from './admin-control.js';
 import { revenueKpi, renderRevenueCard } from './admin-revenue.js';
+import { renderGovernance } from './admin-governance.js';
 
 const root = document.getElementById('adminRoot');
 const CC_NAMES = new Intl.DisplayNames(['es'], { type: 'region' });
@@ -141,7 +142,7 @@ async function renderDashboard(user) {
       h('button', { class: 'btn', type: 'button', onclick: () => renderDashboard(user), html: icon('refresh') + 'Actualizar' }),
       h('button', { class: 'btn btn-danger', type: 'button', id: 'killBtn', html: icon('power') + 'Parada de emergencia' })));
   root.append(head);
-  const TABS = [['analitica', 'Analítica', 'chart'], ['leads', 'Leads', 'users'], ['agentes', 'Agentes', 'spark'], ['operacion', 'Operación', 'shield']];
+  const TABS = [['analitica', 'Analítica', 'chart'], ['leads', 'Leads', 'users'], ['agentes', 'Agentes', 'spark'], ['gobernanza', 'Gobernanza IA', 'flag'], ['operacion', 'Operación', 'shield']];
   const tabBar = h('nav', { class: 'admin-tabs', role: 'tablist', 'aria-label': 'Secciones del panel' });
   const panes = {};
   const kpis = h('div', { class: 'kpis' });
@@ -149,9 +150,11 @@ async function renderDashboard(user) {
   const opsGrid = h('div', { class: 'admin-grid' });
   const leadsBox = h('div', { class: 'stack-lg' });
   const agentsBox = h('div', { class: 'stack-lg' });
+  const govBox = h('div', { class: 'stack-lg gov-admin' });
   panes.analitica = h('div', { role: 'tabpanel' }, kpis, grid);
   panes.leads = h('div', { role: 'tabpanel', hidden: true }, leadsBox);
   panes.agentes = h('div', { role: 'tabpanel', hidden: true }, agentsBox);
+  panes.gobernanza = h('div', { role: 'tabpanel', hidden: true }, govBox);
   panes.operacion = h('div', { role: 'tabpanel', hidden: true }, opsGrid);
   const loaded = {};
   const showTab = (id) => {
@@ -160,6 +163,7 @@ async function renderDashboard(user) {
     history.replaceState(null, '', '#' + id);
     if (id === 'leads' && !loaded.leads) { loaded.leads = 1; renderLeads(leadsBox, user); }
     if (id === 'agentes' && !loaded.agentes) { loaded.agentes = 1; renderAgentsControl(agentsBox, user); }
+    if (id === 'gobernanza' && !loaded.gobernanza) { loaded.gobernanza = 1; renderGovernance(govBox, user); }
   };
   for (const [id, label, ic] of TABS) tabBar.append(h('button', { type: 'button', role: 'tab', 'data-tab': id, html: icon(ic) + `<span>${label}</span>`, onclick: () => showTab(id) }));
   root.append(tabBar, ...Object.values(panes));

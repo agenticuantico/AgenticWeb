@@ -1,0 +1,16 @@
+/* /gobernanza/: política de uso de IA (estilo clásico blanco) */
+.gov-pillars { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 4px 0 30px; }
+.gov-pill { background: #fff; border: 1px solid #e6e7ee; border-radius: 18px; padding: 16px 16px 15px; box-shadow: 0 2px 14px rgba(20, 20, 40, .04); display: grid; gap: 4px; }
+.gov-pill strong { font-size: 15px; letter-spacing: -.01em; color: #16151a; }
+.gov-pill strong::before { content: ""; display: block; width: 22px; height: 4px; border-radius: 99px; background: #9fff00; margin-bottom: 10px; }
+.gov-pill span { font-size: 13.5px; line-height: 1.45; color: #5d5c66; }
+.gov h2 { scroll-margin-top: 90px; }
+.gov ol li strong { color: #16151a; }
+.gov .table-wrap { overflow-x: auto; border: 1px solid #e6e7ee; border-radius: 16px; background: #fff; margin: 12px 0 8px; }
+.gov-table { width: 100%; border-collapse: collapse; font-size: 14.5px; min-width: 420px; }
+.gov-table th, .gov-table td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #f0f0f4; }
+.gov-table thead th { font-size: 12.5px; text-transform: uppercase; letter-spacing: .04em; color: #6b6a72; background: #fafafc; font-weight: 650; }
+.gov-table tbody tr:last-child th, .gov-table tbody tr:last-child td { border-bottom: 0; }
+.gov-table td { font-variant-numeric: tabular-nums; font-weight: 600; color: #16151a; }
+@media (max-width: 860px) { .gov-pillars { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 420px) { .gov-pillars { gap: 10px; } .gov-pill { padding: 14px; } }
