@@ -78,6 +78,9 @@ async function startCall() {
     modal({ title: 'Llegaste al límite de hoy', body: `<p class="muted">El plan Gratis incluye ${mem.LIMIT_MIN.gratis} minutos de llamada por día. Con Pro tenés ${mem.LIMIT_MIN.pro} y con Empresa ${mem.LIMIT_MIN.empresa}.</p>`, actions: [{ label: 'Ahora no', class: 'btn-ghost' }, { label: 'Ver planes', class: 'btn-gold', onClick: () => { location.href = '/planes.html'; } }] });
     return;
   }
+  // AudioContext creado DENTRO del toque en «Llamar»: en Chrome para Android, si se crea después de varias
+  // esperas (permiso, red) nace «suspended» y el detector de voz lee silencio absoluto (la llamada no te oye).
+  try { const AC = window.AudioContext || window.webkitAudioContext; if (!S.ctx || S.ctx.state === 'closed') S.ctx = new AC(); S.ctx.resume && S.ctx.resume().catch(() => {}); } catch {}
   // Permiso de memoria la primera vez (solo con cuenta)
   if (S.user && !S.incognito && S.settings.optIn === undefined) {
     const ok = await modal({ title: '¿Querés que te recuerde?', body: '<p class="muted">Si lo permitís, después de cada llamada guardo datos útiles que me cuentes (tu nombre, personas importantes, intereses, objetivos, cómo te sentís) para darte continuidad día a día. Los ves, editás y borrás en <strong>Mi cuenta → Memoria de llamadas</strong>. Podés cambiarlo cuando quieras o llamar en modo incógnito.</p>', actions: [{ label: 'No, gracias', value: false, class: 'btn-ghost' }, { label: 'Sí, recordame', value: true, class: 'btn-primary' }] }).done;
@@ -110,7 +113,7 @@ async function startCall() {
     try { S.memory = await mem.listMemory(S.user.uid); } catch { S.memory = []; }
   }
   S.name = (S.memory.find((m) => m.kind === 'nombre') || {}).text || (S.profile && S.profile.name ? S.profile.name.split(' ')[0] : null) || (S.user && S.user.displayName ? S.user.displayName.split(' ')[0] : null);
-  S.history = []; S.utterances = [];
+  S.history = []; S.utterances = []; S.sttWarned = false;
   S.startedAt = Date.now();
   document.body.classList.add('in-call');
   $('callShell').dataset.phase = 'call';
@@ -156,7 +159,14 @@ function setState(st) {
 /* ---------- Audio: detección de voz y forma de onda ---------- */
 function setupAudio() {
   const AC = window.AudioContext || window.webkitAudioContext;
-  S.ctx = new AC();
+  if (!S.ctx || S.ctx.state === 'closed') S.ctx = new AC();
+  if (S.ctx.state !== 'running') {
+    S.ctx.resume().catch(() => {});
+    // Respaldo: el próximo toque en la pantalla la reanuda (Android puede negarla sin gesto reciente).
+    const wake = () => { if (S.ctx && S.ctx.state !== 'running') S.ctx.resume().catch(() => {}); };
+    document.addEventListener('pointerdown', wake, { passive: true });
+    document.addEventListener('touchend', wake, { passive: true });
+  }
   const src = S.ctx.createMediaStreamSource(S.stream);
   S.analyser = S.ctx.createAnalyser();
   S.analyser.fftSize = 1024;
@@ -227,30 +237,57 @@ function setupSpeech() {
 function srStart() { if (S.sr) { try { S.sr.lang = S.lang.id; S.sr.start(); } catch {} } }
 function srStop() { if (S.sr) { try { S.sr.stop(); } catch {} } }
 
+function recMime() {
+  const MR = window.MediaRecorder;
+  if (!MR || !MR.isTypeSupported) return '';
+  return ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg;codecs=opus'].find((t) => MR.isTypeSupported(t)) || '';
+}
+const serverStt = () => !!(engine.state.live && engine.state.caps && engine.state.caps.stt && window.MediaRecorder);
+/** Graba el turno desde que empieza a escuchar (así no se pierde el comienzo de la frase mientras el detector decide). */
+function recStart() {
+  recDiscard();
+  if (!serverStt() || S.muted) return;
+  try {
+    const mime = recMime();
+    utterChunks = [];
+    utterRec = mime ? new MediaRecorder(S.stream, { mimeType: mime, audioBitsPerSecond: 32000 }) : new MediaRecorder(S.stream);
+    utterRec.ondataavailable = (e) => e.data && e.data.size && utterChunks.push(e.data);
+    utterRec.start(1000);
+    S.recAt = Date.now();
+  } catch { utterRec = null; }
+}
+function recDiscard() { if (utterRec) { try { utterRec.ondataavailable = null; utterRec.stop(); } catch {} utterRec = null; utterChunks = []; } }
 function listen() {
   if (S.state === 'ended') return;
   S.turnText = ''; S.srText = '';
   setState('listening');
-  if (!S.muted) srStart();
+  if (S.ctx && S.ctx.state === 'suspended') S.ctx.resume().catch(() => {});
+  if (!S.muted) { srStart(); recStart(); }
 }
 function onSpeechStart() {
-  if (engine.state.live && engine.state.caps && engine.state.caps.stt && window.MediaRecorder) {
-    try { utterChunks = []; utterRec = new MediaRecorder(S.stream); utterRec.ondataavailable = (e) => e.data.size && utterChunks.push(e.data); utterRec.start(); } catch { utterRec = null; }
-  }
+  // Si se escuchó mucho rato sin hablar, se reinicia la grabación para no mandar minutos de silencio.
+  if (!utterRec || Date.now() - (S.recAt || 0) > 25_000) recStart();
 }
 async function onSpeechEnd() {
   setState('thinking');
   await new Promise((r) => setTimeout(r, 350)); // último resultado del reconocedor
   srStop();
   let text = S.srText.trim();
+  let sttErr = null;
   if (utterRec) {
-    const blob = await new Promise((res) => { utterRec.onstop = () => res(new Blob(utterChunks, { type: utterRec.mimeType })); try { utterRec.stop(); } catch { res(null); } });
+    const rec = utterRec; const chunks = utterChunks;
     utterRec = null;
-    if (blob && blob.size > 2000) { const server = await engine.transcribe(blob, S.lang.code); if (server) text = server; }
+    const blob = await new Promise((res) => { rec.onstop = () => res(new Blob(chunks, { type: rec.mimeType || 'audio/webm' })); try { rec.stop(); } catch { res(null); } });
+    if (blob && blob.size > 2000) { const server = await engine.transcribe(blob, S.lang.code); if (server) text = server; else sttErr = engine.state.sttError; }
   }
   if (S.state === 'ended') return;
   if (!text) {
     if (!S.sr && !(engine.state.caps && engine.state.caps.stt)) { await say('Te escucho, pero este navegador todavía no me deja entender las palabras. Probá desde Chrome o Edge, o escribime en el chat.'); }
+    else if ((sttErr === 'quota' || sttErr === 'server' || sttErr === 'offline') && !S.sttWarned) {
+      // Causa real, una sola vez por llamada: no es el micrófono de la persona.
+      S.sttWarned = true;
+      await say(sttErr === 'quota' ? 'Te oigo, pero el servicio que pasa tu voz a texto llegó a su límite de hoy, así que ahora no entiendo las palabras. No es tu micrófono. Podés escribirme en el chat.' : 'Te oigo, pero tuve un problema en el servidor para entender las palabras. No es tu micrófono. Probá de nuevo en un momento.');
+    }
     listen();
     return;
   }
@@ -311,7 +348,7 @@ function toggleMute() {
   $('muteBtn').setAttribute('aria-pressed', String(S.muted));
   $('muteBtn').innerHTML = icon(S.muted ? 'micOff' : 'mic') + `<span>${S.muted ? 'Activar micrófono' : 'Silenciar'}</span>`;
   $('callShell').classList.toggle('is-muted', S.muted);
-  if (S.muted) srStop(); else if (S.state === 'listening') srStart();
+  if (S.muted) { srStop(); recDiscard(); } else if (S.state === 'listening') { srStart(); recStart(); }
   if (S.state === 'listening') setState('listening');
 }
 
@@ -341,7 +378,7 @@ async function endCall(msg) {
   const secs = (Date.now() - S.startedAt) / 1000;
   S.state = 'ended';
   if (S.abort) S.abort.abort();
-  stopSpeech(); srStop();
+  stopSpeech(); srStop(); recDiscard();
   cancelAnimationFrame(S.raf);
   clearInterval(S.timer);
   clearInterval(S.hb); S.hb = 0;
