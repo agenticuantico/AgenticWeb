@@ -5,7 +5,7 @@
 .gate-ic svg { width: 28px; height: 28px; }
 .admin-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-bottom: 18px; }
 .admin-head h1 { font-size: var(--fs-2xl); margin: 0; }
-.kpis { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; margin-bottom: 14px; }
+.kpis { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; margin-bottom: 14px; }
 .kpi { display: flex; gap: 12px; align-items: center; padding: 16px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: var(--shadow-1); min-width: 0; }
 .kpi > div { display: grid; min-width: 0; }
 .kpi small { color: var(--muted); font-size: var(--fs-xs); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; }
@@ -94,7 +94,8 @@
 
 /* ---------- Ingresos estimados (ARS · USD, sin mezclar monedas) ---------- */
 .rev-kpi .rev-kpi-sub { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.rev-kpi .rev-kpi-usd { font-weight: 700; color: var(--ink-2); }
+.rev-kpi .rev-kpi-sub { display: flex; align-items: center; gap: 4px; }
+.rev-kpi-logo { display: inline-block; height: 14px; width: auto; vertical-align: middle; }
 .seg-2 { grid-template-columns: repeat(2, auto); }
 .rev-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .rev-prov { border: 1px solid var(--line); border-radius: var(--r-lg); padding: 16px; background: linear-gradient(180deg, #fff, #fbfbfd); display: grid; gap: 12px; align-content: start; }
