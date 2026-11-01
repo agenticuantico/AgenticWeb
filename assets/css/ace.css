@@ -224,3 +224,12 @@ body.ace-lock { overflow: hidden; }
 /* Portada: el chat ocupa todo el ancho de su sección */
 .chat-section .chat-stage { width: 100%; }
 @media (max-width: 420px) { .ace-tab { font-size: 13px; padding: 0 2px; } .ace-tabs { gap: 2px; } }
+
+/* Selector de idioma del chat: mismo estilo que la píldora del encabezado */
+.chat.ace .ace-flag, .ace-flag { height: 40px; gap: 8px; padding: 0 11px 0 7px; border-radius: 999px; background: #fff; border: 1px solid rgba(24, 24, 27, .09); box-shadow: 0 1px 2px rgba(24, 24, 27, .05), 0 6px 18px rgba(24, 24, 27, .08); color: #33363d; }
+.chat.ace .ace-flag:hover, .ace-flag:hover { border-color: rgba(24, 24, 27, .16); box-shadow: 0 1px 2px rgba(24, 24, 27, .06), 0 8px 22px rgba(24, 24, 27, .12); }
+.ace-flag .ace-flag-code { display: none; }
+.ace-flag .ace-flag-img { width: 100%; height: 100%; border-radius: 0; box-shadow: none; }
+.ace-flag svg.lp-chev { width: 16px !important; height: 16px !important; color: #33363d; }
+.chat .lang-menu { background: #fff; }
+@media (max-width: 520px) { .chat.ace .ace-flag, .ace-flag { height: 36px; gap: 6px; padding: 0 8px 0 6px; } .ace-flag .lp-flag { width: 27px; height: 18px; border-radius: 5px; } .ace-flag svg.lp-chev { width: 14px !important; height: 14px !important; } }

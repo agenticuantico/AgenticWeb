@@ -16,7 +16,8 @@ export const CONFIG = Object.freeze({
    * (verificado por las reglas). Se usa solo para ofrecer el alta inicial (bootstrap) de ese documento,
    * que las reglas permiten una única vez y solo con el token verificado de esta cuenta de Google.
    */
-  OWNER_EMAIL: 'agenticuantico@gmail.com',
+  /** SHA-256 del correo de la cuenta dueña (la verificación real la hacen las reglas de Firestore). */
+  OWNER_EMAIL_SHA256: 'c924e30c258733cdb4731c608665b842e9855fa6c71564bb258ed732f7aa036f',
   FIREBASE,
   GITHUB: {
     ACTIONS_DEV: 'https://github.com/agenticuantico/AgenticDev/actions',
@@ -35,11 +36,11 @@ export const CONFIG = Object.freeze({
 export const PLANS = [
   {
     id: 'gratis', name: 'Gratis', tagline: 'Para conocer AgentiCuántico.',
-    features: ['Chat con el asistente general', 'Voz femenina en 7 idiomas', 'Análisis de documentos en tu dispositivo', 'Historial en tu cuenta', '20 mensajes por día con el servidor activo']
+    features: ['Chat con el asistente general', 'Voz femenina en 7 idiomas', 'Análisis de documentos en tu dispositivo', 'Historial en tu cuenta', '20 mensajes por día']
   },
   {
     id: 'pro', name: 'Pro', tagline: 'Para profesionales y creadores.', featured: true,
-    features: ['Todo lo de Gratis', 'Agentes invitables: programador, investigadora, diseñador y más', 'Modo «Hace todo por vos» con herramientas', 'Razonamiento profundo', 'Automatizaciones y conectores (al activarse el servidor)', '500 mensajes por día']
+    features: ['Todo lo de Gratis', 'Agentes invitables: programador, investigadora, diseñador y más', 'Modo «Hace todo por vos» con herramientas', 'Razonamiento profundo', 'Automatizaciones y conectores (próximamente)', '500 mensajes por día']
   },
   {
     id: 'empresa', name: 'Empresa', tagline: 'Para equipos y empresas.',

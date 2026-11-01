@@ -27,7 +27,7 @@ export function openHub(chat, tab = 'agentes') {
   show(tab);
 }
 
-const backendChip = () => engineState.live ? h('span', { class: 'chip ok' }, 'Activo') : h('span', { class: 'chip warn' }, 'Requiere servidor');
+const backendChip = () => engineState.live ? h('span', { class: 'chip ok' }, 'Activo') : h('span', { class: 'chip warn' }, 'Próximamente');
 
 function agentes(pane, chat) {
   const ws = chat.store.ws;
@@ -103,14 +103,14 @@ function conectores(pane, chat) {
 }
 
 async function automatizaciones(pane, chat) {
-  pane.append(h('div', { class: 'alert warn' }, h('span', { html: icon('clock') }), h('div', {}, 'Las automatizaciones se guardan ahora y se ejecutan cuando el servidor de tareas programadas esté activo. Hoy ', h('strong', {}, engineState.live ? 'el servidor responde, pero el programador de tareas todavía no está habilitado' : 'el servidor no está activo'), ', así que no se ejecutan todavía.')));
+  pane.append(h('div', { class: 'alert warn' }, h('span', { html: icon('clock') }), h('div', {}, 'Las automatizaciones se guardan ahora y ', h('strong', {}, 'empiezan a ejecutarse cuando habilitemos las tareas programadas'), '; todavía no se ejecutan.')));
   const list = h('div', { class: 'hub-list' });
   pane.append(list);
   const refresh = async () => {
     list.innerHTML = '';
     const items = await chat.store.listAutomations().catch(() => []);
     if (!items.length) list.append(h('p', { class: 'muted small' }, 'Todavía no creaste automatizaciones.'));
-    for (const a of items) list.append(h('div', { class: 'hub-item' }, h('span', { class: 'hub-ic', html: icon('clock') }), h('div', {}, h('strong', {}, a.title), h('p', { class: 'muted small' }, `${{ daily: 'Todos los días', weekly: 'Cada semana', weekdays: 'Lunes a viernes' }[a.schedule] || a.schedule} a las ${a.time} · ${a.prompt.slice(0, 80)}`)), h('span', { class: 'chip warn' }, 'Esperando servidor'), h('button', { class: 'icon-btn sm', type: 'button', 'aria-label': 'Eliminar automatización', html: icon('trash'), onclick: async () => { await chat.store.deleteAutomation(a.id).catch(() => {}); refresh(); } })));
+    for (const a of items) list.append(h('div', { class: 'hub-item' }, h('span', { class: 'hub-ic', html: icon('clock') }), h('div', {}, h('strong', {}, a.title), h('p', { class: 'muted small' }, `${{ daily: 'Todos los días', weekly: 'Cada semana', weekdays: 'Lunes a viernes' }[a.schedule] || a.schedule} a las ${a.time} · ${a.prompt.slice(0, 80)}`)), h('span', { class: 'chip warn' }, 'Programada'), h('button', { class: 'icon-btn sm', type: 'button', 'aria-label': 'Eliminar automatización', html: icon('trash'), onclick: async () => { await chat.store.deleteAutomation(a.id).catch(() => {}); refresh(); } })));
   };
   refresh();
   const form = h('form', { class: 'card hub-form' },
@@ -126,7 +126,7 @@ async function automatizaciones(pane, chat) {
     const f = new FormData(form);
     try {
       await chat.store.saveAutomation({ id: uid('auto'), title: f.get('title'), prompt: f.get('prompt'), schedule: f.get('schedule'), time: f.get('time') });
-      toast('Automatización guardada (se ejecutará cuando el servidor esté activo)');
+      toast('Automatización guardada (se ejecutará cuando habilitemos las tareas programadas)');
       form.reset(); refresh();
     } catch { toast('No se pudo guardar todavía en tu cuenta.', 'error'); }
   });

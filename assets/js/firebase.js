@@ -45,7 +45,7 @@ export function friendlyError(e) {
     'auth/invalid-credential': 'Correo o contraseña incorrectos.',
     'auth/wrong-password': 'Correo o contraseña incorrectos.',
     'auth/user-not-found': 'Correo o contraseña incorrectos.',
-    'auth/user-disabled': 'Esta cuenta está suspendida. Escribinos a ' + CONFIG.CONTACT_EMAIL + '.',
+    'auth/user-disabled': 'Esta cuenta está suspendida. Escribinos desde el formulario de contacto.',
     'auth/too-many-requests': 'Demasiados intentos. Esperá unos minutos y volvé a intentar.',
     'auth/network-request-failed': 'No hay conexión con el servicio de cuentas. Revisá tu internet.',
     'auth/popup-closed-by-user': 'Cerraste la ventana de Google antes de terminar.',

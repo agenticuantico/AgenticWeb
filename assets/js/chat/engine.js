@@ -11,7 +11,7 @@ import { analyzeLocally } from './docs-local.js';
 
 export const state = { live: false, checked: false, caps: null, base: '' };
 const P = CONFIG.PRICES;
-const MAIL = CONFIG.CONTACT_EMAIL;
+const MAIL = 'el formulario de [contacto](/contacto/)';
 
 const sleep = (ms, signal) => new Promise((res, rej) => {
   const t = setTimeout(res, ms);
@@ -265,13 +265,13 @@ export function localAnswer(q, lang = 'es', ctx = {}) {
       '**Faz tudo por você** planeja a tarefa, usa ferramentas, convida agentes especialistas, pede confirmação antes de ações importantes e verifica o resultado.');
   }
   if (/segur|privacidad|privacy|privacidade|datos personales|cookies/.test(t)) {
-    return L(lang, 'Sobre **seguridad y privacidad**:\n\n- Sin cuenta, tus chats quedan **solo en tu dispositivo**. Con cuenta, se sincronizan cifrados en tránsito con tu usuario.\n- El **modo incógnito** no guarda nada: ni historial, ni memoria.\n- Los pagos se procesan en **Mercado Pago** o **PayPal**: nunca guardamos números de tarjeta.\n- Podés pedir acceso, rectificación o supresión de tus datos (Ley 25.326) escribiendo a ' + MAIL + '.\n\nMás detalle en la [Política de privacidad](/legal/privacidad.html).',
+    return L(lang, 'Sobre **seguridad y privacidad**:\n\n- Sin cuenta, tus chats quedan **solo en tu dispositivo**. Con cuenta, se sincronizan cifrados en tránsito con tu usuario.\n- El **modo incógnito** no guarda nada: ni historial, ni memoria.\n- Los pagos se procesan en **Mercado Pago** o **PayPal**: nunca guardamos números de tarjeta.\n- Podés pedir acceso, rectificación o supresión de tus datos (Ley 25.326) desde [tu cuenta](/cuenta/) o con ' + MAIL + '.\n\nMás detalle en la [Política de privacidad](/legal/privacidad.html).',
       'Without an account your chats stay on your device; incognito saves nothing; payments run on Mercado Pago or PayPal and we never store card numbers. See the [Privacy policy](/legal/privacidad.html).',
       'Sem conta, seus chats ficam no seu dispositivo; o modo anônimo não salva nada; pagamentos via Mercado Pago ou PayPal, sem guardar cartões.');
   }
   if (/contact|correo|mail|escrib|comercial|hablar con|falar/.test(t)) {
-    return L(lang, `Escribinos a **${MAIL}** con el asunto **"Consulta Comercial"**. Contanos tu empresa y qué querés automatizar, y te respondemos con una propuesta.`,
-      `Email **${MAIL}** with the subject **"Consulta Comercial"**.`, `Escreva para **${MAIL}** com o assunto **"Consulta Comercial"**.`);
+    return L(lang, `Escribinos desde ${MAIL}. Contanos tu empresa y qué querés automatizar, y te respondemos con una propuesta.`,
+      'Write to us using the [contact form](/contacto/).', 'Escreva pelo [formulário de contato](/contacto/).');
   }
   if (/voz|voice|habl|speak|micr[oó]fono|audio/.test(t)) {
     return L(lang, 'Con la voz funciona así:\n\n- 🎙️ **Tocá el micrófono** y hablá: se envía como **nota de voz** y te respondo **hablando** (y también por escrito).\n- ⌨️ Si **escribís**, te respondo solo con texto.\n- 🔁 **Conversación manos libres**: activala y charlamos por turnos sin tocar nada.\n\nElegí idioma y acento con las banderas.',
@@ -350,7 +350,7 @@ function artifactFor(d, task, lang, extras) {
   if (extras.calcLine) parts.push('## Cálculo', '', extras.calcLine, '');
   if (extras.docSummary) parts.push('## Documentos analizados', '', extras.docSummary, '');
   for (const c of extras.contributions || []) parts.push(`## Aporte de ${c.name}`, '', c.text, '');
-  parts.push('## Plan de acción', '', '1. **Diagnóstico**: relevar procesos, tiempos y costos actuales.', '2. **Prioridades**: elegir 1–2 tareas repetitivas de mayor impacto.', '3. **Piloto**: automatizarlas durante 2–4 semanas.', '4. **Medición**: horas ahorradas, errores y satisfacción.', '5. **Escala**: extender a otras áreas.', '', '## Próximos pasos', '', '- [ ] Validar el objetivo con el equipo', '- [ ] Elegir el primer proceso piloto', `- [ ] Escribir a ${MAIL} para una propuesta a medida`, '');
+  parts.push('## Plan de acción', '', '1. **Diagnóstico**: relevar procesos, tiempos y costos actuales.', '2. **Prioridades**: elegir 1–2 tareas repetitivas de mayor impacto.', '3. **Piloto**: automatizarlas durante 2–4 semanas.', '4. **Medición**: horas ahorradas, errores y satisfacción.', '5. **Escala**: extender a otras áreas.', '', '## Próximos pasos', '', '- [ ] Validar el objetivo con el equipo', '- [ ] Elegir el primer proceso piloto', `- [ ] Pedir una propuesta a medida desde ${MAIL}`, '');
   return parts.join('\n');
 }
 
@@ -377,7 +377,7 @@ async function localAuto(o) {
     await sleep(450 + Math.random() * 450, sig);
     if (s.tool === 'plan') emit({ type: 'log', id: s.id, text: `Objetivo: ${task.slice(0, 160)}\nEntregable: ${d.name}\nCriterios: claro, completo y listo para usar.` });
     if (s.tool === 'docs') { const r = analyzeLocally(o.docs, 'resumen', lang) || ''; extras.docSummary = r.replace(/^#+.*$/gm, '').trim().slice(0, 1200); emit({ type: 'log', id: s.id, text: extras.docSummary.slice(0, 400) }); }
-    if (s.tool === 'web') emit({ type: 'log', id: s.id, text: `GET ${url}\nLa lectura de páginas se ejecuta en el servidor; quedó anotada como referencia.` });
+    if (s.tool === 'web') emit({ type: 'log', id: s.id, text: `GET ${url}\nQuedó anotada como referencia; la lectura de páginas en vivo llega pronto.` });
     if (s.tool === 'calc') { try { extras.calcLine = `${expr} = ${fmtNum(calc(expr), lang)}`; } catch { extras.calcLine = `${expr} = ?`; } emit({ type: 'log', id: s.id, text: extras.calcLine }); }
     if (s.tool === 'agent') { const text = agentLocal(s.agent, task, lang); extras.contributions.push({ name: s.agent.name, text }); emit({ type: 'agent', id: s.id, agent: { id: s.agent.id, name: s.agent.name, color: s.agent.color }, text }); }
     if (s.tool === 'write') { content = artifactFor(d, task, lang, extras); emit({ type: 'log', id: s.id, text: `${d.name} · ${content.length} caracteres` }); }

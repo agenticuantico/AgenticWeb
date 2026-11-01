@@ -23,9 +23,15 @@ async function logEvent(user, type, detail = '') {
 }
 
 /* =================== Acceso =================== */
+async function isOwner(mail) {
+  try {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(mail));
+    return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, '0')).join('') === CONFIG.OWNER_EMAIL_SHA256;
+  } catch { return false; }
+}
 function loginGate(msg) {
   root.innerHTML = '';
-  const email = h('input', { class: 'input', type: 'email', autocomplete: 'username', value: CONFIG.OWNER_EMAIL, required: true, 'aria-label': 'Correo' });
+  const email = h('input', { class: 'input', type: 'email', autocomplete: 'username', required: true, placeholder: 'Correo', 'aria-label': 'Correo' });
   const pass = h('input', { class: 'input', type: 'password', autocomplete: 'current-password', required: true, 'aria-label': 'Contraseña', placeholder: 'Contraseña' });
   const err = h('p', { class: 'error-text', hidden: true });
   const info = h('p', { class: 'small', hidden: true });
@@ -43,9 +49,12 @@ function loginGate(msg) {
   google.onclick = async () => { try { await auth.signInGoogle({ termsAccepted: true }); } catch (ex) { err.textContent = friendlyError(ex); err.hidden = false; } };
   const reset = h('button', { class: 'linklike small', type: 'button' }, 'Crear contraseña / olvidé mi contraseña');
   reset.onclick = async () => {
-    // Solo se envía a la cuenta dueña: nunca se genera ni se guarda una contraseña.
-    try { await auth.resetPassword(CONFIG.OWNER_EMAIL); info.textContent = `Te enviamos un enlace a ${CONFIG.OWNER_EMAIL} para crear o cambiar la contraseña.`; info.hidden = false; }
-    catch (ex) { err.textContent = friendlyError(ex); err.hidden = false; }
+    // Solo se envía si el correo escrito es el de la cuenta dueña; el mensaje es el mismo en cualquier caso.
+    err.hidden = true;
+    const v = (email.value || '').trim().toLowerCase();
+    if (!v) { err.textContent = 'Escribí el correo de la cuenta.'; err.hidden = false; return; }
+    try { if (await isOwner(v)) await auth.resetPassword(v); } catch {}
+    info.textContent = 'Si el correo corresponde a una cuenta con acceso, te llegará un enlace para crear o cambiar la contraseña.'; info.hidden = false;
   };
   root.append(h('div', { class: 'card gate gate-login' }, h('span', { class: 'gate-ic', html: icon('lock') }), h('h1', {}, 'Panel de control'),
     h('p', { class: 'muted' }, msg || 'Acceso exclusivo de la cuenta dueña de AgentiCuántico.'),
@@ -56,7 +65,7 @@ function loginGate(msg) {
 auth.completeGoogleRedirect?.().catch(() => {});
 auth.watchUser(async (user) => {
   if (!user) { loginGate(); return; }
-  const isOwnerEmail = (user.email || '').toLowerCase() === CONFIG.OWNER_EMAIL;
+  const isOwnerEmail = await isOwner((user.email || '').toLowerCase());
   const ok = isOwnerEmail && (await auth.isAdmin(user));
   if (!ok && isOwnerEmail && user.emailVerified) {
     root.innerHTML = '';

@@ -45,7 +45,7 @@ export const TOOLS = [
   { id: 'web', name: 'Búsqueda web', icon: 'globe', needsBackend: true, desc: 'Lee páginas públicas que indiques y busca información actual.' },
   { id: 'calc', name: 'Calculadora', icon: 'calc', needsBackend: false, desc: 'Cálculos exactos sin ejecutar código.' },
   { id: 'code', name: 'Código y lienzo', icon: 'code', needsBackend: false, desc: 'Escribe código y lo abre en el lienzo con vista previa aislada.' },
-  { id: 'image', name: 'Imágenes', icon: 'image', needsBackend: true, desc: 'Analiza imágenes; la generación llega con el servidor.' },
+  { id: 'image', name: 'Imágenes', icon: 'image', needsBackend: true, desc: 'Analiza imágenes; la generación de imágenes llega pronto.' },
   { id: 'docs', name: 'Documentos', icon: 'file', needsBackend: false, desc: 'PDF, Word, Excel, CSV y texto: extracción en tu dispositivo.' },
   { id: 'camera', name: 'Cámara', icon: 'camera', needsBackend: false, desc: 'Sacá una foto o escaneá un documento y adjuntalo.' }
 ];

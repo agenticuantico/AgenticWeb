@@ -146,8 +146,8 @@ async function renderPanel(user) {
   if (!user.emailVerified && user.providerData.some((p) => p.providerId === 'password')) {
     root.append(h('div', { class: 'alert warn' }, h('span', { html: icon('mail') }), h('div', {}, 'Verificá tu correo para proteger tu cuenta. ', h('button', { class: 'linklike', type: 'button', onclick: async () => { try { await auth.resendVerification(); toast('Te reenviamos el correo de verificación.'); } catch (e) { toast(friendlyError(e), 'error'); } } }, 'Reenviar correo'))));
   }
-  if (dataError) root.append(h('div', { class: 'alert info' }, h('span', { html: icon('info') }), h('div', {}, 'Tu cuenta funciona, pero el perfil y la membresía todavía no se pueden leer del servidor de datos. Volvé a intentar en unos minutos.')));
-  if (profile && profile.suspended) root.append(h('div', { class: 'alert danger' }, 'Tu cuenta está suspendida. Escribinos a ', h('a', { href: 'mailto:' + CONFIG.CONTACT_EMAIL }, CONFIG.CONTACT_EMAIL), '.'));
+  if (dataError) root.append(h('div', { class: 'alert info' }, h('span', { html: icon('info') }), h('div', {}, 'Tu cuenta funciona, pero el perfil y la membresía todavía no se pueden cargar. Volvé a intentar en unos minutos.')));
+  if (profile && profile.suspended) root.append(h('div', { class: 'alert danger' }, 'Tu cuenta está suspendida. Escribinos desde el ', h('a', { href: '/contacto/' }, 'formulario de contacto'), '.'));
 
   const nav = h('nav', { class: 'acc-tabs', role: 'tablist', 'aria-label': 'Secciones de tu cuenta' });
   const pane = h('div', { class: 'acc-pane', role: 'tabpanel' });
@@ -204,7 +204,7 @@ function membresia(pane, { user, profile, reload }) {
       h('dt', {}, 'Días restantes'), h('dd', {}, left == null ? '—' : `${left} ${left === 1 ? 'día' : 'días'}`),
       h('dt', {}, 'Medio de pago'), h('dd', {}, sub ? `${provName}${sub.subscriptionId ? ' · ' + sub.subscriptionId : ''}` : '—'))));
   if (sub && sub.status === 'pending') {
-    pane.append(h('div', { class: 'alert info' }, h('span', { html: icon('clock') }), h('div', {}, h('strong', {}, `Pago en verificación (${PLAN_NAME[sub.plan] || ''}, ${provName}).`), h('p', { style: 'margin:4px 0 0' }, 'El procesador recibió tu autorización. El plan se activa cuando confirmamos el cobro; recién ahí empiezan tus 30 días. Si pasan 24 h sin novedades, escribinos a ' + CONFIG.CONTACT_EMAIL + '.'))));
+    pane.append(h('div', { class: 'alert info' }, h('span', { html: icon('clock') }), h('div', {}, h('strong', {}, `Pago en verificación (${PLAN_NAME[sub.plan] || ''}, ${provName}).`), h('p', { style: 'margin:4px 0 0' }, 'El procesador recibió tu autorización. El plan se activa cuando confirmamos el cobro; recién ahí empiezan tus 30 días. Si pasan 24 h sin novedades, escribinos desde el formulario de contacto.'))));
   }
   if (sub && ['active', 'paused', 'canceled'].includes(sub.status)) {
     const toggle = h('input', { type: 'checkbox', checked: autoRenew || null, 'aria-label': 'Renovación automática' });
@@ -244,7 +244,7 @@ async function billingAction(action, user, profile, reload) {
   } catch {}
   const prov = profile && profile.subscription && profile.subscription.provider;
   const link = prov === 'paypal' ? 'https://www.paypal.com/myaccount/autopay/' : 'https://www.mercadopago.com.ar/subscriptions';
-  modal({ title: 'Pedido registrado', body: h('div', {}, h('p', {}, 'Registramos tu pedido y lo procesamos a la brevedad. Para que sea inmediato, también podés hacerlo vos desde el procesador:'), h('a', { class: 'btn btn-primary', href: link, target: '_blank', rel: 'noopener' }, prov === 'paypal' ? 'Abrir pagos automáticos de PayPal' : 'Abrir mis suscripciones de Mercado Pago'), h('p', { class: 'small muted', style: 'margin-top:12px' }, 'Consultas: ' + CONFIG.CONTACT_EMAIL)) });
+  modal({ title: 'Pedido registrado', body: h('div', {}, h('p', {}, 'Registramos tu pedido y lo procesamos a la brevedad. Para que sea inmediato, también podés hacerlo vos desde el procesador:'), h('a', { class: 'btn btn-primary', href: link, target: '_blank', rel: 'noopener' }, prov === 'paypal' ? 'Abrir pagos automáticos de PayPal' : 'Abrir mis suscripciones de Mercado Pago'), h('p', { class: 'small muted', style: 'margin-top:12px' }, 'Consultas: desde el formulario de contacto (agenticuantico.dev.ar/contacto/)')) });
   reload();
 }
 
@@ -386,12 +386,12 @@ function seguridad(pane, { user }) {
     row('Métodos de ingreso', providers.map((p) => (p === 'google.com' ? 'Google' : p === 'password' ? 'Correo y contraseña' : p)).join(' · ') || '—'),
     row(hasPass ? 'Contraseña' : 'Crear contraseña', hasPass ? 'Te enviamos un enlace seguro para cambiarla.' : 'Agregá una contraseña para ingresar también sin Google.', h('button', { class: 'btn btn-sm', type: 'button', onclick: async () => { try { await auth.resetPassword(user.email); toast('Revisá tu correo: te enviamos el enlace.', 'ok'); } catch (e) { toast(friendlyError(e), 'error'); } } }, hasPass ? 'Cambiar' : 'Crear')),
     row('Cerrar sesión', 'Salir de esta cuenta en este dispositivo.', h('button', { class: 'btn btn-sm btn-ghost', type: 'button', onclick: async () => { await auth.signOutUser(); location.href = '/'; } }, 'Salir')),
-    h('p', { class: 'tiny muted' }, 'Nunca te vamos a pedir la contraseña por correo ni por chat. Ante cualquier actividad extraña, escribinos a ', h('a', { href: 'mailto:' + CONFIG.CONTACT_EMAIL }, CONFIG.CONTACT_EMAIL), '.')));
+    h('p', { class: 'tiny muted' }, 'Nunca te vamos a pedir la contraseña por correo ni por chat. Ante cualquier actividad extraña, escribinos desde el ', h('a', { href: '/contacto/' }, 'formulario de contacto'), '.')));
 }
 
 async function privacidad(pane, { user }) {
   pane.append(h('h2', {}, 'Datos y privacidad'),
-    h('p', { class: 'muted' }, 'Ejercé tus derechos de acceso, rectificación y supresión (Ley 25.326). También podés escribirnos a ', h('a', { href: 'mailto:' + CONFIG.CONTACT_EMAIL }, CONFIG.CONTACT_EMAIL), '.'));
+    h('p', { class: 'muted' }, 'Ejercé tus derechos de acceso, rectificación y supresión (Ley 25.326). También podés escribirnos desde el ', h('a', { href: '/contacto/' }, 'formulario de contacto'), '.'));
   const exp = h('button', { class: 'btn', type: 'button' }, h('span', { html: icon('download') }), 'Descargar mis datos (JSON)');
   exp.addEventListener('click', async () => {
     busy(exp, true);

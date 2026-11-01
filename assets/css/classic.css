@@ -330,3 +330,48 @@ html { background: #EDEEF5; }
 .site-header .nav .nav-contact-btn { background: #fff !important; color: #18181b !important; border: 1.5px solid rgba(24,24,27,.18) !important; box-shadow: none !important; }
 .site-header .nav .nav-contact-btn:hover { border-color: #18181b !important; }
 .lang-menu { min-width: 290px !important; }
+
+/* ---------- Selector de idioma (píldora blanca con bandera rectangular) ---------- */
+.lang-pill-host { position: relative; flex: none; display: flex; align-items: center; }
+.lang-pill { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 11px 0 7px; border-radius: 999px; background: #fff; border: 1px solid rgba(24, 24, 27, .09); box-shadow: 0 1px 2px rgba(24, 24, 27, .05), 0 6px 18px rgba(24, 24, 27, .08); color: #33363d; cursor: pointer; transition: box-shadow .16s, border-color .16s; -webkit-tap-highlight-color: transparent; }
+.lang-pill:hover { border-color: rgba(24, 24, 27, .16); box-shadow: 0 1px 2px rgba(24, 24, 27, .06), 0 8px 22px rgba(24, 24, 27, .12); }
+.lang-pill:focus-visible { outline: 2px solid #2563eb; outline-offset: 2px; }
+.lp-flag { position: relative; display: block; width: 32px; height: 22px; border-radius: 6px; overflow: hidden; flex: none; background: #fff; box-shadow: 0 0 0 1.5px #fff, 0 0 0 2.5px rgba(24, 24, 27, .07), 0 2px 6px rgba(24, 24, 27, .16); }
+.lp-flag img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.lp-flag::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .08), inset 0 -2px 4px rgba(0, 0, 0, .10), inset 0 1px 1px rgba(255, 255, 255, .55); }
+.lp-chev { width: 16px; height: 16px; color: #33363d; flex: none; }
+.site-header .lang-pill-host { margin-left: 4px; }
+.site-lang-menu { position: absolute; top: calc(100% + 10px); right: 0; z-index: 120; min-width: 236px; padding: 6px; background: #fff; border: 1px solid rgba(24, 24, 27, .10); border-radius: 18px; box-shadow: 0 18px 50px rgba(24, 24, 27, .16), 0 2px 6px rgba(24, 24, 27, .06); isolation: isolate; animation: rise .18s ease; }
+.site-lang-menu button { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 12px; border: 0; border-radius: 12px; background: #fff; color: #18181b; font: inherit; font-size: 14.5px; text-align: left; cursor: pointer; }
+.site-lang-menu button:hover, .site-lang-menu button:focus-visible { background: #f4f4f6; outline: none; }
+.site-lang-menu .lm-text { display: flex; flex-direction: column; line-height: 1.2; flex: 1; min-width: 0; }
+.site-lang-menu .lm-text span { font-weight: 600; }
+.site-lang-menu .lm-text small { font-size: 12px; color: #71717a; }
+.site-lang-menu .lm-check { width: 16px; height: 16px; color: #16a34a; flex: none; }
+.site-lang-menu .lp-flag { width: 30px; height: 20px; border-radius: 5px; }
+@media (max-width: 1240px) { .site-header .lang-pill-host { margin-left: auto; } }
+@media (max-width: 400px) {
+  .lang-pill { height: 38px; gap: 6px; padding: 0 9px 0 6px; }
+  .lp-flag { width: 28px; height: 19px; border-radius: 5px; }
+  .lp-chev { width: 14px; height: 14px; }
+  .site-lang-menu { right: -48px; }
+}
+@media (max-width: 370px) { .brand-title-3d { font-size: 17px; } .brand-sub-badge { font-size: 8.5px; letter-spacing: .1em; } }
+@media (min-width: 1241px) and (max-width: 1480px) {
+  .site-header .container.navbar { gap: 12px; width: calc(100% - 32px); }
+  .site-header .nav .nav-link { padding: 8px 8px; }
+  .site-header .nav .account-link .hide-sm { display: none; }
+  .site-header .nav .account-link { padding: 7px 10px; }
+}
+@media (max-width: 440px) {
+  .site-header .container.navbar { gap: 8px; width: calc(100% - 24px); }
+  .brand-group { gap: 10px; } .brand-title-3d { font-size: 19.5px; }
+}
+@media (max-width: 380px) { .brand-title-3d { font-size: 18px; } }
+@media (max-width: 370px) { .brand-title-3d { font-size: 17px; } }
+@media (max-width: 340px) {
+  .site-header .container.navbar { gap: 6px; width: calc(100% - 16px); }
+  .quantum-logo-3d { width: 32px; height: 32px; } .quantum-orb-3d { width: 28px; height: 28px; }
+  .brand-group { gap: 7px; } .brand-title-3d { font-size: 15px; } .brand-sub-badge { font-size: 7.5px; }
+  .lang-pill { padding: 0 7px 0 5px; gap: 4px; } .mobile-toggle { width: 38px; height: 38px; }
+}

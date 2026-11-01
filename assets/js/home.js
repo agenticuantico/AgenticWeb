@@ -29,7 +29,12 @@ import('./neural-hero.js').then((m) => {
   avatar.setState = (st) => { orig(st); m.setNeuralState(st === 'thinking' ? 'thinking' : st === 'talking' ? 'speaking' : 'idle'); };
 }).catch(() => {});
 
-/* Cerebro vivo 3D */
+/* Cerebro neuronal 3D (forma anatómica, red dorada; se enciende cuando el chat procesa o habla) */
+let brainCtl = null;
+{
+  const prev = avatar.setState.bind(avatar);
+  avatar.setState = (st) => { prev(st); brainCtl && brainCtl.setState(st); };
+}
 (function initBrain() {
   const stage = document.getElementById('brainStage');
   if (!stage) return;
@@ -39,9 +44,9 @@ import('./neural-hero.js').then((m) => {
   const fail = (msg) => { badge.textContent = msg; stage.classList.add('no-3d'); stage.setAttribute('data-state', 'fallback'); };
   const load = () => {
     if (started) return; started = true; btn.hidden = true; badge.textContent = 'Cargando cerebro 3D…';
-    import('./brain3d.min.js')
-      .then((m) => m.mountBrain(stage, { src: stage.getAttribute('data-src'), label: 'Cerebro 3D de AgentiCuántico: arrastrá para girar' }))
-      .then(() => { badge.textContent = 'Cerebro 3D interactivo'; stage.setAttribute('data-state', 'ready'); })
+    import('../vendor/a3d/brain-stage.js?v=7.0.0')
+      .then((m) => m.mountBrain(stage, { label: 'Cerebro neuronal 3D de AgentiCuántico: arrastrá para girar' }))
+      .then((b) => { brainCtl = b; b.setState(avatar.state); badge.textContent = 'Cerebro neuronal 3D'; stage.setAttribute('data-state', 'ready'); })
       .catch(() => { started = false; fail('Vista 3D no disponible en este dispositivo'); });
   };
   let gl = false;
@@ -69,7 +74,7 @@ fetch('/agents-status.json', { cache: 'no-cache' })
     grid.innerHTML = (d.agents || []).slice(0, 12).map((a) => {
       const st = a.status === 'activo' ? 'activo' : a.status === 'revision' ? 'revision' : 'espera';
       const label = st === 'activo' ? 'Activo' : st === 'revision' ? 'En revisión' : 'En espera';
-      const link = a.pr && /^https:\/\/github\.com\/agenticuantico\//.test(a.pr) ? `<a href="${esc(a.pr)}" target="_blank" rel="noopener">ver PR</a>` : '';
+      const link = '';
       return `<article class="agent-card"><div class="agent-top"><span class="agent-emoji agent-initials" aria-hidden="true">${esc(String(a.name || '?').split(/\s+/).map((w) => w[0]).join('').slice(0, 2).toUpperCase())}</span><div class="agent-name">${esc(a.name)}<small>${esc(a.role || '')}</small></div><span class="agent-state ${st}">${label}</span></div><p class="agent-last">${esc(a.last_activity || 'Listo para su primera tarea programada.')}</p>${a.last_run || link ? `<div class="agent-meta"><span>${esc(ago(a.last_run))}</span>${link}</div>` : ''}</article>`;
     }).join('');
     document.getElementById('teamUpdated').innerHTML = `<span class="hero-hud-dot"></span><span>Actualizado ${esc(ago(d.updated) || '')}</span>`;

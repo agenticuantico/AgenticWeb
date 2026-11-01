@@ -6,12 +6,14 @@
  *  - Si el usuario ESCRIBE, la respuesta es solo texto (puede escucharla con el botón de altavoz).
  *  - Conversación manos libres: graba, envía, responde con voz y vuelve a escuchar, por turnos.
  */
+import { getAvatarCall } from './avatar-call.js';
 import { h, icon, esc, toast, modal, popover, uid } from '../ui.js';
 import { CONFIG, PLANS, formatARS, mailtoCommercial } from '../config.js';
 import { prefs } from '../consent.js';
 import * as engine from './engine.js';
 import { renderMarkdown } from './md.js';
-import { LANGS, getLang, flagUrl } from './languages.js';
+import { LANGS, getLang, flagUrl, startLang } from './languages.js';
+const SITE_IDS = ['es-AR', 'es-ES', 'en-US', 'pt-BR'];
 import { AGENTS, TOOLS, SKILLS, CONNECTORS, agentById, initials } from './agents.js';
 import { speak, stop as stopSpeech } from './voice.js';
 import { VoiceRecorder, fmtClock } from './recorder.js';
@@ -37,13 +39,25 @@ const SUGGESTIONS = [
 export class ChatApp {
   constructor(root, { variant = 'embed', avatar = null, store, onRequestLogin } = {}) {
     this.root = root;
+    root._chat = this;
     this.variant = variant;
-    this.avatar = avatar;
+    const host = avatar, self = this;
+    /* El avatar del anfitrión (si hay) y la videollamada flotante reciben los mismos estados. */
+    const pip = () => (self._call && self._call.isOpen ? self._call : null);
+    this.avatar = {
+      get state() { return host ? host.state : (self._call ? self._call.state : 'idle'); },
+      setState(st) { host && host.setState(st); pip() && pip().setState(st); },
+      setVisemes(v) { host && host.setVisemes(v); pip() && pip().setVisemes(v); },
+      setLevel(v) { host && host.setLevel && host.setLevel(v); pip() && pip().setLevel(v); },
+      pulse(x) { host && host.pulse(x); pip() && pip().pulse(x); },
+      load() { return Promise.resolve(); },
+    };
     this.store = store;
     this.onRequestLogin = onRequestLogin;
     this.user = null;
     this.profile = null;
-    this.lang = getLang(prefs.get('ac.lang', 'es-AR'));
+    this.lang = startLang(prefs.get('ac.lang', null));
+    document.addEventListener('site:lang', (e) => { const id = e.detail && e.detail.id; if (id && id !== this.lang.id) { this.lang = getLang(id); prefs.set('ac.lang', id); if (this.$) this.renderLang(); } });
     this.mode = 'fast';
     this.chat = this.newChatObject();
     this.busy = null;
@@ -81,14 +95,14 @@ export class ChatApp {
       <header class="chat-head ace-head">
         ${full ? `<button class="ace-ib only-narrow" type="button" data-act="sidebar" aria-label="Abrir historial">${icon('sidebar')}</button>` : ''}
         <div class="ace-id">
-          <span class="ace-ava" data-role="face"><img src="${FACE}" alt="" width="42" height="42"><span class="ace-mouth" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span><span class="ace-dot"></span></span>
+          <span class="ace-ava" data-role="face"><img src="${FACE}" alt="" width="42" height="42"><span class="ace-mouth" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span></span>
           <span class="ace-txt"><strong>AgentiCuántico</strong><small data-role="status"><span class="ace-led"></span>En línea · Lista</small></span>
         </div>
         <div class="chat-participants" data-role="participants" aria-label="Agentes en la conversación"></div>
         <div class="ace-actions">
           <div class="lang-picker" data-popover-host>
             <button class="ace-flag" type="button" data-act="lang" aria-haspopup="menu" aria-expanded="false" aria-label="Idioma y voz">
-              <img class="ace-flag-img" alt="" width="27" height="18" data-role="flag"><span class="ace-flag-code" data-role="langShort"></span>${icon('chevron')}
+              <span class="lp-flag"><img class="ace-flag-img" alt="" width="30" height="20" data-role="flag"></span><span class="ace-flag-code" data-role="langShort"></span><svg class="lp-chev" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9.5l6 6 6-6"/></svg>
             </button>
           </div>
           <a class="ace-ib ace-call" href="/llamada/" aria-label="Llamada de voz" title="Llamada de voz">${icon('phone')}</a>
@@ -196,7 +210,7 @@ export class ChatApp {
     const demo = engine.state.checked && !engine.state.live;
     const k = this.busy ? (this.mode === 'auto' ? 'agentRun' : 'thinking') : (this._face === 'speaking' ? 'speaking' : this.recorder ? 'listening' : 'status');
     const label = this.busy ? (this.busy.label || 'Escribiendo…') : k === 'speaking' ? 'Hablando…' : k === 'listening' ? 'Escuchando…' : 'En línea · Lista';
-    st.innerHTML = `<span class="ace-led ${k}"></span>${esc(label)}${demo && k === 'status' ? ' <span class="ace-demo">· demo</span>' : ''}`;
+    st.innerHTML = `<span class="ace-led ${k}"></span>${esc(label)}`;
     this.setFace(this.busy ? 'thinking' : this._face || 'idle');
     this.root.dataset.live = engine.state.live ? '1' : '0';
   }
@@ -299,7 +313,7 @@ export class ChatApp {
   act_lang(btn) {
     popover(btn, [{ heading: 'Idioma · voz femenina' }, ...LANGS.map((l) => ({
       label: l.name, sub: l.region + ' · ♀ Femenina', img: flagUrl(l), checked: l.id === this.lang.id,
-      onClick: () => { this.lang = l; prefs.set('ac.lang', l.id); this.renderLang(); toast(`Te respondo en ${l.name} (${l.region}) con voz femenina.`); }
+      onClick: () => { this.lang = l; prefs.set('ac.lang', l.id); this.renderLang(); if (SITE_IDS.includes(l.id)) import('../i18n.js').then((m) => m.setSiteLang(l.id)); toast(`Te respondo en ${l.name} (${l.region}) con voz femenina.`); }
     }))], { align: 'end', className: 'lang-menu' });
   }
   act_incognito(btn) { this.setIncognito(!this.chat.incognito); btn.focus(); }
@@ -468,6 +482,17 @@ export class ChatApp {
   }
 
   /* =================== Voz: notas de voz =================== */
+  /** Abre la videollamada flotante con el avatar (al mandar voz o al responder con voz). */
+  openCall() {
+    if (!this.flag('voice')) return;
+    if (!this._call) {
+      this._call = getAvatarCall();
+      this._call.onClose = () => { stopSpeech(); if (this.handsFree) this.act_handsfree(); };
+    }
+    const st = this.avatar.state;
+    this._call.open(this.$('form') || this.root);
+    this._call.setState(st);
+  }
   async act_mic() {
     if (this.recorder) return;
     if (!this.flag('voice')) { toast('La voz está pausada momentáneamente.'); return; }
@@ -496,6 +521,7 @@ export class ChatApp {
     this.root.classList.add('recording-on');
     this.updateStatus(); this.setFace('listening');
     this.$('recHint').textContent = VoiceRecorder.speechSupported() ? 'Escuchando… deslizá a la izquierda para cancelar' : 'Grabando… deslizá a la izquierda para cancelar';
+    this.openCall();
     this.avatar && this.avatar.setState('listening');
     // corte automático por silencio (manos libres) → enviar
     const watch = setInterval(() => { if (rec.state === 'stopping' || rec.state === 'done') { clearInterval(watch); if (this.recorder === rec) this.act_recStop(); } if (rec.state === 'cancelled') clearInterval(watch); }, 120);
@@ -679,6 +705,7 @@ export class ChatApp {
 
   async say(text) {
     if (!this.flag('voice')) return;
+    this.openCall();
     const av = this.avatar;
     av && av.setState('thinking');
     const face = this.$('face');
@@ -686,7 +713,8 @@ export class ChatApp {
       lang: this.lang.id,
       onStart: () => { av && av.setState('talking'); this._face = 'speaking'; this.updateStatus(); },
       onViseme: (v) => { av && av.setVisemes(v); if (face) face.style.setProperty('--lvl', v ? Math.min(1, (v.aa || 0) + (v.oh || 0) + (v.ee || 0) + 0.1).toFixed(3) : '0'); },
-      onEnd: () => { av && (av.setVisemes(null), av.setState('idle')); this._face = null; if (face) face.style.setProperty('--lvl', '0'); this.updateStatus(); }
+      onEnd: () => { av && (av.setVisemes(null), av.setState('idle')); this._face = null; if (face) face.style.setProperty('--lvl', '0'); this.updateStatus(); },
+      onUnavailable: () => { if (!this._voiceNoteAt || Date.now() - this._voiceNoteAt > 60000) { this._voiceNoteAt = Date.now(); toast('Voz no disponible por un momento: te respondo por escrito.'); } }
     });
   }
 

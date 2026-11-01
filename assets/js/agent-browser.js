@@ -102,7 +102,7 @@ export class AgentBrowserCard {
     const [st] = await Promise.all([engine.init(), new Promise((r) => setTimeout(r, 900))]);
     if (this.stopped) return;
     if (!st.live || !st.caps || !st.caps.browser) {
-      this.unavailable('El navegador en la nube se habilita al conectar el servidor', 'Cuando esté activo, voy a poder abrir sitios, completar formularios y mostrarte cada paso en vivo, pidiéndote aprobación antes de enviar o publicar. Mientras tanto te guío para que lo hagas vos, sin compartir contraseñas.',
+      this.unavailable('El navegador en la nube llega pronto', 'Cuando esté activo, voy a poder abrir sitios, completar formularios y mostrarte cada paso en vivo, pidiéndote aprobación antes de enviar o publicar. Mientras tanto te guío para que lo hagas vos, sin compartir contraseñas.',
         h('button', { class: 'btn btn-sm', type: 'button', onclick: () => this.el.remove() }, 'Entendido'));
       return;
     }
@@ -117,7 +117,7 @@ export class AgentBrowserCard {
       this.view.replaceChildren(h('img', { class: 'ab-frame', alt: 'Vista en vivo del navegador del agente', decoding: 'async' }));
       this.poll();
     } catch (e) {
-      if (e.status === 503) this.unavailable('El navegador en la nube se habilita al conectar el servidor', 'El servicio de navegador todavía no está conectado. No se realizó ninguna acción.');
+      if (e.status === 503) this.unavailable('El navegador en la nube llega pronto', 'El servicio de navegador todavía no está conectado. No se realizó ninguna acción.');
       else if (e.status === 402) this.unavailable('Disponible en los planes Pro y Empresa', 'Mejorá tu plan para usar el navegador del agente.', h('a', { class: 'btn btn-sm btn-gold', href: '/planes.html' }, 'Ver planes'));
       else if (e.status === 401) this.unavailable('Ingresá con tu cuenta', 'El navegador del agente necesita una cuenta para proteger tus sesiones.', h('a', { class: 'btn btn-sm', href: '/cuenta/' }, 'Ingresar'));
       else this.unavailable('No pude abrir el navegador', 'Probá de nuevo en unos minutos. No se realizó ninguna acción.');

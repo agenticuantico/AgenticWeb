@@ -76,10 +76,15 @@ export async function speak(markdown, opts = {}) {
   stop();
   current = { cancelled: false };
   const me = current;
-  if (opts.preferServer !== false) {
-    const blob = await synthesize(text, opts.lang, opts.signal);
+  // Español (es-AR / es-ES): solo la voz natural del servidor. Si falla, se reintenta una vez y,
+  // si sigue sin estar, se responde solo con texto (nunca con una voz robótica del navegador).
+  const naturalOnly = /^es\b/i.test(opts.lang || 'es-AR');
+  if (opts.preferServer !== false || naturalOnly) {
+    let blob = await synthesize(text, opts.lang, opts.signal);
     if (me.cancelled) return;
+    if (!blob && naturalOnly) { await new Promise((r) => setTimeout(r, 900)); if (me.cancelled) return; blob = await synthesize(text, opts.lang, opts.signal); if (me.cancelled) return; }
     if (blob) return playWithAnalyser(blob, opts, me);
+    if (naturalOnly) { opts.onUnavailable && opts.onUnavailable(); opts.onEnd && opts.onEnd(); return; }
   }
   return speakBrowser(text, opts, me);
 }

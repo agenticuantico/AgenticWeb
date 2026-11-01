@@ -1,6 +1,7 @@
 User-agent: *
 Allow: /
 Disallow: /admin/
+Disallow: /control/
 Disallow: /cuenta/
 Disallow: /compartido/
 Disallow: /app/preview.html

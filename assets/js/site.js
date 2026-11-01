@@ -6,8 +6,49 @@ import { hydrateIcons, icon, esc } from './ui.js';
 import { showConsent, hasConsent, prefs } from './consent.js';
 import { getSystem } from './sysconfig.js';
 import { watchUser } from './auth.js';
+import { initI18n, setSiteLang, getSiteLang, siteLangInfo, SITE_LANGS } from './i18n.js';
 
 hydrateIcons();
+export const i18nReady = initI18n();
+
+/* ---------- Selector de idioma (píldora blanca con bandera, a la izquierda del menú) ---------- */
+const FLAG = (l) => `/assets/flags/rect/${l.flag}.svg`;
+function renderLangPill(btn) {
+  const l = siteLangInfo();
+  const img = btn.querySelector('.lp-flag img');
+  if (img) { img.src = FLAG(l); img.alt = ''; }
+  btn.setAttribute('aria-label', `Idioma: ${l.name} (${l.region})`);
+}
+function closeLangMenus() { document.querySelectorAll('.site-lang-menu').forEach((m) => { if (m._btn) m._btn.setAttribute('aria-expanded', 'false'); m.remove(); }); }
+function openLangMenu(btn) {
+  const open = document.querySelector('.site-lang-menu');
+  closeLangMenus();
+  if (open && open._btn === btn) return;
+  const menu = document.createElement('div');
+  menu.className = 'site-lang-menu';
+  menu.setAttribute('role', 'menu');
+  menu.setAttribute('data-no-i18n', '');
+  menu._btn = btn;
+  const cur = getSiteLang();
+  menu.innerHTML = SITE_LANGS.map((l) => `<button type="button" role="menuitemradio" aria-checked="${l.id === cur}" data-lang="${l.id}" lang="${l.id}"><span class="lp-flag"><img src="${FLAG(l)}" alt="" width="30" height="20"></span><span class="lm-text"><span>${l.name}</span><small>${l.region}</small></span>${l.id === cur ? icon('check', 'lm-check') : ''}</button>`).join('');
+  (btn.closest('.lang-pill-host') || btn.parentElement).append(menu);
+  btn.setAttribute('aria-expanded', 'true');
+  menu.addEventListener('click', async (e) => {
+    const b = e.target.closest('[data-lang]'); if (!b) return;
+    e.stopPropagation(); closeLangMenus();
+    await setSiteLang(b.dataset.lang);
+    document.querySelectorAll('.lang-pill').forEach(renderLangPill);
+    btn.focus();
+  });
+  menu.querySelector('[aria-checked="true"]')?.focus();
+}
+document.querySelectorAll('.lang-pill').forEach((btn) => {
+  renderLangPill(btn);
+  btn.addEventListener('click', (e) => { e.stopPropagation(); openLangMenu(btn); });
+});
+document.addEventListener('click', (e) => { if (!e.target.closest('.site-lang-menu')) closeLangMenus(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLangMenus(); });
+document.addEventListener('site:lang', () => document.querySelectorAll('.lang-pill').forEach(renderLangPill));
 
 /* ---------- Menú móvil ---------- */
 const nav = document.getElementById('siteNav');

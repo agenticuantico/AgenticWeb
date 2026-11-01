@@ -53,6 +53,8 @@ const P = {
   warn: '<path d="M12 3l9.5 17h-19z"/><path d="M12 10v4.5M12 17.5h.01"/>',
   monitor: '<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>',
   expand: '<path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/>',
+  collapse: '<path d="M10 4v6H4M14 20v-6h6M10 10L4 4M14 14l6 6"/>',
+  body: '<circle cx="12" cy="4.5" r="2"/><path d="M12 7v7M8 10h8M12 14l-3 6M12 14l3 6"/>',
   more: '<circle cx="5" cy="12" r="1.4" fill="currentColor"/><circle cx="12" cy="12" r="1.4" fill="currentColor"/><circle cx="19" cy="12" r="1.4" fill="currentColor"/>',
   arrowDown: '<path d="M12 5v14M5.5 12.5L12 19l6.5-6.5"/>',
   arrowRight: '<path d="M5 12h14M12.5 5.5L19 12l-6.5 6.5"/>',
@@ -183,6 +185,17 @@ export function popover(anchor, items, { align = 'start', place = 'bottom', clas
     if (r.right > innerWidth - 8) { pop.style.left = 'auto'; pop.style.right = '0'; }
     if (r.left < 8) { pop.style.left = '0'; pop.style.right = 'auto'; }
     if (r.bottom > innerHeight - 8 && place === 'bottom') { pop.dataset.place = 'top'; }
+    // nunca tapar la cabecera del chat ni salir de la tarjeta: alto máximo y desplazamiento interno
+    const card = anchor.closest('.chat');
+    const head = card && card.querySelector('.chat-head');
+    const ar = anchor.getBoundingClientRect();
+    const top = pop.dataset.place === 'top';
+    const topLimit = head ? head.getBoundingClientRect().bottom + 6 : card ? card.getBoundingClientRect().top + 6 : 8;
+    const botLimit = card ? card.getBoundingClientRect().bottom - 6 : innerHeight - 8;
+    const availCard = top ? ar.top - 8 - topLimit : botLimit - ar.bottom - 8;
+    const availView = top ? ar.top - 16 : innerHeight - ar.bottom - 16;
+    const avail = Math.max(140, card ? Math.min(availCard, Math.max(availView, availCard)) : availView);
+    if (pop.scrollHeight > avail) { pop.style.maxHeight = Math.floor(avail) + 'px'; pop.style.overflowY = 'auto'; pop.style.overscrollBehavior = 'contain'; }
     const first = pop.querySelector('.menu-item:not([disabled])');
     first && first.focus({ preventScroll: true });
   });

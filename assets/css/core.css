@@ -327,3 +327,5 @@ table.table { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); }
 .form-grid .field { display: grid; gap: 6px; min-width: 0; }
 @media (max-width: 640px) { .form-grid { grid-template-columns: 1fr; } }
 .hp { position: absolute !important; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.footer-legal { flex-wrap: wrap; gap: 6px 8px; align-items: center; font-size: 13px; }
+.footer-legal a, .footer-legal .linklike { color: inherit; }

@@ -6,22 +6,33 @@
  */
 import { h, icon, esc, toast, modal } from '../ui.js';
 import { prefs } from '../consent.js';
-import { AvatarStage } from '../chat/avatar.js';
+import { AgentAvatar } from '../chat/agent-avatar.js';
 import * as engine from '../chat/engine.js';
 import { speak, stop as stopSpeech } from '../chat/voice.js';
-import { LANGS, getLang, flagUrl } from '../chat/languages.js';
+import { LANGS, getLang, flagUrl, startLang } from '../chat/languages.js';
 import { watchUser, getProfile } from '../auth.js';
 import { systemPrompt, localReply, greeting, extractFacts, CRISIS_RE } from './brain.js';
 import * as mem from './memory.js';
 
 const $ = (id) => document.getElementById(id);
 const S = {
-  state: 'ready', user: null, profile: null, lang: getLang(prefs.get('ac.lang', 'es-AR')),
+  state: 'ready', user: null, profile: null, lang: startLang(prefs.get('ac.lang', null)),
   muted: false, incognito: false, optIn: false, memory: [], name: null, history: [], utterances: [],
   startedAt: 0, timer: 0, stream: null, ctx: null, analyser: null, raf: 0, sr: null, srText: '', turnText: '',
   speaking: false, wakeLock: null, abort: null, settings: {}, hb: 0, serverLeft: null
 };
-const avatar = new AvatarStage($('callAvatar'), { eager: true, label: 'AgentiCuántico, inteligencia artificial' });
+const avatar = new AgentAvatar($('callAvatar'), { label: 'AgentiCuántico, inteligencia artificial', framing: 'waist' });
+(window.requestIdleCallback || ((f) => setTimeout(f, 300)))(() => avatar.load());
+{
+  const fb = $('callFraming');
+  if (fb) fb.addEventListener('click', () => {
+    const full = fb.getAttribute('aria-pressed') !== 'true';
+    fb.setAttribute('aria-pressed', String(full));
+    fb.setAttribute('aria-label', full ? 'Ver medio cuerpo' : 'Ver cuerpo entero');
+    $('callShell').classList.toggle('framing-full', full);
+    avatar.setFraming(full ? 'full' : 'waist');
+  });
+}
 
 /* ---------- Preparación ---------- */
 function planName() { return (S.profile && S.profile.plan) || 'gratis'; }
@@ -30,7 +41,7 @@ function renderLang() { $('callFlag').src = flagUrl(S.lang); $('callLangName').t
 renderLang();
 $('callLang').addEventListener('click', async () => {
   const { popover } = await import('../ui.js');
-  popover($('callLang'), LANGS.map((l) => ({ label: l.name, sub: l.region, img: flagUrl(l), checked: l.id === S.lang.id, onClick: () => { S.lang = l; prefs.set('ac.lang', l.id); renderLang(); } })), { align: 'start' });
+  popover($('callLang'), LANGS.map((l) => ({ label: l.name, sub: l.region, img: flagUrl(l), checked: l.id === S.lang.id, onClick: () => { S.lang = l; prefs.set('ac.lang', l.id); renderLang(); if (['es-AR', 'es-ES', 'en-US', 'pt-BR'].includes(l.id)) import('../i18n.js').then((m) => m.setSiteLang(l.id)); } })), { align: 'start' });
 });
 $('incogToggle').addEventListener('change', (e) => { S.incognito = e.target.checked; $('callShell').classList.toggle('is-incognito', S.incognito); });
 $('startCall').addEventListener('click', startCall);
@@ -282,7 +293,8 @@ async function say(text) {
     lang: S.lang.id,
     onStart: () => setState('speaking'),
     onViseme: (v) => { avatar.setVisemes(v); S.level = v ? Math.min(1, (v.aa || 0) + (v.oh || 0) + (v.ee || 0) + 0.15) : 0; },
-    onEnd: () => { avatar.setVisemes(null); }
+    onEnd: () => { avatar.setVisemes(null); },
+    onUnavailable: () => { if (!S.voiceNote || Date.now() - S.voiceNote > 60000) { S.voiceNote = Date.now(); toast('Voz no disponible por un momento: la respuesta está en la transcripción.'); if ($('transcript').hidden) $('trToggle').click(); } }
   });
   S.speaking = false;
 }
