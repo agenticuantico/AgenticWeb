@@ -18,7 +18,7 @@ import { AGENTS, TOOLS, SKILLS, CONNECTORS, agentById, initials } from './agents
 import { speak, stop as stopSpeech } from './voice.js';
 import { VoiceRecorder, fmtClock } from './recorder.js';
 import { readFile, fmtSize } from './docs.js';
-import { needsWebAction, AgentBrowserCard } from '../agent-browser.js';
+import { needsWebAction, isFollowUp, AgentBrowserCard } from '../agent-browser.js';
 import { detectMediaIntent, mediaMessage, mediaCard, isMediaMessage, runMedia as runMediaTask } from './media.js';
 import { cleanArtifact, cleanThought } from './clean.js';
 import { PreviewCard, LiveFrame, previewKind, previewHtml, isPreviewable } from './preview-card.js';
@@ -618,9 +618,18 @@ export class ChatApp {
     this.pushMessage(msg);
     this.syncSend();
     // Acciones en la web (iniciar sesión, enviar correos, postular, formularios): tarjeta del navegador del agente.
-    if (!detectMediaIntent(text) && needsWebAction(text)) {
+    // También los seguimientos («seguí», «ahora compará…») de una tarea de la computadora en esta conversación.
+    const follow = this.browserCard && this.browserCard.chatId === this.chat.id && isFollowUp(text);
+    if (!detectMediaIntent(text) && (needsWebAction(text) || follow)) {
       msg._browser = true;
-      this.browserCard = new AgentBrowserCard({ thread: this.$('inner'), composer: this.$('form'), text, isPaid: this.isPaid, idToken: this.user ? () => this.user.getIdToken() : null, onScroll: () => this.scrollToEnd(true) });
+      if (this.browserCard) this.browserCard.detach();
+      const chatId = this.chat.id;
+      this.browserCard = new AgentBrowserCard({
+        thread: this.$('inner'), composer: this.$('form'), text, conv: chatId, lang: this.lang.code, isPaid: this.isPaid,
+        idToken: this.user ? () => this.user.getIdToken() : null, onScroll: () => this.scrollToEnd(true),
+        onFiles: (files) => this.browserFiles(chatId, files)
+      });
+      this.browserCard.chatId = chatId;
     }
     // "Recordá que…" → memoria explícita
     const mem = /^(record[aá]|acordate|guard[aá] en (tu )?memoria)( que)?\s+(.{4,300})$/i.exec(text);
@@ -629,6 +638,25 @@ export class ChatApp {
       this.store.saveWorkspace();
     }
     await this.respond(msg, { voice: false });
+  }
+
+  /** Archivos que creó la computadora del agente → mensaje con entregables (vista previa automática y Archivos). */
+  browserFiles(chatId, files) {
+    if (!this.chat || this.chat.id !== chatId || !files.length) return;
+    let a = this._browserFilesMsg && this.chat.messages.includes(this._browserFilesMsg) ? this._browserFilesMsg : null;
+    if (!a) {
+      a = { id: uid('m'), role: 'assistant', content: ({ 'en-US': 'Files from the agent computer:', 'pt-BR': 'Arquivos do computador do agente:', 'es-ES': 'Archivos del ordenador del agente:' })[this.lang.id] || 'Archivos de la computadora del agente:', at: Date.now(), artifacts: [] };
+      this._browserFilesMsg = a;
+      this.pushMessage(a);
+    }
+    for (const f of files) {
+      const art = { name: f.name, mime: f.mime, content: f.content, ...(f.url ? { url: f.url } : {}) };
+      const i = a.artifacts.findIndex((x) => x.name === f.name);
+      if (i >= 0) a.artifacts[i] = art; else a.artifacts.push(art);
+    }
+    this.updateMessage(a);
+    this.persist();
+    this.scrollToEnd(true);
   }
 
   /** Arma el contexto (instrucciones, habilidades, memoria) para el modelo. */
@@ -693,11 +721,13 @@ export class ChatApp {
       // (evita que el chat diga que no puede navegar mientras la computadora trabaja).
       if (userMsg._browser && engine.state.live && engine.state.caps && engine.state.caps.browser) {
         const a = { id: uid('m'), role: 'assistant', content: ({
-          'en-US': "I opened the **agent computer** to do it in a real browser. You'll see every step live; before sending, buying, applying or posting I'll ask for your approval, and if a sign-in is needed you take control and type it yourself.",
-          'pt-BR': 'Abri o **computador do agente** para fazer isso em um navegador real. Você vai ver cada passo ao vivo; antes de enviar, comprar, se candidatar ou publicar eu peço sua aprovação, e se for preciso entrar em uma conta, você assume o controle e digita.',
-          'es-ES': 'He abierto el **ordenador del agente** para hacerlo en un navegador real. Verás cada paso en directo; antes de enviar, comprar, postularme o publicar te pediré aprobación y, si hace falta iniciar sesión, tomas el control y lo escribes tú.'
-        })[this.lang.id] || 'Abrí la **computadora del agente** para hacerlo en un navegador real. Vas a ver cada paso en vivo; antes de enviar, comprar, postular o publicar te pido aprobación, y si hace falta iniciar sesión, tomás el control y lo escribís vos.', at: Date.now() };
+          'en-US': "On it. I'm working on the **agent computer**: I plan and do every step on my own and you see them live. I only stop to ask your approval before buying, paying, sending, posting or applying, and if a site needs a sign-in I show you a secure form.",
+          'pt-BR': 'Já estou nisso. Trabalho no **computador do agente**: planejo e faço cada passo sozinho, e você vê tudo ao vivo. Só paro para pedir sua aprovação antes de comprar, pagar, enviar, publicar ou me candidatar, e se um site pedir login eu mostro um formulário seguro.',
+          'es-ES': 'Me pongo con ello. Trabajo en el **ordenador del agente**: planifico y hago cada paso solo y lo ves en directo. Solo me detengo a pedir tu aprobación antes de comprar, pagar, enviar, publicar o postularme y, si un sitio pide iniciar sesión, te muestro un formulario seguro.'
+        })[this.lang.id] || 'Me pongo a trabajar. Uso la **computadora del agente**: planifico y hago cada paso solo, y lo ves en vivo. Solo freno para pedirte aprobación antes de comprar, pagar, enviar, publicar o postular, y si un sitio pide iniciar sesión te muestro un formulario seguro.', at: Date.now() };
         this.pushMessage(a);
+        // La tarjeta de la computadora va debajo de este aviso.
+        if (this.browserCard && this.browserCard.el && this.browserCard.el.isConnected) this.$('inner').append(this.browserCard.el);
         this.persist();
         this.finish();
         return;

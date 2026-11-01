@@ -86,7 +86,7 @@ function habilidades(pane, chat) {
 
 function conectores(pane, chat) {
   // GitHub y Cloudflare se conectan de verdad (por usuario); el resto queda en «Próximamente».
-  import('./connectors.js').then((mod) => mod.renderConnectors(pane, chat, (p) => proximamente(p, chat))).catch(() => proximamente(pane, chat));
+  import('./connectors.js').then((mod) => mod.renderConnectors(pane, chat, (p) => { import('./logins.js').then((lg) => lg.renderLogins(p, chat)).catch(() => {}).finally(() => proximamente(p, chat)); })).catch(() => proximamente(pane, chat));
 }
 
 function proximamente(pane, chat) {
