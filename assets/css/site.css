@@ -123,7 +123,9 @@
 .pay-box { display: grid; gap: 6px; }
 .btn-mp { --b-bg: #009ee3; --b-fg: #fff; --b-line: #009ee3; min-height: 48px; }
 .btn-mp:hover { --b-bg: #0089c7; border-color: #0089c7; }
-.btn-mp img { width: 22px; height: 22px; filter: brightness(0) invert(1); }
+.btn-mp img { width: auto; height: 22px; filter: none; }
+.pay-label { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.pay-label img { display: block; height: 20px; width: auto; flex: none; }
 @media (max-width: 560px) { .pay-methods { grid-template-columns: 1fr; } }
 .call-link svg { color: var(--ok); }
 .hero-inv .lead { margin: 0 0 26px; max-width: 720px; } .hero-inv .hero-ctas { justify-content: flex-start; } .hero-inv h1 { max-width: 22ch; }
