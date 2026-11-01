@@ -1,7 +1,7 @@
 /**
- * /llamada/: llamada de voz manos libres con la Compañera.
+ * /llamada/: llamada de voz manos libres con AgentiCuántico.
  * Ciclo: escuchar (detección de voz por energía) → transcribir → responder → hablar → escuchar.
- * Interrupción: si la persona habla mientras la Compañera habla, se corta la voz y vuelve a escuchar.
+ * Interrupción: si la persona habla mientras AgentiCuántico habla, se corta la voz y vuelve a escuchar.
  * No escribe nada en el chat. La transcripción en pantalla es opcional (apagada por defecto).
  */
 import { h, icon, esc, toast, modal } from '../ui.js';
@@ -11,7 +11,7 @@ import * as engine from '../chat/engine.js';
 import { speak, stop as stopSpeech } from '../chat/voice.js';
 import { LANGS, getLang, flagUrl } from '../chat/languages.js';
 import { watchUser, getProfile } from '../auth.js';
-import { systemPrompt, localReply, greeting, extractFacts, CRISIS_RE, CRISIS_RESOURCES } from './brain.js';
+import { systemPrompt, localReply, greeting, extractFacts, CRISIS_RE } from './brain.js';
 import * as mem from './memory.js';
 
 const $ = (id) => document.getElementById(id);
@@ -21,7 +21,7 @@ const S = {
   startedAt: 0, timer: 0, stream: null, ctx: null, analyser: null, raf: 0, sr: null, srText: '', turnText: '',
   speaking: false, wakeLock: null, abort: null, settings: {}, hb: 0, serverLeft: null
 };
-const avatar = new AvatarStage($('callAvatar'), { eager: true, label: 'Avatar de la Compañera' });
+const avatar = new AvatarStage($('callAvatar'), { eager: true, label: 'AgentiCuántico, inteligencia artificial' });
 
 /* ---------- Preparación ---------- */
 function planName() { return (S.profile && S.profile.plan) || 'gratis'; }
@@ -69,7 +69,7 @@ async function startCall() {
   }
   // Permiso de memoria la primera vez (solo con cuenta)
   if (S.user && !S.incognito && S.settings.optIn === undefined) {
-    const ok = await modal({ title: '¿Querés que te recuerde?', body: '<p class="muted">Si lo permitís, después de cada llamada guardo datos útiles que me cuentes (tu nombre, personas importantes, intereses, objetivos, cómo te sentís) para darte continuidad día a día. Los ves, editás y borrás en <strong>Mi cuenta → Compañera</strong>. Podés cambiarlo cuando quieras o llamar en modo incógnito.</p>', actions: [{ label: 'No, gracias', value: false, class: 'btn-ghost' }, { label: 'Sí, recordame', value: true, class: 'btn-primary' }] }).done;
+    const ok = await modal({ title: '¿Querés que te recuerde?', body: '<p class="muted">Si lo permitís, después de cada llamada guardo datos útiles que me cuentes (tu nombre, personas importantes, intereses, objetivos, cómo te sentís) para darte continuidad día a día. Los ves, editás y borrás en <strong>Mi cuenta → Memoria de llamadas</strong>. Podés cambiarlo cuando quieras o llamar en modo incógnito.</p>', actions: [{ label: 'No, gracias', value: false, class: 'btn-ghost' }, { label: 'Sí, recordame', value: true, class: 'btn-primary' }] }).done;
     S.optIn = ok === true;
     S.settings.optIn = S.optIn;
     mem.saveSettings(S.user.uid, { optIn: S.optIn }).catch(() => {});
@@ -259,7 +259,7 @@ async function ask(text, isSystem = false) {
     S.abort = new AbortController();
     try {
       const msgs = [...S.history.slice(-16), { role: 'user', content: text }];
-      const r = await engine.chat({ messages: msgs, lang: S.lang.code, mode: 'fast', system: sys + '\nRespondé en 1 a 3 oraciones, para ser dichas en voz alta, sin listas ni formato.', agent: { id: 'companera', name: 'Compañera', system: sys }, signal: S.abort.signal, onDelta: () => {} });
+      const r = await engine.chat({ messages: msgs, lang: S.lang.code, mode: 'fast', system: sys + '\nRespondé en 1 a 3 oraciones, para ser dichas en voz alta, sin listas ni formato.', agent: { id: 'companera', name: 'AgentiCuántico', system: sys }, signal: S.abort.signal, onDelta: () => {} });
       if (!r.local) { if (!isSystem) S.history.push({ role: 'user', content: text }); S.history.push({ role: 'assistant', content: r.text }); return r.text; }
     } catch (e) { if (e.name === 'AbortError') return null; }
     if (isSystem) return null;
@@ -276,7 +276,7 @@ async function say(text) {
   if (S.state === 'ended') return;
   srStop();
   setState('speaking');
-  addTranscript('Compañera', text);
+  addTranscript('AgentiCuántico', text);
   S.speaking = true;
   await speak(text, {
     lang: S.lang.id,
@@ -318,10 +318,9 @@ function liveLine(text) {
   box.scrollTop = box.scrollHeight;
 }
 function showCrisis() {
+  /* Sin números de teléfono en pantalla: la respuesta de la IA (system prompt) sugiere ayuda profesional con calma. */
   const box = $('crisis');
-  box.hidden = false;
-  box.innerHTML = '';
-  box.append(h('strong', {}, 'No estás sola/o. Hablá con alguien ahora:'), ...CRISIS_RESOURCES.map((r) => h('a', { class: 'crisis-line', href: 'tel:' + r.tel }, h('span', { html: icon('phone') }), h('span', {}, h('b', {}, r.label || r.tel), ' · ' + r.name, h('small', {}, r.desc)))), h('button', { class: 'linklike small', type: 'button', onclick: () => { box.hidden = true; } }, 'Cerrar'));
+  if (box) box.hidden = true;
 }
 
 /* ---------- Cierre y memoria ---------- */

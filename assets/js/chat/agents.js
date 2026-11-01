@@ -55,6 +55,7 @@ export const CONNECTORS = [
   { id: 'gmail', name: 'Gmail', desc: 'Resumir y redactar correos (con tu confirmación antes de enviar).' },
   { id: 'gcal', name: 'Google Calendar', desc: 'Ver tu agenda y proponer horarios.' },
   { id: 'github', name: 'GitHub', desc: 'Leer repositorios, issues y pull requests.' },
+  { id: 'cloudflare', name: 'Cloudflare', desc: 'Ver tus Workers, Pages y DNS.' },
   { id: 'slack', name: 'Slack', desc: 'Resumir canales y preparar mensajes.' },
   { id: 'notion', name: 'Notion', desc: 'Consultar y crear páginas.' },
   { id: 'mercadopago', name: 'Mercado Pago', desc: 'Consultar cobros y suscripciones de tu negocio.' },

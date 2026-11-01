@@ -1,12 +1,12 @@
-/** Portada: avatar + chat embebido, planes y estado del equipo de agentes. */
-import { AvatarStage } from './chat/avatar.js';
+/** Portada: chat embebido (con el hero neuronal sincronizado), planes y estado del equipo de agentes. */
 import { ChatApp } from './chat/chat.js';
 import { ChatStore } from './chat/store.js';
 import { mountPlans } from './plans.js';
 import { watchUser, getProfile } from './auth.js';
 import { esc } from './ui.js';
 
-const avatar = new AvatarStage(document.getElementById('heroAvatar'));
+/* Sin avatar 3D: un objeto liviano recibe los estados del chat y los refleja en el hero neuronal. */
+const avatar = { state: 'idle', setState(st) { this.state = st; }, pulse() {}, setVisemes() {}, load() { return Promise.resolve(); } };
 const store = new ChatStore();
 const chat = new ChatApp(document.getElementById('homeChat'), { variant: 'embed', avatar, store });
 document.addEventListener('keydown', (e) => { if (document.activeElement && document.getElementById('homeChat').contains(document.activeElement)) chat.handleShortcut(e); });
@@ -41,7 +41,7 @@ import('./neural-hero.js').then((m) => {
     if (started) return; started = true; btn.hidden = true; badge.textContent = 'Cargando cerebro 3D…';
     import('./brain3d.min.js')
       .then((m) => m.mountBrain(stage, { src: stage.getAttribute('data-src'), label: 'Cerebro 3D de AgentiCuántico: arrastrá para girar' }))
-      .then(() => { badge.textContent = 'Cerebro vivo · sinapsis activas'; stage.setAttribute('data-state', 'ready'); })
+      .then(() => { badge.textContent = 'Cerebro 3D interactivo'; stage.setAttribute('data-state', 'ready'); })
       .catch(() => { started = false; fail('Vista 3D no disponible en este dispositivo'); });
   };
   let gl = false;
@@ -70,7 +70,7 @@ fetch('/agents-status.json', { cache: 'no-cache' })
       const st = a.status === 'activo' ? 'activo' : a.status === 'revision' ? 'revision' : 'espera';
       const label = st === 'activo' ? 'Activo' : st === 'revision' ? 'En revisión' : 'En espera';
       const link = a.pr && /^https:\/\/github\.com\/agenticuantico\//.test(a.pr) ? `<a href="${esc(a.pr)}" target="_blank" rel="noopener">ver PR</a>` : '';
-      return `<article class="agent-card"><div class="agent-top"><span class="agent-emoji" aria-hidden="true">${esc(a.emoji || '🤖')}</span><div class="agent-name">${esc(a.name)}<small>${esc(a.role || '')}</small></div><span class="agent-state ${st}">${label}</span></div><p class="agent-last">${esc(a.last_activity || 'Listo para su primera tarea programada.')}</p>${a.last_run || link ? `<div class="agent-meta"><span>${esc(ago(a.last_run))}</span>${link}</div>` : ''}</article>`;
+      return `<article class="agent-card"><div class="agent-top"><span class="agent-emoji agent-initials" aria-hidden="true">${esc(String(a.name || '?').split(/\s+/).map((w) => w[0]).join('').slice(0, 2).toUpperCase())}</span><div class="agent-name">${esc(a.name)}<small>${esc(a.role || '')}</small></div><span class="agent-state ${st}">${label}</span></div><p class="agent-last">${esc(a.last_activity || 'Listo para su primera tarea programada.')}</p>${a.last_run || link ? `<div class="agent-meta"><span>${esc(ago(a.last_run))}</span>${link}</div>` : ''}</article>`;
     }).join('');
     document.getElementById('teamUpdated').innerHTML = `<span class="hero-hud-dot"></span><span>Actualizado ${esc(ago(d.updated) || '')}</span>`;
   })

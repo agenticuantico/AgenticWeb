@@ -23,7 +23,9 @@ function inline(s) {
     const u = safeUrl(href);
     return u ? `${pre}<a href="${u}" target="_blank" rel="noopener noreferrer nofollow">${href}</a>` : m;
   });
-  s = s.replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>');
+  s = s.replace(/\*\*\*([^*\n]+)\*\*\*/g, '<strong><em>$1</em></strong>');
+  s = s.replace(/\*\*([^\n]+?)\*\*/g, '<strong>$1</strong>');
+  s = s.replace(/(^|[^\w])__([^_\n]+)__(?!\w)/g, '$1<strong>$2</strong>');
   s = s.replace(/(^|[^*\w])\*([^*\n]+)\*(?!\w)/g, '$1<em>$2</em>');
   s = s.replace(/(^|[^_\w])_([^_\n]+)_(?!\w)/g, '$1<em>$2</em>');
   s = s.replace(/~~([^~\n]+)~~/g, '<del>$1</del>');
@@ -51,7 +53,7 @@ export function renderMarkdown(src, { codeActions = true } = {}) {
       continue;
     }
     if (/^\s*$/.test(line)) { i++; continue; }
-    const hd = /^(#{1,4})\s+(.+)$/.exec(line);
+    const hd = /^\s{0,3}(#{1,6})\s+(.+?)\s*#*\s*$/.exec(line);
     if (hd) { const n = Math.min(4, hd[1].length + 1); out.push(`<h${n}>${inline(escapeHtml(hd[2]))}</h${n}>`); i++; continue; }
     if (/^(-{3,}|\*{3,})\s*$/.test(line)) { out.push('<hr>'); i++; continue; }
     if (/^\|.*\|\s*$/.test(line) && i + 1 < lines.length && /^\|?\s*:?-{2,}/.test(lines[i + 1])) {
@@ -71,7 +73,7 @@ export function renderMarkdown(src, { codeActions = true } = {}) {
     if (/^\s*([-*+]|\d+[.)])\s+/.test(line)) {
       const ordered = /^\s*\d+[.)]/.test(line);
       const items = [];
-      while (i < lines.length && /^\s*([-*+]|\d+[.)])\s+/.test(lines[i])) {
+      while (i < lines.length && /^\s*([-*+]|\d+[.)])\s+/.test(lines[i]) && (/^\s*\d+[.)]/.test(lines[i]) === ordered || /^\s{2,}/.test(lines[i]))) {
         let it = lines[i++].replace(/^\s*([-*+]|\d+[.)])\s+/, '');
         const task = /^\[( |x|X)\]\s+/.exec(it);
         let pre = '';
@@ -82,7 +84,7 @@ export function renderMarkdown(src, { codeActions = true } = {}) {
       continue;
     }
     const buf = [];
-    while (i < lines.length && !/^\s*$/.test(lines[i]) && !/^(```|#{1,4}\s|>\s?|\s*([-*+]|\d+[.)])\s+|\|.*\|\s*$)/.test(lines[i])) buf.push(lines[i++]);
+    while (i < lines.length && !/^\s*$/.test(lines[i]) && !/^(```|\s{0,3}#{1,6}\s|>\s?|\s*([-*+]|\d+[.)])\s+|\|.*\|\s*$)/.test(lines[i])) buf.push(lines[i++]);
     if (!buf.length) { buf.push(lines[i++]); }
     out.push('<p>' + buf.map((l) => inline(escapeHtml(l))).join('<br>') + '</p>');
   }

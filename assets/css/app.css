@@ -82,3 +82,20 @@ body.app-body { overflow: hidden; background: var(--surface); }
   .avatar-panel { top: 64px; right: 8px; width: 132px; height: 168px; }
 }
 .sb-top .brand-mark { width: 28px; height: 28px; }
+
+/* ---- v6: /app/ claro, cajón lateral opaco y legible ---- */
+body.app-body { background: #fff; color: #111; }
+@media (min-width: 901px) { .app-shell, .app-shell.no-avatar { grid-template-columns: var(--sb-w) minmax(0, 1fr); } }
+.app-body .sidebar { background: #F4F5FA !important; color: #111; opacity: 1; backdrop-filter: none; }
+.sb-item, .sb-chat-open, .acc-text strong, .upgrade-card, .upgrade-card strong, .sb-project summary { color: #111 !important; }
+.sb-head, .sb-chat-open small, .sb-empty, .acc-text small, .upgrade-card small { color: #555 !important; }
+.sb-item svg { color: #333; }
+.upgrade-card { background: linear-gradient(135deg, #f2fde0, #fff); border-color: #c5e88a; }
+.upgrade-card svg { color: #4d7c0f; }
+.sb-account .initial { background: #f2fde0; color: #3f6212; display: grid; place-items: center; font-weight: 700; }
+.sb-backdrop { background: rgba(15, 14, 20, .5); z-index: 1000; }
+@media (max-width: 900px) {
+  .app-body .sidebar { z-index: 1001; background: #fff !important; box-shadow: 0 20px 60px rgba(0, 0, 0, .25); }
+  .app-shell, .app-shell.sb-collapsed, .app-shell.no-avatar { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 900px), (hover: none) { .sb-item .kbd { display: none; } }

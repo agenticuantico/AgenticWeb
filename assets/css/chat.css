@@ -204,7 +204,7 @@
 
 /* Avatar */
 .avatar-stage { position: relative; overflow: hidden; isolation: isolate; background: radial-gradient(120% 90% at 50% 18%, #fffaf0 0%, #f6efe2 45%, #ece5d8 100%); }
-[data-theme="dark"] .avatar-stage { background: radial-gradient(120% 90% at 50% 18%, #2a2418 0%, #18161d 60%, #121117 100%); }
+[data-theme="dark-off"] .avatar-stage { background: radial-gradient(120% 90% at 50% 18%, #2a2418 0%, #18161d 60%, #121117 100%); }
 .avatar-canvas { position: absolute; inset: 0; width: 100% !important; height: 100% !important; z-index: 2; }
 .avatar-poster { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 18%; z-index: 1; transition: opacity .6s; }
 .avatar-stage[data-mode="3d"] .avatar-poster { opacity: 0; }
@@ -357,3 +357,17 @@ body.ab-lock { overflow: hidden; }
 .ab-view:has(.ab-off) { aspect-ratio: auto; }
 @media (max-width: 400px) { .chat-actions [data-act="incognito"] { display: none; } .chat-head .chat-id-text strong { font-size: .92rem; } }
 @media (max-width: 380px) { .mode-strip { gap: 4px; } .mode-chip { padding: 0 9px; gap: 4px; font-size: .8125rem; height: 32px; } .mode-chip svg { width: 15px; height: 15px; } }
+
+/* Retrato de AgentiCuántico (cerebro dorado) — reemplaza al avatar 3D */
+.portrait-stage { --lvl: 0; position: relative; overflow: hidden; isolation: isolate; background: radial-gradient(120% 90% at 50% 25%, #fffaf0 0%, #f3ead8 55%, #e6dcc6 100%); }
+.portrait-zoom { position: absolute; inset: 0; transform: scale(calc(1.02 + var(--lvl) * .045)); transform-origin: 50% 35%; transition: transform .12s linear; animation: portraitBreath 6s ease-in-out infinite; }
+.portrait-zoom picture, .portrait-img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; object-fit: cover; object-position: 50% 30%; }
+.portrait-img { filter: saturate(calc(1 + var(--lvl) * .25)) brightness(calc(1 + var(--lvl) * .08)); }
+.portrait-canvas { position: absolute; inset: 0; width: 100%; height: 100%; mix-blend-mode: screen; pointer-events: none; }
+.portrait-glow { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(42% 32% at 60% 26%, rgba(255, 200, 90, calc(.05 + var(--lvl) * .45)), transparent 70%); mix-blend-mode: screen; }
+.portrait-stage[data-state="thinking"] .portrait-glow { background: radial-gradient(42% 32% at 60% 26%, rgba(190, 130, 255, .35), transparent 70%); }
+.portrait-stage[data-state="listening"] .portrait-glow { background: radial-gradient(42% 32% at 60% 26%, rgba(159, 255, 0, .22), transparent 70%); }
+.portrait-stage .avatar-status { position: absolute; z-index: 3; left: 14px; bottom: 14px; padding: 6px 14px; border-radius: 999px; background: rgba(22, 21, 26, .78); color: #fff; font-weight: 700; font-size: 14px; backdrop-filter: blur(6px); }
+.portrait-stage .avatar-status:empty { display: none; }
+@keyframes portraitBreath { 50% { transform: scale(calc(1.035 + var(--lvl) * .045)); } }
+@media (prefers-reduced-motion: reduce) { .portrait-zoom { animation: none; } }

@@ -1,4 +1,4 @@
-/** Idiomas de conversación y voz (banderas circle-flags, MIT). */
+/** Idiomas de conversación y voz (banderas rectangulares premium en /assets/flags/rect/). */
 export const LANGS = [
   { id: 'es-AR', code: 'es', short: 'ES', name: 'Español', region: 'Argentina', flag: 'ar', greeting: '¡Hola! Soy AgentiCuántico.', sub: 'Conversá conmigo, pedime código o activá el modo Agente para tareas completas.' },
   { id: 'es-ES', code: 'es', short: 'ES', name: 'Español', region: 'España', flag: 'es', greeting: '¡Hola! Soy AgentiCuántico.', sub: 'Conversá conmigo, pedime código o activá el modo Agente para tareas completas.' },
@@ -8,5 +8,5 @@ export const LANGS = [
   { id: 'fr-FR', code: 'fr', short: 'FR', name: 'Français', region: 'France', flag: 'fr', greeting: 'Bonjour ! Je suis AgentiCuántico.', sub: 'Discutez avec moi, demandez du code ou activez le mode Agent pour des tâches complètes.' },
   { id: 'de-DE', code: 'de', short: 'DE', name: 'Deutsch', region: 'Deutschland', flag: 'de', greeting: 'Hallo! Ich bin AgentiCuántico.', sub: 'Sprich mit mir, frag nach Code oder aktiviere den Agent-Modus für ganze Aufgaben.' }
 ];
-export const flagUrl = (l) => `/assets/flags/${l.flag}.svg`;
+export const flagUrl = (l) => `/assets/flags/rect/${l.flag}.svg`;
 export function getLang(id) { return LANGS.find((l) => l.id === id) || LANGS[0]; }

@@ -1,5 +1,5 @@
 /**
- * Memoria de largo plazo de la Compañera (solo con cuenta y con permiso explícito).
+ * Memoria de largo plazo de AgentiCuántico (llamadas) (solo con cuenta y con permiso explícito).
  *  users/{uid}/companion_memory/{id}: { kind, text, createdAt, updatedAt, source }
  *  users/{uid}/private/companion:     { optIn, lastCallAt, usage: { day, seconds } }
  */

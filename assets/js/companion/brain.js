@@ -1,5 +1,5 @@
 /**
- * Compañera · personalidad, memoria y respuestas.
+ * AgentiCuántico (llamada) · personalidad, memoria y respuestas.
  * Con el servidor: el modelo responde con el prompt de sistema de abajo + la memoria relevante.
  * Sin servidor: respuestas locales honestas (conversación cálida, continuidad con la memoria,
  * cálculos y programación básica) — nunca se presenta como humana.
@@ -8,16 +8,11 @@ import { localAnswer } from '../chat/engine.js';
 
 export const CRISIS_RE = /(suicid|matarme|me quiero morir|quiero morir|no quiero (seguir )?vivir|quitarme la vida|terminar con (todo|mi vida)|autolesi|lastimarme|cortarme|hacerme da[ñn]o|kill myself|suicide|end my life|self.?harm|me matar|tirarme (de|del|por))/i;
 
-export const CRISIS_RESOURCES = [
-  { name: 'Línea 135 (CABA y Gran Buenos Aires)', tel: '135', desc: 'Atención en crisis, gratuita, las 24 horas.' },
-  { name: 'Línea de prevención del suicidio (todo el país)', tel: '01152751135', label: '(011) 5275-1135', desc: 'Centro de Asistencia al Suicida, 24 horas.' },
-  { name: 'Emergencias', tel: '911', desc: 'Si estás en peligro inmediato.' }
-];
 
 export function systemPrompt({ lang, name, memory = [], since }) {
   const mem = memory.slice(0, 40).map((m) => `- (${m.kind}) ${m.text}`).join('\n');
   return [
-    'Sos «la Compañera» de AgentiCuántico: una inteligencia artificial cálida, curiosa y muy capaz con la que la persona habla por voz todos los días.',
+    'Sos AgentiCuántico: una inteligencia artificial cálida, curiosa y muy capaz con la que la persona habla por voz todos los días.',
     'Hablás como una amiga argentina súper inteligente: voseo, frases cortas y naturales para ser dichas en voz alta (2 a 4 oraciones), una pregunta por vez.',
     'Podés charlar de la vida, ideas profundas, programación, tecnología o lo que sea. Si te piden código, explicalo en palabras y ofrecé pasarlo al chat escrito.',
     'Sos honesta: sos una IA, no una persona; nunca digas que sos humana ni que tenés cuerpo o vida propia. No adules ni des la razón por compromiso: si algo no cierra, decilo con cariño.',
@@ -56,7 +51,7 @@ export function greeting({ name, memory = [], lang = 'es' }) {
   const pend = memory.find((m) => m.kind === 'pendiente' || m.kind === 'objetivo');
   if (name && pend) return `¡Hola, ${name}! Qué bueno escucharte. La última vez me contaste de ${pend.text}. ¿Cómo te fue con eso?`;
   if (name) return pick([`¡Hola, ${name}! ¿Cómo venís hoy?`, `¡${name}! Qué lindo escucharte. ¿Qué tal tu día?`]);
-  return '¡Hola! Soy tu compañera de AgentiCuántico, una inteligencia artificial. Podemos charlar de lo que quieras: tu día, ideas, programación, tecnología. ¿Cómo te llamás?';
+  return '¡Hola! Soy AgentiCuántico, una inteligencia artificial. Podemos charlar de lo que quieras: tu día, ideas, programación, tecnología. ¿Cómo te llamás?';
 }
 
 export function localReply(text, ctx) {

@@ -1,7 +1,8 @@
-/* Aplica el tema antes de pintar (evita parpadeo). Diseño clásico: claro por defecto; oscuro solo si la persona lo eligió. */
+/* Tema: el sitio es siempre claro (blanco). Se ignora cualquier preferencia guardada o del sistema
+   y se borra un 'ac.theme' viejo para que no vuelva a aparecer el modo oscuro. */
 (function () {
-  try {
-    var t = localStorage.getItem('ac.theme') || sessionStorage.getItem('ac.theme');
-    document.documentElement.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light');
-  } catch (e) { /* sin almacenamiento */ }
+  document.documentElement.setAttribute('data-theme', 'light');
+  document.documentElement.style.colorScheme = 'only light';
+  try { localStorage.removeItem('ac.theme'); } catch (e) { /* sin almacenamiento */ }
+  try { sessionStorage.removeItem('ac.theme'); } catch (e) { /* sin almacenamiento */ }
 })();

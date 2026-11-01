@@ -28,15 +28,14 @@ document.querySelectorAll('.nav a, .legal-nav a').forEach((a) => {
   if (href && (href === location.pathname || (href !== '/' && location.pathname.startsWith(href.replace(/\.html$/, ''))))) a.setAttribute('aria-current', 'page');
 });
 
-/* ---------- Tema ---------- */
-export function setTheme(t) {
-  document.documentElement.setAttribute('data-theme', t);
-  prefs.set('ac.theme', t);
-  document.querySelectorAll('[data-theme-toggle]').forEach((b) => { b.innerHTML = icon(t === 'dark' ? 'sun' : 'moon'); b.setAttribute('aria-label', t === 'dark' ? 'Usar tema claro' : 'Usar tema oscuro'); });
-  window.dispatchEvent(new CustomEvent('ac:theme', { detail: t }));
+/* ---------- Tema: siempre claro ---------- */
+export function setTheme() {
+  document.documentElement.setAttribute('data-theme', 'light');
+  try { localStorage.removeItem('ac.theme'); sessionStorage.removeItem('ac.theme'); } catch {}
+  window.dispatchEvent(new CustomEvent('ac:theme', { detail: 'light' }));
 }
-document.querySelectorAll('[data-theme-toggle]').forEach((b) => b.addEventListener('click', () => setTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark')));
-setTheme(document.documentElement.dataset.theme || 'light');
+document.querySelectorAll('[data-theme-toggle]').forEach((b) => { b.hidden = true; b.remove(); });
+setTheme();
 
 /* ---------- Consentimiento + analítica ---------- */
 document.querySelectorAll('[data-consent-open]').forEach((b) => b.addEventListener('click', () => showConsent(true)));

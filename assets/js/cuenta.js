@@ -293,9 +293,9 @@ function perfil(pane, { user, profile, reload }) {
 
 async function companera(pane, { user }) {
   const mem = await import('./companion/memory.js');
-  pane.append(h('h2', {}, 'Lo que la Compañera recuerda de mí'), h('p', { class: 'muted' }, 'Datos que guardó después de tus llamadas para darte continuidad. Podés editarlos o borrarlos. Las llamadas incógnito no guardan nada.'));
+  pane.append(h('h2', {}, 'Lo que AgentiCuántico recuerda de mí'), h('p', { class: 'muted' }, 'Datos que guardó después de tus llamadas para darte continuidad. Podés editarlos o borrarlos. Las llamadas incógnito no guardan nada.'));
   const settings = await mem.getSettings(user.uid);
-  const sw = h('input', { type: 'checkbox', checked: settings.optIn === true || null, 'aria-label': 'Permitir que la Compañera recuerde' });
+  const sw = h('input', { type: 'checkbox', checked: settings.optIn === true || null, 'aria-label': 'Permitir que AgentiCuántico recuerde' });
   sw.addEventListener('change', async () => { try { await mem.saveSettings(user.uid, { optIn: sw.checked }); toast(sw.checked ? 'Memoria activada' : 'Memoria desactivada', 'ok'); } catch (e) { toast(friendlyError(e), 'error'); } });
   pane.append(h('label', { class: 'hub-item' }, h('div', {}, h('strong', {}, 'Permitir que me recuerde'), h('p', { class: 'muted small' }, 'Si lo apagás, no se guardan datos nuevos (lo ya guardado queda hasta que lo borres).')), h('span', { class: 'switch' }, sw, h('span'))));
   const list = h('div', { class: 'hub-list' }, h('div', { class: 'skeleton', style: 'height:60px' }));
@@ -311,7 +311,7 @@ async function companera(pane, { user }) {
       input.addEventListener('change', async () => { try { await mem.updateMemory(user.uid, it.id, input.value.trim()); toast('Actualizado', 'ok'); } catch (e) { toast(friendlyError(e), 'error'); } });
       list.append(h('div', { class: 'hub-item' }, h('span', { class: 'chip gold' }, KIND[it.kind] || it.kind), input, h('button', { class: 'icon-btn sm', type: 'button', 'aria-label': 'Borrar', html: icon('trash'), onclick: async () => { try { await mem.deleteMemory(user.uid, it.id); draw(); } catch (e) { toast(friendlyError(e), 'error'); } } })));
     }
-    if (items.length) list.append(h('button', { class: 'btn btn-danger-ghost btn-sm', type: 'button', onclick: async () => { if (await confirmDialog({ title: 'Borrar todo', text: '¿Borrar todo lo que la Compañera recuerda de vos?', ok: 'Borrar todo', danger: true })) { await mem.deleteAllMemory(user.uid).catch(() => {}); draw(); } } }, 'Borrar todo'));
+    if (items.length) list.append(h('button', { class: 'btn btn-danger-ghost btn-sm', type: 'button', onclick: async () => { if (await confirmDialog({ title: 'Borrar todo', text: '¿Borrar todo lo que AgentiCuántico recuerda de vos?', ok: 'Borrar todo', danger: true })) { await mem.deleteAllMemory(user.uid).catch(() => {}); draw(); } } }, 'Borrar todo'));
   };
   draw();
 }

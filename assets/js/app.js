@@ -1,5 +1,4 @@
-/** App completa /app/: barra lateral (proyectos, fijados, historial), chat y panel del avatar. */
-import { AvatarStage } from './chat/avatar.js';
+/** App completa /app/: barra lateral (proyectos, fijados, historial) y chat. */
 import { ChatApp } from './chat/chat.js';
 import { ChatStore } from './chat/store.js';
 import { watchUser, getProfile } from './auth.js';
@@ -8,29 +7,15 @@ import { prefs } from './consent.js';
 
 const $ = (id) => document.getElementById(id);
 const store = new ChatStore();
-const avatarOn = prefs.get('ac.avatarPanel', '1') === '1';
-const avatar = new AvatarStage($('appAvatar'), { eager: avatarOn && innerWidth >= 1100 });
-const chat = new ChatApp($('appChat'), { variant: 'full', avatar, store });
+const chat = new ChatApp($('appChat'), { variant: 'full', avatar: null, store });
+// Conversación abierta desde el chat de la portada (botón de pantalla completa)
+try { const oid = sessionStorage.getItem('ac.app.open'); if (oid) { sessionStorage.removeItem('ac.app.open'); const c = store.get(oid); if (c) chat.loadChat(c); } } catch {}
 
 const params = new URLSearchParams(location.search);
 if (params.get('modo') === 'auto') chat.setMode('auto', true);
 if (params.get('q')) chat.$('input').value = params.get('q').slice(0, 2000);
 
-/* ---------- Panel del avatar ---------- */
 const shell = $('appShell');
-function setAvatarPanel(on) {
-  shell.classList.toggle('no-avatar', !on);
-  $('avatarToggle').setAttribute('aria-pressed', String(on));
-  $('avatarToggle').setAttribute('aria-label', on ? 'Ocultar avatar' : 'Mostrar avatar');
-  prefs.set('ac.avatarPanel', on ? '1' : '0');
-  if (on) avatar.load();
-}
-setAvatarPanel(avatarOn);
-$('avatarToggle').addEventListener('click', () => setAvatarPanel(shell.classList.contains('no-avatar')));
-// En teléfonos el avatar aparece arriba del chat mientras habla o en modo voz
-const showMini = () => { const m = chat.root.classList.contains('hands-free') || ['talking', 'thinking', 'listening'].includes(avatar.state); shell.classList.toggle('avatar-live', m); if (m) avatar.load(); };
-new MutationObserver(showMini).observe($('appAvatar'), { attributes: true, attributeFilter: ['data-state'] });
-new MutationObserver(showMini).observe(chat.root, { attributes: true, attributeFilter: ['class'] });
 
 /* ---------- Barra lateral ---------- */
 const sidebar = $('sidebar');

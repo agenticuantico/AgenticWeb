@@ -21,8 +21,11 @@ import { needsWebAction, AgentBrowserCard } from '../agent-browser.js';
 const MODES = {
   fast: { label: 'Rápido', short: 'Rápido', icon: 'bolt', desc: 'Respuestas al instante' },
   deep: { label: 'Pensar', short: 'Pensar', icon: 'bulb', desc: 'Razonamiento profundo' },
-  auto: { label: 'Hace todo por vos', short: 'Agente', icon: 'spark', desc: 'Planifica, usa herramientas y verifica', flagship: true }
+  auto: { label: 'Hace todo por vos', short: 'Agente', icon: 'agent', desc: 'Planifica, usa herramientas y verifica', flagship: true }
 };
+
+const PHASES = { thinking: 'Pensando', searching: 'Buscando', coding: 'Escribiendo código', verifying: 'Verificando', reading: 'Leyendo', agent: 'Especialista', confirm: 'Confirmación' };
+const FACE = '/media/agenticuantico-avatar.jpg';
 
 const SUGGESTIONS = [
   { t: '¿Qué es AgentiCuántico?', i: 'info' },
@@ -71,58 +74,59 @@ export class ChatApp {
   /* =================== Render base =================== */
   render() {
     const r = this.root;
-    r.classList.add('chat');
+    r.classList.add('chat', 'ace');
     r.dataset.variant = this.variant;
+    const full = this.variant === 'full';
     r.innerHTML = `
-      <header class="chat-head">
-        ${this.variant === 'full' ? `<button class="icon-btn only-narrow" type="button" data-act="sidebar" aria-label="Abrir historial">${icon('sidebar')}</button>` : ''}
-        <div class="chat-id">
-          <span class="chat-face"><img src="/media/agenticuantico-avatar.jpg" alt="" width="40" height="40"><i class="dot" aria-hidden="true"></i></span>
-          <span class="chat-id-text"><strong>AgentiCuántico</strong><span class="chat-status" data-role="status">En línea</span></span>
+      <header class="chat-head ace-head">
+        ${full ? `<button class="ace-ib only-narrow" type="button" data-act="sidebar" aria-label="Abrir historial">${icon('sidebar')}</button>` : ''}
+        <div class="ace-id">
+          <span class="ace-ava" data-role="face"><img src="${FACE}" alt="" width="42" height="42"><span class="ace-mouth" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span><span class="ace-dot"></span></span>
+          <span class="ace-txt"><strong>AgentiCuántico</strong><small data-role="status"><span class="ace-led"></span>En línea · Lista</small></span>
         </div>
         <div class="chat-participants" data-role="participants" aria-label="Agentes en la conversación"></div>
-        <div class="chat-actions">
+        <div class="ace-actions">
           <div class="lang-picker" data-popover-host>
-            <button class="lang-btn" type="button" data-act="lang" aria-haspopup="menu" aria-expanded="false" aria-label="Idioma y voz">
-              <img class="flag" alt="" width="26" height="26" data-role="flag"><span data-role="langShort"></span>${icon('chevron')}
+            <button class="ace-flag" type="button" data-act="lang" aria-haspopup="menu" aria-expanded="false" aria-label="Idioma y voz">
+              <img class="ace-flag-img" alt="" width="27" height="18" data-role="flag"><span class="ace-flag-code" data-role="langShort"></span>${icon('chevron')}
             </button>
           </div>
-          <a class="icon-btn" href="/llamada/" aria-label="Llamar a la Compañera" title="Llamada de voz con la Compañera">${icon('phone')}</a>
-          <button class="icon-btn" type="button" data-act="incognito" aria-pressed="false" aria-label="Chat incógnito" title="Chat incógnito (no se guarda)">${icon('ghost')}</button>
-          <div data-popover-host><button class="icon-btn" type="button" data-act="more" aria-haspopup="menu" aria-expanded="false" aria-label="Más opciones">${icon('more')}</button></div>
+          <a class="ace-ib ace-call" href="/llamada/" aria-label="Llamada de voz" title="Llamada de voz">${icon('phone')}</a>
+          ${full
+            ? `<button class="ace-ib" type="button" data-act="incognito" aria-pressed="false" aria-label="Chat incógnito" title="Chat incógnito (no se guarda)">${icon('ghost')}</button>
+               <div data-popover-host><button class="ace-ib" type="button" data-act="more" aria-haspopup="menu" aria-expanded="false" aria-label="Más opciones">${icon('more')}</button></div>`
+            : `<button class="ace-ib" type="button" data-act="clear" aria-label="Nuevo chat" title="Nuevo chat">${icon('trash')}</button>
+               <a class="ace-ib" href="/app/" data-act="expand" aria-label="Abrir en pantalla completa" title="Abrir en pantalla completa">${icon('expand')}</a>`}
         </div>
       </header>
       <div class="incognito-bar" data-role="incognitoBar" hidden>${icon('ghost')}<span><strong>Chat incógnito.</strong> No se guarda en el historial, la memoria ni la nube.</span></div>
-      <div class="chat-body">
-        <div class="chat-thread" data-role="thread" role="log" aria-live="polite" aria-relevant="additions" tabindex="0" aria-label="Conversación">
+      <div class="chat-body ace-thread-wrap">
+        <div class="chat-thread ace-thread" data-role="thread" role="log" aria-live="polite" aria-relevant="additions" tabindex="0" aria-label="Conversación">
           <div class="thread-inner" data-role="inner"></div>
         </div>
-        <div class="chat-empty" data-role="empty">
-          <span class="chat-hello-face" aria-hidden="true"><img src="/media/agenticuantico-avatar.jpg" alt="" width="96" height="96"></span>
-          <p class="chat-greeting" data-role="greeting"></p>
-          <p class="chat-hello-sub" data-role="greetingSub"></p>
-          <div class="suggestions" data-role="suggestions"></div>
+        <div class="ace-empty" data-role="empty">
+          <span class="ace-hello-face" aria-hidden="true"><img src="${FACE}" alt="" width="96" height="96"></span>
+          <h3 class="ace-greeting" data-role="greeting"></h3>
+          <p class="ace-hello-sub" data-role="greetingSub"></p>
+          <div class="ace-sugg" data-role="suggestions"></div>
         </div>
         <button class="scroll-down icon-btn" type="button" data-act="scrollDown" aria-label="Ir al final" hidden>${icon('arrowDown')}</button>
       </div>
-      <form class="composer" data-role="form" autocomplete="off">
-        <div class="mode-strip-wrap" data-role="modeWrap">
-          <div class="mode-strip" data-role="modeStrip" role="radiogroup" aria-label="Modo de respuesta">${Object.entries(MODES).map(([id, m]) => `<button class="mode-chip" type="button" role="radio" aria-checked="false" data-act="setmode" data-mode="${id}" title="${m.desc}">${icon(m.icon)}<span>${m.short}</span></button>`).join('')}</div>
-        </div>
-        <div class="composer-box" data-role="box">
+      <form class="composer ace-composer" data-role="form" autocomplete="off">
+        <div class="composer-box ace-box" data-role="box">
           <div class="composer-files" data-role="files" hidden></div>
           <label class="sr-only" for="${this.variant}-input">Mensaje</label>
-          <textarea id="${this.variant}-input" data-role="input" rows="1" placeholder="Escribí o tocá el micrófono para hablar" enterkeyhint="send"></textarea>
-          <div class="composer-row">
-            <div class="composer-left" data-popover-host>
-              <button class="icon-btn round" type="button" data-act="plus" aria-haspopup="menu" aria-expanded="false" aria-label="Adjuntar, cámara y herramientas">${icon('plus')}</button>
-              <button class="icon-btn round" type="button" data-act="invite" aria-label="Invitar agente" title="Invitar agente (@)">${icon('userPlus')}</button>
+          <textarea id="${this.variant}-input" data-role="input" rows="1" placeholder="Preguntá lo que quieras" enterkeyhint="send"></textarea>
+          <div class="ace-row">
+            <div class="ace-left" data-popover-host>
+              <button class="ace-ib round ace-plus" type="button" data-act="plus" aria-haspopup="menu" aria-expanded="false" aria-label="Cámara, archivos, agentes y conectores">${icon('plus')}</button>
+              <div class="ace-modes" data-role="modeStrip" role="radiogroup" aria-label="Modo de respuesta">${Object.entries(MODES).map(([id, m]) => `<button class="mode-chip" type="button" role="radio" aria-checked="false" data-act="setmode" data-mode="${id}" title="${m.desc}">${icon(m.icon)}<span>${m.short}</span></button>`).join('')}</div>
             </div>
-            <div class="composer-right">
-              <button class="icon-btn round" type="button" data-act="mic" aria-label="Grabar nota de voz" title="Grabar nota de voz">${icon('mic')}</button>
-              <button class="send-btn" type="button" data-act="handsfree" aria-label="Conversación por voz" title="Conversación por voz (manos libres)">${icon('wave')}</button>
-              <button class="send-btn" type="submit" data-role="send" aria-label="Enviar" hidden>${icon('send')}</button>
-              <button class="send-btn stop" type="button" data-act="stop" aria-label="Detener" hidden>${icon('stop')}</button>
+            <div class="ace-right">
+              <button class="ace-ib round" type="button" data-act="mic" aria-label="Grabar nota de voz" title="Grabar nota de voz">${icon('mic')}</button>
+              <button class="ace-send voice" type="button" data-act="handsfree" aria-label="Conversación por voz" title="Conversación por voz (manos libres)">${icon('wave')}</button>
+              <button class="ace-send" type="submit" data-role="send" aria-label="Enviar" hidden>${icon('send')}</button>
+              <button class="ace-send stop" type="button" data-act="stop" aria-label="Detener" hidden>${icon('stop')}</button>
             </div>
           </div>
           <div class="recording" data-role="rec" hidden>
@@ -133,7 +137,7 @@ export class ChatApp {
             <button class="send-btn" type="button" data-act="recStop" aria-label="Enviar nota de voz">${icon('send')}</button>
           </div>
         </div>
-        <p class="composer-note">AgentiCuántico puede equivocarse. Verificá la información importante. <a href="/legal/uso-aceptable.html">Uso responsable</a></p>
+        ${full ? '<p class="composer-note">AgentiCuántico puede equivocarse. Verificá la información importante. <a href="/legal/uso-aceptable.html">Uso responsable</a></p>' : ''}
         <input type="file" data-role="file" multiple hidden accept=".pdf,.docx,.xlsx,.csv,.tsv,.txt,.md,.json,.js,.ts,.py,.html,.css,.sql,.xml,.yaml,.yml,text/*,image/*">
         <input type="file" data-role="cameraFallback" accept="image/*" capture="environment" hidden>
       </form>`;
@@ -160,13 +164,14 @@ export class ChatApp {
       if (on && b.parentElement.scrollWidth > b.parentElement.clientWidth) b.scrollIntoView({ block: 'nearest', inline: 'nearest' });
     });
     this.$('modeStrip').dataset.mode = this.mode;
+    this.$('input').placeholder = this.mode === 'auto' ? 'Describí la tarea para el agente' : 'Preguntá lo que quieras';
     this.$('modeStrip').setAttribute('aria-label', 'Modo de respuesta: ' + m.label);
   }
   renderEmpty() {
     const box = this.$('suggestions');
     box.innerHTML = '';
     for (const s of SUGGESTIONS) {
-      box.append(h('button', { class: 'suggestion', type: 'button', onclick: () => { if (s.mode) this.setMode(s.mode, true); this.send(s.t); } }, h('span', { html: icon(s.i) }), s.t));
+      box.append(h('button', { class: 'ace-sug', type: 'button', onclick: () => { if (s.mode) this.setMode(s.mode, true); this.send(s.t); } }, h('span', { html: icon(s.i) }), s.t));
     }
     this.syncEmpty();
   }
@@ -188,8 +193,20 @@ export class ChatApp {
   }
   updateStatus() {
     const st = this.$('status');
-    st.textContent = this.busy ? (this.busy.label || 'Escribiendo…') : 'En línea';
+    const demo = engine.state.checked && !engine.state.live;
+    const k = this.busy ? (this.mode === 'auto' ? 'agentRun' : 'thinking') : (this._face === 'speaking' ? 'speaking' : this.recorder ? 'listening' : 'status');
+    const label = this.busy ? (this.busy.label || 'Escribiendo…') : k === 'speaking' ? 'Hablando…' : k === 'listening' ? 'Escuchando…' : 'En línea · Lista';
+    st.innerHTML = `<span class="ace-led ${k}"></span>${esc(label)}${demo && k === 'status' ? ' <span class="ace-demo">· demo</span>' : ''}`;
+    this.setFace(this.busy ? 'thinking' : this._face || 'idle');
     this.root.dataset.live = engine.state.live ? '1' : '0';
+  }
+  /** Estado visual del avatar redondo de la cabecera (y del cerebro neuronal de la portada). */
+  setFace(stt) {
+    const f = this.$('face');
+    if (!f) return;
+    f.classList.toggle('thinking', stt === 'thinking');
+    f.classList.toggle('speaking', stt === 'speaking');
+    f.classList.toggle('listening', stt === 'listening');
   }
   applyFlags() {
     const sys = this.system;
@@ -236,7 +253,7 @@ export class ChatApp {
       if (this.avatar && now - lastPulse > 140) { lastPulse = now; this.avatar.pulse(Math.min(1, input.value.length / 120 + 0.3)); if (!this.busy) this.avatar.setState('listening'); }
       clearTimeout(this._idleT);
       this._idleT = setTimeout(() => { if (!this.busy && this.avatar && this.avatar.state === 'listening') this.avatar.setState('idle'); }, 1800);
-      if (/(^|\s)@\w*$/.test(input.value)) this.act_invite(r.querySelector('[data-act="invite"]'), null, true);
+      if (/(^|\s)@\w*$/.test(input.value)) this.act_invite(r.querySelector('[data-act="plus"]') || input, null, true);
     });
     input.addEventListener('paste', (e) => {
       const files = Array.from(e.clipboardData && e.clipboardData.files || []);
@@ -280,8 +297,8 @@ export class ChatApp {
 
   /* =================== Acciones de encabezado =================== */
   act_lang(btn) {
-    popover(btn, [{ heading: 'Idioma y voz de la respuesta' }, ...LANGS.map((l) => ({
-      label: l.name, sub: l.region, img: flagUrl(l), checked: l.id === this.lang.id,
+    popover(btn, [{ heading: 'Idioma · voz femenina' }, ...LANGS.map((l) => ({
+      label: l.name, sub: l.region + ' · ♀ Femenina', img: flagUrl(l), checked: l.id === this.lang.id,
       onClick: () => { this.lang = l; prefs.set('ac.lang', l.id); this.renderLang(); toast(`Te respondo en ${l.name} (${l.region}) con voz femenina.`); }
     }))], { align: 'end', className: 'lang-menu' });
   }
@@ -290,7 +307,7 @@ export class ChatApp {
     if (on && this.chat.messages.length && !this.chat.incognito) this.newChat(true);
     else this.chat.incognito = on;
     if (!on && this.chat.incognito) this.newChat(false);
-    this.root.querySelector('[data-act="incognito"]').setAttribute('aria-pressed', String(!!this.chat.incognito));
+    this.root.querySelector('[data-act="incognito"]')?.setAttribute('aria-pressed', String(!!this.chat.incognito));
     this.$('incognitoBar').hidden = !this.chat.incognito;
     this.root.classList.toggle('is-incognito', !!this.chat.incognito);
     if (on) toast('Chat incógnito activado: nada se guarda.');
@@ -305,11 +322,16 @@ export class ChatApp {
       { label: 'Exportar Markdown', icon: 'download', onClick: () => this.exportMd(), disabled: !this.chat.messages.length },
       { label: 'Exportar PDF', icon: 'print', onClick: () => this.exportPdf(), disabled: !this.chat.messages.length },
       'sep',
-      { label: 'Atajos de teclado', icon: 'keyboard', onClick: () => this.showShortcuts() },
-      { label: document.documentElement.dataset.theme === 'dark' ? 'Tema claro' : 'Tema oscuro', icon: document.documentElement.dataset.theme === 'dark' ? 'sun' : 'moon', onClick: () => document.querySelector('[data-theme-toggle]')?.click() || toggleTheme() }
+      { label: 'Atajos de teclado', icon: 'keyboard', onClick: () => this.showShortcuts() }
     ];
     if (this.variant === 'embed') items.splice(2, 0, { label: 'Abrir app completa', icon: 'expand', onClick: () => { location.href = '/app/'; } });
     popover(btn, items, { align: 'end' });
+  }
+  act_clear() { this.newChat(); }
+  act_expand() {
+    this.persist();
+    try { if (this.chat.messages.some((m) => m.role === 'user') && !this.chat.incognito) sessionStorage.setItem('ac.app.open', this.chat.id); } catch {}
+    location.href = '/app/';
   }
   act_scrollDown() { this.scrollToEnd(true); }
   act_sidebar() { this.root.dispatchEvent(new CustomEvent('chat:sidebar', { bubbles: true })); }
@@ -317,12 +339,16 @@ export class ChatApp {
   /* =================== Composer =================== */
   act_plus(btn) {
     popover(btn, [
+      { label: 'Cámara', sub: 'Foto o escaneo de documento', icon: 'camera', onClick: () => this.openCamera() },
       { label: 'Subir archivo', sub: 'PDF, Word, Excel, CSV, texto o imagen', icon: 'paperclip', onClick: () => this.$('file').click() },
-      { label: 'Abrir cámara', sub: 'Foto o escaneo de documento', icon: 'camera', onClick: () => this.openCamera() },
+      'sep',
+      { label: 'Equipo de agentes con rol', sub: 'Programador, Investigadora, Diseñador…', icon: 'users', onClick: () => this.act_invite(btn) },
+      { label: 'Conectar GitHub', sub: 'Conector en preparación', icon: 'code', onClick: () => this.openHub('conectores') },
+      { label: 'Conectar Cloudflare', sub: 'Conector en preparación', icon: 'globe', onClick: () => this.openHub('conectores') },
+      { label: 'Llamada de voz en vivo', sub: 'Hablá con AgentiCuántico', icon: 'phone', onClick: () => { location.href = '/llamada/'; } },
       'sep',
       { label: 'Herramientas', icon: 'tools', onClick: () => this.openHub('herramientas') },
       { label: 'Habilidades', icon: 'spark', onClick: () => this.openHub('habilidades') },
-      { label: 'Conectores', icon: 'plug', onClick: () => this.openHub('conectores') },
       { label: 'Automatizaciones', icon: 'clock', onClick: () => this.openHub('automatizaciones') },
       { label: 'Memoria', icon: 'memory', onClick: () => this.openHub('memoria') }
     ], { place: 'top' });
@@ -468,6 +494,7 @@ export class ChatApp {
     }
     this.$('rec').hidden = false;
     this.root.classList.add('recording-on');
+    this.updateStatus(); this.setFace('listening');
     this.$('recHint').textContent = VoiceRecorder.speechSupported() ? 'Escuchando… deslizá a la izquierda para cancelar' : 'Grabando… deslizá a la izquierda para cancelar';
     this.avatar && this.avatar.setState('listening');
     // corte automático por silencio (manos libres) → enviar
@@ -493,6 +520,7 @@ export class ChatApp {
     if (!this.recorder) return;
     this.recorder.cancel();
     this.recorder = null;
+    this.updateStatus();
     this.$('rec').hidden = true;
     this.root.classList.remove('recording-on');
     this.handsFree = false; this.root.classList.remove('hands-free');
@@ -503,6 +531,7 @@ export class ChatApp {
     const rec = this.recorder;
     if (!rec) return;
     this.recorder = null;
+    this.updateStatus();
     const res = await rec.stop();
     this.$('rec').hidden = true;
     this.root.classList.remove('recording-on');
@@ -652,11 +681,12 @@ export class ChatApp {
     if (!this.flag('voice')) return;
     const av = this.avatar;
     av && av.setState('thinking');
+    const face = this.$('face');
     await speak(text, {
       lang: this.lang.id,
-      onStart: () => av && av.setState('talking'),
-      onViseme: (v) => av && av.setVisemes(v),
-      onEnd: () => { av && (av.setVisemes(null), av.setState('idle')); }
+      onStart: () => { av && av.setState('talking'); this._face = 'speaking'; this.updateStatus(); },
+      onViseme: (v) => { av && av.setVisemes(v); if (face) face.style.setProperty('--lvl', v ? Math.min(1, (v.aa || 0) + (v.oh || 0) + (v.ee || 0) + 0.1).toFixed(3) : '0'); },
+      onEnd: () => { av && (av.setVisemes(null), av.setState('idle')); this._face = null; if (face) face.style.setProperty('--lvl', '0'); this.updateStatus(); }
     });
   }
 
@@ -707,6 +737,7 @@ export class ChatApp {
     this.scrollToEnd(m.role === 'user');
   }
   updateMessage(m) {
+    if (this._panel && this._panel.m === m) { clearTimeout(this._prT); this._prT = setTimeout(() => this._panel && this._panel.render(), 120); }
     const old = this.root.querySelector(`[data-msg="${m.id}"]`);
     const el = this.msgEl(m);
     if (old) old.replaceWith(el); else this.$('inner').append(el);
@@ -727,33 +758,32 @@ export class ChatApp {
   msgEl(m) {
     if (m.role === 'notice') return h('div', { class: 'msg-notice ' + (m.type || ''), 'data-msg': m.id }, m.content);
     if (m.role === 'user') {
-      const el = h('div', { class: 'msg user', 'data-msg': m.id });
+      const el = h('div', { class: 'msg user ace-msg', 'data-msg': m.id });
       if (m.kind === 'voice') el.append(this.voiceBubble(m));
-      else el.append(h('div', { class: 'bubble' }, m.content));
+      else el.append(h('div', { class: 'bubble ace-bubble' }, m.content));
       if (m.attachments && m.attachments.length) {
         el.append(h('div', { class: 'msg-files' }, ...m.attachments.map((a) => a.url ? h('img', { src: a.url, alt: a.name, class: 'msg-thumb' }) : h('span', { class: 'chip' }, h('span', { html: icon('file') }), a.name))));
       }
       return el;
     }
     const ag = m.agent;
-    const el = h('div', { class: 'msg assistant' + (m.streaming ? ' streaming' : '') + (ag ? ' by-agent' : ''), 'data-msg': m.id, style: ag ? `--c:${ag.color}` : null });
-    const who = ag
-      ? h('div', { class: 'msg-who' }, h('span', { class: 'p-badge' }, initials(ag.name)), h('strong', {}, ag.name), h('span', { class: 'chip' }, 'agente'))
-      : h('div', { class: 'msg-who' }, h('img', { src: '/media/agenticuantico-avatar.jpg', alt: '', width: 24, height: 24 }), h('strong', {}, 'AgentiCuántico'));
-    const body = h('div', { class: 'msg-body' });
+    const el = h('div', { class: 'msg assistant ace-msg' + (m.streaming ? ' streaming' : '') + (ag ? ' by-agent' : ''), 'data-msg': m.id, style: ag ? `--c:${ag.color}` : null });
+    const face = ag ? h('span', { class: 'p-badge ace-mava-badge' }, initials(ag.name)) : h('img', { class: 'ace-mava', src: FACE, alt: '', width: 30, height: 30 });
+    const body = h('div', { class: 'msg-body ace-body' });
+    if (ag) body.append(h('div', { class: 'msg-who' }, h('strong', {}, ag.name), h('span', { class: 'chip' }, 'agente')));
     if (m.steps && m.steps.length) body.append(this.timeline(m));
+    if (m.artifacts && m.artifacts.length) body.append(this.filesList(m));
     const md = h('div', { class: 'md' });
     md.innerHTML = m.content ? renderMarkdown(m.content) : (m.streaming && !(m.steps && m.steps.length) ? '<span class="typing" aria-label="Escribiendo"><i></i><i></i><i></i></span>' : '');
     body.append(md);
-    for (const art of m.artifacts || []) body.append(this.artifactCard(art));
     if (m.notice === 'login') body.append(h('div', { class: 'alert info' }, 'Iniciá sesión para seguir con el modelo completo. ', h('a', { href: '/cuenta/' }, 'Ingresar')));
     if (m.notice === 'upgrade' || m.notice === 'quota') body.append(h('div', { class: 'alert info' }, 'Llegaste al límite de tu plan por hoy. ', h('a', { href: '/planes.html' }, 'Ver planes')));
-    el.append(who, body);
     if (!m.streaming && m.content) {
-      el.append(h('div', { class: 'msg-actions' },
-        h('button', { class: 'icon-btn sm', type: 'button', 'aria-label': 'Copiar respuesta', title: 'Copiar', html: icon('copy'), onclick: () => navigator.clipboard.writeText(m.content).then(() => toast('Copiado')) }),
-        h('button', { class: 'icon-btn sm', type: 'button', 'aria-label': 'Escuchar respuesta', title: 'Escuchar', html: icon('speaker'), onclick: () => this.say(m.content) })));
+      body.append(h('div', { class: 'msg-actions ace-acts' },
+        h('button', { class: 'ace-ib sm', type: 'button', 'aria-label': 'Copiar respuesta', title: 'Copiar', html: icon('copy'), onclick: () => navigator.clipboard.writeText(m.content).then(() => toast('Copiado')) }),
+        h('button', { class: 'ace-ib sm', type: 'button', 'aria-label': 'Escuchar respuesta', title: 'Escuchar', html: icon('speaker'), onclick: () => this.say(m.content) })));
     }
+    el.append(face, body);
     return el;
   }
 
@@ -787,33 +817,116 @@ export class ChatApp {
     return bubble;
   }
 
+  /** Tarjeta del plan del agente: «Tarea completada · N de N pasos» con checks verdes. */
   timeline(m) {
-    const done = m.steps.filter((s) => s.status === 'done').length;
-    const wrap = h('div', { class: 'timeline' });
-    const head = h('div', { class: 'tl-head' }, h('span', { html: icon('spark') }), h('strong', {}, 'Hace todo por vos'), h('span', { class: 'tl-count' }, `${done}/${m.steps.length} pasos`));
-    const prog = h('div', { class: 'tl-progress', role: 'progressbar', 'aria-valuemin': 0, 'aria-valuemax': m.steps.length, 'aria-valuenow': done }, h('i', { style: `width:${(done / m.steps.length) * 100}%` }));
-    const list = h('ol', { class: 'tl-list' });
-    for (const s of m.steps) {
-      const logs = (m.logs && m.logs[s.id]) || [];
-      const li = h('li', { class: 'tl-step ' + s.status, 'data-phase': s.phase },
-        h('span', { class: 'tl-dot', html: s.status === 'done' ? icon('check') : '' }),
-        h('span', { class: 'tl-title' }, s.title));
-      if (logs.length) li.append(h('details', { class: 'tl-log' }, h('summary', {}, 'Ver detalle'), h('pre', {}, logs.join('\n'))));
-      list.append(li);
+    const done = m.steps.filter((x) => x.status === 'done').length;
+    const total = m.steps.length;
+    const running = m.streaming;
+    const stopped = !running && done < total;
+    const stIcon = (st) => h('span', { class: 'ace-st ' + (st || ''), html: st === 'done' ? icon('check') : st === 'error' ? icon('close') : '' });
+    const card = h('div', { class: 'ace-task' });
+    const head = h('button', { class: 'ace-task-h', type: 'button', title: 'Ver computadora del agente', onclick: () => this.openAgentPanel(m, 'plan') },
+      stIcon(running ? 'running' : stopped ? 'error' : 'done'),
+      h('span', { class: 'ace-task-t' }, h('strong', {}, running ? 'El agente está trabajando' : stopped ? 'Tarea detenida' : 'Tarea completada'), h('small', {}, `${done} de ${total} pasos`)),
+      h('span', { class: 'ace-task-open', html: icon('monitor') }));
+    const prog = h('div', { class: 'ace-prog', role: 'progressbar', 'aria-valuemin': 0, 'aria-valuemax': total, 'aria-valuenow': done }, h('i', { style: `width:${total ? (done / total) * 100 : 0}%` }));
+    const list = h('ul', {});
+    for (const st of m.steps) {
+      list.append(h('li', { class: st.status || '' }, stIcon(st.status), h('span', { class: 'ace-step-t' }, st.title), h('em', { class: 'p-' + (st.phase || 'thinking') }, PHASES[st.phase] || st.phase || '')));
     }
-    const computer = h('details', { class: 'vm' }, h('summary', {}, h('span', { html: icon('monitor') }), 'Computadora del agente'),
-      h('pre', { class: 'vm-screen' }, ['$ agente --plan', ...m.steps.map((s) => `${s.status === 'done' ? '✔' : s.status === 'running' ? '…' : '·'} ${s.title}`), ...Object.values(m.logs || {}).flat().slice(-6).map((l) => '  ' + String(l).split('\n')[0])].join('\n')));
-    if (m.streaming) computer.open = this.variant === 'full';
-    wrap.append(head, prog, list, computer);
-    return wrap;
+    card.append(head, prog, list);
+    return card;
   }
 
-  artifactCard(art) {
-    return h('div', { class: 'artifact' },
-      h('span', { class: 'artifact-icon', html: icon(art.mime === 'text/html' ? 'globe' : art.mime === 'text/markdown' ? 'file' : 'code') }),
-      h('span', { class: 'artifact-meta' }, h('strong', {}, art.name), h('small', {}, `${(art.content.length / 1024).toFixed(1)} KB`)),
-      h('button', { class: 'btn btn-sm', type: 'button', onclick: () => this.openCanvas(art) }, 'Abrir en lienzo'),
-      h('button', { class: 'icon-btn sm', type: 'button', 'aria-label': 'Descargar ' + art.name, html: icon('download'), onclick: () => download(art.name, art.content, art.mime) }));
+  filesList(m) {
+    const box = h('div', { class: 'ace-files' });
+    m.artifacts.forEach((art, i) => {
+      box.append(h('div', { class: 'ace-file' },
+        h('strong', {}, art.name),
+        h('small', {}, `${Math.max(1, Math.round(String(art.content || '').length / 1024))} KB`),
+        h('button', { class: 'ace-ib', type: 'button', title: 'Ver', 'aria-label': 'Ver ' + art.name, html: icon('eye'), onclick: () => this.openAgentPanel(m, 'files', i) }),
+        h('button', { class: 'ace-ib', type: 'button', title: 'Descargar', 'aria-label': 'Descargar ' + art.name, html: icon('download'), onclick: () => download(art.name, art.content, art.mime || 'text/plain') })));
+    });
+    return box;
+  }
+  artifactCard(art) { return this.filesList({ artifacts: [art] }); }
+
+  /* =================== Computadora del agente (panel a pantalla completa) =================== */
+  openAgentPanel(m, tab = 'plan', fileIdx = 0) {
+    this.closeAgentPanel();
+    const ui = { tab, fi: fileIdx, preview: false };
+    const wrap = h('div', { class: 'ace-panel-wrap' });
+    const panel = h('div', { class: 'ace-panel', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Computadora del agente' });
+    const close = () => this.closeAgentPanel();
+    const headEl = h('div', { class: 'ace-panel-h' }, h('span', { class: 'ace-panel-title' }, h('span', { html: icon('monitor') }), h('strong', {}, 'Computadora del agente')), h('button', { class: 'ace-ib', type: 'button', 'aria-label': 'Cerrar', html: icon('close'), onclick: close }));
+    const body = h('div', { class: 'ace-panel-b' });
+    panel.append(headEl, body); wrap.append(panel);
+    wrap.addEventListener('click', (e) => { if (e.target === wrap) close(); });
+    this._panelKey = (e) => { if (e.key === 'Escape') close(); };
+    document.addEventListener('keydown', this._panelKey);
+    const render = () => {
+      const steps = m.steps || [], arts = m.artifacts || [];
+      const done = steps.filter((x) => x.status === 'done').length;
+      const running = m.streaming;
+      const task = (() => { const i = this.chat.messages.indexOf(m); for (let k = i - 1; k >= 0; k--) if (this.chat.messages[k].role === 'user') return this.chat.messages[k].content; return ''; })();
+      body.innerHTML = '';
+      if (task) body.append(h('div', { class: 'ap-task' }, h('strong', {}, task.slice(0, 220))));
+      body.append(h('div', { class: 'ap-status' }, h('span', {}, running ? 'El agente está trabajando…' : done < steps.length ? 'Tarea detenida' : 'Tarea completada'), h('span', {}, steps.length ? `${done} de ${steps.length} pasos` : '')));
+      body.append(h('div', { class: 'progress' }, h('i', { style: `width:${steps.length ? Math.round(done / steps.length * 100) : 0}%` })));
+      const tabs = h('div', { class: 'ace-tabs', role: 'tablist' });
+      [['plan', 'Plan'], ['computer', 'Computadora'], ['files', 'Archivos' + (arts.length ? ` (${arts.length})` : '')]].forEach(([id, label]) => {
+        tabs.append(h('button', { class: 'ace-tab' + (ui.tab === id ? ' on' : ''), type: 'button', role: 'tab', 'aria-selected': String(ui.tab === id), onclick: () => { ui.tab = id; render(); } }, label));
+      });
+      body.append(tabs);
+      if (ui.tab === 'plan') {
+        const ul = h('ul', { class: 'plan-list' });
+        for (const st of steps) {
+          const logs = (m.logs && m.logs[st.id]) || [];
+          ul.append(h('li', { class: st.status || '' }, h('span', { class: 'ace-st ' + (st.status || ''), html: st.status === 'done' ? icon('check') : '' }),
+            h('div', { class: 'row' }, h('span', {}, st.title), h('span', { class: 'phase-tag p-' + (st.phase || 'thinking') }, PHASES[st.phase] || st.phase || '')),
+            logs.length ? h('div', { class: 'log' }, String(logs[logs.length - 1]).slice(0, 400)) : null));
+        }
+        body.append(ul);
+      } else if (ui.tab === 'computer') {
+        const lines = [];
+        for (const st of steps) {
+          lines.push(h('div', { class: 'ln' }, h('span', { class: 'pr' }, '› '), h('span', { class: 'ph' }, `[${PHASES[st.phase] || st.phase || ''}] `), `${st.status === 'done' ? '✔' : st.status === 'running' ? '…' : '·'} ${st.title}`));
+          for (const l of ((m.logs && m.logs[st.id]) || [])) lines.push(h('div', { class: 'ln sub' }, '  ' + String(l)));
+        }
+        body.append(h('div', { class: 'computer' }, h('div', { class: 'computer-bar' }, h('i'), h('i'), h('i'), h('span', {}, 'agente@agenticuantico: ~/tarea')), h('div', { class: 'terminal' }, ...lines, running ? h('span', { class: 'pr' }, '▍') : null)));
+      } else {
+        if (!arts.length) body.append(h('p', { class: 'ap-empty' }, 'Todavía no hay archivos.'));
+        else {
+          const fi = Math.min(ui.fi, arts.length - 1), f = arts[fi];
+          const isHtml = f.mime === 'text/html' || /\.html?$/i.test(f.name);
+          body.append(h('div', { class: 'file-tabs' }, ...arts.map((x, i) => h('button', { class: 'file-tab' + (i === fi ? ' on' : ''), type: 'button', onclick: () => { ui.fi = i; ui.preview = false; render(); } }, x.name))));
+          body.append(h('div', { class: 'file-acts' },
+            h('button', { class: 'ace-pill-btn', type: 'button', onclick: () => navigator.clipboard.writeText(f.content).then(() => toast('Copiado')) }, h('span', { html: icon('copy') }), 'Copiar'),
+            h('button', { class: 'ace-pill-btn', type: 'button', onclick: () => download(f.name, f.content, f.mime || 'text/plain') }, h('span', { html: icon('download') }), 'Descargar'),
+            isHtml ? h('button', { class: 'ace-pill-btn', type: 'button', onclick: () => { ui.preview = !ui.preview; render(); } }, h('span', { html: icon(ui.preview ? 'code' : 'eye') }), ui.preview ? 'Código' : 'Vista previa') : null,
+            h('button', { class: 'ace-pill-btn', type: 'button', onclick: () => { close(); this.openCanvas(f); } }, h('span', { html: icon('canvas') }), 'Lienzo')));
+          const view = h('div', { class: 'file-view' });
+          if (isHtml && ui.preview) {
+            const fr = h('iframe', { class: 'preview-frame', title: f.name, sandbox: 'allow-scripts', src: '/app/preview.html', referrerpolicy: 'no-referrer' });
+            fr.addEventListener('load', () => fr.contentWindow && fr.contentWindow.postMessage({ type: 'ac-preview', html: f.content }, '*'));
+            view.append(fr);
+          } else if (f.mime === 'text/markdown' || /\.md$/i.test(f.name)) { const d = h('div', { class: 'md' }); d.innerHTML = renderMarkdown(f.content); view.append(d); }
+          else { const d = h('div', { class: 'md' }); d.innerHTML = renderMarkdown('```' + (f.name.split('.').pop() || '') + '\n' + f.content + '\n```'); view.append(d); }
+          body.append(view);
+        }
+      }
+    };
+    render();
+    this._panel = { wrap, render, m };
+    document.body.append(wrap);
+    document.body.classList.add('ace-lock');
+    requestAnimationFrame(() => headEl.querySelector('button').focus({ preventScroll: true }));
+  }
+  closeAgentPanel() {
+    if (!this._panel) return;
+    this._panel.wrap.remove(); this._panel = null;
+    document.body.classList.remove('ace-lock');
+    document.removeEventListener('keydown', this._panelKey);
   }
 
   /* =================== Lienzo (código / documentos con vista previa aislada) =================== */
@@ -847,7 +960,7 @@ export class ChatApp {
     this.$('inner').innerHTML = '';
     this.renderParticipants();
     this.syncEmpty();
-    this.root.querySelector('[data-act="incognito"]').setAttribute('aria-pressed', String(incognito));
+    this.root.querySelector('[data-act="incognito"]')?.setAttribute('aria-pressed', String(incognito));
     this.$('incognitoBar').hidden = !incognito;
     this.root.classList.toggle('is-incognito', incognito);
     this.root.dispatchEvent(new CustomEvent('chat:changed', { bubbles: true, detail: this.chat }));
@@ -946,5 +1059,4 @@ export function download(name, content, mime = 'text/plain') {
   setTimeout(() => URL.revokeObjectURL(a.href), 2000);
 }
 function slug(s) { return String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 50) || 'chat'; }
-function toggleTheme() { const t = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'; document.documentElement.dataset.theme = t; prefs.set('ac.theme', t); }
 export { mailtoCommercial, TOOLS, CONNECTORS };

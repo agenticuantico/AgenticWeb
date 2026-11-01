@@ -101,7 +101,7 @@ export async function chat(o) {
 }
 
 /**
- * Compañera: control de minutos en el servidor (POST /api/companion/start y /heartbeat).
+ * Llamada de voz: control de minutos en el servidor (POST /api/companion/start y /heartbeat).
  * Devuelve { ok, remainingSec?, limitMin?, exceeded?, offline? }. Sin servidor (o con error de red)
  * devuelve { ok: true, offline: true } y la llamada sigue con el control local de minutos.
  */

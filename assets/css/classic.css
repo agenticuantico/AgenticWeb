@@ -10,7 +10,7 @@
   --r-sm: 8px; --r-md: 14px; --r-lg: 22px; --r-xl: 32px;
   --header-h: 76px;
 }
-:root:not([data-theme="dark"]) {
+:root:not([data-theme="dark-off"]) {
   --bg: #EDEEF5;
   --bg-2: rgba(255, 255, 255, .42);
   --surface: #ffffff;
@@ -36,7 +36,7 @@
   --shadow-3: 0 30px 90px rgba(24, 24, 27, .08);
   --glow-gold: 0 0 0 1.5px #9fff00, 0 0 25px rgba(159, 255, 0, .35);
 }
-[data-theme="dark"] { --gold: #a3e635; --gold-2: #9fff00; --gold-soft: #1f2b10; --lime: #9fff00; }
+[data-theme="dark-off"] { --gold: #a3e635; --gold-2: #9fff00; --gold-soft: #1f2b10; --lime: #9fff00; }
 
 html { background: var(--bg); }
 body { font-family: var(--font); background-color: var(--bg); position: relative; overflow-x: hidden; }
@@ -292,15 +292,15 @@ dialog.modal { border-radius: 28px; }
 .sb-top .brand-sub-badge { font-size: 8.5px; }
 
 /* Tema oscuro (solo si la persona lo elige en la app) */
-[data-theme="dark"] body { background: var(--bg); }
-[data-theme="dark"] .site-header { background: rgba(15,15,19,.9); }
-[data-theme="dark"] .brand-title-3d { color: #f2f1ee; text-shadow: none; }
-[data-theme="dark"] .card, [data-theme="dark"] .feature, [data-theme="dark"] .plan, [data-theme="dark"] .faq details, [data-theme="dark"] .agent-card { background: var(--surface); }
-[data-theme="dark"] .chat-body { background: var(--surface); }
-[data-theme="dark"] .composer, [data-theme="dark"] .chat-head { background: var(--surface); }
-[data-theme="dark"] .suggestion { background: var(--surface); color: var(--ink); border-color: var(--line); }
-[data-theme="dark"] .mode-strip { background: var(--surface-3); }
-[data-theme="dark"] .mode-chip[aria-checked="true"] { background: var(--surface); color: var(--ink); }
+[data-theme="dark-off"] body { background: var(--bg); }
+[data-theme="dark-off"] .site-header { background: rgba(15,15,19,.9); }
+[data-theme="dark-off"] .brand-title-3d { color: #f2f1ee; text-shadow: none; }
+[data-theme="dark-off"] .card, [data-theme="dark-off"] .feature, [data-theme="dark-off"] .plan, [data-theme="dark-off"] .faq details, [data-theme="dark-off"] .agent-card { background: var(--surface); }
+[data-theme="dark-off"] .chat-body { background: var(--surface); }
+[data-theme="dark-off"] .composer, [data-theme="dark-off"] .chat-head { background: var(--surface); }
+[data-theme="dark-off"] .suggestion { background: var(--surface); color: var(--ink); border-color: var(--line); }
+[data-theme="dark-off"] .mode-strip { background: var(--surface-3); }
+[data-theme="dark-off"] .mode-chip[aria-checked="true"] { background: var(--surface); color: var(--ink); }
 @media (max-width: 380px), (max-height: 700px) {
   .chat-hello-face { width: 72px; height: 72px; }
   .chat-greeting { font-size: 1.35rem; }
@@ -309,3 +309,24 @@ dialog.modal { border-radius: 28px; }
 .nav-contact-btn svg { flex: none; width: 14px; height: 14px; max-width: none; display: block; }
 .hero::before { background: radial-gradient(40% 50% at 78% 12%, rgba(159, 255, 0, .10), transparent 70%), radial-gradient(35% 40% at 12% 8%, rgba(37, 99, 235, .05), transparent 70%); }
 #startTitle, .call-body h1, .call-body h2 { font-weight: 700; letter-spacing: -.02em; }
+
+/* ---- v6: siempre claro + botones del menú con contraste completo ---- */
+:root, html, body { color-scheme: only light; }
+html { background: #EDEEF5; }
+.site-header .nav .auth-btn-pill, .site-header .nav .auth-btn-pill span, .site-header .nav .call-link, .site-header .nav .account-link { color: #111 !important; opacity: 1 !important; font-weight: 700; }
+.site-header .nav .auth-btn-pill { background: #fff !important; border: 1.5px solid #18181b !important; }
+.site-header .nav .call-link svg { color: #16a34a !important; }
+.site-header .nav .account-link svg { color: #111 !important; }
+[data-theme-toggle] { display: none !important; }
+/* v6: botones secundarios blancos con borde (sin bloques grises); sentence case */
+.hero-btn-secondary { background: #fff !important; border: 1.5px solid rgba(24,24,27,.18) !important; color: #18181b !important; }
+.hero-btn-secondary:hover { border-color: #18181b !important; }
+.site-header .nav .nav-link, .hero-btn-primary, .hero-btn-secondary, .nav-cta-btn { text-transform: none; }
+:where(a, button, [tabindex]):focus-visible { outline: 2px solid #2563eb; outline-offset: 2px; }
+@media (max-width: 480px) { .ace-demo { display: none; } }
+.agent-initials { font: 800 15px/1 Outfit, Inter, sans-serif !important; color: #18181b; background: #f2fde0 !important; border: 1.5px solid #c5e88a; }
+.site-header .nav .nav-link[href="/planes.html"] { color: #3f3f46; font-weight: 500; }
+.site-header .nav .nav-link[href="/planes.html"][aria-current="page"] { color: #18181b; }
+.site-header .nav .nav-contact-btn { background: #fff !important; color: #18181b !important; border: 1.5px solid rgba(24,24,27,.18) !important; box-shadow: none !important; }
+.site-header .nav .nav-contact-btn:hover { border-color: #18181b !important; }
+.lang-menu { min-width: 290px !important; }
