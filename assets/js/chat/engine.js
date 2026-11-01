@@ -382,7 +382,13 @@ async function localAuto(o) {
     if (s.tool === 'web') emit({ type: 'log', id: s.id, text: `GET ${url}\nQuedó anotada como referencia; la lectura de páginas en vivo llega pronto.` });
     if (s.tool === 'calc') { try { extras.calcLine = `${expr} = ${fmtNum(calc(expr), lang)}`; } catch { extras.calcLine = `${expr} = ?`; } emit({ type: 'log', id: s.id, text: extras.calcLine }); }
     if (s.tool === 'agent') { const text = agentLocal(s.agent, task, lang); extras.contributions.push({ name: s.agent.name, text }); emit({ type: 'agent', id: s.id, agent: { id: s.agent.id, name: s.agent.name, color: s.agent.color }, text }); }
-    if (s.tool === 'write') { content = artifactFor(d, task, lang, extras); emit({ type: 'log', id: s.id, text: `${d.name} · ${content.length} caracteres` }); }
+    if (s.tool === 'write') {
+      content = artifactFor(d, task, lang, extras);
+      // El archivo llega por partes: la vista previa se va dibujando mientras se escribe.
+      const n = 10, size = Math.ceil(content.length / n);
+      for (let k = 0; k < content.length; k += size) { emit({ type: 'artifact_delta', name: d.name, mime: d.mime, delta: content.slice(k, k + size) }); await sleep(140, sig); }
+      emit({ type: 'log', id: s.id, text: `${d.name} · ${content.length} caracteres` });
+    }
     if (s.tool === 'confirm') {
       const ok = o.confirm ? await o.confirm('La tarea incluye una acción con consecuencias (enviar, publicar, pagar o borrar). ¿Querés que la prepare igual? No se ejecuta nada externo sin el servidor y sin tu aprobación final.') : false;
       emit({ type: 'log', id: s.id, text: ok ? 'Confirmado: se prepara el borrador, sin ejecutar acciones externas.' : 'Cancelado por vos: solo se entrega el borrador.' });
@@ -391,7 +397,7 @@ async function localAuto(o) {
     emit({ type: 'step', id: s.id, status: 'done', phase: s.phase, title: s.title });
   }
   emit({ type: 'artifact', name: d.name, mime: d.mime, content });
-  const summary = `Listo. Preparé **${d.name}**: planifiqué, ${o.docs && o.docs.length ? 'leí tus documentos, ' : ''}${extras.calcLine ? `calculé (${extras.calcLine}), ` : ''}${extras.contributions.length ? `sumé los aportes de ${extras.contributions.map((c) => c.name).join(', ')}, ` : ''}lo redacté y lo verifiqué.\n\n${d.kind === 'html' ? 'Abrilo en el **lienzo** para ver la vista previa o descargalo.' : 'Podés abrirlo en el lienzo, editarlo y descargarlo.'}`;
+  const summary = `Listo. Preparé **${d.name}**: planifiqué, ${o.docs && o.docs.length ? 'leí tus documentos, ' : ''}${extras.calcLine ? `calculé (${extras.calcLine}), ` : ''}${extras.contributions.length ? `sumé los aportes de ${extras.contributions.map((c) => c.name).join(', ')}, ` : ''}lo redacté y lo verifiqué.\n\n${d.kind === 'html' || d.kind === 'markdown' ? 'La vista previa está acá arriba: tocá **Expandir** para verla en grande, o descargalo.' : 'Podés abrirlo en el lienzo, editarlo y descargarlo.'}`;
   await stream(summary, (c) => emit({ delta: c }), sig);
   emit({ type: 'done' });
   return { local: true };

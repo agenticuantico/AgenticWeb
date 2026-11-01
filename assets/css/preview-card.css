@@ -1,0 +1,27 @@
+/* Tarjeta de vista previa automática de los entregables del agente (chat y Computadora del agente). */
+.pvc { margin: 0 0 12px; border: 1px solid rgba(24, 24, 27, .12); border-radius: 18px; background: #fff; overflow: hidden; max-width: 100%; min-width: 0; box-shadow: 0 1px 2px rgba(24, 24, 27, .04), 0 8px 24px -16px rgba(24, 24, 27, .18); }
+.pvc-h { display: flex; align-items: center; gap: 8px; padding: 10px 14px; min-width: 0; border-bottom: 1px solid rgba(24, 24, 27, .08); }
+.pvc-ic { display: inline-grid; color: #3f6212; flex: none; } .pvc-ic svg { width: 18px; height: 18px; }
+.pvc-name { flex: 1; min-width: 0; font-size: 14.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #18181b; }
+.pvc-state { flex: none; font-size: 12.5px; font-weight: 700; color: #4d7c0f; display: inline-flex; align-items: center; gap: 6px; }
+.pvc-state:empty { display: none; }
+.pvc.is-writing .pvc-state::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: #9fff00; box-shadow: 0 0 0 3px rgba(159, 255, 0, .25); animation: pvc-pulse 1s ease-in-out infinite; }
+@keyframes pvc-pulse { 50% { opacity: .35; } }
+.pvc-stage { position: relative; display: block; width: 100%; height: 260px; padding: 0; margin: 0; border: 0; background: #f7f7f8; cursor: zoom-in; overflow: hidden; }
+.pvc-stage:focus-visible { outline: 2px solid #18181b; outline-offset: -2px; }
+.pvc-frame { display: block; width: 100%; height: 100%; border: 0; background: #fff; pointer-events: none; }
+.pvc-max { position: absolute; right: 10px; bottom: 10px; display: inline-grid; place-items: center; width: 36px; height: 36px; border-radius: 999px; background: rgba(255, 255, 255, .94); border: 1px solid rgba(24, 24, 27, .14); color: #18181b; box-shadow: 0 4px 14px rgba(24, 24, 27, .15); }
+.pvc-max svg { width: 17px; height: 17px; }
+.pvc-acts { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 12px; border-top: 1px solid rgba(24, 24, 27, .08); }
+.pvc-acts[hidden] { display: none; }
+.pvc-btn { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 13px; border-radius: 999px; border: 1px solid rgba(24, 24, 27, .16); background: #fff; color: #18181b; font: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer; min-width: 0; }
+.pvc-btn:hover { border-color: #18181b; }
+.pvc-btn span { display: inline-grid; } .pvc-btn svg { width: 16px; height: 16px; }
+.pvc-btn.pvc-primary { background: #18181b; color: #fff; border-color: #18181b; }
+.pvc-markdown .pvc-stage, .pvc-svg .pvc-stage, .pvc-image .pvc-stage { height: 230px; }
+@media (min-width: 720px) { .pvc-stage { height: 340px; } .pvc-markdown .pvc-stage, .pvc-svg .pvc-stage, .pvc-image .pvc-stage { height: 300px; } }
+@media (max-width: 380px) { .pvc-btn { padding: 0 10px; gap: 5px; font-size: 13px; } .pvc-acts { gap: 5px; padding: 9px 10px; } }
+/* Computadora del agente: la vista previa ocupa el alto disponible */
+.ace-panel .file-view.has-preview .preview-frame.is-live { min-height: 52vh; }
+.ace-panel .ap-writing { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; color: #4d7c0f; margin: 0 0 8px; }
+.ace-panel .ap-writing::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: #9fff00; animation: pvc-pulse 1s ease-in-out infinite; }

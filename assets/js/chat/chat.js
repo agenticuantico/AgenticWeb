@@ -21,6 +21,7 @@ import { readFile, fmtSize } from './docs.js';
 import { needsWebAction, AgentBrowserCard } from '../agent-browser.js';
 import { detectMediaIntent, mediaMessage, mediaCard, isMediaMessage, runMedia as runMediaTask } from './media.js';
 import { cleanArtifact, cleanThought } from './clean.js';
+import { PreviewCard, LiveFrame, previewKind, previewHtml, isPreviewable } from './preview-card.js';
 
 const MODES = {
   fast: { label: 'Rápido', short: 'Rápido', icon: 'bolt', desc: 'Respuestas al instante' },
@@ -768,18 +769,36 @@ export class ChatApp {
         else if (ev.type === 'step') { const s = a.steps.find((x) => x.id === ev.id); if (s) s.status = ev.status; else a.steps.push({ id: ev.id, title: ev.title, phase: ev.phase, status: ev.status }); this.busy && (this.busy.label = ev.title + '…', this.updateStatus()); this.avatar && this.avatar.pulse(0.4); }
         else if (ev.type === 'log') { (a.logs[ev.id] = a.logs[ev.id] || []).push(ev.text); }
         else if (ev.type === 'agent') { (a.logs[ev.id] = a.logs[ev.id] || []).push(`${ev.agent.name}: listo.`); this.pushMessage({ id: uid('m'), role: 'assistant', content: ev.text, at: Date.now(), agent: ev.agent }); }
-        else if (ev.type === 'artifact') a.artifacts.push({ name: ev.name, mime: ev.mime, content: cleanArtifact(ev.content, ev.name) });
+        else if (ev.type === 'artifact' || ev.type === 'artifact_delta') this.onArtifact(a, ev);
         else if (typeof ev.delta === 'string') a.content += ev.delta;
         else if (ev.type === 'error') a.content += '\n\n' + (ev.message || 'Hubo un error en un paso.');
         this.updateMessage(a);
       }
     });
     a.streaming = false;
+    (a.artifacts || []).forEach((x) => { delete x.writing; });
     this.updateMessage(a);
+    // Al terminar con archivos: la Computadora del agente (si está abierta) pasa sola a Archivos, en vista previa.
+    if (this._panel && this._panel.m === a && a.artifacts.length) this._panel.showFiles();
     // mantener el mensaje principal al final
     const idx = this.chat.messages.indexOf(a);
     if (idx > -1 && idx !== this.chat.messages.length - 1) { this.chat.messages.splice(idx, 1); this.chat.messages.push(a); this.$('inner').append(this.msgEl(a)); }
     return a.content;
+  }
+
+  /**
+   * Entregables del agente. {type:'artifact'} trae el archivo completo; {type:'artifact_delta', name, mime, delta}
+   * (o {type:'artifact', partial:true}) lo va mandando por partes: la vista previa se redibuja mientras se escribe.
+   */
+  onArtifact(a, ev) {
+    const name = ev.name || 'archivo';
+    let art = a.artifacts.find((x) => x.name === name);
+    if (!art) { art = { name, mime: ev.mime, content: '' }; a.artifacts.push(art); }
+    if (ev.mime) art.mime = ev.mime;
+    if (ev.type === 'artifact_delta') { art.content += String(ev.delta || ''); art.writing = true; }
+    else if (ev.partial) { art.content = String(ev.content || ''); art.writing = true; }
+    else { art.content = cleanArtifact(ev.content, name); delete art.writing; }
+    if (this._panel && this._panel.m === a && isPreviewable(art) && !this._panel.ui.userPicked) this._panel.showFiles(a.artifacts.indexOf(art));
   }
 
   inlineConfirm(msg, question) {
@@ -806,9 +825,26 @@ export class ChatApp {
   updateMessage(m) {
     if (this._panel && this._panel.m === m) { clearTimeout(this._prT); this._prT = setTimeout(() => this._panel && this._panel.render(), 120); }
     const old = this.root.querySelector(`[data-msg="${m.id}"]`);
+    // Con vistas previas en el mensaje se actualiza en el lugar (sin mover los iframes, que se recargarían).
+    if (old && m._pv && m._pv.size && old.querySelector('.pvc')) { this.morphMessage(old, this.msgEl(m, { slots: true })); this.scrollToEnd(); return; }
     const el = this.msgEl(m);
     if (old) old.replaceWith(el); else this.$('inner').append(el);
     this.scrollToEnd();
+  }
+  morphMessage(old, el) {
+    old.className = el.className;
+    const ob = old.querySelector('.msg-body'), nb = el.querySelector('.msg-body');
+    if (!ob || !nb) { old.replaceWith(el); return; }
+    const keep = new Set([...nb.querySelectorAll(':scope > .pvc-slot')].map((x) => x._card).filter(Boolean));
+    for (const n of [...ob.childNodes]) if (!keep.has(n)) n.remove();
+    let cursor = null;
+    for (const n of [...nb.childNodes]) {
+      const node = n.classList && n.classList.contains('pvc-slot') ? n._card : n;
+      if (!node) continue;
+      const ref = cursor ? cursor.nextSibling : ob.firstChild;
+      if (node !== ref) ob.insertBefore(node, ref);
+      cursor = node;
+    }
   }
   addNotice(text, type = '') {
     const m = { id: uid('n'), role: 'notice', content: text, type, at: Date.now() };
@@ -822,7 +858,7 @@ export class ChatApp {
     if (force || this.stick) requestAnimationFrame(() => { t.scrollTop = t.scrollHeight; });
   }
 
-  msgEl(m) {
+  msgEl(m, { slots = false } = {}) {
     if (m.role === 'notice') return h('div', { class: 'msg-notice ' + (m.type || ''), 'data-msg': m.id }, m.content);
     if (m.role === 'user') {
       const el = h('div', { class: 'msg user ace-msg', 'data-msg': m.id });
@@ -840,7 +876,14 @@ export class ChatApp {
     if (ag) body.append(h('div', { class: 'msg-who' }, h('strong', {}, ag.name), h('span', { class: 'chip' }, 'agente')));
     if (isMediaMessage(m)) { body.append(mediaCard(m, this)); el.append(face, body); return el; }
     if (m.steps && m.steps.length) body.append(this.timeline(m));
-    if (m.artifacts && m.artifacts.length) body.append(this.filesList(m));
+    if (m.artifacts && m.artifacts.length) {
+      // Vista previa automática de cada entregable previsualizable (también al reabrir la conversación).
+      for (const card of this.previewCards(m)) {
+        if (slots && card.isConnected) { const slot = h('i', { class: 'pvc-slot' }); slot._card = card; body.append(slot); } else body.append(card);
+      }
+      const rest = m.artifacts.filter((x) => !isPreviewable(x));
+      if (rest.length) body.append(this.filesList(m, rest));
+    }
     const md = h('div', { class: 'md' });
     md.innerHTML = m.content ? renderMarkdown(m.content) : (m.streaming && !(m.steps && m.steps.length) ? '<span class="typing" aria-label="Escribiendo"><i></i><i></i><i></i></span>' : '');
     body.append(md);
@@ -906,14 +949,42 @@ export class ChatApp {
     return card;
   }
 
-  filesList(m) {
-    const box = h('div', { class: 'ace-files' });
+  /** Tarjetas de vista previa (se reutilizan entre renders para no recargar el iframe). */
+  previewCards(m) {
+    const cache = m._pv || (Object.defineProperty(m, '_pv', { value: new Map(), enumerable: false, writable: true }), m._pv);
+    const out = [];
     m.artifacts.forEach((art, i) => {
+      if (!isPreviewable(art)) return;
+      let card = cache.get(art.name);
+      const opts = {
+        onExpand: (f) => openDesign(f),
+        onCode: () => this.openAgentPanel(m, 'files', i, { preview: false }),
+        onDownload: () => this.downloadArtifact(art),
+        onPublish: () => import('./connectors.js').then((mod) => mod.publishArtifact(this, art))
+      };
+      if (!card || card.kind !== previewKind(art)) { card = new PreviewCard(art, opts); cache.set(art.name, card); }
+      else { card.opts = opts; card.update(art, { writing: !!art.writing }); }
+      out.push(card.el);
+    });
+    return out;
+  }
+  downloadArtifact(art) {
+    const k = previewKind(art), c = String(art.content || '').trim();
+    if ((k === 'image' || k === 'video') && (art.url || /^(data:|blob:)/.test(c))) {
+      const a = h('a', { href: art.url || c, download: art.name }); document.body.append(a); a.click(); a.remove(); return;
+    }
+    download(art.name, cleanArtifact(art.content, art.name), art.mime || 'text/plain');
+  }
+
+  filesList(m, list) {
+    const box = h('div', { class: 'ace-files' });
+    (list || m.artifacts).forEach((art) => {
+      const i = m.artifacts.indexOf(art);
       box.append(h('div', { class: 'ace-file' },
         h('strong', {}, art.name),
         h('small', {}, `${Math.max(1, Math.round(String(art.content || '').length / 1024))} KB`),
         h('button', { class: 'ace-ib', type: 'button', title: 'Ver', 'aria-label': 'Ver ' + art.name, html: icon('eye'), onclick: () => this.openAgentPanel(m, 'files', i) }),
-        h('button', { class: 'ace-ib', type: 'button', title: 'Descargar', 'aria-label': 'Descargar ' + art.name, html: icon('download'), onclick: () => download(art.name, cleanArtifact(art.content, art.name), art.mime || 'text/plain') }),
+        h('button', { class: 'ace-ib', type: 'button', title: 'Descargar', 'aria-label': 'Descargar ' + art.name, html: icon('download'), onclick: () => this.downloadArtifact(art) }),
         h('button', { class: 'ace-ib', type: 'button', title: 'Publicar en GitHub o Cloudflare', 'aria-label': 'Publicar ' + art.name, html: icon('upload'), onclick: () => import('./connectors.js').then((mod) => mod.publishArtifact(this, art)) })));
     });
     return box;
@@ -921,9 +992,12 @@ export class ChatApp {
   artifactCard(art) { return this.filesList({ artifacts: [art] }); }
 
   /* =================== Computadora del agente (panel a pantalla completa) =================== */
-  openAgentPanel(m, tab = 'plan', fileIdx = 0) {
+  openAgentPanel(m, tab = 'plan', fileIdx = 0, { preview = true } = {}) {
     this.closeAgentPanel();
-    const ui = { tab, fi: fileIdx, preview: false };
+    // preview: los archivos previsualizables se abren en vista previa (no en código) salvo que se pida «Código».
+    const ui = { tab, fi: fileIdx, preview, userPicked: tab === 'files' };
+    let live = null, liveKey = '';
+    const viewHost = h('div', { class: 'ap-view-host' });
     const wrap = h('div', { class: 'ace-panel-wrap' });
     const panel = h('div', { class: 'ace-panel', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Computadora del agente' });
     const close = () => this.closeAgentPanel();
@@ -938,15 +1012,17 @@ export class ChatApp {
       const done = steps.filter((x) => x.status === 'done').length;
       const running = m.streaming;
       const task = (() => { const i = this.chat.messages.indexOf(m); for (let k = i - 1; k >= 0; k--) if (this.chat.messages[k].role === 'user') return this.chat.messages[k].content; return ''; })();
-      body.innerHTML = '';
-      if (task) body.append(h('div', { class: 'ap-task' }, h('strong', {}, cleanThought(task).trim().slice(0, 220))));
-      body.append(h('div', { class: 'ap-status' }, h('span', {}, running ? 'El agente está trabajando…' : done < steps.length ? 'Tarea detenida' : 'Tarea completada'), h('span', {}, steps.length ? `${done} de ${steps.length} pasos` : '')));
-      body.append(h('div', { class: 'progress' }, h('i', { style: `width:${steps.length ? Math.round(done / steps.length * 100) : 0}%` })));
+      // Se vacía todo menos el contenedor de la vista previa: así el iframe no se recarga en cada evento.
+      for (const n of [...body.childNodes]) if (n !== viewHost) n.remove();
+      const put = (n) => { if (n) body.insertBefore(n, viewHost.parentNode === body ? viewHost : null); };
+      if (task) put(h('div', { class: 'ap-task' }, h('strong', {}, cleanThought(task).trim().slice(0, 220))));
+      put(h('div', { class: 'ap-status' }, h('span', {}, running ? 'El agente está trabajando…' : done < steps.length ? 'Tarea detenida' : 'Tarea completada'), h('span', {}, steps.length ? `${done} de ${steps.length} pasos` : '')));
+      put(h('div', { class: 'progress' }, h('i', { style: `width:${steps.length ? Math.round(done / steps.length * 100) : 0}%` })));
       const tabs = h('div', { class: 'ace-tabs', role: 'tablist' });
       [['plan', 'Plan'], ['computer', 'Computadora'], ['files', 'Archivos' + (arts.length ? ` (${arts.length})` : '')]].forEach(([id, label]) => {
-        tabs.append(h('button', { class: 'ace-tab' + (ui.tab === id ? ' on' : ''), type: 'button', role: 'tab', 'aria-selected': String(ui.tab === id), onclick: () => { ui.tab = id; render(); } }, label));
+        tabs.append(h('button', { class: 'ace-tab' + (ui.tab === id ? ' on' : ''), type: 'button', role: 'tab', 'aria-selected': String(ui.tab === id), onclick: () => { ui.tab = id; ui.userPicked = true; render(); } }, label));
       });
-      body.append(tabs);
+      put(tabs);
       if (ui.tab === 'plan') {
         const ul = h('ul', { class: 'plan-list' });
         for (const st of steps) {
@@ -955,40 +1031,65 @@ export class ChatApp {
             h('div', { class: 'row' }, h('span', {}, st.title), h('span', { class: 'phase-tag p-' + (st.phase || 'thinking') }, PHASES[st.phase] || st.phase || '')),
             logs.length ? h('div', { class: 'log' }, String(logs[logs.length - 1]).slice(0, 400)) : null));
         }
-        body.append(ul);
+        put(ul);
       } else if (ui.tab === 'computer') {
         const lines = [];
         for (const st of steps) {
           lines.push(h('div', { class: 'ln' }, h('span', { class: 'pr' }, '› '), h('span', { class: 'ph' }, `[${PHASES[st.phase] || st.phase || ''}] `), `${st.status === 'done' ? '✔' : st.status === 'running' ? '…' : '·'} ${st.title}`));
           for (const l of ((m.logs && m.logs[st.id]) || [])) lines.push(h('div', { class: 'ln sub' }, '  ' + String(l)));
         }
-        body.append(h('div', { class: 'computer' }, h('div', { class: 'computer-bar' }, h('i'), h('i'), h('i'), h('span', {}, 'agente@agenticuantico: ~/tarea')), h('div', { class: 'terminal' }, ...lines, running ? h('span', { class: 'pr' }, '▍') : null)));
+        put(h('div', { class: 'computer' }, h('div', { class: 'computer-bar' }, h('i'), h('i'), h('i'), h('span', {}, 'agente@agenticuantico: ~/tarea')), h('div', { class: 'terminal' }, ...lines, running ? h('span', { class: 'pr' }, '▍') : null)));
       } else {
-        if (!arts.length) body.append(h('p', { class: 'ap-empty' }, 'Todavía no hay archivos.'));
+        if (!arts.length) put(h('p', { class: 'ap-empty' }, 'Todavía no hay archivos.'));
         else {
-          const fi = Math.min(ui.fi, arts.length - 1), f = { ...arts[fi], content: cleanArtifact(arts[fi].content, arts[fi].name) };
-          const isHtml = f.mime === 'text/html' || /\.html?$/i.test(f.name);
-          body.append(h('div', { class: 'file-tabs' }, ...arts.map((x, i) => h('button', { class: 'file-tab' + (i === fi ? ' on' : ''), type: 'button', onclick: () => { ui.fi = i; ui.preview = false; render(); } }, x.name))));
-          body.append(h('div', { class: 'file-acts' },
-            h('button', { class: 'ace-pill-btn', type: 'button', onclick: () => navigator.clipboard.writeText(f.content).then(() => toast('Copiado')) }, h('span', { html: icon('copy') }), 'Copiar'),
-            h('button', { class: 'ace-pill-btn', type: 'button', onclick: () => download(f.name, f.content, f.mime || 'text/plain') }, h('span', { html: icon('download') }), 'Descargar'),
-            isHtml ? h('button', { class: 'ace-pill-btn', type: 'button', onclick: () => { ui.preview = !ui.preview; render(); } }, h('span', { html: icon(ui.preview ? 'code' : 'eye') }), ui.preview ? 'Código' : 'Vista previa') : null,
-            h('button', { class: 'ace-pill-btn', type: 'button', onclick: () => { close(); this.openCanvas(f); } }, h('span', { html: icon('canvas') }), 'Lienzo'),
-            isHtml ? h('button', { class: 'ace-pill-btn ace-expand', type: 'button', title: 'Expandir', 'aria-label': 'Expandir', onclick: () => openDesign(f) }, h('span', { html: icon('expand') }), 'Expandir') : null));
-          const view = h('div', { class: 'file-view' });
-          if (isHtml && ui.preview) {
-            const fr = h('iframe', { class: 'preview-frame', title: f.name, sandbox: 'allow-scripts', src: '/app/preview.html', referrerpolicy: 'no-referrer' });
-            fr.addEventListener('load', () => fr.contentWindow && fr.contentWindow.postMessage({ type: 'ac-preview', html: f.content, fit: true }, '*'));
-            view.classList.add('has-preview');
-            view.append(fr, h('button', { class: 'preview-max', type: 'button', title: 'Expandir', 'aria-label': 'Expandir', html: icon('expand'), onclick: () => openDesign(f) }));
-          } else if (f.mime === 'text/markdown' || /\.md$/i.test(f.name)) { const d = h('div', { class: 'md' }); d.innerHTML = renderMarkdown(f.content); view.append(d); }
-          else { const d = h('div', { class: 'md' }); d.innerHTML = renderMarkdown('```' + (f.name.split('.').pop() || '') + '\n' + f.content + '\n```'); view.append(d); }
-          body.append(view);
+          const fi = Math.min(ui.fi, arts.length - 1), src = arts[fi];
+          const f = { ...src, content: src.writing ? String(src.content || '') : cleanArtifact(src.content, src.name) };
+          const kind = previewKind(src);
+          const canPreview = !!kind, inFrame = kind && kind !== 'markdown';
+          const showPrev = canPreview && ui.preview;
+          put(h('div', { class: 'file-tabs' }, ...arts.map((x, i) => h('button', { class: 'file-tab' + (i === fi ? ' on' : ''), type: 'button', onclick: () => { ui.fi = i; ui.preview = true; ui.userPicked = true; render(); } }, x.name))));
+          if (src.writing) put(h('div', { class: 'ap-writing' }, 'Escribiendo el archivo…'));
+          const expandFile = () => openDesign({ name: f.name, mime: 'text/html', content: previewHtml(src) });
+          put(h('div', { class: 'file-acts' },
+            kind === 'image' || kind === 'video' ? null : h('button', { class: 'ace-pill-btn', type: 'button', onclick: () => navigator.clipboard.writeText(f.content).then(() => toast('Copiado')) }, h('span', { html: icon('copy') }), 'Copiar'),
+            h('button', { class: 'ace-pill-btn', type: 'button', onclick: () => this.downloadArtifact(src) }, h('span', { html: icon('download') }), 'Descargar'),
+            canPreview && kind !== 'image' && kind !== 'video' ? h('button', { class: 'ace-pill-btn', type: 'button', onclick: () => { ui.preview = !ui.preview; ui.userPicked = true; render(); } }, h('span', { html: icon(ui.preview ? 'code' : 'eye') }), ui.preview ? 'Código' : 'Vista previa') : null,
+            h('button', { class: 'ace-pill-btn', type: 'button', onclick: () => import('./connectors.js').then((mod) => mod.publishArtifact(this, src)) }, h('span', { html: icon('upload') }), 'Publicar'),
+            kind === 'image' || kind === 'video' ? null : h('button', { class: 'ace-pill-btn', type: 'button', onclick: () => { close(); this.openCanvas(f); } }, h('span', { html: icon('canvas') }), 'Lienzo'),
+            canPreview ? h('button', { class: 'ace-pill-btn ace-expand', type: 'button', title: 'Expandir', 'aria-label': 'Expandir', onclick: expandFile }, h('span', { html: icon('expand') }), 'Expandir') : null));
+          const key = `${fi}:${src.name}:${showPrev && inFrame ? 'live' : showPrev ? 'md' : 'code'}`;
+          if (showPrev && inFrame) {
+            // Vista previa en vivo: el mismo iframe se actualiza (con debounce) mientras llega el contenido.
+            if (!live || liveKey !== key) {
+              live = new LiveFrame('preview-frame is-live', f.name);
+              viewHost.className = 'file-view has-preview';
+              viewHost.replaceChildren(live.el, h('button', { class: 'preview-max', type: 'button', title: 'Expandir', 'aria-label': 'Expandir', html: icon('expand'), onclick: expandFile }));
+            }
+            live.set(previewHtml(src), { wait: src.writing ? 450 : 0 });
+          } else {
+            live = null;
+            viewHost.className = 'file-view';
+            const d = h('div', { class: 'md' });
+            d.innerHTML = showPrev ? renderMarkdown(f.content) : renderMarkdown('```' + (f.name.split('.').pop() || '') + '\n' + f.content + '\n```');
+            viewHost.replaceChildren(d);
+          }
+          liveKey = key;
+          if (viewHost.parentNode !== body) body.appendChild(viewHost);
+          return;
         }
       }
+      if (viewHost.parentNode === body) { viewHost.remove(); live = null; liveKey = ''; }
+    };
+    const showFiles = (i) => {
+      const arts = m.artifacts || [];
+      ui.tab = 'files';
+      if (typeof i === 'number') ui.fi = i;
+      else { const j = arts.findIndex((x) => isPreviewable(x)); ui.fi = j < 0 ? 0 : j; }
+      ui.preview = true;
+      render();
     };
     render();
-    this._panel = { wrap, render, m };
+    this._panel = { wrap, render, m, ui, showFiles };
     document.body.append(wrap);
     document.body.classList.add('ace-lock');
     requestAnimationFrame(() => headEl.querySelector('button').focus({ preventScroll: true }));

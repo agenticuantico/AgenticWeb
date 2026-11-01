@@ -28,35 +28,61 @@ iframe{border:0;display:block;transform-origin:0 0;background:#fff}
     if (/<\/body>/i.test(s)) return s.replace(/<\/body>/i, PROBE + '</body>');
     return s + PROBE;
   }
-  function layout() {
-    if (!frame) return;
+  function layout(fr) {
+    fr = fr || frame;
+    if (!fr) return;
     var W = wrap.clientWidth, H = wrap.clientHeight;
-    var need = fit && natural > W + 2 ? natural : W;
+    var nat = fr === frame ? natural : (fr._nat || 0);
+    var need = fit && nat > W + 2 ? nat : W;
     var scale = W / need;
-    frame.style.width = need + 'px';
-    frame.style.height = Math.ceil(H / scale) + 'px';
-    frame.style.transform = scale < 1 ? 'scale(' + scale + ')' : '';
+    fr.style.width = need + 'px';
+    fr.style.height = Math.ceil(H / scale) + 'px';
+    fr.style.transform = scale < 1 ? 'scale(' + scale + ')' : '';
   }
+  function make() {
+    var f = document.createElement('iframe');
+    f.setAttribute('sandbox', 'allow-scripts allow-modals');
+    f.setAttribute('title', 'Contenido');
+    return f;
+  }
+  /* Actualizaciones seguidas (el agente escribiendo): el diseño nuevo se carga en un iframe oculto y reemplaza al
+     anterior recién cuando terminó de cargar, así no hay parpadeo en blanco. */
+  var pending = null;
   function show(html, f) {
     fit = f !== false;
     wrap = wrap || document.getElementById('wrap');
+    last = html;
     if (!frame) {
-      frame = document.createElement('iframe');
-      frame.setAttribute('sandbox', 'allow-scripts allow-modals');
-      frame.setAttribute('title', 'Contenido');
-      wrap.appendChild(frame);
+      frame = make(); wrap.appendChild(frame);
+      natural = 0; layout();
+      frame.srcdoc = inject(html);
+      return;
     }
-    natural = 0; last = html;
-    layout();
-    frame.srcdoc = inject(html);
+    if (pending) { pending.remove(); pending = null; }
+    var nf = make(); nf._nat = 0;
+    nf.style.position = 'absolute'; nf.style.left = '0'; nf.style.top = '0'; nf.style.visibility = 'hidden';
+    wrap.appendChild(nf); layout(nf);
+    pending = nf;
+    nf.addEventListener('load', function () {
+      if (pending !== nf) return;
+      setTimeout(function () {
+        if (pending !== nf) return;
+        var old = frame; frame = nf; pending = null; natural = nf._nat || 0;
+        nf.style.position = ''; nf.style.visibility = '';
+        layout();
+        if (old && old.parentNode) old.remove();
+      }, 60);
+    });
+    nf.srcdoc = inject(html);
   }
   window.addEventListener('message', function (e) {
     var d = e.data;
     if (!d || typeof d !== 'object') return;
-    if (d.type === 'ac-preview-size' && frame && e.source === frame.contentWindow) {
+    if (d.type === 'ac-preview-size') {
       var w = Number(d.w) || 0;
       // Solo crece: al escalar, el hijo se vuelve a medir con el ancho nuevo y no debe achicarse en bucle.
-      if (w > natural) { natural = w; layout(); }
+      if (frame && e.source === frame.contentWindow) { if (w > natural) { natural = w; layout(); } }
+      else if (pending && e.source === pending.contentWindow) { if (w > pending._nat) { pending._nat = w; layout(pending); } }
       return;
     }
     if (d.type === 'ac-preview' && typeof d.html === 'string') show(d.html, d.fit);
