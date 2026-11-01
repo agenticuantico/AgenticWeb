@@ -54,7 +54,7 @@ function providerBlock(name, cur, p, logo) {
   return h('article', { class: 'rev-prov', 'data-provider': name },
     h('header', { class: 'rev-prov-head' },
       h('span', { class: 'rev-logo', html: logo }),
-      h('div', {}, h('h3', {}, name === 'mercadopago' ? 'Mercado Pago' : 'PayPal'), h('span', { class: 'rev-cur' }, cur === 'ARS' ? 'Pesos argentinos (ARS)' : 'Dólares (USD)')),
+      h('div', {}, h('h3', { class: 'sr-only' }, name === 'mercadopago' ? 'Mercado Pago' : 'PayPal'), h('span', { class: 'rev-cur' }, cur === 'ARS' ? 'Pesos argentinos (ARS)' : 'Dólares (USD)')),
       h('span', { class: 'chip ' + (p.activeSubscriptions ? 'ok' : '') }, h('span', { 'data-no-i18n': '' }, nfInt.format(p.paidSubscriptions)), h('span', {}, ' pagas'))),
     h('div', { class: 'rev-main' }, h('small', {}, 'Cobrado este mes'), h('strong', { 'data-no-i18n': '' }, money(p.monthCents, cur))),
     h('div', { class: 'rev-stats' },
@@ -66,8 +66,8 @@ function providerBlock(name, cur, p, logo) {
     p.lastPaymentAt ? h('p', { class: 'tiny muted' }, h('span', {}, 'Último cobro'), h('span', { 'data-no-i18n': '' }, ' ' + new Date(p.lastPaymentAt).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short', hourCycle: 'h23', timeZone: 'America/Argentina/Buenos_Aires' }))) : h('p', { class: 'tiny muted' }, 'Sin cobros registrados todavía.'));
 }
 
-const MP_LOGO = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#00b1ea"/><path d="M6.5 13.2c1.6-2.4 3.4-3.6 5.5-3.6s3.9 1.2 5.5 3.6" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>';
-const PP_LOGO = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="6" fill="#003087"/><path d="M9.2 17.5l1.6-10h3.4c2 0 3.1 1 2.8 2.8-.3 2-1.8 3-3.8 3h-1.6l-.7 4.2z" fill="#fff"/></svg>';
+const MP_LOGO = '<img src="/assets/brands/mercadopago-oficial.svg" alt="Mercado Pago" width="130" height="34" decoding="async">';
+const PP_LOGO = '<img src="/assets/brands/paypal-oficial.svg" alt="PayPal" width="106" height="30" decoding="async">';
 
 /** Tarjeta completa (ancho total del panel Analítica). */
 export function renderRevenueCard(host, user) {
