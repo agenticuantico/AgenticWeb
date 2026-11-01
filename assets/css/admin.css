@@ -102,7 +102,9 @@
 .rev-prov-head > div { display: grid; margin-right: auto; min-width: 0; }
 .rev-prov-head h3 { margin: 0; font-size: 1rem; }
 .rev-cur { font-size: var(--fs-xs); color: var(--muted); font-weight: 600; }
-.rev-logo { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 11px; background: var(--surface-3); flex: none; }
+.rev-logo { display: flex; align-items: center; height: 40px; padding: 4px 12px; border-radius: 12px; background: #fff; border: 1px solid var(--line); flex: none; }
+.rev-logo img { display: block; height: 26px; width: auto; max-width: 140px; }
+.rev-prov[data-provider="paypal"] .rev-logo img { height: 24px; }
 .rev-main { display: grid; gap: 2px; }
 .rev-main small, .rev-stat small, .rev-combined small { color: var(--muted); font-size: var(--fs-xs); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; }
 .rev-main strong { font-family: var(--font-display); font-size: clamp(1.7rem, 4.2vw, 2.25rem); line-height: 1.1; letter-spacing: -.01em; font-variant-numeric: tabular-nums; }
