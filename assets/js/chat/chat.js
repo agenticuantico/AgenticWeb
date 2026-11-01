@@ -585,9 +585,9 @@ export class ChatApp {
     msg.content = msg.voice.transcript;
     this.updateMessage(msg);
     if (!msg.content) {
-      const text = VoiceRecorder.speechSupported()
-        ? 'Recibí tu nota de voz, pero no llegué a entender las palabras. ¿Me lo repetís un poco más cerca del micrófono?'
-        : 'Recibí tu nota de voz. Este navegador todavía no me deja transcribirla; cuando se active la transcripción del servidor la voy a entender. Mientras tanto, ¿me lo escribís?';
+      msg.voice.sttError = engine.state.sttError || null;
+      this.updateMessage(msg);
+      const text = engine.sttFailureMessage(engine.state.sttError, VoiceRecorder.speechSupported());
       const a = { id: uid('m'), role: 'assistant', content: text, at: Date.now() };
       this.pushMessage(a);
       this.persist();
@@ -952,7 +952,7 @@ export class ChatApp {
       });
     }
     const tr = v.transcript;
-    const det = h('details', { class: 'vb-transcript' }, h('summary', {}, tr ? 'Transcripción' : 'Sin transcripción'), h('p', {}, tr || 'No se pudo transcribir el audio en este navegador.'));
+    const det = h('details', { class: 'vb-transcript' }, h('summary', {}, tr ? 'Transcripción' : 'Sin transcripción'), h('p', {}, tr || ({ quota: 'El servicio de transcripción llegó a su límite de hoy.', server: 'Error del servidor al transcribir.', offline: 'Sin conexión con el servidor al transcribir.', no_speech: 'No se oyeron palabras claras.' }[v.sttError] || 'No se pudo transcribir el audio en este navegador.')));
     if (tr && tr.length < 140) det.open = true;
     bubble.append(det);
     return bubble;

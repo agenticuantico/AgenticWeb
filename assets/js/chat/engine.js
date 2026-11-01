@@ -126,18 +126,40 @@ export async function companion(kind) {
   }
 }
 
-/** Transcripción del servidor (Workers AI Whisper). Devuelve null si no está disponible. */
+/**
+ * Transcripción del servidor (Workers AI Whisper → Gemini). Devuelve el texto, o null si no se pudo.
+ * El motivo del último fallo queda en state.sttError para mostrar un mensaje honesto:
+ *   'quota' (sin cupo diario en el servidor), 'server' (error del servidor), 'offline' (sin conexión),
+ *   'no_speech' (el servidor no oyó palabras), 'unavailable' (sin transcripción en el servidor), o null si salió bien.
+ */
 export async function transcribe(blob, lang) {
-  if (!state.live || !(state.caps && state.caps.stt)) return null;
+  state.sttError = null;
+  if (!state.live || !(state.caps && state.caps.stt)) { state.sttError = 'unavailable'; return null; }
   try {
     const fd = new FormData();
-    fd.append('audio', blob, 'voz.' + (blob.type.includes('mp4') ? 'mp4' : 'webm'));
+    const t = String(blob.type || '');
+    fd.append('audio', blob, 'voz.' + (t.includes('mp4') ? 'mp4' : t.includes('ogg') ? 'ogg' : t.includes('wav') ? 'wav' : 'webm'));
     fd.append('lang', lang || 'es');
     const r = await api('/api/stt', { method: 'POST', body: fd, raw: true });
-    if (!r.ok) return null;
+    if (!r.ok) {
+      const j = await r.json().catch(() => ({}));
+      const code = String((j && j.error) || '');
+      state.sttError = /quota|rate_limited/.test(code) || r.status === 429 ? 'quota' : 'server';
+      return null;
+    }
     const j = await r.json();
-    return typeof j.text === 'string' ? j.text.trim() : null;
-  } catch { return null; }
+    const text = typeof j.text === 'string' ? j.text.trim() : '';
+    if (!text) { state.sttError = 'no_speech'; return null; }
+    return text;
+  } catch (e) { state.sttError = 'offline'; return null; }
+}
+
+/** Mensaje honesto para una nota de voz sin texto, según la causa real. */
+export function sttFailureMessage(code, hasBrowserSR) {
+  if (code === 'quota') return 'Recibí tu nota de voz, pero el servicio que pasa la voz a texto llegó a su límite de hoy y no la pude transcribir. No es tu micrófono. ¿Me lo escribís, o probás de nuevo en un rato?';
+  if (code === 'server' || code === 'offline') return 'Recibí tu nota de voz, pero tuve un problema en el servidor al transcribirla. No es tu micrófono. ¿Me la mandás de nuevo, o me lo escribís?';
+  if (code === 'unavailable' && !hasBrowserSR) return 'Recibí tu nota de voz. Este navegador todavía no me deja transcribirla; cuando se active la transcripción del servidor la voy a entender. Mientras tanto, ¿me lo escribís?';
+  return 'Recibí tu nota de voz, pero no se oyen palabras claras. ¿Me lo repetís un poco más cerca del micrófono?';
 }
 
 /** Voz del servidor (ElevenLabs vía worker-v2). Devuelve un Blob de audio o null. */
