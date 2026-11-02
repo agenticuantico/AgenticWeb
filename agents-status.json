@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-02T11:41:45.942Z",
+  "updated": "2026-11-02T23:14:08.161Z",
   "source": "agentes-24-7",
   "note": "Estado público del equipo de agentes. Lo actualiza el workflow Agentes 24/7 (solo datos).",
   "agents": [
@@ -50,7 +50,7 @@
       "emoji": "🎨",
       "status": "espera",
       "last_activity": "Preparando su próxima tarea.",
-      "last_run": "2026-11-01T10:49:24.705Z",
+      "last_run": "2026-11-02T23:13:51.306Z",
       "pr": null
     },
     {
@@ -60,7 +60,7 @@
       "emoji": "🌐",
       "status": "espera",
       "last_activity": "Preparando su próxima tarea.",
-      "last_run": "2026-11-01T10:49:24.706Z",
+      "last_run": "2026-11-02T23:13:51.307Z",
       "pr": null
     },
     {
