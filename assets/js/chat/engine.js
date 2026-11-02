@@ -82,6 +82,23 @@ async function readSSE(res, onData, signal) {
 }
 const noticeFor = (s) => (s === 401 ? 'login' : s === 402 ? 'upgrade' : s === 429 ? 'quota' : 'fallback');
 
+async function continueCut(o, text) {
+  const cutNote = { es: '\n\n_(La respuesta se cortó por un problema de conexión. Volvé a enviar tu mensaje.)_', en: '\n\n_(The answer was cut off by a connection problem. Please send your message again.)_', pt: '\n\n_(A resposta foi interrompida por um problema de conexão. Envie sua mensagem de novo.)_' };
+  const lang = /^en/.test(o.lang || '') ? 'en' : /^pt/.test(o.lang || '') ? 'pt' : 'es';
+  try {
+    const messages = [...o.messages, { role: 'assistant', content: text }, { role: 'user', content: '(Tu respuesta anterior se cortó. Continuala exactamente desde donde quedó, sin repetir nada y sin mencionar el corte.)' }];
+    const res = await api('/api/chat', { method: 'POST', signal: o.signal, body: { messages, agent: o.agent ? 'custom' : 'general', agentId: o.agent?.id, system: [o.agent?.system, o.system].filter(Boolean).join('\n\n').slice(0, 4000), lang: o.lang, mode: 'fast' } });
+    if (!res.ok || !res.body) throw new Error('cont_' + res.status);
+    let more = ''; let done = false;
+    await readSSE(res, (d) => { if (d === '[DONE]') done = true; else if (d && typeof d.delta === 'string') { more += d.delta; o.onDelta(d.delta); } }, o.signal);
+    if (more && done) return text + more;
+    o.onDelta(cutNote[lang]); return text + more + cutNote[lang];
+  } catch (e) {
+    if (e.name === 'AbortError') throw e;
+    o.onDelta(cutNote[lang]); return text + cutNote[lang];
+  }
+}
+
 /**
  * Chat.
  * o: { messages:[{role,content}], lang, mode:'fast'|'deep', agent?:{id,name,system}, system?, attachments?, signal, onDelta }
@@ -92,8 +109,13 @@ export async function chat(o) {
   try {
     const res = await api('/api/chat', { method: 'POST', signal: o.signal, body: { messages: o.messages, agent: o.agent ? 'custom' : 'general', agentId: o.agent?.id, agentName: o.agent?.name, system: [o.agent?.system, o.system].filter(Boolean).join('\n\n').slice(0, 4000), lang: o.lang, mode: o.mode === 'deep' ? 'deep' : 'fast' } });
     if (!res.ok || !res.body) { const r = await localChat(o); r.notice = noticeFor(res.status); return r; }
-    await readSSE(res, (d) => { if (d && typeof d.delta === 'string') { text += d.delta; o.onDelta(d.delta); } }, o.signal);
+    let done = false;
+    try {
+      await readSSE(res, (d) => { if (d === '[DONE]') done = true; else if (d && typeof d.delta === 'string') { text += d.delta; o.onDelta(d.delta); } }, o.signal);
+    } catch (e) { if (e.name === 'AbortError') throw e; }
     if (!text) { const r = await localChat(o); r.notice = 'fallback'; return r; }
+    // Respuesta cortada (red o servidor): se pide la continuación una vez, sin repetir lo ya mostrado.
+    if (!done) text = await continueCut(o, text);
     return { text, local: false };
   } catch (e) {
     if (e.name === 'AbortError') throw e;
