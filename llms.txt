@@ -36,7 +36,7 @@ Sitio: https://agenticuantico.dev.ar/ · Contacto comercial: agenticuantico@gmai
 - [Cómo funciona](https://agenticuantico.dev.ar/como-funciona.html)
 - [Soluciones](https://agenticuantico.dev.ar/soluciones/)
 - [Guías prácticas](https://agenticuantico.dev.ar/guias/)
-- [Plantillas web inmersivas 3D (demos)](https://agenticuantico.dev.ar/plantillas/): demos de diseño para bodegas, gimnasios, turismo y logística; marcas y datos ficticios.
+- [Plantillas web inmersivas 3D (demos)](https://agenticuantico.dev.ar/plantillas/): demos de diseño para bodegas, gimnasios, turismo, logística, estudios creativos y marcas de producto; marcas y datos ficticios.
 - [Planes y precios](https://agenticuantico.dev.ar/planes.html)
 - [Nosotros](https://agenticuantico.dev.ar/nosotros.html)
 - [Contacto](https://agenticuantico.dev.ar/contacto/)

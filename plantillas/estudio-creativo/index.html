@@ -1,0 +1,370 @@
+<!doctype html>
+<!--
+  AgentiCuántico · Design Lab · PLANTILLA DE SITIO COMPLETO
+  Rubro: estudio creativo / agencia de diseño / portfolio (estudio ficticio "Trama")
+  Secciones: telón de carga con contador · nav · hero editorial con tipografía gigante sobre tinta WebGL ·
+             banda de servicios en marquesina · manifiesto que se "entinta" con el scroll · proyectos con revelado por
+             máscara (clip-path) ligado al scroll · servicios en sección oscura (transición de tema papel→tinta) ·
+             proceso en scroll horizontal fijado · reconocimientos · contacto gigante con copiar mail · footer
+  Técnicas: three.js (shader de manchas de tinta tipo metaball que siguen al cursor, con grano de papel), fallback CSS,
+            cursor personalizado solo con (pointer:fine) y etiqueta contextual, transición de página con telón al navegar
+            por anclas, clip-path inset + parallax interno, interpolación de tema por scroll, sticky + translateX,
+            split de letras con delays, IntersectionObserver para pausar WebGL, DPR máx 1.75, prefers-reduced-motion.
+  Dependencias: solo three.js 0.169 por import map. Código, textos y gráficos originales.
+-->
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Trama · Plantilla demo para estudios creativos | AgentiCuántico</title>
+<meta name="description" content="Plantilla demo para estudios de diseño y agencias: tinta 3D que sigue al cursor, proyectos que se revelan con el scroll y proceso en scroll horizontal. Marca y contenido ficticios.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta name="robots" content="noindex, follow">
+<link rel="canonical" href="https://agenticuantico.dev.ar/plantillas/estudio-creativo/">
+<link rel="icon" href="/favicon.ico?v=7" sizes="48x48">
+<meta name="theme-color" content="#efe9dd">
+<link rel="stylesheet" href="../_comun/fonts/fonts.css">
+<style>.demo-ribbon{position:fixed;left:0;right:0;bottom:14px;margin:0 auto;width:max-content;z-index:9990;display:flex;align-items:center;gap:10px;max-width:calc(100vw - 24px);padding:8px 8px 8px 14px;border-radius:999px;background:rgba(14,14,18,.86);color:#f4f4f6;font:500 12.5px/1.3 system-ui,-apple-system,"Segoe UI",sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.25);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}.demo-ribbon b{font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-size:11px;color:#c8ff5a}.demo-ribbon>span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}.demo-ribbon a{flex:none;padding:7px 12px;border-radius:999px;background:#f4f4f6;color:#111;text-decoration:none;font-weight:650}@media (max-width:520px){.demo-ribbon .long{display:none}}</style>
+<style>
+:root{
+  --paper:#efe9dd;--paper-2:#e6dfd0;--ink:#15120e;--ink-2:#3b352c;--soft:#7a7164;--line:rgba(21,18,14,.14);
+  --acc:#ff4122;--acc-ink:#1a0703;
+  --serif:"Instrument Serif","Bodoni 72","Didot","Playfair Display","C059","Times New Roman",serif;
+  --sans:"Inter Tight","Helvetica Neue","Neue Haas Grotesk",Arial,"DejaVu Sans",sans-serif;
+  --mono:"JetBrains Mono","SF Mono",ui-monospace,Menlo,monospace;
+  --ease:cubic-bezier(.76,0,.24,1);--out:cubic-bezier(.16,1,.3,1);
+  --pad:clamp(1.1rem,3.4vw,3rem);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%;overflow-x:clip}
+body{font-family:var(--sans);background:var(--paper);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased;transition:background-color .6s,color .6s}
+body.dark{background:var(--ink);color:var(--paper)}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+svg{display:block}
+::selection{background:var(--acc);color:var(--paper)}
+:focus-visible{outline:2px solid var(--acc);outline-offset:3px}
+.px{padding-inline:var(--pad)}
+.lbl{font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase}
+.serif{font-family:var(--serif);font-weight:400;font-style:italic;letter-spacing:-.01em}
+/* grano de papel global (SVG feTurbulence en data URI) */
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:90;opacity:.22;mix-blend-mode:multiply;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .4 0 0 0 0 .35 0 0 0 0 .3 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+body.dark::after{mix-blend-mode:screen;opacity:.08}
+
+/* TELÓN de carga y de transición */
+.curtain{position:fixed;inset:0;z-index:100;background:var(--acc);color:var(--acc-ink);display:flex;align-items:flex-end;justify-content:space-between;padding:var(--pad);transform:translateY(0);pointer-events:none}
+.curtain .cnt{font-family:var(--serif);font-size:clamp(5rem,22vw,18rem);line-height:.8;font-variant-numeric:tabular-nums}
+.curtain .lbl{margin-bottom:1rem}
+.curtain.out{transform:translateY(-100%);transition:transform 1s var(--ease)}
+.curtain.wipe-in{transform:translateY(100%);transition:none}
+.curtain.wipe-in.go{transform:translateY(0);transition:transform .6s var(--ease)}
+.curtain.wipe-out{transform:translateY(-100%);transition:transform .7s var(--ease)}
+.curtain.trans .cnt,.curtain.trans .lbl{display:none}
+
+/* CURSOR (solo puntero fino) */
+.cur,.cur-dot{position:fixed;left:0;top:0;z-index:95;pointer-events:none;display:none}
+.has-cur .cur-dot{display:block}.has-cur .cur{display:grid}.cur,.cur-dot{opacity:0}.cur.live,.cur-dot.live{opacity:1}
+.has-cur,.has-cur a,.has-cur button{cursor:none}
+.cur-dot{width:6px;height:6px;margin:-3px 0 0 -3px;border-radius:50%;background:var(--acc)}
+.cur{width:38px;height:38px;margin:-19px 0 0 -19px;border-radius:50%;border:1px solid var(--ink);place-items:center;transition:opacity .3s,width .45s var(--out),height .45s var(--out),margin .45s var(--out),background-color .3s,border-color .3s}
+.cur span{font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--paper);opacity:0;transition:opacity .2s}
+.cur.big{width:92px;height:92px;margin:-46px 0 0 -46px;background:var(--acc);border-color:var(--acc)}
+.cur.big span{opacity:1}
+.cur.link{width:60px;height:60px;margin:-30px 0 0 -30px;background:rgba(255,65,34,.12);border-color:var(--acc)}
+body.dark .cur{border-color:var(--paper)}
+
+/* NAV */
+.nav{position:fixed;top:0;left:0;right:0;z-index:60;display:flex;justify-content:space-between;align-items:center;padding:1.1rem var(--pad);mix-blend-mode:difference;color:#fff}
+.brand{font-weight:700;letter-spacing:-.04em;font-size:1.35rem}
+.brand sup{font-size:.55em;font-weight:500}
+.nav ul{display:flex;gap:2rem;list-style:none}
+.nav ul a{position:relative;font-size:.92rem}
+.nav ul a::after{content:"";position:absolute;left:0;right:0;bottom:-2px;height:1px;background:currentColor;transform:scaleX(0);transform-origin:right;transition:transform .5s var(--out)}
+.nav ul a:hover::after{transform:scaleX(1);transform-origin:left}
+.nav .time{font-family:var(--mono);font-size:.75rem;letter-spacing:.06em}
+@media (max-width:760px){.nav ul{display:none}}
+
+/* HERO */
+.hero{position:relative;min-height:100svh;display:flex;flex-direction:column;justify-content:space-between;padding-top:5.5rem;padding-bottom:1.6rem;overflow:hidden;isolation:isolate}
+#ink{position:absolute;inset:0;width:100%;height:100%;z-index:-1;mix-blend-mode:multiply;opacity:0;transition:opacity 1.2s}
+.gl-on #ink{opacity:1}
+.hero .fb{position:absolute;z-index:-2;width:46vmax;height:46vmax;right:-10vmax;top:18%;border-radius:47% 53% 61% 39%/45% 41% 59% 55%;background:var(--acc);filter:blur(1px);animation:morph 14s ease-in-out infinite alternate}
+.gl-on .hero .fb{display:none}
+@keyframes morph{50%{border-radius:61% 39% 44% 56%/38% 62% 38% 62%;transform:translate(-4vmax,3vmax) rotate(20deg)}}
+.meta{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;color:var(--ink-2)}
+.big{font-weight:700;font-size:clamp(3.4rem,13.2vw,15rem);line-height:.84;letter-spacing:-.065em;margin:auto 0 0}
+.big .row{display:block;overflow:hidden;padding:.02em 0 .06em}
+.big .row.r2{padding-left:9vw}
+.big .serif{font-weight:400;letter-spacing:-.04em;padding-right:.05em}
+.ch{display:inline-block;transform:translateY(110%) rotate(6deg);transform-origin:left bottom}
+.ready .ch{transform:none;transition:transform 1.1s var(--out);transition-delay:calc(var(--i)*28ms + .1s)}
+.big .dot{color:var(--acc)}
+.hero .foot{display:grid;grid-template-columns:1fr auto 1fr;align-items:end;gap:1.5rem;margin-top:2.2rem}
+.hero .foot p{max-width:340px;font-size:1rem;color:var(--ink-2)}
+.hero .foot .avail{justify-self:end;display:flex;align-items:center;gap:.6rem;font-size:.9rem}
+.hero .foot .avail i{width:9px;height:9px;border-radius:50%;background:#1fb35a;box-shadow:0 0 0 4px rgba(31,179,90,.18);animation:pulse 2s infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 8px rgba(31,179,90,0)}}
+.down{width:54px;height:54px;border-radius:50%;border:1px solid var(--ink);place-items:center;transition:opacity .3s,background .3s,color .3s}
+.down:hover{background:var(--ink);color:var(--paper)}
+.down svg{animation:bob 2.2s var(--out) infinite}
+@keyframes bob{50%{transform:translateY(4px)}}
+.fade-up{opacity:0;transform:translateY(16px)}
+.ready .fade-up{opacity:1;transform:none;transition:opacity 1s .7s var(--out),transform 1s .7s var(--out)}
+@media (max-width:760px){
+  .hero{min-height:88svh}
+  .big{font-size:16.4vw;margin-top:3.5rem}
+  .big .row.r2{padding-left:0}
+  .hero .foot{grid-template-columns:1fr auto}
+  .hero .foot .avail{grid-column:1/-1;justify-self:start;order:-1}
+  .hero .fb{width:80vw;height:80vw;right:-30vw;top:10%}
+}
+
+/* MARQUESINA */
+.bandwrap{overflow:hidden;padding:2.5rem 0 1rem}
+.band{background:var(--acc);color:var(--acc-ink);overflow:hidden;padding:1.1rem 0;transform:rotate(-1.5deg);margin:0 -2vw;border-block:1px solid var(--ink)}
+.band .track{display:flex;width:max-content;animation:mq 30s linear infinite}
+.band span{font-weight:700;font-size:clamp(1.6rem,4vw,3rem);letter-spacing:-.04em;white-space:nowrap;padding-right:2.2rem;display:flex;align-items:center;gap:2.2rem}
+.band span em{font-family:var(--serif);font-weight:400}
+.band svg{width:.8em;height:.8em}
+@keyframes mq{to{transform:translateX(-50%)}}
+
+/* MANIFIESTO */
+.mani{padding-block:clamp(6rem,14vw,12rem) clamp(5rem,10vw,9rem)}
+.mani .lbl{color:var(--soft);margin-bottom:2rem;display:block}
+.mani p{font-size:clamp(1.7rem,4.4vw,4rem);line-height:1.08;letter-spacing:-.035em;font-weight:500;max-width:1250px}
+.mani p .w{opacity:.14;transition:opacity .3s}
+.mani p .w.on{opacity:1}
+.mani p .serif{color:var(--acc)}
+
+/* PROYECTOS */
+.work .head{display:flex;justify-content:space-between;align-items:end;gap:2rem;border-bottom:1px solid var(--line);padding-bottom:1.2rem;margin-bottom:clamp(2rem,5vw,4rem)}
+.work h2,.sec-title{font-size:clamp(2.8rem,9vw,8rem);line-height:.86;letter-spacing:-.06em;font-weight:700}
+.work .head small{color:var(--soft);font-size:.95rem;max-width:280px;text-align:right}
+.proj{display:grid;grid-template-columns:repeat(12,1fr);gap:var(--pad);margin-bottom:clamp(4rem,10vw,9rem);align-items:end}
+.proj figure{position:relative;overflow:hidden;clip-path:inset(var(--c,30%) var(--cx,8%) var(--c,30%) var(--cx,8%) round 4px);will-change:clip-path;aspect-ratio:4/3}
+.proj .art{position:absolute;inset:-8%;transform:scale(calc(1.25 - var(--r,0)*.25)) translateY(calc((var(--r,0) - .5)*-6%))}
+.proj .cap{display:flex;flex-direction:column;gap:.6rem}
+.proj .cap .n{font-family:var(--mono);font-size:.78rem;color:var(--soft)}
+.proj .cap h3{font-size:clamp(1.9rem,3.6vw,3.2rem);line-height:.95;letter-spacing:-.045em;font-weight:700}
+.proj .cap h3 .serif{font-weight:400}
+.proj .cap p{color:inherit;opacity:.72;max-width:340px;font-size:.98rem}
+.tags{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.4rem}
+.tags span{font-size:.75rem;padding:.3rem .7rem;border:1px solid var(--line);border-radius:99px}
+.p1 figure{grid-column:1/9}.p1 .cap{grid-column:9/13}
+.p2 figure{grid-column:5/13;grid-row:1}.p2 .cap{grid-column:1/5;grid-row:1}
+.p3 figure{grid-column:2/8;aspect-ratio:4/5}.p3 .cap{grid-column:8/12}
+.p4 figure{grid-column:1/13;aspect-ratio:21/9}.p4 .cap{grid-column:1/13;flex-direction:row;justify-content:space-between;align-items:end;flex-wrap:wrap}
+@media (max-width:760px){
+  .proj{grid-template-columns:1fr;gap:1.1rem}
+  .proj figure,.proj .cap,.p2 figure,.p2 .cap{grid-column:1!important;grid-row:auto!important}
+  .p3 figure{aspect-ratio:4/4.6}.p4 figure{aspect-ratio:4/3}
+  .work .head{flex-direction:column;align-items:start}.work .head small{text-align:left}
+}
+/* artes generativas (sin fotos) */
+.a1{background:#1b3a2f}
+.a1 .sun{position:absolute;width:44%;aspect-ratio:1;border-radius:50%;left:18%;top:20%;background:radial-gradient(circle at 40% 35%,#ffd9a0,#ff9a3c 55%,#e0521e)}
+.a1 .hill{position:absolute;left:-10%;right:-10%;bottom:-20%;height:60%;border-radius:50% 50% 0 0;background:#0f241c}
+.a1 .word{position:absolute;right:7%;bottom:12%;font-family:var(--serif);font-style:italic;color:#efe9dd;font-size:clamp(2rem,6vw,5rem);line-height:1}
+.a2{background:var(--acc)}
+.a2 .grid{position:absolute;inset:0;background:linear-gradient(var(--acc-ink) 1px,transparent 1px) 0 0/100% 12.5%,linear-gradient(90deg,var(--acc-ink) 1px,transparent 1px) 0 0/12.5% 100%;opacity:.25}
+.a2 .lt{position:absolute;inset:0;display:grid;place-items:center;font-weight:800;font-size:clamp(7rem,28vw,24rem);letter-spacing:-.08em;color:var(--paper);line-height:1}
+.a3{background:linear-gradient(170deg,#e9d8c4,#c9a98a)}
+.a3 svg{position:absolute;inset:0;width:100%;height:100%}
+.a4{background:#16130f}
+.a4 .stripe{position:absolute;top:-10%;bottom:-10%;width:9%;background:linear-gradient(#efe9dd,#efe9dd00);transform:skewX(-14deg)}
+.a4 .lbl2{position:absolute;left:6%;top:50%;translate:0 -50%;color:var(--paper);font-weight:700;letter-spacing:-.06em;font-size:clamp(2.6rem,9vw,8.5rem);line-height:.85}
+.a4 .lbl2 em{font-family:var(--serif);font-weight:400;color:var(--acc)}
+
+/* SERVICIOS (oscuro) */
+.serv{padding-block:clamp(5rem,12vw,10rem)}
+.serv .lbl{opacity:.6}
+.serv .sec-title{margin:1.2rem 0 clamp(2rem,5vw,4rem)}
+.srow{position:relative;display:grid;grid-template-columns:90px 1fr 1fr 40px;gap:1.5rem;align-items:center;padding:1.6rem 0;border-top:1px solid rgba(239,233,221,.16);overflow:hidden;isolation:isolate}
+.srow:last-child{border-bottom:1px solid rgba(239,233,221,.16)}
+.srow::before{content:"";position:absolute;inset:0;z-index:-1;background:var(--acc);transform:scaleY(0);transform-origin:bottom;transition:transform .6s var(--ease)}
+.srow:hover::before,.srow:focus-within::before{transform:scaleY(1)}
+.srow:hover,.srow:focus-within{color:var(--acc-ink)}
+.srow .n{font-family:var(--mono);font-size:.8rem;opacity:.6}
+.srow h3{font-size:clamp(1.8rem,4.6vw,4rem);letter-spacing:-.05em;font-weight:700;line-height:1;transition:transform .6s var(--out)}
+.srow:hover h3{transform:translateX(12px)}
+.srow p{font-size:.98rem;opacity:.75;max-width:420px}
+.srow .ar{transition:transform .6s var(--out)}
+.srow:hover .ar{transform:rotate(-45deg)}
+@media (max-width:760px){.srow{grid-template-columns:40px 1fr 24px;gap:.8rem}.srow p{grid-column:2/3;grid-row:2}}
+
+/* PROCESO horizontal */
+.proc{height:340vh;position:relative}
+.proc .pin{position:sticky;top:0;height:100svh;overflow:hidden;display:flex;flex-direction:column;justify-content:center;padding-top:4rem}
+.proc .sec-title{font-size:clamp(2.6rem,6.4vw,6rem)}
+.proc .top{display:flex;justify-content:space-between;align-items:end;margin-bottom:2.5rem;gap:1rem}
+.proc .bar{width:min(320px,40vw);height:2px;background:var(--line);position:relative}
+.proc .bar i{position:absolute;inset:0;background:var(--acc);transform-origin:left;transform:scaleX(var(--p,0))}
+.htrack{display:flex;gap:var(--pad);padding-left:var(--pad);width:max-content;will-change:transform}
+.panel{width:min(520px,78vw);flex:none;padding:2rem;border:1px solid var(--line);border-radius:6px;background:var(--paper-2);min-height:min(52svh,400px);display:flex;flex-direction:column;justify-content:space-between}
+.panel .num{font-family:var(--serif);font-size:clamp(5rem,12vw,9rem);line-height:.8;color:var(--acc);padding-top:.12em}
+.panel h3{font-size:clamp(1.7rem,3vw,2.5rem);letter-spacing:-.045em;line-height:1;font-weight:700;margin-bottom:.7rem}
+.panel p{color:var(--ink-2);max-width:380px}
+.panel .wk{font-family:var(--mono);font-size:.75rem;color:var(--soft);margin-top:1rem}
+.panel.end{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.panel.end p{color:rgba(239,233,221,.7)}
+.panel.end a{display:inline-flex;gap:.6rem;align-items:center;font-weight:600;border-bottom:1px solid currentColor;padding-bottom:.2rem;width:max-content}
+
+/* RECONOCIMIENTOS */
+.awards{padding-block:clamp(5rem,10vw,8rem)}
+.awards .g{display:grid;grid-template-columns:1fr 2fr;gap:var(--pad)}
+.awards h2{font-size:clamp(2.2rem,5vw,4rem);letter-spacing:-.05em;line-height:.95;font-weight:700}
+.awards table{width:100%;border-collapse:collapse;font-size:.98rem}
+.awards td{padding:1.05rem 0;border-top:1px solid var(--line);vertical-align:top}
+.awards tr:last-child td{border-bottom:1px solid var(--line)}
+.awards td:first-child{font-family:var(--mono);font-size:.8rem;color:var(--soft);width:70px}
+.awards td:last-child{text-align:right;color:var(--soft)}
+.awards tr{transition:background .3s}
+.awards tr:hover{background:rgba(255,65,34,.07)}
+@media (max-width:760px){.awards .g{grid-template-columns:1fr}.awards td:last-child{display:none}}
+
+/* CONTACTO */
+.contact{padding-block:clamp(5rem,12vw,10rem) 3rem;border-top:1px solid var(--line)}
+.contact .lbl{color:var(--soft)}
+.hablemos{display:flex;align-items:center;gap:2vw;font-weight:700;font-size:clamp(4rem,17vw,17rem);letter-spacing:-.07em;line-height:.85;margin:1rem 0 2.5rem;width:max-content;max-width:100%}
+.hablemos .serif{font-weight:400;color:var(--acc);letter-spacing:-.04em}
+.hablemos .circle{flex:none;width:.62em;height:.62em;border-radius:50%;background:var(--acc);display:grid;place-items:center;color:var(--paper);transition:transform .7s var(--out)}
+.hablemos:hover .circle{transform:rotate(-45deg) scale(1.08)}
+.hablemos .circle svg{width:38%;height:38%}
+.crow{display:flex;justify-content:space-between;gap:2rem;flex-wrap:wrap;align-items:end}
+.mail{display:inline-flex;align-items:center;gap:1rem;font-size:clamp(1.2rem,2.6vw,2rem);letter-spacing:-.03em;border-bottom:1px solid var(--ink);padding-bottom:.3rem}
+.mail small{font-family:var(--mono);font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;padding:.35rem .6rem;border-radius:99px;background:var(--ink);color:var(--paper);transition:background .3s}
+.mail.ok small{background:#1fb35a}
+.socials{display:flex;gap:1.6rem;font-size:.95rem}
+.socials a{border-bottom:1px solid transparent;transition:border-color .3s}
+.socials a:hover{border-color:currentColor}
+footer{padding:2rem 0;display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;color:var(--soft);font-size:.82rem;border-top:1px solid var(--line);margin-top:4rem}
+
+.rv{opacity:0;transform:translateY(30px);transition:opacity 1s var(--out),transform 1s var(--out);transition-delay:var(--d,0s)}
+.rv.in{opacity:1;transform:none}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .ch,.fade-up,.rv{transform:none!important;opacity:1!important}
+  .proj figure{clip-path:none!important}.proj .art{transform:none!important}
+  .mani p .w{opacity:1}
+  .curtain{display:none}
+}
+</style>
+</head>
+<body>
+<a href="#main" class="lbl" style="position:absolute;left:-999px">Saltar al contenido</a>
+<div class="curtain" id="curtain" aria-hidden="true"><span class="lbl">Trama® — Estudio de diseño</span><span class="cnt" id="cnt">00</span></div>
+<div class="cur" id="cur" aria-hidden="true"><span id="curLbl">Ver</span></div><div class="cur-dot" id="curDot" aria-hidden="true"></div>
+
+<header class="nav">
+  <a class="brand" href="#top" data-link>trama<sup>®</sup></a>
+  <nav aria-label="Principal"><ul><li><a href="#trabajos" data-link>Trabajos</a></li><li><a href="#servicios" data-link>Servicios</a></li><li><a href="#proceso" data-link>Proceso</a></li><li><a href="#contacto" data-link>Contacto</a></li></ul></nav>
+  <span class="time" id="clock">BAHÍA BLANCA 00:00</span>
+</header>
+
+<main id="main">
+<section class="hero px" id="top">
+  <canvas id="ink" aria-hidden="true"></canvas><div class="fb" aria-hidden="true"></div>
+  <div class="meta lbl fade-up"><span>Estudio independiente</span><span>Identidad · Web · Dirección de arte</span><span>Desde 2014</span></div>
+  <h1 class="big" aria-label="Marcas con carácter, no con ruido.">
+    <span class="row" data-split>Marcas con</span>
+    <span class="row r2"><span class="serif" data-split>carácter,</span></span>
+    <span class="row" data-split>no con ruido<span class="dot">.</span></span>
+  </h1>
+  <div class="foot">
+    <p class="fade-up">Diseñamos identidades, sitios y campañas para marcas que prefieren decir poco y que se note mucho.</p>
+    <a class="down fade-up" href="#trabajos" data-link aria-label="Ir a trabajos"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 2v12M3 9l5 5 5-5"/></svg></a>
+    <span class="avail fade-up"><i></i>Tomamos 2 proyectos para 2027</span>
+  </div>
+</section>
+
+<div class="bandwrap"><div class="band" aria-hidden="true"><div class="track" id="band">
+  <span>Identidad <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 0l2.6 7.4L20 10l-7.4 2.6L10 20l-2.6-7.4L0 10l7.4-2.6z"/></svg> <em>Sitios web</em> <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 0l2.6 7.4L20 10l-7.4 2.6L10 20l-2.6-7.4L0 10l7.4-2.6z"/></svg> Packaging <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 0l2.6 7.4L20 10l-7.4 2.6L10 20l-2.6-7.4L0 10l7.4-2.6z"/></svg> <em>Dirección de arte</em> <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 0l2.6 7.4L20 10l-7.4 2.6L10 20l-2.6-7.4L0 10l7.4-2.6z"/></svg> Motion <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 0l2.6 7.4L20 10l-7.4 2.6L10 20l-2.6-7.4L0 10l7.4-2.6z"/></svg></span>
+</div></div></div>
+
+<section class="mani px">
+  <span class="lbl">(01) Manifiesto</span>
+  <p id="mani">Creemos que una buena marca no grita: <span class="serif">se queda.</span> Por eso trabajamos con pocos clientes a la vez, investigamos antes de dibujar y cuidamos cada detalle, del logo a la última línea de código. El resultado son marcas claras, coherentes y con algo propio para decir.</p>
+</section>
+
+<section class="work px" id="trabajos">
+  <div class="head"><h2 class="rv">Trabajos<br><span class="serif" style="font-weight:400">elegidos</span></h2><small class="rv" style="--d:.1s">Una selección de proyectos de identidad, web y packaging. Clientes de muestra.</small></div>
+
+  <article class="proj p1">
+    <figure data-cursor="Ver"><!-- IMG: foto IA de packaging de yerba orgánica en papel kraft verde, luz cálida de atardecer, sobre mesa de madera -->
+      <div class="art a1"><div class="sun"></div><div class="hill"></div><div class="word">Monte</div></div></figure>
+    <div class="cap rv"><span class="n">01 / 2026</span><h3>Monte <span class="serif">Verde</span></h3><p>Identidad y packaging para una yerba orgánica de Misiones. Un sol que se pone en cada paquete.</p><div class="tags"><span>Identidad</span><span>Packaging</span></div></div>
+  </article>
+
+  <article class="proj p2">
+    <figure data-cursor="Ver"><!-- IMG: render IA de afiches tipográficos rojos pegados en una pared de ciudad, cuadrícula visible -->
+      <div class="art a2"><div class="grid"></div><div class="lt">Ñ</div></div></figure>
+    <div class="cap rv"><span class="n">02 / 2025</span><h3>Festival <span class="serif">Ñandú</span></h3><p>Sistema visual para un festival de música independiente: una sola letra, mil afiches.</p><div class="tags"><span>Dirección de arte</span><span>Motion</span></div></div>
+  </article>
+
+  <article class="proj p3">
+    <figure data-cursor="Ver"><!-- IMG: foto IA de cerámicas artesanales color arena con sombras largas, estilo editorial -->
+      <div class="art a3"><svg viewBox="0 0 400 500" preserveAspectRatio="xMidYMid slice"><ellipse cx="200" cy="420" rx="150" ry="22" fill="#a9876a" opacity=".5"/><path d="M140 160c-30 60-40 140-10 210 20 45 120 45 140 0 30-70 20-150-10-210z" fill="#efe1cf"/><path d="M160 120h80l-10 40h-60z" fill="#e2cfb8"/><path d="M150 250c40 18 80 18 110 0" stroke="#b48d6c" stroke-width="3" fill="none"/><circle cx="300" cy="120" r="34" fill="#ff4122"/></svg></div></figure>
+    <div class="cap rv"><span class="n">03 / 2025</span><h3>Arcilla <span class="serif">Sur</span></h3><p>Tienda online y fotografía de producto para un taller de cerámica de la costa.</p><div class="tags"><span>Sitio web</span><span>E-commerce</span></div></div>
+  </article>
+
+  <article class="proj p4">
+    <figure data-cursor="Ver"><!-- IMG: render IA de una sala oscura de cine independiente con butacas y haz de luz de proyector -->
+      <div class="art a4"><div class="stripe" style="left:62%"></div><div class="stripe" style="left:74%;opacity:.6"></div><div class="stripe" style="left:86%;opacity:.3"></div><div class="lbl2">Cine<br><em>Bruma</em></div></div></figure>
+    <div class="cap rv"><div><span class="n">04 / 2024</span><h3>Cine <span class="serif">Bruma</span></h3></div><p>Rebranding y sitio de entradas para un cine de barrio que se resiste a cerrar.</p><div class="tags"><span>Identidad</span><span>Sitio web</span><span>Señalética</span></div></div>
+  </article>
+</section>
+
+<section class="serv px" id="servicios" data-theme="dark">
+  <span class="lbl">(02) Servicios</span>
+  <h2 class="sec-title rv">Qué <span class="serif" style="font-weight:400">hacemos</span></h2>
+  <div class="srow" tabindex="0"><span class="n">01</span><h3>Identidad</h3><p>Estrategia, nombre, logo y sistema visual completo, con manual listo para usar.</p><svg class="ar" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+  <div class="srow" tabindex="0"><span class="n">02</span><h3>Sitios web</h3><p>Diseño y desarrollo a medida, rápidos, accesibles y fáciles de editar.</p><svg class="ar" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+  <div class="srow" tabindex="0"><span class="n">03</span><h3>Packaging</h3><p>Envases que se destacan en la góndola y se ven bien en la cocina.</p><svg class="ar" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+  <div class="srow" tabindex="0"><span class="n">04</span><h3>Dirección de arte</h3><p>Campañas, fotografía y piezas para redes con una voz consistente.</p><svg class="ar" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+</section>
+
+<section class="proc" id="proceso">
+  <div class="pin">
+    <div class="top px"><div><span class="lbl" style="color:var(--soft)">(03) Proceso</span><h2 class="sec-title" style="margin-top:.8rem">Cómo <span class="serif" style="font-weight:400">trabajamos</span></h2></div><div class="bar" aria-hidden="true"><i id="pbar"></i></div></div>
+    <div class="htrack" id="htrack">
+      <div class="panel"><span class="num">01</span><div><h3>Escuchar</h3><p>Entrevistas, recorrida por tu negocio y análisis de la competencia. Antes de diseñar, entendemos.</p><div class="wk">Semana 1–2</div></div></div>
+      <div class="panel"><span class="num">02</span><div><h3>Definir</h3><p>Una idea central, la personalidad de la marca y el tono. Todo en un documento corto y claro.</p><div class="wk">Semana 3</div></div></div>
+      <div class="panel"><span class="num">03</span><div><h3>Diseñar</h3><p>Exploramos rutas, elegimos una juntos y la llevamos a cada pieza: logo, web, packaging.</p><div class="wk">Semana 4–8</div></div></div>
+      <div class="panel"><span class="num">04</span><div><h3>Lanzar</h3><p>Entregamos archivos, manual y sitio publicado. Y nos quedamos cerca los primeros meses.</p><div class="wk">Semana 9+</div></div></div>
+      <div class="panel end"><span class="num">→</span><div><h3>¿Arrancamos?</h3><p>Contanos qué necesitás y te respondemos en menos de 48 horas con una propuesta.</p><br><a href="#contacto" data-link>Escribinos <span>↗</span></a></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="awards px">
+  <div class="g">
+    <h2 class="rv">Reconoci<wbr>mientos<br><span class="serif" style="font-weight:400">y prensa</span></h2>
+    <table class="rv" style="--d:.1s"><tbody>
+      <tr><td>2026</td><td>Mención en identidad — Bienal de Diseño del Sur</td><td>Monte Verde</td></tr>
+      <tr><td>2025</td><td>Sitio del día — Galería de diseño web latinoamericana</td><td>Arcilla Sur</td></tr>
+      <tr><td>2025</td><td>Selección oficial — Muestra de afiche independiente</td><td>Festival Ñandú</td></tr>
+      <tr><td>2024</td><td>Nota de tapa — Revista de cultura visual</td><td>Cine Bruma</td></tr>
+    </tbody></table>
+  </div>
+</section>
+
+<section class="contact px" id="contacto">
+  <span class="lbl">(04) Contacto</span>
+  <a class="hablemos" href="#contacto" data-cursor="Escribir" id="hab"><span>Habl<span class="serif">emos</span></span><span class="circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M9 7h8v8"/></svg></span></a>
+  <div class="crow">
+    <button class="mail" id="mail" type="button" aria-live="polite">hola@trama.estudio <small>Copiar</small></button>
+    <div class="socials"><a href="#">Instagram</a><a href="#">Behance</a><a href="#">LinkedIn</a></div>
+  </div>
+  <footer><span>© 2026 Trama Estudio. Datos y clientes de muestra.</span><span>Hecho con AgentiCuántico</span></footer>
+</section>
+</main>
+
+<script src="ui.js"></script>
+
+<!-- three.js: manchas de tinta (metaballs en shader) que siguen al cursor -->
+<script type="module" src="app.js"></script>
+<div class="demo-ribbon" role="note"><b>Demo</b><span>Plantilla de muestra<span class="long"> · marca y datos ficticios</span></span><a href="/plantillas/">Ver plantillas</a></div>
+</body>
+</html>

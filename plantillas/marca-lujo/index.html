@@ -1,0 +1,319 @@
+<!doctype html>
+<!--
+  AgentiCuántico · Design Lab · PLANTILLA DE SITIO COMPLETO
+  Rubro: marca premium de producto — perfumería de autor (marca ficticia "Casa Velarde", fragancia "Noctámbula")
+  Secciones: nav mínima · hero con frasco 3D · "La esencia" (pirámide olfativa) · detalle 1: la tapa · detalle 2: el cristal ·
+             detalle 3: el elixir (cada uno con zoom de cámara + lupa de textura) · el ritual · compra (tamaños, grabado
+             personalizado que se imprime en la etiqueta 3D, agregar a la bolsa) · footer
+  Técnicas: three.js con frasco armado SOLO con geometrías (ExtrudeGeometry con bisel, cilindros facetados, toro),
+            MeshPhysicalMaterial transparente con clearcoat e IOR para el vidrio (sin pase de transmisión, más liviano), oro metálico con mapa de entorno generado con
+            PMREMGenerator a partir de una escena propia (sin HDRI externos), etiqueta con CanvasTexture que se reescribe
+            con el grabado, interpolación de "capítulos" por scroll (posición, escala, rotación), canvas fijo que se
+            atenúa y deja de renderizar al llegar al footer o con la pestaña oculta, DPR máx 1.75, fallback SVG sin WebGL,
+            prefers-reduced-motion (sin giro ocioso ni partículas).
+  Dependencias: solo three.js 0.169 por import map. Código, textos y gráficos originales.
+-->
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Casa Velarde · Plantilla demo para marcas de producto | AgentiCuántico</title>
+<meta name="description" content="Plantilla demo para marcas premium y tiendas de producto: frasco 3D de vidrio y latón, capítulos con zoom y grabado personalizado en la etiqueta. Marca, producto y precios ficticios.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta name="robots" content="noindex, follow">
+<link rel="canonical" href="https://agenticuantico.dev.ar/plantillas/marca-lujo/">
+<link rel="icon" href="/favicon.ico?v=7" sizes="48x48">
+<meta name="theme-color" content="#0b0a09">
+<link rel="stylesheet" href="../_comun/fonts/fonts.css">
+<style>.demo-ribbon{position:fixed;left:0;right:0;bottom:14px;margin:0 auto;width:max-content;z-index:9990;display:flex;align-items:center;gap:10px;max-width:calc(100vw - 24px);padding:8px 8px 8px 14px;border-radius:999px;background:rgba(14,14,18,.86);color:#f4f4f6;font:500 12.5px/1.3 system-ui,-apple-system,"Segoe UI",sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.25);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}.demo-ribbon b{font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-size:11px;color:#c8ff5a}.demo-ribbon>span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}.demo-ribbon a{flex:none;padding:7px 12px;border-radius:999px;background:#f4f4f6;color:#111;text-decoration:none;font-weight:650}@media (max-width:520px){.demo-ribbon .long{display:none}}</style>
+<style>
+:root{
+  --bg:#0b0a09;--bg-2:#13110e;--cream:#ece4d4;--muted:#958c7c;--dim:#5e584d;--gold:#c8a96a;--gold-2:#e3cf9f;--line:rgba(200,169,106,.22);
+  --serif:"Bodoni Moda","Didot","Bodoni 72","Playfair Display","C059","Times New Roman",serif;
+  --sans:"Jost","Futura","Avenir Next","Helvetica Neue",Arial,"DejaVu Sans",sans-serif;
+  --ease:cubic-bezier(.19,1,.22,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--cream);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden;font-weight:300}
+a{color:inherit;text-decoration:none}
+button,input{font:inherit;color:inherit}
+button{background:none;border:0;cursor:pointer}
+::selection{background:var(--gold);color:var(--bg)}
+:focus-visible{outline:1px solid var(--gold);outline-offset:4px}
+.cap{font-size:.7rem;letter-spacing:.32em;text-transform:uppercase;color:var(--gold);font-weight:400}
+.serif{font-family:var(--serif);font-weight:400}
+.wrap{width:min(1240px,88vw);margin-inline:auto}
+
+/* Escenario 3D fijo */
+#gl{position:fixed;inset:0;width:100%;height:100%;z-index:0;opacity:0;transition:opacity 1.4s var(--ease);pointer-events:none}
+.gl-on #gl{opacity:1}
+.gl-on.gl-fade #gl{opacity:0}
+/* viñeta y luz ambiente */
+.amb{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(60% 50% at var(--ax,65%) 45%,rgba(200,169,106,.10),transparent 70%),radial-gradient(120% 90% at 50% 50%,transparent 55%,rgba(0,0,0,.65))}
+main,footer,.nav{position:relative;z-index:1}
+
+/* NAV */
+.nav{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:1.4rem 6vw;transition:background .5s,padding .5s}
+.nav.solid{background:linear-gradient(rgba(11,10,9,.85),rgba(11,10,9,0));}
+.nav .mark{font-family:var(--serif);font-size:1.15rem;letter-spacing:.38em;text-transform:uppercase}
+.nav ul{display:flex;gap:2.4rem;list-style:none}
+.nav ul a{font-size:.72rem;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);transition:color .4s}
+.nav ul a:hover{color:var(--cream)}
+.bag{display:flex;align-items:center;gap:.6rem;font-size:.72rem;letter-spacing:.24em;text-transform:uppercase}
+.bag b{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;border:1px solid var(--line);font-size:.65rem;font-weight:400;transition:background .4s,color .4s}
+.bag.has b{background:var(--gold);color:var(--bg)}
+@media (max-width:820px){.nav ul{display:none}.nav{padding:1.1rem 6vw}}
+
+/* Capítulos */
+.ch{min-height:100svh;display:flex;align-items:center;position:relative}
+.ch.tall{min-height:130svh}
+.txt{max-width:440px}
+.right .txt{margin-left:auto}
+.ch h2{font-family:var(--serif);font-weight:400;font-size:clamp(2.4rem,5vw,4.4rem);line-height:1.02;letter-spacing:-.01em;margin:1.2rem 0 1.4rem}
+.ch h2 em{font-style:italic;color:var(--gold-2)}
+.ch p{color:var(--muted);font-size:1.02rem}
+.rule{width:56px;height:1px;background:var(--gold);margin:1.8rem 0;transform-origin:left;transform:scaleX(0);transition:transform 1.4s var(--ease) .2s}
+.in .rule{transform:none}
+.rv{opacity:0;transform:translateY(22px);transition:opacity 1.6s var(--ease),transform 1.6s var(--ease);transition-delay:var(--d,0s)}
+.in .rv,.rv.in{opacity:1;transform:none}
+
+/* HERO */
+.hero{min-height:100svh;display:flex;align-items:center}
+.hero .txt{max-width:560px}
+.hero h1{font-family:var(--serif);font-weight:400;font-size:clamp(3.4rem,9.5vw,9rem);line-height:.9;letter-spacing:-.02em;margin:1.4rem 0 1.6rem}
+.hero h1 span{display:block;font-style:italic;color:var(--gold-2);font-size:.42em;letter-spacing:.02em;margin-top:.4rem;padding-left:.15em}
+.hero p{color:var(--muted);max-width:380px;font-size:1.05rem}
+.ctas{display:flex;gap:1.8rem;align-items:center;margin-top:2.4rem;flex-wrap:wrap}
+.btn{position:relative;display:inline-flex;align-items:center;gap:.9rem;padding:1.05rem 2.1rem;border:1px solid var(--gold);color:var(--cream);font-size:.72rem;letter-spacing:.3em;text-transform:uppercase;overflow:hidden;isolation:isolate;transition:color .6s var(--ease)}
+.btn::before{content:"";position:absolute;inset:0;z-index:-1;background:var(--gold);transform:scaleX(0);transform-origin:right;transition:transform .7s var(--ease)}
+.btn:hover{color:var(--bg)}
+.btn:hover::before{transform:scaleX(1);transform-origin:left}
+.link{font-size:.72rem;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--dim);padding-bottom:.35rem;transition:color .4s,border-color .4s}
+.link:hover{color:var(--cream);border-color:var(--gold)}
+.scroll{position:absolute;left:50%;bottom:2.2rem;translate:-50% 0;display:flex;flex-direction:column;align-items:center;gap:.8rem;font-size:.62rem;letter-spacing:.34em;text-transform:uppercase;color:var(--dim)}
+.scroll i{width:1px;height:46px;background:linear-gradient(var(--gold),transparent);transform-origin:top;animation:line 2.4s var(--ease) infinite}
+@keyframes line{0%{transform:scaleY(0)}60%{transform:scaleY(1)}100%{transform:scaleY(1);opacity:0}}
+.fb{display:none}
+.no-gl .fb{display:block;position:absolute;right:8vw;top:50%;translate:0 -50%;width:min(30vw,300px)}
+
+/* Pirámide olfativa */
+.notes{display:grid;gap:0;margin-top:2rem;border-top:1px solid var(--line)}
+.note{display:grid;grid-template-columns:110px 1fr;gap:1rem;padding:1.1rem 0;border-bottom:1px solid var(--line);align-items:baseline}
+.note small{font-size:.65rem;letter-spacing:.3em;text-transform:uppercase;color:var(--dim)}
+.note span{font-family:var(--serif);font-size:1.3rem;font-style:italic}
+
+/* Detalle con lupa */
+.detail .txt{display:grid;gap:0}
+.spec{display:flex;gap:2.4rem;margin-top:2rem}
+.spec b{display:block;font-family:var(--serif);font-weight:400;font-size:2.2rem;line-height:1;color:var(--gold-2)}
+.spec small{font-size:.66rem;letter-spacing:.24em;text-transform:uppercase;color:var(--dim)}
+.lens{--z:0;position:relative;width:132px;height:132px;border-radius:50%;overflow:hidden;border:1px solid var(--line);margin-bottom:1.6rem;box-shadow:0 0 0 6px rgba(200,169,106,.05)}
+.lens::after{content:"";position:absolute;inset:0;border-radius:50%;box-shadow:inset 0 0 30px rgba(0,0,0,.7)}
+.lens>div{position:absolute;inset:-30%;transform:scale(calc(1 + var(--z)*1.6)) rotate(calc(var(--z)*12deg))}
+.lens.l1>div{background:repeating-linear-gradient(90deg,#8d7443 0 1px,#c8a96a 1px 3px,#e3cf9f 3px 4px,#a88b55 4px 6px)}
+.lens.l2>div{background:conic-gradient(from 0deg,#1a1814,#3c3a35,#0f0e0c,#57534a,#1a1814,#2d2a25,#0f0e0c,#4a463e,#1a1814)}
+.lens.l3>div{background:radial-gradient(circle at 35% 30%,#ffd9a1,#c27a2c 30%,#6b3410 60%,#2a1206)}
+.lens span{position:absolute;left:50%;bottom:10px;translate:-50% 0;z-index:1;font-size:.55rem;letter-spacing:.28em;text-transform:uppercase;color:var(--cream);text-shadow:0 1px 4px #000}
+
+/* Ritual */
+.ritual .center{text-align:center;max-width:820px;margin-inline:auto}
+.ritual h2{margin-inline:auto}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:2.4rem;margin-top:3rem;text-align:left}
+.steps div{padding-top:1.2rem;border-top:1px solid var(--line)}
+.steps b{font-family:var(--serif);font-weight:400;font-size:1.25rem;display:block;margin:.4rem 0}
+.steps p{font-size:.94rem}
+.steps small{font-size:.65rem;letter-spacing:.3em;color:var(--gold)}
+
+/* Compra */
+.shop .card{max-width:470px;padding:2.6rem;border:1px solid var(--line);background:linear-gradient(180deg,rgba(19,17,14,.82),rgba(11,10,9,.88));backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.shop h2{font-size:clamp(2rem,4vw,3.2rem)}
+.price{display:flex;align-items:baseline;gap:.8rem;margin:.4rem 0 1.8rem}
+.price b{font-family:var(--serif);font-weight:400;font-size:2.4rem;color:var(--cream);font-variant-numeric:lining-nums}
+.price small{color:var(--dim);font-size:.8rem}
+fieldset{border:0;margin-bottom:1.6rem}
+legend{font-size:.65rem;letter-spacing:.3em;text-transform:uppercase;color:var(--dim);margin-bottom:.8rem}
+.sizes{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem}
+.sizes label{position:relative;cursor:pointer}
+.sizes input{position:absolute;opacity:0;inset:0}
+.sizes span{display:block;text-align:center;padding:.85rem .4rem;border:1px solid var(--line);font-size:.85rem;transition:border-color .4s,background .4s,color .4s}
+.sizes span small{display:block;font-size:.66rem;color:var(--dim);margin-top:.15rem;letter-spacing:.06em}
+.sizes input:checked+span{border-color:var(--gold);background:rgba(200,169,106,.08);color:var(--gold-2)}
+.sizes input:focus-visible+span{outline:1px solid var(--gold);outline-offset:3px}
+.eng{display:flex;align-items:center;border-bottom:1px solid var(--line);transition:border-color .4s}
+.eng:focus-within{border-color:var(--gold)}
+.eng input{flex:1;min-width:0;background:none;border:0;outline:0;padding:.75rem 0;font-family:var(--serif);font-size:1.15rem;letter-spacing:.12em;font-style:italic}
+.eng input::placeholder{color:var(--dim)}
+.eng small{font-size:.7rem;color:var(--dim)}
+.hint{font-size:.78rem;color:var(--dim);margin-top:.5rem}
+.buy{width:100%;justify-content:center;margin-top:.6rem}
+.buy.ok{color:var(--bg)}
+.buy.ok::before{transform:scaleX(1)}
+.perks{display:flex;justify-content:space-between;gap:1rem;margin-top:1.4rem;font-size:.72rem;color:var(--dim);letter-spacing:.04em;flex-wrap:wrap}
+
+/* Footer */
+footer{padding:7rem 0 2.4rem;border-top:1px solid var(--line);background:var(--bg)}
+.fgrid{display:grid;grid-template-columns:1.4fr 1fr 1fr 1.3fr;gap:2.4rem}
+.fgrid h4{font-size:.65rem;letter-spacing:.3em;text-transform:uppercase;color:var(--dim);font-weight:400;margin-bottom:1.1rem}
+.fgrid ul{list-style:none;display:grid;gap:.6rem;font-size:.9rem;color:var(--muted)}
+.fgrid ul a:hover{color:var(--gold-2)}
+.fmark{font-family:var(--serif);font-size:clamp(3rem,10vw,9rem);line-height:.9;letter-spacing:.06em;text-transform:uppercase;margin-top:5rem;text-align:center;color:transparent;-webkit-text-stroke:1px rgba(200,169,106,.35)}
+.news{display:flex;border-bottom:1px solid var(--line)}
+.news input{flex:1;min-width:0;background:none;border:0;outline:0;padding:.7rem 0;font-size:.9rem}
+.news button{font-size:.66rem;letter-spacing:.26em;text-transform:uppercase;color:var(--gold)}
+.legal{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-top:3rem;font-size:.75rem;color:var(--dim)}
+@media (max-width:860px){.fgrid{grid-template-columns:1fr 1fr}.fgrid>div:first-child,.fgrid>div:last-child{grid-column:span 2}}
+
+/* MÓVIL: el frasco ocupa la mitad superior; el texto va abajo con fondo degradado para no encimarse */
+@media (max-width:760px){
+  .hero h1{font-size:clamp(3rem,15vw,4.6rem)}
+  .scroll{display:none}
+  .ch{align-items:flex-end;padding-top:46svh;padding-bottom:3rem}
+  .ch.tall{min-height:110svh}
+  .ch .txt,.right .txt{margin:0;max-width:none;padding:1.6rem 0 0;position:relative}
+  .ch .txt::before{content:"";position:absolute;inset:-5rem -6vw -3rem;z-index:-1;background:linear-gradient(rgba(11,10,9,0),rgba(11,10,9,.93) 4.5rem,rgba(11,10,9,.97))}
+  .ch h2{font-size:2.3rem}
+  .lens{width:76px;height:76px;margin-bottom:1rem}
+  .lens span{display:none}
+  .steps{grid-template-columns:1fr;gap:1.4rem;margin-top:1.8rem}
+  .ritual .center{text-align:left}
+  .shop{padding-top:40svh}
+  .shop .card{padding:1.8rem 1.4rem;max-width:none}
+  .spec{gap:1.6rem}.spec b{font-size:1.8rem}
+  .no-gl .fb{right:50%;translate:50% 0;top:auto;bottom:4svh;width:42vw}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+  .rv,.rule{opacity:1!important;transform:none!important}
+}
+</style>
+</head>
+<body>
+<canvas id="gl" aria-hidden="true"></canvas><div class="amb" id="amb" aria-hidden="true"></div>
+
+<header class="nav" id="nav">
+  <a class="mark" href="#inicio">Velarde</a>
+  <nav aria-label="Principal"><ul><li><a href="#esencia">La esencia</a></li><li><a href="#tapa">El frasco</a></li><li><a href="#ritual">El ritual</a></li><li><a href="#comprar">Comprar</a></li></ul></nav>
+  <a class="bag" href="#comprar" id="bag" aria-label="Bolsa de compras">Bolsa <b id="bagN">0</b></a>
+</header>
+
+<main>
+  <!-- HERO · capítulo 0 -->
+  <section class="hero ch" id="inicio" data-k="0">
+    <!-- IMG: (opcional) foto IA del frasco Noctámbula sobre piedra negra con reflejo dorado, para redes y OG image -->
+    <svg class="fb" viewBox="0 0 200 320" aria-hidden="true"><defs><linearGradient id="fg" x1="0" x2="1"><stop offset="0" stop-color="#8d7443"/><stop offset=".5" stop-color="#e3cf9f"/><stop offset="1" stop-color="#8d7443"/></linearGradient><linearGradient id="fl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c27a2c" stop-opacity=".5"/><stop offset="1" stop-color="#6b3410"/></linearGradient></defs><path d="M70 10h60l8 70H62z" fill="url(#fg)"/><rect x="88" y="80" width="24" height="16" fill="url(#fg)"/><rect x="20" y="96" width="160" height="210" rx="26" fill="rgba(236,228,212,.06)" stroke="rgba(236,228,212,.35)"/><rect x="34" y="150" width="132" height="142" rx="16" fill="url(#fl)"/><rect x="60" y="180" width="80" height="60" fill="#0b0a09" stroke="#c8a96a" stroke-width=".8"/><text x="100" y="214" fill="#c8a96a" font-size="9" text-anchor="middle" letter-spacing="2" font-family="serif">NOCTÁMBULA</text></svg>
+    <div class="wrap">
+      <div class="txt">
+        <span class="cap rv">Casa Velarde · Extracto de perfume</span>
+        <h1 class="rv" style="--d:.15s">Noctámbula<span>para las horas que nadie ve</span></h1>
+        <p class="rv" style="--d:.3s">Ámbar, higo negro y madera de guayubira. Una fragancia lenta, hecha en lotes de trescientos frascos.</p>
+        <div class="ctas rv" style="--d:.45s"><a class="btn" href="#comprar">Descubrir · desde $ 148.000</a><a class="link" href="#esencia">La esencia</a></div>
+      </div>
+    </div>
+    <div class="scroll" aria-hidden="true"><i></i>Deslizar</div>
+  </section>
+
+  <!-- LA ESENCIA · capítulo 1 -->
+  <section class="ch right" id="esencia" data-k="1">
+    <div class="wrap"><div class="txt">
+      <span class="cap rv">I · La esencia</span>
+      <h2 class="rv" style="--d:.1s">Un perfume que <em>se abre de noche</em></h2>
+      <p class="rv" style="--d:.2s">Compuesto en Buenos Aires durante dos años, madura seis meses en barrica antes de envasarse a mano.</p>
+      <div class="notes rv" style="--d:.3s">
+        <div class="note"><small>Salida</small><span>Bergamota, pimienta rosa</span></div>
+        <div class="note"><small>Corazón</small><span>Higo negro, iris, cuero suave</span></div>
+        <div class="note"><small>Fondo</small><span>Ámbar, guayubira, vainilla</span></div>
+      </div>
+    </div></div>
+  </section>
+
+  <!-- DETALLE 1: LA TAPA · capítulo 2 -->
+  <section class="ch tall detail" id="tapa" data-k="2">
+    <div class="wrap"><div class="txt">
+      <div class="lens l1 rv" data-lens><div></div><span>× 40</span></div>
+      <span class="cap rv">II · La tapa</span>
+      <h2 class="rv" style="--d:.1s">Latón cepillado, <em>octógono perfecto</em></h2>
+      <p class="rv" style="--d:.2s">Torneada en un taller de Avellaneda y bañada en oro de 18 quilates. Ocho caras para atrapar la luz sin brillar de más.</p>
+      <div class="spec rv" style="--d:.3s"><div><b>18 k</b><small>Baño de oro</small></div><div><b>86 g</b><small>Peso</small></div></div>
+    </div></div>
+  </section>
+
+  <!-- DETALLE 2: EL CRISTAL · capítulo 3 -->
+  <section class="ch tall right detail" id="cristal" data-k="3">
+    <div class="wrap"><div class="txt">
+      <div class="lens l2 rv" data-lens><div></div><span>× 40</span></div>
+      <span class="cap rv">III · El cristal</span>
+      <h2 class="rv" style="--d:.1s">Tallado a mano, <em>pulido en frío</em></h2>
+      <p class="rv" style="--d:.2s">Cristal de base gruesa con bordes biselados. Cada frasco lleva su número de lote grabado en la base.</p>
+      <div class="spec rv" style="--d:.3s"><div><b>12 mm</b><small>Base</small></div><div><b>Nº 300</b><small>Por lote</small></div></div>
+    </div></div>
+  </section>
+
+  <!-- DETALLE 3: EL ELIXIR · capítulo 4 -->
+  <section class="ch tall detail" id="elixir" data-k="4">
+    <div class="wrap"><div class="txt">
+      <div class="lens l3 rv" data-lens><div></div><span>× 40</span></div>
+      <span class="cap rv">IV · El elixir</span>
+      <h2 class="rv" style="--d:.1s">Veinticinco por ciento <em>de concentración</em></h2>
+      <p class="rv" style="--d:.2s">Un extracto que dura en la piel más de doce horas y se transforma con el calor del cuerpo.</p>
+      <div class="spec rv" style="--d:.3s"><div><b>25 %</b><small>Extracto</small></div><div><b>12 h+</b><small>Duración</small></div></div>
+    </div></div>
+  </section>
+
+  <!-- RITUAL · capítulo 5 -->
+  <section class="ch ritual" id="ritual" data-k="5">
+    <div class="wrap center"><div class="txt" style="max-width:none">
+      <span class="cap rv">V · El ritual</span>
+      <h2 class="rv" style="--d:.1s">Menos es <em>más tiempo</em></h2>
+      <div class="steps">
+        <div class="rv" style="--d:.15s"><small>01</small><b>En el pulso</b><p>Dos gotas en muñecas y cuello, sin frotar.</p></div>
+        <div class="rv" style="--d:.25s"><small>02</small><b>Dejar asentar</b><p>Los primeros diez minutos son de la salida. Después, todo cambia.</p></div>
+        <div class="rv" style="--d:.35s"><small>03</small><b>Guardar a oscuras</b><p>Lejos del sol y del calor, en su estuche de origen.</p></div>
+      </div>
+    </div></div>
+  </section>
+
+  <!-- COMPRA · capítulo 6 -->
+  <section class="ch shop" id="comprar" data-k="6">
+    <div class="wrap"><div class="card txt rv">
+      <span class="cap">Edición numerada · Lote 07</span>
+      <h2 style="margin:.9rem 0 .2rem">Noctámbula</h2>
+      <div class="price"><b id="price">$ 198.000</b><small>IVA incluido</small></div>
+      <fieldset>
+        <legend>Tamaño</legend>
+        <div class="sizes">
+          <label><input type="radio" name="ml" value="30" data-price="148000"><span>30 ml<small>$ 148.000</small></span></label>
+          <label><input type="radio" name="ml" value="50" data-price="198000" checked><span>50 ml<small>$ 198.000</small></span></label>
+          <label><input type="radio" name="ml" value="100" data-price="296000"><span>100 ml<small>$ 296.000</small></span></label>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend><label for="eng">Grabado en la etiqueta (sin cargo)</label></legend>
+        <div class="eng"><input id="eng" maxlength="14" placeholder="Tus iniciales" autocomplete="off"><small id="engN">0/14</small></div>
+        <p class="hint">Mirá cómo queda en el frasco: se imprime en vivo en la etiqueta.</p>
+      </fieldset>
+      <button class="btn buy" id="buy" type="button">Agregar a la bolsa</button>
+      <div class="perks"><span>Envío sin cargo a todo el país</span><span>Estuche de regalo</span><span>Cambios en 30 días</span></div>
+    </div></div>
+  </section>
+</main>
+
+<footer id="foot">
+  <div class="wrap">
+    <div class="fgrid">
+      <div><span class="cap">Casa Velarde</span><p style="color:var(--muted);max-width:280px;margin-top:1rem;font-size:.92rem">Perfumería de autor desde 1987. Fragancias en lotes pequeños, compuestas y envasadas en Buenos Aires.</p></div>
+      <div><h4>Colección</h4><ul><li><a href="#">Noctámbula</a></li><li><a href="#">Siesta</a></li><li><a href="#">Litoral</a></li><li><a href="#">Velas</a></li></ul></div>
+      <div><h4>Casa</h4><ul><li><a href="#">Historia</a></li><li><a href="#">Boutiques</a></li><li><a href="#">Contacto</a></li><li><a href="#">Preguntas</a></li></ul></div>
+      <div><h4>Cartas de la casa</h4><form class="news" data-demo-form><label for="nm" class="cap" style="position:absolute;left:-999px">Tu email</label><input id="nm" type="email" placeholder="Tu email" required><button type="submit">Suscribirme</button></form><p style="color:var(--dim);font-size:.78rem;margin-top:.8rem">Lanzamientos y lotes nuevos, cuatro veces al año.</p></div>
+    </div>
+    <div class="fmark" aria-hidden="true">Velarde</div>
+    <div class="legal"><span>© 2026 Casa Velarde. Marca, producto y precios de muestra.</span><span>Hecho con AgentiCuántico</span></div>
+  </div>
+</footer>
+
+<script src="ui.js"></script>
+
+<script type="module" src="app.js"></script>
+<div class="demo-ribbon" role="note"><b>Demo</b><span>Plantilla de muestra<span class="long"> · marca y datos ficticios</span></span><a href="/plantillas/">Ver plantillas</a></div>
+</body>
+</html>
