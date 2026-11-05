@@ -100,7 +100,7 @@ export class ChatApp {
         ${full ? `<button class="ace-ib only-narrow" type="button" data-act="sidebar" aria-label="Abrir historial">${icon('sidebar')}</button>` : ''}
         <div class="ace-id">
           <span class="ace-ava" data-role="face"><img src="${FACE}" alt="" width="42" height="42"><span class="ace-mouth" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span></span>
-          <span class="ace-txt"><strong>AgentiCuántico</strong><small data-role="status"><span class="ace-led"></span>En línea · Lista</small></span>
+          <span class="ace-txt"><strong>AgentiCuántico</strong><small data-role="status" role="status" aria-live="polite"><span class="ace-led"></span>En línea · Lista</small></span>
         </div>
         <div class="chat-participants" data-role="participants" aria-label="Agentes en la conversación"></div>
         <div class="ace-actions">
@@ -138,6 +138,7 @@ export class ChatApp {
           <div class="ace-row">
             <div class="ace-left" data-popover-host>
               <button class="ace-ib round ace-plus" type="button" data-act="plus" aria-haspopup="menu" aria-expanded="false" aria-label="Cámara, archivos, agentes y conectores">${icon('plus')}</button>
+              <button class="ace-ib round ace-web" type="button" data-act="websearch" aria-pressed="false" aria-label="Buscar en la web" title="Buscar en la web">${icon('globe')}</button>
               <div class="ace-modes" data-role="modeStrip" role="radiogroup" aria-label="Modo de respuesta">${Object.entries(MODES).map(([id, m]) => `<button class="mode-chip" type="button" role="radio" aria-checked="false" data-act="setmode" data-mode="${id}" title="${m.desc}">${icon(m.icon)}<span>${m.short}</span></button>`).join('')}</div>
             </div>
             <div class="ace-right">
@@ -741,8 +742,9 @@ export class ChatApp {
         if (!onlyAgents) {
           const a = { id: uid('m'), role: 'assistant', content: '', at: Date.now(), streaming: true };
           this.pushMessage(a);
-          const r = await engine.chat({ messages: this.history(), lang: this.lang.code, mode: this.mode, system: this.systemContext(), docs, signal: ctrl.signal, onDelta: (d) => { a.content += d; this.updateMessage(a); } });
+          const r = await engine.chat({ messages: this.history(), lang: this.lang.code, mode: this.mode, system: this.systemContext(), docs, signal: ctrl.signal, search: this.webSearch ? true : undefined, onEvent: (ev) => this.onSearchEvent(a, ev), onDelta: (d) => { a.content += d; if (a.search && a.search.state !== 'writing' && a.search.state !== 'done') this.onSearchEvent(a, { type: 'search_done' }); this.updateMessage(a); } });
           a.streaming = false; a.content = r.text; if (r.notice) a.notice = r.notice;
+          if (a.search) a.search.state = 'done';
           this.updateMessage(a);
           finalText = r.text;
         }
@@ -843,6 +845,54 @@ export class ChatApp {
       this.avatar && this.avatar.setState('listening');
       this.scrollToEnd();
     });
+  }
+
+  /* =================== Búsqueda web en vivo =================== */
+  /** Botón «Buscar en la web»: la próxima respuesta (y las siguientes, hasta apagarlo) busca en la web. */
+  act_websearch(btn) {
+    this.webSearch = !this.webSearch;
+    this.root.querySelectorAll('[data-act="websearch"]').forEach((b) => { b.setAttribute('aria-pressed', this.webSearch ? 'true' : 'false'); b.classList.toggle('on', this.webSearch); });
+    toast(this.webSearch ? 'Búsqueda en la web activada' : 'Búsqueda en la web desactivada');
+    this.$('input').focus({ preventScroll: true });
+  }
+  /** Eventos del servidor: search_start → search_sources (Leyendo N fuentes) → search_done (Redactando…). */
+  onSearchEvent(a, ev) {
+    const s = a.search || (a.search = { state: 'searching', query: '', sources: [] });
+    if (ev.type === 'search_start') { s.state = 'searching'; s.query = String(ev.query || '').slice(0, 160); }
+    else if (ev.type === 'search_limit') { s.limit = { reason: ev.reason === 'global' ? 'global' : 'plan', n: Number(ev.limit) || 0 }; }
+    else if (ev.type === 'search_sources') {
+      s.sources = (Array.isArray(ev.sources) ? ev.sources : []).map((x) => ({ title: String(x && x.title || '').slice(0, 160), url: String(x && x.url || '') })).filter((x) => /^https?:\/\//i.test(x.url)).slice(0, 8);
+      if (typeof ev.reading === 'number') s.reading = Math.max(1, Math.min(ev.reading, s.sources.length || ev.reading));
+      if (s.state === 'searching') s.state = 'reading';
+    } else if (ev.type === 'search_done') { s.state = 'writing'; }
+    const nr = s.reading || s.sources.length;
+    const label = { searching: 'Buscando en la web…', reading: `Leyendo ${nr} ${nr === 1 ? 'fuente' : 'fuentes'}…`, writing: 'Redactando…' }[s.state];
+    if (this.busy && label && this.busy.label !== label) { this.busy.label = label; this.updateStatus(); }
+    this.updateMessage(a);
+  }
+  searchCard(m) {
+    const s = m.search; const n = (s.sources || []).length; const st = m.streaming ? s.state : 'done'; const nr = s.reading || n;
+    const icon2 = (k) => h('span', { class: 'ace-st ' + k, 'aria-hidden': 'true', html: k === 'done' ? icon('check') : '' });
+    const steps = [
+      [st === 'searching' ? 'Buscando en la web…' : 'Búsqueda en la web', st === 'searching' ? 'running' : 'done'],
+      [st === 'searching' ? 'Leer las fuentes' : st === 'reading' ? `Leyendo ${nr} ${nr === 1 ? 'fuente' : 'fuentes'}…` : `${nr} ${nr === 1 ? 'fuente leída' : 'fuentes leídas'}`, st === 'searching' ? '' : st === 'reading' ? 'running' : 'done'],
+      [st === 'done' ? 'Respuesta lista' : 'Redactando…', st === 'writing' ? 'running' : st === 'done' ? 'done' : '']
+    ];
+    const title = st === 'done' ? (n ? `Buscó en la web · ${n} ${n === 1 ? 'fuente' : 'fuentes'}` : 'Buscó en la web · sin resultados útiles') : steps.find((x) => x[1] === 'running')?.[0] || 'Buscando en la web…';
+    const card = h('div', { class: 'ace-task ace-search' + (st === 'done' ? ' is-done' : ''), role: 'group', 'aria-label': 'Búsqueda en la web' },
+      h('div', { class: 'ace-task-h' }, h('span', { class: 'ace-search-ic', 'aria-hidden': 'true', html: icon('globe') }),
+        h('span', { class: 'ace-task-t' }, h('strong', {}, title), s.query ? h('small', { 'data-no-i18n': '' }, s.query) : null)));
+    if (st !== 'done') card.append(h('ul', {}, ...steps.map(([t, k]) => h('li', { class: k }, icon2(k), h('span', { class: 'ace-step-t' }, t)))));
+    if (s.limit) card.append(h('p', { class: 'ace-search-note' }, s.limit.reason === 'global'
+      ? 'El buscador gratuito llegó a su límite de hoy. Respondo con datos públicos disponibles; se renueva a las 21:00 (hora de Argentina).'
+      : `Usaste tus ${s.limit.n} búsquedas en la web de hoy. Respondo con datos públicos disponibles; se renueva a las 21:00 (hora de Argentina). `, s.limit.reason === 'plan' ? h('a', { href: '/planes.html' }, 'Ver planes') : null));
+    return card;
+  }
+  sourcesList(m) {
+    const src = (m.search && m.search.sources) || [];
+    const host = (u) => { try { return new URL(u).hostname.replace(/^www\./, ''); } catch { return ''; } };
+    return h('nav', { class: 'ace-sources', 'aria-label': 'Fuentes' }, h('strong', {}, 'Fuentes'),
+      h('ol', {}, ...src.map((x, i) => h('li', {}, h('a', { href: x.url, target: '_blank', rel: 'noopener noreferrer nofollow', title: x.title }, h('span', { class: 'ace-src-n' }, String(i + 1)), h('span', { class: 'ace-src-t', 'data-no-i18n': '' }, x.title || host(x.url)), h('small', {}, host(x.url)))))));
   }
 
   /* =================== Mensajes =================== */
@@ -949,9 +999,11 @@ export class ChatApp {
       const rest = m.artifacts.filter((x) => !isPreviewable(x));
       if (rest.length) body.append(this.filesList(m, rest));
     }
+    if (m.search) body.append(this.searchCard(m));
     const md = h('div', { class: 'md' });
-    md.innerHTML = m.content ? renderMarkdown(m.content) : (m.streaming && !(m.steps && m.steps.length) ? '<span class="typing" aria-label="Escribiendo"><i></i><i></i><i></i></span>' : '');
+    md.innerHTML = m.content ? renderMarkdown(m.content) : (m.streaming && !(m.steps && m.steps.length) && !m.search ? '<span class="typing" aria-label="Escribiendo"><i></i><i></i><i></i></span>' : '');
     body.append(md);
+    if (m.search && m.search.sources && m.search.sources.length && (!m.streaming || m.search.state === 'writing')) body.append(this.sourcesList(m));
     if (m.notice === 'login') body.append(h('div', { class: 'alert info' }, 'Iniciá sesión para seguir con el modelo completo. ', h('a', { href: '/cuenta/' }, 'Ingresar')));
     if (m.notice === 'upgrade' || m.notice === 'quota') body.append(h('div', { class: 'alert info' }, 'Llegaste al límite de tu plan por hoy. ', h('a', { href: '/planes.html' }, 'Ver planes')));
     if (!m.streaming && m.content) {

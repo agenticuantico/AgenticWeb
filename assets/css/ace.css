@@ -252,3 +252,28 @@ body.ace-lock { overflow: hidden; }
 .design-full-btn svg { width: 18px; height: 18px; }
 .design-full-frame { flex: 1 1 auto; width: 100%; min-height: 0; border: 0; background: #fff; padding-bottom: env(safe-area-inset-bottom); }
 body.design-lock { overflow: hidden; }
+
+/* ---------- Búsqueda web en vivo (tarjeta de progreso + fuentes) ---------- */
+.chat.ace .ace-web.on { background: var(--a-ink); color: #fff; }
+.chat.ace .ace-web.on:hover { background: #27272a; color: #fff; }
+.ace-search .ace-task-h { cursor: default; }
+.ace-search .ace-task-h:hover { background: none; }
+.ace-search-ic { width: 24px; height: 24px; flex: 0 0 24px; border-radius: 50%; display: grid; place-items: center; background: rgba(37, 99, 235, .1); color: #1d4ed8; }
+.ace-search-ic svg { width: 15px !important; height: 15px !important; }
+.ace-search .ace-task-t small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ace-search.is-done { margin-bottom: 10px; }
+.ace-search.is-done .ace-task-h { padding: 9px 14px; }
+.ace-search.is-done .ace-task-t strong { font-size: 14px; font-weight: 600; }
+.ace-search-note { margin: 0; padding: 0 14px 12px; font-size: 13px; color: #92400e; }
+.ace-search-note a { color: inherit; font-weight: 600; }
+.ace-sources { margin: 12px 0 2px; width: 100%; max-width: 100%; min-width: 0; overflow: hidden; }
+.ace-sources > strong { display: block; font-size: 13px; font-weight: 700; color: var(--a-muted); margin: 0 0 6px; }
+.ace-sources ol { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; min-width: 0; }
+.ace-sources li { min-width: 0; }
+.ace-sources a { box-sizing: border-box; width: 100%; overflow: hidden; display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 6px 12px 6px 6px; border: 1px solid var(--a-border); border-radius: 12px; background: #fff; color: var(--a-ink); text-decoration: none; min-width: 0; }
+.ace-sources a:hover { background: #fafafa; }
+.ace-sources a:focus-visible { outline: 2px solid #1d4ed8; outline-offset: 2px; }
+.ace-src-n { flex: 0 0 24px; height: 24px; border-radius: 8px; display: grid; place-items: center; background: var(--a-soft); font-size: 12px; font-weight: 700; color: #3f3f46; }
+.ace-src-t { flex: 1; min-width: 0; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ace-sources small { flex: 0 1 auto; max-width: 40%; font-size: 12px; color: var(--a-faint); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 380px) { .chat.ace .ace-web { width: 34px; height: 34px; } }
