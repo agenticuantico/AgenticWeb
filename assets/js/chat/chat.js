@@ -812,7 +812,7 @@ export class ChatApp {
     if (this._panel && this._panel.m === a && a.artifacts.length) this._panel.showFiles();
     // mantener el mensaje principal al final
     const idx = this.chat.messages.indexOf(a);
-    if (idx > -1 && idx !== this.chat.messages.length - 1) { this.chat.messages.splice(idx, 1); this.chat.messages.push(a); this.$('inner').append(this.msgEl(a)); }
+    if (idx > -1 && idx !== this.chat.messages.length - 1) { this.chat.messages.splice(idx, 1); this.chat.messages.push(a); const n = this.root.querySelector(`[data-msg="${a.id}"]`); this.$('inner').append(n || this.msgEl(a)); }
     return a.content;
   }
 
@@ -834,7 +834,7 @@ export class ChatApp {
   inlineConfirm(msg, question) {
     return new Promise((resolve) => {
       const el = this.root.querySelector(`[data-msg="${msg.id}"] .msg-body`);
-      const card = h('div', { class: 'confirm-card', role: 'group', 'aria-label': 'Confirmación requerida' },
+      const card = h('div', { class: 'confirm-card', role: 'group', 'aria-label': 'Confirmación requerida', 'data-keep': '' },
         h('p', {}, h('strong', {}, 'Necesito tu confirmación. '), question),
         h('div', { class: 'row' },
           h('button', { class: 'btn btn-sm btn-primary', type: 'button', onclick: () => { card.remove(); resolve(true); } }, 'Sí, continuar'),
@@ -852,28 +852,57 @@ export class ChatApp {
     this.syncEmpty();
     this.scrollToEnd(m.role === 'user');
   }
-  updateMessage(m) {
+  /**
+   * Actualiza un mensaje sin parpadeo: los tokens se juntan y se dibujan una vez por cuadro
+   * (requestAnimationFrame) y el mensaje existente se parchea en el lugar. Nunca se reemplaza el nodo
+   * completo: así no se reinicia la animación de entrada (.msg → rise), no se recarga el avatar
+   * ni los iframes de vista previa, y el scroll queda anclado al final.
+   */
+  updateMessage(m, { now = false } = {}) {
     if (this._panel && this._panel.m === m) { clearTimeout(this._prT); this._prT = setTimeout(() => this._panel && this._panel.render(), 120); }
-    const old = this.root.querySelector(`[data-msg="${m.id}"]`);
-    // Con vistas previas en el mensaje se actualiza en el lugar (sin mover los iframes, que se recargarían).
-    if (old && m._pv && m._pv.size && old.querySelector('.pvc')) { this.morphMessage(old, this.msgEl(m, { slots: true })); this.scrollToEnd(); return; }
-    const el = this.msgEl(m);
-    if (old) old.replaceWith(el); else this.$('inner').append(el);
-    this.scrollToEnd();
+    (this._dirty || (this._dirty = new Set())).add(m);
+    if (now || !m.streaming || document.hidden) { this.flushMessages(); return; }
+    if (!this._raf) this._raf = requestAnimationFrame(() => this.flushMessages());
   }
-  morphMessage(old, el) {
-    old.className = el.className;
-    const ob = old.querySelector('.msg-body'), nb = el.querySelector('.msg-body');
+  flushMessages() {
+    if (this._raf) { cancelAnimationFrame(this._raf); this._raf = 0; }
+    const list = this._dirty ? [...this._dirty] : [];
+    if (this._dirty) this._dirty.clear();
+    for (const m of list) {
+      const old = this.root.querySelector(`[data-msg="${m.id}"]`);
+      if (!old) { this.$('inner').append(this.msgEl(m)); continue; }
+      this.patchMessage(old, this.msgEl(m, { slots: true }));
+    }
+    if (list.length) this.scrollToEnd(false, true);
+  }
+  /** Parchea old con el contenido de el (mismo mensaje) tocando solo los nodos que cambiaron. */
+  patchMessage(old, el) {
+    if (old.className !== el.className) old.className = el.className;
+    if ((old.getAttribute('style') || '') !== (el.getAttribute('style') || '')) { if (el.hasAttribute('style')) old.setAttribute('style', el.getAttribute('style')); else old.removeAttribute('style'); }
+    const ob = old.querySelector(':scope > .msg-body'), nb = el.querySelector(':scope > .msg-body');
     if (!ob || !nb) { old.replaceWith(el); return; }
-    const keep = new Set([...nb.querySelectorAll(':scope > .pvc-slot')].map((x) => x._card).filter(Boolean));
-    for (const n of [...ob.childNodes]) if (!keep.has(n)) n.remove();
-    let cursor = null;
+    // Los nodos insertados aparte (tarjeta de confirmación, tarjeta de búsqueda) se conservan.
+    const keepExtra = [...ob.childNodes].filter((n) => n.nodeType === 1 && n.hasAttribute('data-keep'));
+    const want = [];
     for (const n of [...nb.childNodes]) {
-      const node = n.classList && n.classList.contains('pvc-slot') ? n._card : n;
-      if (!node) continue;
-      const ref = cursor ? cursor.nextSibling : ob.firstChild;
-      if (node !== ref) ob.insertBefore(node, ref);
-      cursor = node;
+      if (n.nodeType === 1 && n.classList.contains('pvc-slot')) { if (n._card) want.push(n._card); continue; }
+      want.push(n);
+    }
+    const cur = [...ob.childNodes].filter((n) => !keepExtra.includes(n));
+    const out = [];
+    want.forEach((n, i) => {
+      const o = cur[i];
+      if (o === n) { out.push(o); return; }
+      if (o && o.nodeType === 1 && n.nodeType === 1 && o.tagName === n.tagName && o.className === n.className && o.classList.contains('md')) { morphChildren(o, n); out.push(o); return; }
+      if (o && o.isEqualNode(n)) { out.push(o); return; }
+      out.push(n);
+    });
+    for (const n of cur) if (!out.includes(n)) n.remove();
+    // Orden final: lo que corresponde al mensaje y, al final, lo conservado.
+    let ref = ob.firstChild;
+    for (const n of [...out, ...keepExtra]) {
+      if (n === ref) { ref = n.nextSibling; continue; }
+      ob.insertBefore(n, ref);
     }
   }
   addNotice(text, type = '') {
@@ -883,9 +912,15 @@ export class ChatApp {
     this.syncEmpty();
     this.scrollToEnd();
   }
-  scrollToEnd(force) {
+  scrollToEnd(force, instant) {
     const t = this.$('thread');
-    if (force || this.stick) requestAnimationFrame(() => { t.scrollTop = t.scrollHeight; });
+    if (!(force || this.stick) || this._scrollQ) return;
+    this._scrollQ = requestAnimationFrame(() => {
+      this._scrollQ = 0;
+      // Mientras llega la respuesta el desplazamiento es inmediato: el «smooth» del CSS reiniciado en cada token se ve como temblor.
+      const top = t.scrollHeight - t.clientHeight;
+      if (Math.abs(t.scrollTop - top) > 1) t.scrollTo({ top, behavior: instant || this.busy ? 'instant' : 'auto' });
+    });
   }
 
   msgEl(m, { slots = false } = {}) {
@@ -1298,3 +1333,23 @@ export function download(name, content, mime = 'text/plain') {
 }
 function slug(s) { return String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 50) || 'chat'; }
 export { mailtoCommercial, TOOLS, CONNECTORS };
+
+/**
+ * Pasa los hijos de `to` a `from` reemplazando solo los nodos que cambiaron (en el streaming suele ser el
+ * último párrafo). Evita recrear imágenes y bloques ya dibujados en cada token.
+ */
+function morphChildren(from, to) {
+  const a = [...from.childNodes], b = [...to.childNodes];
+  for (let i = 0; i < b.length; i++) {
+    const o = a[i], n = b[i];
+    if (o && o.isEqualNode(n)) continue;
+    if (o && o.nodeType === 3 && n.nodeType === 3) { o.nodeValue = n.nodeValue; continue; }
+    if (o && o.nodeType === 1 && n.nodeType === 1 && o.tagName === n.tagName && o.tagName !== 'IMG' && o.tagName !== 'IFRAME' && /^(UL|OL|TABLE|TBODY|THEAD|TR|BLOCKQUOTE|DIV)$/.test(o.tagName)) {
+      for (const at of [...o.attributes]) if (!n.hasAttribute(at.name)) o.removeAttribute(at.name);
+      for (const at of [...n.attributes]) if (o.getAttribute(at.name) !== at.value) o.setAttribute(at.name, at.value);
+      morphChildren(o, n); continue;
+    }
+    if (o) from.replaceChild(n, o); else from.appendChild(n);
+  }
+  for (let i = b.length; i < a.length; i++) a[i].remove();
+}
