@@ -5,6 +5,7 @@
  */
 import { h, icon, toast, confirmDialog, timeAgo } from '../ui.js';
 import { call, errorText } from './api.js';
+import { getSiteLang } from '../i18n.js';
 
 const DAYS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 let seq = 0;
@@ -71,7 +72,7 @@ function taskCard(t, ctx, root) {
       h('span', { class: 'acc-task-ic', html: icon(t.kind === 'job_search' ? 'briefcase' : 'globe') }),
       h('div', { class: 'acc-task-t' }, h('strong', {}, t.title), h('small', { class: 'muted' }, t.schedule)),
       status),
-    h('p', { class: 'acc-task-next muted' }, t.status === 'active' ? `Próxima: ${new Date(t.nextRunAt).toLocaleString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires', weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}` : t.failCount >= 5 ? 'Se pausó sola después de 5 fallas seguidas.' : 'No se ejecuta mientras esté pausada.'),
+    h('p', { class: 'acc-task-next muted' }, t.status === 'active' ? `Próxima: ${new Date(t.nextRunAt).toLocaleString(getSiteLang(), { timeZone: 'America/Argentina/Buenos_Aires', weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}` : t.failCount >= 5 ? 'Se pausó sola después de 5 fallas seguidas.' : 'No se ejecuta mientras esté pausada.'),
     results,
     h('div', { class: 'acc-row' }, runBtn, toggle, edit, del),
     hist);
@@ -92,7 +93,7 @@ function historyBox(t) {
       if (!r.runs.length) { list.replaceChildren(h('p', { class: 'muted acc-small' }, 'Todavía no se ejecutó.')); return; }
       list.replaceChildren(h('ol', { class: 'acc-hist' }, ...r.runs.map((x) => h('li', { class: x.status },
         h('span', { class: 'acc-chip ' + (x.status === 'ok' ? 'ok' : x.status === 'error' ? 'warn' : '') }, x.status === 'ok' ? 'Bien' : x.status === 'error' ? 'Con problemas' : 'En curso'),
-        h('span', { class: 'acc-hist-when' }, new Date(x.startedAt).toLocaleString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }), x.trigger === 'manual' ? ' · manual' : ' · programada'),
+        h('span', { class: 'acc-hist-when' }, new Date(x.startedAt).toLocaleString(getSiteLang(), { timeZone: 'America/Argentina/Buenos_Aires', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }), x.trigger === 'manual' ? ' · manual' : ' · programada'),
         x.summary ? h('span', { class: 'acc-hist-sum' }, x.summary) : null))));
     } catch (e) { loaded = false; list.replaceChildren(h('p', { class: 'error-text' }, errorText(e))); }
   });
@@ -116,7 +117,7 @@ function runView(r) {
 
 function taskForm(ctx, root, data, task = null, onCancel = null) {
   const kind = h('select', { class: 'input', name: 'kind' }, h('option', { value: 'job_search' }, 'Buscar empleo'), h('option', { value: 'web_digest' }, 'Resumen de la web'));
-  const query = h('input', { class: 'input', name: 'query', required: true, maxlength: 120, placeholder: 'Ej.: atención al cliente remoto Argentina', autocomplete: 'off' });
+  const query = h('input', { class: 'input', name: 'query', required: true, maxlength: 120, placeholder: 'Ej.: atención al cliente', autocomplete: 'off' });
   const cadence = h('select', { class: 'input', name: 'cadence' }, h('option', { value: 'daily' }, 'Todos los días'), h('option', { value: 'weekly' }, 'Una vez por semana'));
   const wd = task && task.weekday !== null && task.weekday !== undefined ? task.weekday : 1;
   const hr = task ? task.hourArt : 9;
@@ -124,6 +125,15 @@ function taskForm(ctx, root, data, task = null, onCancel = null) {
   const hour = h('select', { class: 'input', name: 'hour' }, ...Array.from({ length: 24 }, (_, i) => h('option', { value: String(i), selected: i === hr || null }, `${String(i).padStart(2, '0')}:00`)));
   const title = task ? h('input', { class: 'input', name: 'title', maxlength: 80, autocomplete: 'off', value: task.title }) : null;
   if (task) { kind.value = task.kind; query.value = (task.params && task.params.query) || ''; cadence.value = task.cadence; }
+  // Fase 3: filtros del agente de empleo (solo para «Buscar empleo»).
+  const tp = (task && task.params) || {};
+  const english = h('select', { class: 'input', name: 'english' }, ...[['', 'Según mi perfil'], ['any', 'Cualquier nivel'], ['none', 'Sin inglés'], ['written', 'Solo inglés escrito']].map(([v, l]) => h('option', { value: v, selected: (tp.english || '') === v || null }, l)));
+  const arId = 'tar' + Math.random().toString(36).slice(2, 7);
+  const ar = h('input', { type: 'checkbox', id: arId, name: 'remoteArgentina', checked: tp.remoteArgentina !== false || null });
+  const engField = field('Inglés en las ofertas', english);
+  const arField = h('label', { class: 'acc-check-row', for: arId }, ar, ' Solo remoto desde Argentina');
+  const syncKind = () => { engField.hidden = arField.hidden = kind.value !== 'job_search'; };
+  kind.addEventListener('change', syncKind);
   const dayField = field('Día', weekday);
   dayField.hidden = cadence.value !== 'weekly';
   cadence.addEventListener('change', () => { dayField.hidden = cadence.value !== 'weekly'; });
@@ -134,13 +144,14 @@ function taskForm(ctx, root, data, task = null, onCancel = null) {
   const form = h('form', { class: 'acc-card acc-form', novalidate: true, 'aria-label': task ? `Editar ${task.title}` : 'Nueva tarea' },
     h('h4', {}, task ? 'Editar tarea' : 'Nueva tarea'),
     full ? h('p', { class: 'acc-note' }, h('span', { html: icon('info') }), 'Llegaste al máximo de tareas activas de tu plan. Pausá o borrá una para crear otra.') : null,
-    h('div', { class: 'acc-form-grid' }, title ? field('Nombre', title) : null, field('Qué hace', kind), field('Qué buscar', query), field('Frecuencia', cadence), dayField, field('Hora (Argentina)', hour)),
-    err, h('div', { class: 'acc-row' }, submit, cancel));
+    h('div', { class: 'acc-form-grid' }, title ? field('Nombre', title) : null, field('Qué hace', kind), field('Qué buscar', query), field('Frecuencia', cadence), dayField, field('Hora (Argentina)', hour), engField),
+    arField, err, h('div', { class: 'acc-row' }, submit, cancel));
+  syncKind();
   form.addEventListener('submit', async (e) => {
     e.preventDefault(); err.textContent = '';
     if (query.value.trim().length < 2) { err.textContent = 'Escribí qué querés buscar.'; query.focus(); return; }
     submit.disabled = true;
-    const body = { kind: kind.value, params: { query: query.value.trim() }, cadence: cadence.value, hourArt: Number(hour.value), weekday: cadence.value === 'weekly' ? Number(weekday.value) : undefined };
+    const body = { kind: kind.value, params: kind.value === 'job_search' ? { query: query.value.trim(), ...(english.value ? { english: english.value } : {}), remoteArgentina: ar.checked } : { query: query.value.trim() }, cadence: cadence.value, hourArt: Number(hour.value), weekday: cadence.value === 'weekly' ? Number(weekday.value) : undefined };
     try {
       if (task) {
         await call(`/api/tasks/${task.id}/edit`, { method: 'POST', body: { ...body, title: title.value.trim() || undefined } });

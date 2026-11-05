@@ -25,7 +25,7 @@ export class AvatarStage {
     el.setAttribute('aria-label', label);
     el.dataset.state = 'idle';
     el.dataset.mode = 'portrait';
-    el.innerHTML = `<div class="portrait-zoom"><picture><source type="image/webp" srcset="/media/agenticuantico-portrait.webp"><img class="portrait-img" src="/media/agenticuantico-portrait.jpg" alt="" width="${IMG_W}" height="${IMG_H}" decoding="async"></picture><canvas class="portrait-canvas" aria-hidden="true"></canvas></div><div class="portrait-glow" aria-hidden="true"></div><span class="avatar-status" aria-live="polite"></span>`;
+    el.innerHTML = `<div class="portrait-zoom"><picture><source type="image/avif" srcset="/media/agenticuantico-portrait.avif"><source type="image/webp" srcset="/media/agenticuantico-portrait.webp"><img class="portrait-img" src="/media/agenticuantico-portrait.jpg" alt="" width="${IMG_W}" height="${IMG_H}" decoding="async"></picture><canvas class="portrait-canvas" aria-hidden="true"></canvas></div><div class="portrait-glow" aria-hidden="true"></div><span class="avatar-status" aria-live="polite"></span>`;
     this.statusEl = el.querySelector('.avatar-status');
     this.canvas = el.querySelector('.portrait-canvas');
     this._startCanvas();

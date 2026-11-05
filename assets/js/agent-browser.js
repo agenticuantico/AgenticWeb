@@ -13,6 +13,9 @@
  */
 import { h, icon } from './ui.js';
 import * as engine from './chat/engine.js';
+import { needsWebAction, isFollowUp } from './chat/intent.js';
+/** Reexportadas para el código que ya las importaba desde acá (la lógica vive en chat/intent.js, sin DOM). */
+export { needsWebAction, isFollowUp };
 
 (function css() {
   if (typeof document === 'undefined' || document.getElementById('ac-ab2-css')) return;
@@ -21,18 +24,12 @@ import * as engine from './chat/engine.js';
   document.head.appendChild(l);
 })();
 
-const WEB_ACTION = /(inici[aá]r? sesi[oó]n|\blog ?in\b|ingres[aá]r? a mi cuenta|envi[aá](r|me|le)? (un |el |los )?(correo|mail|email|e-mail)s?|postul(a|á|ar|ame|arme)\b|aplic(a|á|ar) a (empleos?|trabajos?|ofertas?|puestos?)|complet(a|á|ar) (el |un |los )?formularios?|linkedin|computrabajo|bumeran|zonajobs|indeed|mercado ?libre|clasificados?|public(a|á|ar) (un )?aviso|naveg(a|á|ar) (por|en)|entr(a|á|ar) (a|en) (la )?(web|p[aá]gina|sitio)|abr(í|i|ir) (la )?(web|p[aá]gina|sitio)|busc(a|á|ar) en (google|la web|internet)|wikipedia|computadora del agente|investig(a|á|ar|ame)\b|averigu(a|á|ar|ame)\b|busc(a|á)(me)? (la |el |los |las |info|informaci[oó]n|datos|precios?|noticias|ofertas)|compar(a|á)(me)? (precios|ofertas|fuentes|productos)|resum(i|í)(me)? (las |las )?fuentes|con fuentes|fuentes y (links|enlaces)|extra(e|é|er) (la |una )?tabla|(en|a) csv\b|captura de (la )?(p[aá]gina|pantalla)|pdf de (la )?p[aá]gina|\bresearch\b|look up|pesquis(a|ar|e)\b)/i;
-const FOLLOW = /^\s*(segu[ií]|continu[aá]|dale|sigue|retom[aá]|ahora (compar[aá]|busc[aá]|hac[eé]|arm[aá]|export[aá]|guard[aá]|pas[aá]|resum[ií]|agreg[aá])|tambi[eé]n (busc[aá]|compar[aá]|agreg[aá])|export[aá](lo)? a|pas[aá](lo)? a (csv|tabla|pdf))/i;
-
 const SITES = [
   [/linkedin/i, 'https://www.linkedin.com/'], [/computrabajo/i, 'https://ar.computrabajo.com/'], [/bumeran/i, 'https://www.bumeran.com.ar/'],
   [/zonajobs/i, 'https://www.zonajobs.com.ar/'], [/indeed/i, 'https://ar.indeed.com/'], [/mercado ?libre/i, 'https://www.mercadolibre.com.ar/'],
   [/gmail|correo|mail/i, 'https://mail.google.com/']
 ];
 
-export function needsWebAction(text) { return WEB_ACTION.test(String(text || '')); }
-/** ¿Es un seguimiento de la tarea anterior de la computadora («seguí», «ahora compará…»)? */
-export function isFollowUp(text) { return FOLLOW.test(String(text || '')); }
 export function guessUrl(text) {
   const m = /\bhttps?:\/\/[^\s<>"']{4,300}/i.exec(text) || /\b([a-z0-9-]+\.)+(com|ar|net|org|io|dev|es|mx|co|br)(\.[a-z]{2})?(\/[^\s]*)?/i.exec(text);
   if (m) return m[0].startsWith('http') ? m[0] : 'https://' + m[0];

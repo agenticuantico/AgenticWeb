@@ -6,7 +6,6 @@
  *  - Si el usuario ESCRIBE, la respuesta es solo texto (puede escucharla con el botón de altavoz).
  *  - Conversación manos libres: graba, envía, responde con voz y vuelve a escuchar, por turnos.
  */
-import { getAvatarCall } from './avatar-call.js';
 import { h, icon, esc, toast, modal, popover, uid } from '../ui.js';
 import { CONFIG, PLANS, formatARS, mailtoCommercial } from '../config.js';
 import { prefs } from '../consent.js';
@@ -18,7 +17,8 @@ import { AGENTS, TOOLS, SKILLS, CONNECTORS, agentById, initials } from './agents
 import { speak, stop as stopSpeech } from './voice.js';
 import { VoiceRecorder, fmtClock } from './recorder.js';
 import { readFile, fmtSize } from './docs.js';
-import { needsWebAction, isFollowUp, AgentBrowserCard } from '../agent-browser.js';
+// Rendimiento (Fase 3): la computadora del agente y la videollamada se cargan recién cuando se usan.
+import { needsWebAction, isFollowUp, routeWebIntent } from './intent.js';
 import { detectMediaIntent, mediaMessage, mediaCard, isMediaMessage, runMedia as runMediaTask } from './media.js';
 import { cleanArtifact, cleanThought } from './clean.js';
 import { PreviewCard, LiveFrame, previewKind, previewHtml, isPreviewable } from './preview-card.js';
@@ -31,7 +31,7 @@ const MODES = {
 };
 
 const PHASES = { thinking: 'Pensando', searching: 'Buscando', coding: 'Escribiendo código', verifying: 'Verificando', reading: 'Leyendo', agent: 'Especialista', confirm: 'Confirmación' };
-const FACE = '/media/agenticuantico-avatar.jpg';
+const FACE = '/media/agenticuantico-avatar.webp';
 
 const SUGGESTIONS = [
   { t: '¿Qué es AgentiCuántico?', i: 'info' },
@@ -184,7 +184,9 @@ export class ChatApp {
       const on = b.dataset.mode === this.mode;
       b.setAttribute('aria-checked', String(on));
       b.tabIndex = on ? 0 : -1;
-      if (on && b.parentElement.scrollWidth > b.parentElement.clientWidth) b.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+      // Solo se desplaza la tira de modos (scrollIntoView movía toda la página en el celular al cargar la portada).
+      const strip = b.parentElement;
+      if (on && strip.scrollWidth > strip.clientWidth) { const l = b.getBoundingClientRect().left - strip.getBoundingClientRect().left + strip.scrollLeft; if (l < strip.scrollLeft) strip.scrollLeft = l; else if (l + b.offsetWidth > strip.scrollLeft + strip.clientWidth) strip.scrollLeft = l + b.offsetWidth - strip.clientWidth; }
     });
     this.$('modeStrip').dataset.mode = this.mode;
     this.$('input').placeholder = this.mode === 'auto' ? 'Describí la tarea para el agente' : 'Preguntá lo que quieras';
@@ -494,13 +496,12 @@ export class ChatApp {
   /** Abre la videollamada flotante con el avatar (al mandar voz o al responder con voz). */
   openCall() {
     if (!this.flag('voice')) return;
-    if (!this._call) {
-      this._call = getAvatarCall();
-      this._call.onClose = () => { stopSpeech(); if (this.handsFree) this.act_handsfree(); };
-    }
-    const st = this.avatar.state;
-    this._call.open(this.$('form') || this.root);
-    this._call.setState(st);
+    const show = () => { const st = this.avatar.state; this._call.open(this.$('form') || this.root); this._call.setState(st); };
+    if (this._call) { show(); return; }
+    import('./avatar-call.js').then(({ getAvatarCall }) => {
+      if (!this._call) { this._call = getAvatarCall(); this._call.onClose = () => { stopSpeech(); if (this.handsFree) this.act_handsfree(); }; }
+      show();
+    }).catch(() => {});
   }
   async act_mic() {
     if (this.recorder) return;
@@ -627,11 +628,15 @@ export class ChatApp {
     const follow = this.browserCard && this.browserCard.chatId === this.chat.id && isFollowUp(text);
     // Pedidos sobre las cuentas conectadas (correo, GitHub, Cloudflare, LinkedIn) o de empleo: herramientas del servidor
     // (más rápidas y sin gastar minutos de navegador). Cualquier escritura pide «Confirmar» en una tarjeta.
+    // Rápido/Profundo: «Buscá en la web: …», «averiguá…», «con fuentes» → búsqueda en vivo (no la computadora del agente).
+    const route = detectMediaIntent(text) ? null : routeWebIntent(text, this.mode);
     if (!detectMediaIntent(text) && this.toolsReady() && wantsTools(text) && !follow) msg._tools = true;
-    else if (!detectMediaIntent(text) && (needsWebAction(text) || follow)) {
+    else if (route === 'search' && !follow) msg._search = true;
+    else if (!detectMediaIntent(text) && (route === 'browser' || follow)) {
       msg._browser = true;
       if (this.browserCard) this.browserCard.detach();
       const chatId = this.chat.id;
+      const { AgentBrowserCard } = await import('../agent-browser.js');
       this.browserCard = new AgentBrowserCard({
         thread: this.$('inner'), composer: this.$('form'), text, conv: chatId, lang: this.lang.code, isPaid: this.isPaid,
         idToken: this.user ? () => this.user.getIdToken() : null, onScroll: () => this.scrollToEnd(true),
@@ -790,7 +795,7 @@ export class ChatApp {
         return;
       }
       // Pedidos de acción en la web sin navegador en la nube: respuesta honesta (guía), sin pasos simulados.
-      const webOnly = needsWebAction(userMsg.content) && !(engine.state.live && engine.state.caps && engine.state.caps.browser);
+      const webOnly = !userMsg._search && needsWebAction(userMsg.content) && !(engine.state.live && engine.state.caps && engine.state.caps.browser);
       if (this.mode === 'auto' && !webOnly) {
         finalText = await this.runAuto(userMsg, invited, docs, ctrl);
       } else {
@@ -798,7 +803,7 @@ export class ChatApp {
         if (!onlyAgents) {
           const a = { id: uid('m'), role: 'assistant', content: '', at: Date.now(), streaming: true };
           this.pushMessage(a);
-          const r = await engine.chat({ messages: this.history(), lang: this.lang.code, mode: this.mode, system: this.systemContext(), docs, signal: ctrl.signal, search: this.webSearch ? true : undefined, onEvent: (ev) => this.onSearchEvent(a, ev), onDelta: (d) => { a.content += d; if (a.search && a.search.state !== 'writing' && a.search.state !== 'done') this.onSearchEvent(a, { type: 'search_done' }); this.updateMessage(a); } });
+          const r = await engine.chat({ messages: this.history(), lang: this.lang.code, mode: this.mode, system: this.systemContext(), docs, signal: ctrl.signal, search: (this.webSearch || userMsg._search) ? true : undefined, onEvent: (ev) => this.onSearchEvent(a, ev), onDelta: (d) => { a.content += d; if (a.search && a.search.state !== 'writing' && a.search.state !== 'done') this.onSearchEvent(a, { type: 'search_done' }); this.updateMessage(a); } });
           a.streaming = false; a.content = r.text; if (r.notice) a.notice = r.notice;
           if (a.search) a.search.state = 'done';
           this.updateMessage(a);
