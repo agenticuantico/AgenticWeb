@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+<title>Altura Sur · Plantilla demo para bodegas | AgentiCuántico</title>
+<meta name="description" content="Plantilla demo inmersiva para bodegas y vinotecas: copa 3D en tiempo real, historia con scroll y reserva de visitas. Marca y contenido ficticios.">
+<meta name="robots" content="noindex, follow">
+<link rel="canonical" href="https://agenticuantico.dev.ar/plantillas/bodega-altura/">
+<meta name="theme-color" content="#170a0e">
+<link rel="icon" href="/favicon.ico?v=7" sizes="48x48">
+<link rel="stylesheet" href="../_comun/fonts/fonts.css">
+<link rel="stylesheet" href="../_comun/demo.css">
+<link rel="stylesheet" href="style.css">
+<script type="module" src="app.js"></script>
+</head>
+<body>
+<a class="skip" href="#main">Saltar al contenido</a>
+<div class="progress" aria-hidden="true"></div>
+
+<header class="top">
+  <a class="logo" href="#main" aria-label="Altura Sur, inicio">
+    <svg viewBox="0 0 40 40" width="30" height="30" aria-hidden="true"><path d="M4 32 L16 12 L22 22 L27 15 L36 32 Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="29" cy="9" r="2.4" fill="currentColor"/></svg>
+    <span>Altura <i>Sur</i></span>
+  </a>
+  <nav class="links" data-menu aria-label="Principal">
+    <a href="#historia">Historia</a><a href="#vinos">Vinos</a><a href="#visitas">Visitas</a>
+  </nav>
+  <a class="cta-top" href="#visitas" data-magnetic>Reservar visita</a>
+  <button class="burger" type="button" data-menu-btn aria-expanded="false" aria-label="Abrir menú"><span></span><span></span></button>
+</header>
+
+<main id="main">
+  <section class="hero" aria-labelledby="h1">
+    <canvas class="glass" id="glass" aria-hidden="true"></canvas>
+    <div class="glass-fallback" aria-hidden="true">
+      <svg viewBox="0 0 200 320"><defs><linearGradient id="gw" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#8d1d33"/><stop offset="1" stop-color="#3d0812"/></linearGradient></defs><path d="M52 30 Q48 140 100 168 Q152 140 148 30 Z" fill="none" stroke="#f3e9dc" stroke-opacity=".5" stroke-width="2"/><path d="M58 92 Q60 146 100 160 Q140 146 142 92 Z" fill="url(#gw)"/><path d="M100 168 V280 M62 290 Q100 278 138 290" stroke="#f3e9dc" stroke-opacity=".5" stroke-width="2" fill="none"/></svg>
+    </div>
+    <div class="hero-copy">
+      <p class="eyebrow rv">Bodega familiar · Valle alto</p>
+      <h1 id="h1" class="rv" data-d="1">Vinos que <em>respiran</em> altura</h1>
+      <p class="lead rv" data-d="2">Malbec y blends de viñedos de montaña, criados sin apuro. La copa responde a tu movimiento; el scroll cuenta el resto.</p>
+      <div class="hero-actions rv" data-d="3">
+        <a class="btn" href="#vinos" data-magnetic>Conocer los vinos</a>
+        <a class="btn ghost" href="#visitas">Visitar la bodega</a>
+      </div>
+    </div>
+    <div class="hero-foot" aria-hidden="true"><span>Deslizá</span><i></i></div>
+  </section>
+
+  <section class="story" id="historia" aria-labelledby="story-h">
+    <h2 id="story-h" class="sr-only">Del viñedo a la copa</h2>
+    <div class="story-sticky">
+      <ol class="chapters">
+        <li class="chapter" data-ch="0"><span class="num">01</span><h3>Suelo</h3><p>Piedra, arena y noches frías. La vid sufre un poco y la uva concentra color y aroma.</p></li>
+        <li class="chapter" data-ch="1"><span class="num">02</span><h3>Tiempo</h3><p>Doce meses en roble francés de segundo uso. La madera acompaña, no tapa.</p></li>
+        <li class="chapter" data-ch="2"><span class="num">03</span><h3>Copa</h3><p>Taninos firmes, fruta negra y un final largo que pide otra conversación.</p></li>
+      </ol>
+      <div class="story-meter" aria-hidden="true"><i></i></div>
+    </div>
+  </section>
+
+  <section class="wines" id="vinos" aria-labelledby="wines-h">
+    <div class="wrap">
+      <p class="eyebrow rv">Línea de muestra</p>
+      <h2 id="wines-h" class="rv" data-d="1">Tres etiquetas, <em>tres alturas</em></h2>
+      <div class="cards">
+        <article class="card rv" data-tilt>
+          <div class="bottle" style="--wine:#5b0f1f;--label:#f3e9dc"><span>Piedra</span></div>
+          <h3>Piedra Malbec</h3><p>Fresco y directo. Violetas, ciruela, cero maquillaje.</p>
+          <dl><div><dt>Altura</dt><dd>1.450 m</dd></div><div><dt>Crianza</dt><dd>6 meses</dd></div></dl>
+        </article>
+        <article class="card rv" data-d="1" data-tilt>
+          <div class="bottle" style="--wine:#3e0a16;--label:#c9a35b"><span>Viento</span></div>
+          <h3>Viento Blend</h3><p>Malbec, Cabernet Franc y Petit Verdot. Especiado y profundo.</p>
+          <dl><div><dt>Altura</dt><dd>1.700 m</dd></div><div><dt>Crianza</dt><dd>12 meses</dd></div></dl>
+        </article>
+        <article class="card rv" data-d="2" data-tilt>
+          <div class="bottle" style="--wine:#2a0710;--label:#1b1b1b;--ink:#c9a35b"><span>Cumbre</span></div>
+          <h3>Cumbre Gran Reserva</h3><p>Producción corta de una sola parcela. Para guardar o para una fecha especial.</p>
+          <dl><div><dt>Altura</dt><dd>1.900 m</dd></div><div><dt>Crianza</dt><dd>18 meses</dd></div></dl>
+        </article>
+      </div>
+      <p class="fine rv">Datos de muestra para la demo. Cada bodega carga sus propios vinos, precios y fichas.</p>
+    </div>
+  </section>
+
+  <section class="ritual" aria-labelledby="ritual-h">
+    <div class="wrap ritual-grid">
+      <h2 id="ritual-h" class="rv">Cómo se <em>sirve</em></h2>
+      <ul class="steps">
+        <li class="rv"><b>16–18 °C</b><span>Temperatura de servicio para los tintos.</span></li>
+        <li class="rv" data-d="1"><b>20 min</b><span>Abrilo antes: el Gran Reserva agradece el aire.</span></li>
+        <li class="rv" data-d="2"><b>Copa amplia</b><span>Un tercio lleno, para que el aroma tenga lugar.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="visit" id="visitas" aria-labelledby="visit-h">
+    <div class="wrap visit-grid">
+      <div>
+        <p class="eyebrow rv">Turismo del vino</p>
+        <h2 id="visit-h" class="rv" data-d="1">Vení a <em>probarlo</em> donde nace</h2>
+        <p class="rv" data-d="2">Recorrido por viñedo y sala de barricas, con degustación guiada de tres vinos. Grupos chicos, de jueves a domingo.</p>
+      </div>
+      <form class="form rv" data-demo data-d="2" aria-describedby="visit-note">
+        <label>Nombre<input name="nombre" autocomplete="name" required></label>
+        <label>Email<input name="email" type="email" autocomplete="email" required></label>
+        <div class="row">
+          <label>Fecha<input name="fecha" type="date" required></label>
+          <label>Personas<select name="personas"><option>2</option><option>3</option><option>4</option><option>5 o más</option></select></label>
+        </div>
+        <button class="btn" type="submit" data-magnetic>Pedir reserva</button>
+        <p class="demo-note" id="visit-note">Formulario de demostración: no envía datos a ningún lado.</p>
+        <p class="form-ok" role="status" tabindex="-1">Listo. En un sitio real, la bodega recibiría tu pedido por email o en su panel.</p>
+      </form>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap foot-grid">
+    <p class="big" aria-hidden="true">Altura Sur</p>
+    <p>Beber con moderación. Prohibida su venta a menores de 18 años.</p>
+    <p>Marca ficticia creada para mostrar una plantilla. Diseño y código: AgentiCuántico.</p>
+  </div>
+</footer>
+
+<div class="demo-ribbon" role="note"><b>Demo</b><span>Plantilla de muestra<span class="long"> · marca y datos ficticios</span></span><a href="/plantillas/">Ver plantillas</a></div>
+</body>
+</html>

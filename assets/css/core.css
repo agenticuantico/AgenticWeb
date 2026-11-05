@@ -269,6 +269,7 @@ table.table { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); }
 .prose a { color: var(--ink); }
 .prose .updated { color: var(--muted); font-size: var(--fs-sm); }
 .legal-layout { display: grid; grid-template-columns: 240px 1fr; gap: 48px; align-items: start; }
+.legal-layout > * { min-width: 0; }
 .legal-nav { position: sticky; top: calc(var(--header-h) + 24px); display: grid; gap: 2px; font-size: var(--fs-sm); }
 .legal-nav a { padding: 8px 12px; border-radius: var(--r-md); text-decoration: none; color: var(--muted); }
 .legal-nav a[aria-current="page"], .legal-nav a:hover { background: var(--surface-3); color: var(--ink); }

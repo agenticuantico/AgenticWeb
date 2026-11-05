@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+<title>Pulso · Plantilla demo para gimnasios | AgentiCuántico</title>
+<meta name="description" content="Plantilla demo inmersiva para gimnasios y centros de entrenamiento: núcleo 3D que late al ritmo que elegís, horarios por día y planes. Marca y datos ficticios.">
+<meta name="robots" content="noindex, follow">
+<link rel="canonical" href="https://agenticuantico.dev.ar/plantillas/gimnasio-pulso/">
+<meta name="theme-color" content="#0c0c0d">
+<link rel="icon" href="/favicon.ico?v=7" sizes="48x48">
+<link rel="stylesheet" href="../_comun/fonts/fonts.css">
+<link rel="stylesheet" href="../_comun/demo.css">
+<link rel="stylesheet" href="style.css">
+<script type="module" src="app.js"></script>
+</head>
+<body>
+<a class="skip" href="#main">Saltar al contenido</a>
+<div class="progress" aria-hidden="true"></div>
+
+<header class="top">
+  <a class="logo" href="#main" aria-label="Pulso, inicio"><span class="mark" aria-hidden="true"></span>PULSO</a>
+  <nav class="links" data-menu aria-label="Principal">
+    <a href="#disciplinas">Disciplinas</a><a href="#horarios">Horarios</a><a href="#planes">Planes</a><a href="#prueba">Clase de prueba</a>
+  </nav>
+  <a class="cta-top" href="#prueba" data-magnetic>Probar gratis</a>
+  <button class="burger" type="button" data-menu-btn aria-expanded="false" aria-label="Abrir menú"><span></span><span></span></button>
+</header>
+
+<main id="main">
+  <section class="hero" aria-labelledby="h1">
+    <canvas id="core" class="core" aria-hidden="true"></canvas>
+    <div class="core-fallback" aria-hidden="true"></div>
+    <h1 id="h1" class="hero-title"><span class="kin" data-kin>Entrená</span> <span class="kin outline" data-kin>a tu</span> <span class="kin accent" data-kin>ritmo</span></h1>
+    <div class="hero-bottom">
+      <p class="lead rv">Fuerza, boxeo y funcional en grupos chicos, con coaches que corrigen de verdad. Sin contratos eternos.</p>
+      <div class="bpm rv" data-d="1">
+        <label for="bpm">Elegí el ritmo del núcleo</label>
+        <div class="bpm-row"><input id="bpm" type="range" min="60" max="180" step="2" value="112" aria-describedby="bpm-out"><output id="bpm-out" for="bpm"><b>112</b> lpm</output></div>
+      </div>
+      <a class="btn rv" data-d="2" href="#prueba" data-magnetic>Reservar clase de prueba</a>
+    </div>
+  </section>
+
+  <div class="marquee">
+    <p class="sr-only">Disciplinas: funcional, boxeo, fuerza, movilidad, HIIT y ciclismo indoor.</p>
+    <div class="track" aria-hidden="true">
+      <span>Funcional</span><i></i><span>Boxeo</span><i></i><span>Fuerza</span><i></i><span>Movilidad</span><i></i><span>HIIT</span><i></i><span>Ciclismo indoor</span><i></i>
+      <span>Funcional</span><i></i><span>Boxeo</span><i></i><span>Fuerza</span><i></i><span>Movilidad</span><i></i><span>HIIT</span><i></i><span>Ciclismo indoor</span><i></i>
+    </div>
+  </div>
+
+  <section class="disc" id="disciplinas" aria-labelledby="disc-h">
+    <div class="wrap">
+      <h2 id="disc-h" class="rv">Seis formas de <span class="accent">moverte</span></h2>
+      <div class="disc-grid">
+        <article class="d-card rv"><span class="n">01</span><h3>Funcional</h3><p>Patrones básicos, kettlebells y trabajo en circuito.</p><div class="meter" style="--v:.7"><i></i><span>Intensidad</span></div></article>
+        <article class="d-card rv" data-d="1"><span class="n">02</span><h3>Boxeo</h3><p>Técnica, bolsa y guantes. No hace falta experiencia.</p><div class="meter" style="--v:.85"><i></i><span>Intensidad</span></div></article>
+        <article class="d-card rv" data-d="2"><span class="n">03</span><h3>Fuerza</h3><p>Barra y mancuernas con progresión planificada.</p><div class="meter" style="--v:.75"><i></i><span>Intensidad</span></div></article>
+        <article class="d-card rv"><span class="n">04</span><h3>Movilidad</h3><p>Articulaciones felices y espalda que no se queja.</p><div class="meter" style="--v:.3"><i></i><span>Intensidad</span></div></article>
+        <article class="d-card rv" data-d="1"><span class="n">05</span><h3>HIIT</h3><p>Intervalos cortos, sudor largo. 40 minutos y listo.</p><div class="meter" style="--v:.95"><i></i><span>Intensidad</span></div></article>
+        <article class="d-card rv" data-d="2"><span class="n">06</span><h3>Ciclismo indoor</h3><p>Música alta y cadencia guiada por luces.</p><div class="meter" style="--v:.8"><i></i><span>Intensidad</span></div></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="sched" id="horarios" aria-labelledby="sched-h">
+    <div class="wrap">
+      <div class="sched-head">
+        <h2 id="sched-h" class="rv">Horarios</h2>
+        <div class="days rv" role="tablist" aria-label="Día de la semana">
+          <button role="tab" aria-selected="true" data-day="0">Lun</button><button role="tab" aria-selected="false" data-day="1">Mar</button><button role="tab" aria-selected="false" data-day="2">Mié</button><button role="tab" aria-selected="false" data-day="3">Jue</button><button role="tab" aria-selected="false" data-day="4">Vie</button><button role="tab" aria-selected="false" data-day="5">Sáb</button>
+        </div>
+      </div>
+      <div role="tabpanel" aria-label="Clases del día" aria-live="polite"><ul class="slots" id="slots"></ul></div>
+      <p class="fine">Grilla de ejemplo. Cada gimnasio carga la suya.</p>
+    </div>
+  </section>
+
+  <section class="plans" id="planes" aria-labelledby="plans-h">
+    <div class="wrap">
+      <h2 id="plans-h" class="rv">Planes <span class="accent">simples</span></h2>
+      <div class="plan-grid">
+        <article class="plan rv"><h3>2 por semana</h3><p class="price"><span>$</span>00.000<small>/mes</small></p><ul><li>Cualquier disciplina</li><li>Reserva desde la web</li></ul><a class="btn ghost" href="#prueba">Elegir</a></article>
+        <article class="plan hot rv" data-d="1"><span class="tag">Más elegido</span><h3>3 por semana</h3><p class="price"><span>$</span>00.000<small>/mes</small></p><ul><li>Cualquier disciplina</li><li>Plan de fuerza personalizado</li><li>Evaluación trimestral</li></ul><a class="btn" href="#prueba" data-magnetic>Elegir</a></article>
+        <article class="plan rv" data-d="2"><h3>Libre</h3><p class="price"><span>$</span>00.000<small>/mes</small></p><ul><li>Todas las clases</li><li>Sala de musculación</li></ul><a class="btn ghost" href="#prueba">Elegir</a></article>
+      </div>
+      <p class="fine">Los precios se muestran como 00.000 a propósito: en un sitio real los define el gimnasio.</p>
+    </div>
+  </section>
+
+  <section class="trial" id="prueba" aria-labelledby="trial-h">
+    <div class="wrap trial-grid">
+      <h2 id="trial-h" class="rv">Tu primera clase <span class="accent">no se paga</span></h2>
+      <form class="form rv" data-demo data-d="1" aria-describedby="trial-note">
+        <label>Nombre<input name="nombre" autocomplete="name" required></label>
+        <label>Email<input name="email" type="email" autocomplete="email" required></label>
+        <label>Disciplina<select name="disciplina"><option>Funcional</option><option>Boxeo</option><option>Fuerza</option><option>Movilidad</option><option>HIIT</option><option>Ciclismo indoor</option></select></label>
+        <button class="btn" type="submit" data-magnetic>Quiero mi clase</button>
+        <p class="demo-note" id="trial-note">Formulario de demostración: no envía datos.</p>
+        <p class="form-ok" role="status" tabindex="-1">¡Listo! En un sitio real, el gimnasio te confirmaría el turno.</p>
+      </form>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <p class="giant" aria-hidden="true">PULSO</p>
+  <div class="wrap foot-row"><p>Marca ficticia creada para mostrar una plantilla.</p><p>Diseño y código: AgentiCuántico.</p></div>
+</footer>
+
+<div class="demo-ribbon" role="note"><b>Demo</b><span>Plantilla de muestra<span class="long"> · marca y datos ficticios</span></span><a href="/plantillas/">Ver plantillas</a></div>
+</body>
+</html>

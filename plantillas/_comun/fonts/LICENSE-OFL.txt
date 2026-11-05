@@ -1,0 +1,10 @@
+Las tipografías de esta carpeta se distribuyen bajo la SIL Open Font License, versión 1.1
+(https://openfontlicense.org/open-font-license-official-text/), obtenidas de Google Fonts y autoalojadas
+sin modificaciones (subconjunto latino):
+
+- Archivo — Copyright The Archivo Project Authors (https://github.com/Omnibus-Type/Archivo)
+- Cormorant Garamond — Copyright The Cormorant Project Authors (https://github.com/CatharsisFonts/Cormorant)
+- Instrument Serif — Copyright The Instrument Serif Project Authors (https://github.com/Instrument/instrument-serif)
+- Space Grotesk — Copyright The Space Grotesk Project Authors (https://github.com/floriankarsten/space-grotesk)
+- JetBrains Mono — Copyright The JetBrains Mono Project Authors (https://github.com/JetBrains/JetBrainsMono)
+- Inter — ver LICENSE-Inter.txt
