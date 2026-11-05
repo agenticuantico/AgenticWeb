@@ -51,6 +51,8 @@ function markOffline() { state.live = false; state.base = ''; try { sessionStora
 let idToken = null;
 /** El chat informa el token de Firebase del usuario para que el servidor verifique la cuenta. */
 export function setIdTokenProvider(fn) { idToken = fn; }
+/** ¿Hay una cuenta iniciada? (lo usan el área Cuenta y el chat con herramientas). */
+export function hasAccount() { return typeof idToken === 'function'; }
 
 /** Llamada autenticada al servidor (la usan media.js y otros módulos del chat). */
 export function apiFetch(path, opts) { return api(path, opts); }

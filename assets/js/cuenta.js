@@ -25,7 +25,7 @@ function renderAuth(tab = params.get('registro') ? 'signup' : 'login') {
       h('img', { src: '/media/agenticuantico-avatar.jpg', alt: '', width: 72, height: 72, class: 'auth-face' }),
       h('h1', {}, tab === 'signup' ? 'Creá tu cuenta' : tab === 'reset' ? 'Recuperá tu acceso' : 'Te damos la bienvenida'),
       h('p', { class: 'muted' }, 'Sincronizá tus chats entre dispositivos, compartí conversaciones y elegí tu plan.'),
-      h('ul', { class: 'checklist' }, ...['Chats guardados en tu cuenta', 'Agentes invitables con Pro', 'Pagos seguros con PayPal y Mercado Pago'].map((t) => h('li', { html: icon('check') + `<span>${t}</span>` })))),
+      h('ul', { class: 'checklist' }, ...['Chats guardados en tu cuenta', 'Todas las funciones en todos los planes', 'Pagos seguros con PayPal y Mercado Pago'].map((t) => h('li', { html: icon('check') + `<span>${t}</span>` })))),
     card);
   root.append(wrap);
 

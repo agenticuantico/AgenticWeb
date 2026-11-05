@@ -3,7 +3,8 @@ import { ChatApp } from './chat/chat.js';
 import { ChatStore } from './chat/store.js';
 import { watchUser, getProfile } from './auth.js';
 import { setIdTokenProvider } from './chat/engine.js';
-import { h, icon, esc, modal, popover, confirmDialog, uid, timeAgo } from './ui.js';
+import { h, icon, esc, modal, popover, confirmDialog, uid, timeAgo, toast } from './ui.js';
+import { readConnectReturn, takeResume, returnMessage } from './account/oauth-connect.js';
 import { prefs } from './consent.js';
 
 const $ = (id) => document.getElementById(id);
@@ -11,6 +12,11 @@ const store = new ChatStore();
 const chat = new ChatApp($('appChat'), { variant: 'full', avatar: null, store });
 // Conversación abierta desde el chat de la portada (botón de pantalla completa)
 try { const oid = sessionStorage.getItem('ac.app.open'); if (oid) { sessionStorage.removeItem('ac.app.open'); const c = store.get(oid); if (c) chat.loadChat(c); } } catch {}
+
+// Vuelta de conectar una cuenta (?cuenta=conectada|error&proveedor=…): se lee y se limpia de la barra antes que nada.
+const connectReturn = readConnectReturn();
+const pendingResume = connectReturn ? takeResume(connectReturn.provider) : null;
+let connectResume = connectReturn && connectReturn.ok ? pendingResume : null;
 
 const params = new URLSearchParams(location.search);
 if (params.get('modo') === 'auto') chat.setMode('auto', true);
@@ -109,6 +115,31 @@ function promptText(title, label, value) {
   return m.done.then(() => m.result || null);
 }
 
+/* ---------- Tu cuenta (perfil, uso, tareas, cuentas conectadas, empleo) ---------- */
+const ACC_TABS = { '': 'perfil', uso: 'uso', tareas: 'tareas', conexiones: 'conexiones', empleo: 'empleo' };
+async function openAccountPanel(tab) {
+  const m = await import('./account/panel.js');
+  m.openAccount(tab, { chat });
+  openSidebar(false);
+}
+$('sbAccount').addEventListener('click', (e) => {
+  if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return; // abrir en otra pestaña sigue yendo a /cuenta/
+  e.preventDefault();
+  openAccountPanel('perfil');
+});
+function routeHash() {
+  const m = /^#cuenta(?:\/([a-z]+))?$/.exec(location.hash || '');
+  if (m) openAccountPanel(ACC_TABS[m[1] || ''] || 'perfil');
+}
+window.addEventListener('hashchange', routeHash);
+if (connectReturn && !connectResume) {
+  // Conexión desde «Cuentas conectadas»: se abre esa pestaña y se avisa el resultado.
+  import('./account/connections.js').then((m) => { m.setConnectNotice({ ok: connectReturn.ok, text: returnMessage(connectReturn) }); openAccountPanel('conexiones'); });
+} else if (connectResume) toast(`${returnMessage(connectReturn)} Sigo con tu pedido…`, 'ok', 5000);
+else routeHash();
+// Tarjeta «Activar en el chat»: retoma el pedido en la conversación actual.
+document.addEventListener('ac:resume-request', (e) => chat.resumeRequest({ text: e.detail && e.detail.text }));
+
 /* ---------- Atajos ---------- */
 document.addEventListener('keydown', (e) => {
   if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); openSearch(); return; }
@@ -124,6 +155,8 @@ watchUser(async (u) => {
   const p = profile && !profile._error ? profile : null;
   chat.setUser(u, p);
   await store.attachUser(u.uid);
+  // Pedido del chat que esperaba esta conexión: se retoma con la sesión ya cargada.
+  if (connectResume) { const r = connectResume; connectResume = null; chat.resumeRequest(r); }
   const name = u.displayName || u.email || 'Mi cuenta';
   $('sbName').textContent = name;
   $('sbPlan').textContent = 'Plan ' + ({ gratis: 'Gratis', pro: 'Pro', empresa: 'Empresa' }[p ? p.plan : 'gratis'] || 'Gratis') + (p && p.subscription && p.subscription.status === 'pending' ? ' · pago en verificación' : '');
