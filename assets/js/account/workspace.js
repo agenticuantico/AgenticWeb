@@ -6,11 +6,12 @@
  */
 import { h, icon, toast, confirmDialog } from '../ui.js';
 import { call, errorText } from './api.js';
+import { getSiteLang } from '../i18n.js';
 
 let seq = 0;
 const fid = (p) => `${p}-${++seq}`;
 const refreshApp = () => document.dispatchEvent(new CustomEvent('workspace:refresh'));
-const fmtDate = (t) => new Date(t).toLocaleDateString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires', day: 'numeric', month: 'short', year: 'numeric' });
+const fmtDate = (t) => new Date(t).toLocaleDateString(getSiteLang(), { timeZone: 'America/Argentina/Buenos_Aires', day: 'numeric', month: 'short', year: 'numeric' });
 const SOURCE = { chat: 'desde el chat', import: 'traído del dispositivo', manual: 'agregado a mano' };
 
 /* --------------------------------- Memoria --------------------------------- */

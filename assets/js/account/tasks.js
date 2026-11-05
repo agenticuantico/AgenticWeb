@@ -5,6 +5,7 @@
  */
 import { h, icon, toast, confirmDialog, timeAgo } from '../ui.js';
 import { call, errorText } from './api.js';
+import { getSiteLang } from '../i18n.js';
 
 const DAYS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 let seq = 0;
@@ -71,7 +72,7 @@ function taskCard(t, ctx, root) {
       h('span', { class: 'acc-task-ic', html: icon(t.kind === 'job_search' ? 'briefcase' : 'globe') }),
       h('div', { class: 'acc-task-t' }, h('strong', {}, t.title), h('small', { class: 'muted' }, t.schedule)),
       status),
-    h('p', { class: 'acc-task-next muted' }, t.status === 'active' ? `Próxima: ${new Date(t.nextRunAt).toLocaleString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires', weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}` : t.failCount >= 5 ? 'Se pausó sola después de 5 fallas seguidas.' : 'No se ejecuta mientras esté pausada.'),
+    h('p', { class: 'acc-task-next muted' }, t.status === 'active' ? `Próxima: ${new Date(t.nextRunAt).toLocaleString(getSiteLang(), { timeZone: 'America/Argentina/Buenos_Aires', weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}` : t.failCount >= 5 ? 'Se pausó sola después de 5 fallas seguidas.' : 'No se ejecuta mientras esté pausada.'),
     results,
     h('div', { class: 'acc-row' }, runBtn, toggle, edit, del),
     hist);
@@ -92,7 +93,7 @@ function historyBox(t) {
       if (!r.runs.length) { list.replaceChildren(h('p', { class: 'muted acc-small' }, 'Todavía no se ejecutó.')); return; }
       list.replaceChildren(h('ol', { class: 'acc-hist' }, ...r.runs.map((x) => h('li', { class: x.status },
         h('span', { class: 'acc-chip ' + (x.status === 'ok' ? 'ok' : x.status === 'error' ? 'warn' : '') }, x.status === 'ok' ? 'Bien' : x.status === 'error' ? 'Con problemas' : 'En curso'),
-        h('span', { class: 'acc-hist-when' }, new Date(x.startedAt).toLocaleString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }), x.trigger === 'manual' ? ' · manual' : ' · programada'),
+        h('span', { class: 'acc-hist-when' }, new Date(x.startedAt).toLocaleString(getSiteLang(), { timeZone: 'America/Argentina/Buenos_Aires', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }), x.trigger === 'manual' ? ' · manual' : ' · programada'),
         x.summary ? h('span', { class: 'acc-hist-sum' }, x.summary) : null))));
     } catch (e) { loaded = false; list.replaceChildren(h('p', { class: 'error-text' }, errorText(e))); }
   });
