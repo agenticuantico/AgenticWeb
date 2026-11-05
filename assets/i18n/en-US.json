@@ -1918,5 +1918,22 @@
 "Ese dato ya no está. Actualizá la lista.": "That note is gone. Refresh the list.",
 "Escribí un nombre para el proyecto.": "Type a name for the project.",
 "Llegaste a 50 proyectos. Borrá alguno para crear otro.": "You reached 50 projects. Delete one to create another.",
-"Ese proyecto ya no existe. Actualizá la lista.": "That project no longer exists. Refresh the list."
+"Ese proyecto ya no existe. Actualizá la lista.": "That project no longer exists. Refresh the list.",
+"Bienvenida": "Welcome",
+"Saltar bienvenida": "Skip welcome",
+"Anterior": "Back",
+"Siguiente": "Next",
+"Empezar": "Get started",
+"Ejemplos para probar": "Examples to try",
+"Preguntá lo que necesites": "Ask whatever you need",
+"Escribí o hablá como con una persona. Para datos de hoy, empezá con «Buscá en la web:» y te respondo con fuentes.": "Type or talk like you would with a person. For today’s facts, start with “Search the web:” and I’ll answer with sources.",
+"Buscá en la web: dólar oficial hoy": "Search the web: official dollar rate in Argentina today",
+"Armame un plan de estudio semanal": "Make me a weekly study plan",
+"Resumime este texto en 5 puntos": "Summarize this text in 5 points",
+"Conectá una cuenta": "Connect an account",
+"Sumá tu correo, tu agenda o tus repositorios. El chat solo los usa cuando se lo pedís, y antes de enviar o publicar algo te pide «Confirmar».": "Add your email, calendar or repositories. The chat only uses them when you ask, and before sending or publishing anything it asks you to “Confirm”.",
+"Ver cuentas conectadas": "See connected accounts",
+"Creá una tarea": "Create a task",
+"Dejá algo andando solo: por ejemplo, buscar empleo remoto todos los días a las 9. Los resultados quedan en Tu cuenta.": "Leave something running on its own: for example, search for remote jobs every day at 9. Results stay in Your account.",
+"Crear una tarea": "Create a task"
 }

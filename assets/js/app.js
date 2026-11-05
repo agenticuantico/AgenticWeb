@@ -167,3 +167,6 @@ watchUser(async (u) => {
   if (p && ['pro', 'empresa'].includes(p.plan)) $('sbUpgrade').hidden = true;
 }, { force: false });
 
+
+/* ---------- Bienvenida de primera visita (3 pasos, salteable) ---------- */
+if (!connectReturn) setTimeout(() => { import('./chat/welcome.js').then((m) => m.maybeShowWelcome({ input: chat.$('input'), openTab: openAccountPanel })).catch(() => {}); }, 700);
