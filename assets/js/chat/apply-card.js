@@ -17,6 +17,7 @@ const FIELDS = [['fullName', 'Nombre completo', 'text'], ['email', 'Correo', 'em
 
 export function applyCard(m) {
   const data = m.tools.batch;
+  const meta = (it) => h('small', { class: 'tc-apply-meta' }, h('span', {}, it.company || ''), h('span', { class: 'tc-apply-host', title: it.host || '' }, it.host || ''));
   const root = h('div', { class: 'tc-apply', role: 'group', 'aria-label': 'Postulaciones para aprobar' });
   let timer = null;
   const render = (v) => {
@@ -50,7 +51,7 @@ export function applyCard(m) {
         cb.addEventListener('change', () => { include.set(it.id, cb.checked); li.classList.toggle('removed', !cb.checked); count(); });
         titleRow.append(cb);
       }
-      titleRow.append(h('div', {}, h('strong', {}, it.title), h('small', {}, `${it.company} · ${it.host}`)));
+      titleRow.append(h('div', {}, h('strong', {}, it.title), meta(it)));
       if (modeChip(it)) titleRow.append(h('span', { class: 'acc-chip muted' }, modeChip(it)));
       li.append(titleRow);
       if (it.mode !== 'auto') {
@@ -100,7 +101,7 @@ export function applyCard(m) {
     root.append(h('ol', { class: 'tc-apply-list' }, ...v.items.map((it) => {
       const [tone, label] = ST[it.status] || ST.pending;
       return h('li', { class: 'tc-apply-item st-' + it.status },
-        h('div', { class: 'tc-apply-t' }, h('div', {}, h('strong', {}, it.title), h('small', {}, `${it.company} · ${it.host}`)), h('span', { class: `acc-chip ${tone}` }, label)),
+        h('div', { class: 'tc-apply-t' }, h('div', {}, h('strong', {}, it.title), meta(it)), h('span', { class: `acc-chip ${tone}` }, label)),
         it.reason ? h('p', { class: 'tc-apply-why' }, it.reason) : null,
         it.status === 'needs_help' || it.mode !== 'auto' ? h('a', { href: it.url, target: '_blank', rel: 'noopener noreferrer', class: 'tc-apply-link' }, 'Abrir la oferta') : null);
     })));

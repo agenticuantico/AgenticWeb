@@ -262,6 +262,8 @@ dialog.acc-dialog::backdrop { background: rgba(15, 14, 20, .45); backdrop-filter
 .tc-apply-t > div { display: grid; gap: 2px; min-width: 0; flex: 1; }
 .tc-apply-t strong { font-size: .92rem; overflow-wrap: anywhere; }
 .tc-apply-t small { color: var(--ink-2, #52525b); font-size: .8rem; overflow-wrap: anywhere; }
+.tc-apply-meta { display: grid; gap: 1px; min-width: 0; }
+.tc-apply-host { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; overflow-wrap: normal; }
 .tc-apply-t input[type=checkbox] { width: 18px; height: 18px; flex: none; accent-color: #18181b; }
 .tc-apply-why { margin: 0; font-size: .84rem; color: var(--ink-2, #3f3f46); }
 .tc-apply-link { font-size: .84rem; font-weight: 600; }
@@ -281,4 +283,5 @@ dialog.acc-dialog::backdrop { background: rgba(15, 14, 20, .45); backdrop-filter
 .acc-login-ic { display: grid; place-items: center; width: 32px; height: 32px; flex: none; border-radius: 10px; background: #f6f7fb; }
 .acc-login-ic svg { width: 16px; height: 16px; }
 .acc-login-t { display: grid; gap: 2px; flex: 1; min-width: 0; }
-.acc-login-t strong { overflow-wrap: anywhere; }
+.acc-login-t strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .95rem; }
+.acc-login-t small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

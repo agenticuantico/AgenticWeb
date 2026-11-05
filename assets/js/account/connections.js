@@ -57,7 +57,7 @@ export async function renderConnections(el, ctx) {
     if (!lg.logins || !lg.logins.length) box.append(h('p', { class: 'acc-small' }, 'No tenés accesos guardados.'));
     else box.append(h('ul', { class: 'acc-login-list' }, ...lg.logins.map((x) => h('li', {},
       h('span', { class: 'acc-login-ic', html: icon('lock') }),
-      h('span', { class: 'acc-login-t' }, h('strong', { 'data-no-i18n': '' }, x.host), h('small', { class: 'muted' }, `${x.label || ''}${x.lastUsedAt ? ' · usado ' + timeAgo(x.lastUsedAt) : ''}`)),
+      h('span', { class: 'acc-login-t' }, h('strong', { 'data-no-i18n': '', title: x.host }, x.host), h('small', { class: 'muted' }, `${x.label || ''}${x.lastUsedAt ? ' · usado ' + timeAgo(x.lastUsedAt) : ''}`)),
       h('button', { class: 'btn btn-sm btn-danger-ghost', type: 'button', onclick: async () => {
         if (!(await confirmDialog({ title: `Borrar el acceso a ${x.host}`, text: 'Se borra el usuario y la contraseña guardados para ese sitio. El agente te los va a pedir de nuevo si los necesita.', ok: 'Borrar', danger: true }))) return;
         try { await call('/api/agent/logins/delete', { method: 'POST', body: { host: x.host } }); toast(`Acceso a ${x.host} borrado.`); el.innerHTML = ''; renderConnections(el, ctx); }
