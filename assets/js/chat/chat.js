@@ -19,6 +19,7 @@ import { speak, stop as stopSpeech } from './voice.js';
 import { VoiceRecorder, fmtClock } from './recorder.js';
 import { readFile, fmtSize } from './docs.js';
 import { needsWebAction, isFollowUp, AgentBrowserCard } from '../agent-browser.js';
+import { routeWebIntent } from './intent.js';
 import { detectMediaIntent, mediaMessage, mediaCard, isMediaMessage, runMedia as runMediaTask } from './media.js';
 import { cleanArtifact, cleanThought } from './clean.js';
 import { PreviewCard, LiveFrame, previewKind, previewHtml, isPreviewable } from './preview-card.js';
@@ -627,8 +628,11 @@ export class ChatApp {
     const follow = this.browserCard && this.browserCard.chatId === this.chat.id && isFollowUp(text);
     // Pedidos sobre las cuentas conectadas (correo, GitHub, Cloudflare, LinkedIn) o de empleo: herramientas del servidor
     // (más rápidas y sin gastar minutos de navegador). Cualquier escritura pide «Confirmar» en una tarjeta.
+    // Rápido/Profundo: «Buscá en la web: …», «averiguá…», «con fuentes» → búsqueda en vivo (no la computadora del agente).
+    const route = detectMediaIntent(text) ? null : routeWebIntent(text, this.mode);
     if (!detectMediaIntent(text) && this.toolsReady() && wantsTools(text) && !follow) msg._tools = true;
-    else if (!detectMediaIntent(text) && (needsWebAction(text) || follow)) {
+    else if (route === 'search' && !follow) msg._search = true;
+    else if (!detectMediaIntent(text) && (route === 'browser' || follow)) {
       msg._browser = true;
       if (this.browserCard) this.browserCard.detach();
       const chatId = this.chat.id;
@@ -790,7 +794,7 @@ export class ChatApp {
         return;
       }
       // Pedidos de acción en la web sin navegador en la nube: respuesta honesta (guía), sin pasos simulados.
-      const webOnly = needsWebAction(userMsg.content) && !(engine.state.live && engine.state.caps && engine.state.caps.browser);
+      const webOnly = !userMsg._search && needsWebAction(userMsg.content) && !(engine.state.live && engine.state.caps && engine.state.caps.browser);
       if (this.mode === 'auto' && !webOnly) {
         finalText = await this.runAuto(userMsg, invited, docs, ctrl);
       } else {
@@ -798,7 +802,7 @@ export class ChatApp {
         if (!onlyAgents) {
           const a = { id: uid('m'), role: 'assistant', content: '', at: Date.now(), streaming: true };
           this.pushMessage(a);
-          const r = await engine.chat({ messages: this.history(), lang: this.lang.code, mode: this.mode, system: this.systemContext(), docs, signal: ctrl.signal, search: this.webSearch ? true : undefined, onEvent: (ev) => this.onSearchEvent(a, ev), onDelta: (d) => { a.content += d; if (a.search && a.search.state !== 'writing' && a.search.state !== 'done') this.onSearchEvent(a, { type: 'search_done' }); this.updateMessage(a); } });
+          const r = await engine.chat({ messages: this.history(), lang: this.lang.code, mode: this.mode, system: this.systemContext(), docs, signal: ctrl.signal, search: (this.webSearch || userMsg._search) ? true : undefined, onEvent: (ev) => this.onSearchEvent(a, ev), onDelta: (d) => { a.content += d; if (a.search && a.search.state !== 'writing' && a.search.state !== 'done') this.onSearchEvent(a, { type: 'search_done' }); this.updateMessage(a); } });
           a.streaming = false; a.content = r.text; if (r.notice) a.notice = r.notice;
           if (a.search) a.search.state = 'done';
           this.updateMessage(a);
