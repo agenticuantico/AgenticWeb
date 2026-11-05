@@ -33,6 +33,12 @@ function inline(s) {
   return s;
 }
 let blockId = 0;
+/**
+ * Encabezados: «# Título» … «###### Título» (hasta 3 espacios antes). También «##Título» sin espacio, que los modelos
+ * escriben a veces (desde 2 numerales, así un #hashtag suelto no se vuelve título). Los numerales del final se quitan.
+ */
+const HEADING = /^\s{0,3}(#{1,6})(?:[ \t]+|(?<=##)(?=[^\s#]))(.+?)(?:[ \t]+#+)?[ \t]*$/;
+const EMPTY_HEADING = /^\s{0,3}#{1,6}[ \t]*$/;
 export function renderMarkdown(src, { codeActions = true } = {}) {
   const text = String(src ?? '').replace(/\r\n?/g, '\n');
   const lines = text.split('\n');
@@ -53,7 +59,9 @@ export function renderMarkdown(src, { codeActions = true } = {}) {
       continue;
     }
     if (/^\s*$/.test(line)) { i++; continue; }
-    const hd = /^\s{0,3}(#{1,6})\s+(.+?)\s*#*\s*$/.exec(line);
+    // Encabezado vacío («##» solo, p. ej. mientras llega el texto): no se muestra crudo.
+    if (EMPTY_HEADING.test(line)) { i++; continue; }
+    const hd = HEADING.exec(line);
     if (hd) { const n = Math.min(4, hd[1].length + 1); out.push(`<h${n}>${inline(escapeHtml(hd[2]))}</h${n}>`); i++; continue; }
     if (/^(-{3,}|\*{3,})\s*$/.test(line)) { out.push('<hr>'); i++; continue; }
     if (/^\|.*\|\s*$/.test(line) && i + 1 < lines.length && /^\|?\s*:?-{2,}/.test(lines[i + 1])) {
@@ -84,12 +92,24 @@ export function renderMarkdown(src, { codeActions = true } = {}) {
       continue;
     }
     const buf = [];
-    while (i < lines.length && !/^\s*$/.test(lines[i]) && !/^(```|\s{0,3}#{1,6}\s|>\s?|\s*([-*+]|\d+[.)])\s+|\|.*\|\s*$)/.test(lines[i])) buf.push(lines[i++]);
+    while (i < lines.length && !/^\s*$/.test(lines[i]) && !HEADING.test(lines[i]) && !EMPTY_HEADING.test(lines[i]) && !/^(```|>\s?|\s*([-*+]|\d+[.)])\s+|\|.*\|\s*$)/.test(lines[i])) buf.push(lines[i++]);
     if (!buf.length) { buf.push(lines[i++]); }
     out.push('<p>' + buf.map((l) => inline(escapeHtml(l))).join('<br>') + '</p>');
   }
   return out.join('\n');
 }
+/**
+ * ¿Este texto es Markdown para leer (informe, notas) y no código? Sirve para mostrar la «Vista previa» con formato.
+ * Archivos de código (.py, .sh, .js, …) nunca: ahí «# comentario» no es un título.
+ */
+export function looksLikeMarkdown(text, name = '') {
+  if (/\.(py|sh|bash|zsh|rb|pl|r|ya?ml|toml|ini|conf|cfg|js|mjs|ts|tsx|jsx|css|json|html?|xml|sql|c|cpp|h|cs|java|go|rs|php|ps1|dockerfile)$/i.test(String(name || ''))) return false;
+  const t = String(text || '');
+  if (!/^\s{0,3}#{1,6}[ \t]*\S/m.test(t)) return false;
+  const marks = (t.match(/^\s{0,3}#{1,6}[ \t]*\S/gm) || []).length + (/\*\*[^*\n]+\*\*/.test(t) ? 1 : 0) + (/^\s*([-*+]|\d+[.)])\s+\S/m.test(t) ? 1 : 0) + (/^\|.*\|\s*$/m.test(t) ? 1 : 0);
+  return marks >= 2;
+}
+
 /** Texto plano para la voz: sin código, sin marcas. */
 export function toSpeech(src) {
   return String(src || '')
