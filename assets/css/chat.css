@@ -159,7 +159,7 @@
 .send-btn.stop { background: var(--ink); }
 .chat.hands-free [data-act="handsfree"] { background: var(--gold); color: #1d1606; box-shadow: 0 0 0 4px var(--gold-soft); animation: breathe 1.6s infinite; }
 @keyframes breathe { 50% { box-shadow: 0 0 0 9px color-mix(in srgb, var(--gold-2) 25%, transparent); } }
-.composer-note { max-width: 820px; margin: 6px auto 0; font-size: 11px; color: var(--faint); text-align: center; }
+.composer-note { max-width: 820px; margin: 6px auto 0; font-size: 11px; color: #71717a; text-align: center; }
 .composer-note a { color: inherit; }
 .chat[data-variant="embed"] .composer-note { display: none; }
 .composer-files { display: flex; gap: 6px; overflow-x: auto; padding: 2px 2px 8px; }

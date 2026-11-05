@@ -37,7 +37,7 @@ const avatar = new AgentAvatar($('callAvatar'), { label: 'AgentiCuántico, intel
 /* ---------- Preparación ---------- */
 function planName() { return (S.profile && S.profile.plan) || 'gratis'; }
 function limitSeconds() { return (mem.LIMIT_MIN[planName()] || 10) * 60; }
-function renderLang() { $('callFlag').src = flagUrl(S.lang); $('callLangName').textContent = `${S.lang.name} · ${S.lang.region}`; }
+function renderLang() { $('callFlag').src = flagUrl(S.lang); $('callLangName').textContent = `${S.lang.name} · ${S.lang.region}`; $('callLang').setAttribute('aria-label', `Idioma de la llamada: ${S.lang.name} · ${S.lang.region}`); }
 renderLang();
 $('callLang').addEventListener('click', async () => {
   const { popover } = await import('../ui.js');
