@@ -31,8 +31,8 @@ const backendChip = () => engineState.live ? h('span', { class: 'chip ok' }, 'Ac
 
 function agentes(pane, chat) {
   const ws = chat.store.ws;
-  pane.append(h('p', { class: 'muted' }, 'Invitá especialistas a la conversación con «Invitar agente» o escribiendo @nombre. Cada uno responde con su nombre. Disponible en Pro y Empresa.'));
-  if (!chat.isPaid) pane.append(h('div', { class: 'alert info' }, h('span', { html: icon('lock') }), h('div', {}, 'Tu plan actual es Gratis. ', h('a', { href: '/planes.html' }, 'Ver planes Pro y Empresa'))));
+  pane.append(h('p', { class: 'muted' }, 'Invitá especialistas a la conversación con «Invitar agente» o escribiendo @nombre. Cada uno responde con su nombre. Disponible en todos los planes.'));
+  if (!chat.featuresUnlocked) pane.append(h('div', { class: 'alert info' }, h('span', { html: icon('lock') }), h('div', {}, 'Tu plan actual es Gratis. ', h('a', { href: '/planes.html' }, 'Ver planes Pro y Empresa'))));
   const grid = h('div', { class: 'agent-grid' });
   for (const a of [...AGENTS, ...(ws.customAgents || [])]) {
     const inChat = chat.chat.agents.includes(a.id);
@@ -41,7 +41,7 @@ function agentes(pane, chat) {
       h('div', {}, h('strong', {}, a.name), h('small', { class: 'muted' }, a.role || 'Agente propio')),
       h('div', { class: 'agent-skills' }, ...(a.skills || []).slice(0, 4).map((s) => h('span', { class: 'chip' }, s))),
       h('div', { class: 'row' },
-        h('button', { class: 'btn btn-sm' + (inChat ? '' : ' btn-primary'), type: 'button', onclick: (e) => { if (!chat.isPaid) return chat.paywall('Los agentes invitables'); chat.toggleAgent(a.id); e.target.textContent = chat.chat.agents.includes(a.id) ? 'Quitar del chat' : 'Invitar'; e.target.classList.toggle('btn-primary'); } }, inChat ? 'Quitar del chat' : 'Invitar'),
+        h('button', { class: 'btn btn-sm' + (inChat ? '' : ' btn-primary'), type: 'button', onclick: (e) => { if (!chat.featuresUnlocked) return chat.paywall('Los agentes invitables'); chat.toggleAgent(a.id); e.target.textContent = chat.chat.agents.includes(a.id) ? 'Quitar del chat' : 'Invitar'; e.target.classList.toggle('btn-primary'); } }, inChat ? 'Quitar del chat' : 'Invitar'),
         a.custom ? h('button', { class: 'icon-btn sm', type: 'button', 'aria-label': 'Eliminar agente ' + a.name, html: icon('trash'), onclick: async () => { if (await confirmDialog({ title: 'Eliminar agente', text: `¿Eliminar «${a.name}»?`, danger: true, ok: 'Eliminar' })) { ws.customAgents = ws.customAgents.filter((x) => x.id !== a.id); chat.store.saveWorkspace(); pane.innerHTML = ''; agentes(pane, chat); } } }) : null)));
   }
   pane.append(grid);
@@ -54,7 +54,7 @@ function agentes(pane, chat) {
     h('button', { class: 'btn btn-primary', type: 'submit' }, 'Guardar agente'));
   form.addEventListener('submit', (e) => {
     e.preventDefault();
-    if (!chat.isPaid) return chat.paywall('Los agentes propios');
+    if (!chat.featuresUnlocked) return chat.paywall('Los agentes propios');
     const f = new FormData(form);
     ws.customAgents = ws.customAgents || [];
     ws.customAgents.push({ id: uid('ag'), custom: true, name: String(f.get('name')).trim(), role: String(f.get('role') || '').trim(), system: String(f.get('system')).trim(), color: String(f.get('color')), icon: 'user', skills: [] });

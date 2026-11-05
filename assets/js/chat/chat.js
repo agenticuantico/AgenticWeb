@@ -22,6 +22,7 @@ import { needsWebAction, isFollowUp, AgentBrowserCard } from '../agent-browser.j
 import { detectMediaIntent, mediaMessage, mediaCard, isMediaMessage, runMedia as runMediaTask } from './media.js';
 import { cleanArtifact, cleanThought } from './clean.js';
 import { PreviewCard, LiveFrame, previewKind, previewHtml, isPreviewable } from './preview-card.js';
+import { toolBlock, wantsTools } from './tool-cards.js';
 
 const MODES = {
   fast: { label: 'Rápido', short: 'Rápido', icon: 'bolt', desc: 'Respuestas al instante' },
@@ -80,13 +81,16 @@ export class ChatApp {
   }
   get plan() { return (this.profile && this.profile.plan) || 'gratis'; }
   get isPaid() { return ['pro', 'empresa'].includes(this.plan) && (!this.profile || ['active', 'pending'].includes(this.profile.planStatus || 'active')); }
+  /** Funciones habilitadas: todas en todos los planes (Fase 1) o, si se desactiva, solo en Pro/Empresa. */
+  get featuresUnlocked() { return CONFIG.ALL_FEATURES_ALL_PLANS === true || this.isPaid; }
   flag(name) { return !this.system || this.system.flags[name] !== false; }
 
   setUser(user, profile) {
     this.user = user; this.profile = profile;
     engine.setIdTokenProvider(user ? () => user.getIdToken() : null);
     this.renderParticipants();
-    if (user && /conectar=github/.test(location.hash || '')) import('./connectors.js').then((m) => m.handleReturn(this)).catch(() => {});
+    // Vuelta de un proveedor OAuth (GitHub, Gmail, LinkedIn): la completa el área «Tu cuenta».
+    if (user && /^#conectar=/.test(location.hash || '')) import('../account/panel.js').then((m) => m.openAccount('conexiones', { chat: this })).catch(() => {});
   }
 
   /* =================== Render base =================== */
@@ -404,7 +408,7 @@ export class ChatApp {
     if (!silent) this.$('input').focus();
   }
   act_invite(btn, e, fromMention = false) {
-    if (!this.isPaid) { if (!fromMention) this.paywall('Los agentes invitables'); return; }
+    if (!this.featuresUnlocked) { if (!fromMention) this.paywall('Los agentes invitables'); return; }
     const all = [...AGENTS, ...(this.store.ws.customAgents || [])];
     popover(btn, [{ heading: 'Invitar especialista a la conversación' }, ...all.map((a) => ({
       label: a.name, sub: a.role, icon: a.icon || 'user', checked: this.chat.agents.includes(a.id),
@@ -621,7 +625,10 @@ export class ChatApp {
     // Acciones en la web (iniciar sesión, enviar correos, postular, formularios): tarjeta del navegador del agente.
     // También los seguimientos («seguí», «ahora compará…») de una tarea de la computadora en esta conversación.
     const follow = this.browserCard && this.browserCard.chatId === this.chat.id && isFollowUp(text);
-    if (!detectMediaIntent(text) && (needsWebAction(text) || follow)) {
+    // Pedidos sobre las cuentas conectadas (correo, GitHub, Cloudflare, LinkedIn) o de empleo: herramientas del servidor
+    // (más rápidas y sin gastar minutos de navegador). Cualquier escritura pide «Confirmar» en una tarjeta.
+    if (!detectMediaIntent(text) && this.toolsReady() && wantsTools(text) && !follow) msg._tools = true;
+    else if (!detectMediaIntent(text) && (needsWebAction(text) || follow)) {
       msg._browser = true;
       if (this.browserCard) this.browserCard.detach();
       const chatId = this.chat.id;
@@ -704,17 +711,66 @@ export class ChatApp {
     finally { this.finish(); m._card && m._card._render(); }
   }
 
+  /**
+   * Retoma un pedido que esperaba una cuenta (después de conectar o activar): abre la conversación original
+   * si existe y vuelve a mandar el pedido. Se llama a la vuelta del proveedor o desde la tarjeta «Activar».
+   */
+  async resumeRequest({ chatId, text }) {
+    if (!text) return;
+    try { await engine.init(); } catch { /* el envío informa si no hay servidor */ }
+    if (chatId && this.chat.id !== chatId) { const c = this.store.get(chatId); if (c) this.loadChat(c); }
+    for (let i = 0; i < 20 && this.busy; i++) await new Promise((r) => setTimeout(r, 250));
+    this.send(text);
+  }
+
+  /** El servidor tiene herramientas y hay una cuenta iniciada. */
+  toolsReady() { return !!(engine.state.live && engine.state.caps && engine.state.caps.tools && engine.hasAccount()); }
+
+  /** Chat con herramientas (conectores y empleo): respuesta + pasos + ofertas + tarjetas de confirmación. */
+  async runTools(userMsg, ctrl) {
+    const a = { id: uid('m'), role: 'assistant', content: '', at: Date.now(), streaming: true };
+    this.pushMessage(a);
+    try {
+      const res = await engine.apiFetch('/api/tools/chat', { method: 'POST', signal: ctrl.signal, body: { messages: this.history().slice(-12), lang: this.lang.code } });
+      const j = await res.json().catch(() => ({}));
+      if (res.ok) { a.content = j.reply || ''; a.tools = { steps: j.steps || [], actions: j.actions || [], jobs: j.jobs || null, drafts: j.drafts || null, needs: j.needs || [], batch: j.batch || null, resumeText: userMsg.content, chatId: this.chat.id }; }
+      else {
+        a.content = res.status === 401 ? 'Ingresá a tu cuenta para usar tus cuentas conectadas.' : res.status === 429 ? 'Llegaste al límite de hoy de tu plan. Se renueva a las 21:00 (hora de Argentina).' : 'No pude usar tus cuentas en este momento. Probá de nuevo.';
+        if (res.status === 401) a.notice = 'login'; else if (res.status === 429) a.notice = 'quota';
+      }
+    } catch (e) {
+      if (e.name === 'AbortError') throw e;
+      a.content = 'No pude usar tus cuentas en este momento. Probá de nuevo.';
+    }
+    a.streaming = false;
+    this.updateMessage(a, { now: true });
+    return a.content;
+  }
+
   async respond(userMsg, { voice }) {
     const media = userMsg && userMsg.role === 'user' ? detectMediaIntent(userMsg.content) : null;
     if (media) { await this.createMedia(media); return; }
+    if (userMsg && userMsg._tools && this.toolsReady()) {
+      const ctrl = new AbortController();
+      this.busy = { ctrl, label: 'Usando tus cuentas…' };
+      this.updateStatus(); this.syncSend();
+      this.avatar && (this.avatar.pulse(1), this.avatar.setState('thinking'));
+      try {
+        await this.runTools(userMsg, ctrl);
+        if (this.chat.title === 'Nueva conversación') this.chat.title = (userMsg.content || '').replace(/\s+/g, ' ').slice(0, 60);
+        this.persist();
+      } catch (e) { if (e.name !== 'AbortError') this.addNotice('Algo falló al responder. Probá de nuevo.', 'warn'); }
+      this.finish();
+      return;
+    }
     const ctrl = new AbortController();
     this.busy = { ctrl, label: this.mode === 'auto' ? 'Trabajando…' : this.mode === 'deep' ? 'Pensando…' : 'Escribiendo…' };
     this.updateStatus(); this.syncSend();
     this.avatar && (this.avatar.pulse(1), this.avatar.setState('thinking'));
     const mentioned = this.mentionedAgents(userMsg.content);
-    if (mentioned.length && !this.isPaid) { this.finish(); this.paywall('Mencionar agentes especialistas'); return; }
+    if (mentioned.length && !this.featuresUnlocked) { this.finish(); this.paywall('Mencionar agentes especialistas'); return; }
     for (const a of mentioned) if (!this.chat.agents.includes(a.id)) { this.chat.agents.push(a.id); this.renderParticipants(); }
-    const invited = this.isPaid ? this.chat.agents.map((id) => agentById(id, this.store.ws.customAgents)).filter(Boolean) : [];
+    const invited = this.featuresUnlocked ? this.chat.agents.map((id) => agentById(id, this.store.ws.customAgents)).filter(Boolean) : [];
     const docs = this.chat.messages.flatMap((m) => m._docs || []);
     let finalText = '';
     try {
@@ -1004,6 +1060,11 @@ export class ChatApp {
     md.innerHTML = m.content ? renderMarkdown(m.content) : (m.streaming && !(m.steps && m.steps.length) && !m.search ? '<span class="typing" aria-label="Escribiendo"><i></i><i></i><i></i></span>' : '');
     body.append(md);
     if (m.search && m.search.sources && m.search.sources.length && (!m.streaming || m.search.state === 'writing')) body.append(this.sourcesList(m));
+    if (m.tools) {
+      // Tarjetas de herramientas: un solo nodo por mensaje, conservado entre redibujos (mismo mecanismo que la vista previa).
+      const blk = toolBlock(m);
+      if (slots && blk.isConnected) { const slot = h('i', { class: 'pvc-slot' }); slot._card = blk; body.append(slot); } else body.append(blk);
+    }
     if (m.notice === 'login') body.append(h('div', { class: 'alert info' }, 'Iniciá sesión para seguir con el modelo completo. ', h('a', { href: '/cuenta/' }, 'Ingresar')));
     if (m.notice === 'upgrade' || m.notice === 'quota') body.append(h('div', { class: 'alert info' }, 'Llegaste al límite de tu plan por hoy. ', h('a', { href: '/planes.html' }, 'Ver planes')));
     if (!m.streaming && m.content) {

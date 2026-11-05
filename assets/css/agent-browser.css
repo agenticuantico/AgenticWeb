@@ -97,3 +97,5 @@
 @media (max-width: 700px) { .ab-view.is-browser { aspect-ratio: auto; height: min(56vh, 520px); } .ab-view.is-browser .ab-frame { object-fit: cover; object-position: top; } }
 .ab-card.is-full .ab-view.is-browser { height: auto; }
 @media (max-width: 460px) { .ab-card .ab-title span { display: none; } .ab-head .ab-pill { min-width: 0; } }
+.abf-consent { display: grid; gap: 8px; padding: 10px 12px; border-radius: 12px; background: #f6f7fb; border: 1px solid var(--line); }
+.abf-consent p { margin: 0; }

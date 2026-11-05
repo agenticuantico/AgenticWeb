@@ -61,7 +61,7 @@ export function approvalCard(container, text, detail) {
 
 const STATUS_TEXT = {
   starting: 'Encendiendo la computadora', ready: 'Trabajando', thinking: 'Pensando el siguiente paso', acting: 'Trabajando',
-  awaiting_approval: 'Esperando tu aprobación', needs_user: 'Necesita tu ayuda', queued: 'En fila', takeover: 'Tenés el control', done: 'Tarea terminada', ended: 'Sesión cerrada', error: 'No disponible'
+  awaiting_approval: 'Esperando tu aprobación', needs_user: 'Necesita tu acción', queued: 'En fila', takeover: 'Tenés el control', done: 'Tarea terminada', ended: 'Sesión cerrada', error: 'No disponible'
 };
 
 export class AgentBrowserCard {
@@ -324,20 +324,24 @@ export class AgentBrowserCard {
     const user = h('input', { name: 'username', autocomplete: 'off', autocapitalize: 'off', spellcheck: 'false', 'aria-label': 'Usuario o correo', placeholder: 'tu@correo.com' });
     const pass = h('input', { name: 'password', type: 'password', autocomplete: 'new-password', 'aria-label': 'Contraseña', placeholder: 'Tu contraseña' });
     const code = h('input', { name: 'code', inputmode: 'numeric', autocomplete: 'one-time-code', 'aria-label': 'Código de verificación', placeholder: '123456', maxlength: '12' });
-    const save = h('input', { type: 'checkbox', name: 'save', checked: true });
+    const save = h('input', { type: 'checkbox', name: 'save' });   // guardar es opcional: casilla sin tildar
     const eye = h('button', { class: 'abf-eye', type: 'button', 'aria-label': 'Mostrar contraseña', html: icon('eye'), onclick: () => { pass.type = pass.type === 'password' ? 'text' : 'password'; } });
     const status = h('span', { class: 'abf-status small muted', 'aria-live': 'polite' });
     const form = h('form', { class: 'ab-form-card abf-login', autocomplete: 'off' },
       h('div', { class: 'ap-head' }, h('span', { class: 'abf-ic', html: icon('lock') }), h('strong', {}, 'Iniciar sesión'), ask.host ? h('span', { class: 'abf-host', 'data-no-i18n': '' }, ask.host) : null),
-      h('p', { class: 'small' }, 'Completá tus datos: los cargo yo en la página. Viajan cifrados y el agente no los ve.'),
-      ask.saved ? h('button', { class: 'btn btn-sm abf-saved', type: 'button', onclick: () => this.sendLogin({ useSaved: true }, form, status) }, h('span', { html: icon('user') }), 'Usar mi cuenta guardada') : null,
+      ask.saved && !ask.needCode
+        ? h('div', { class: 'abf-consent' }, h('p', { class: 'small' }, `Tenés una cuenta guardada para ${ask.host || 'este sitio'}. ¿Te doy permiso para usarla ahora? Solo la cargo si tocás «Sí, usarla».`),
+          h('div', { class: 'abf-row' }, h('button', { class: 'btn btn-sm btn-primary abf-saved', type: 'button', onclick: () => this.sendLogin({ useSaved: true }, form, status) }, h('span', { html: icon('check') }), 'Sí, usarla'),
+            h('span', { class: 'small muted' }, 'o escribí otros datos abajo')))
+        : null,
+      h('p', { class: 'small' }, 'Completá tus datos: los cargo yo en la página. Van directo al servidor, se guardan cifrados solo si lo elegís y el agente nunca los ve.'),
       ask.needUser !== false ? h('label', { class: 'abf-field' }, h('span', {}, 'Usuario o correo'), user) : null,
       ask.needPassword !== false ? h('label', { class: 'abf-field' }, h('span', {}, 'Contraseña'), h('div', { class: 'abf-pw' }, pass, eye)) : null,
       ask.needCode ? h('label', { class: 'abf-field' }, h('span', {}, 'Código de verificación'), code) : null,
       ask.needCode ? null : h('label', { class: 'abf-check' }, save, h('span', {}, 'Guardar esta cuenta para la próxima (cifrada)')),
       h('div', { class: 'abf-row' }, h('button', { class: 'btn btn-sm btn-primary', type: 'submit' }, h('span', { html: icon('check') }), 'Ingresar'),
         h('button', { class: 'btn btn-sm btn-ghost', type: 'button', onclick: () => this.setTakeover(true) }, 'Lo hago yo'), status),
-      h('p', { class: 'abf-fine muted' }, 'Nunca escribo datos de tarjetas. Podés borrar tus cuentas en Centro de control → Conectores.'));
+      h('p', { class: 'abf-fine muted' }, 'Nunca escribo datos de tarjetas. Podés borrar tus accesos guardados en Tu cuenta → Cuentas conectadas.'));
     form.addEventListener('submit', (e) => {
       e.preventDefault();
       const body = { username: user.value, password: pass.value, code: code.value.replace(/\s+/g, ''), save: !ask.needCode && save.checked, host: ask.host };
