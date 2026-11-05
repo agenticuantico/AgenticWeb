@@ -11,7 +11,7 @@ import { h, icon, esc, toast, modal, popover, uid } from '../ui.js';
 import { CONFIG, PLANS, formatARS, mailtoCommercial } from '../config.js';
 import { prefs } from '../consent.js';
 import * as engine from './engine.js';
-import { renderMarkdown } from './md.js';
+import { renderMarkdown, looksLikeMarkdown } from './md.js';
 import { LANGS, getLang, flagUrl, startLang } from './languages.js';
 const SITE_IDS = ['es-AR', 'es-ES', 'en-US', 'pt-BR'];
 import { AGENTS, TOOLS, SKILLS, CONNECTORS, agentById, initials } from './agents.js';
@@ -642,8 +642,8 @@ export class ChatApp {
     // "Recordá que…" → memoria explícita
     const mem = /^(record[aá]|acordate|guard[aá] en (tu )?memoria)( que)?\s+(.{4,300})$/i.exec(text);
     if (mem && !this.chat.incognito && this.store.ws.memoryOn) {
-      this.store.ws.memory.push({ id: uid('mem'), text: mem[4].trim(), at: Date.now() });
-      this.store.saveWorkspace();
+      // Se guarda en la cuenta (servidor) si hay; el servidor rechaza contraseñas, códigos y tarjetas.
+      this.store.addMemory(mem[4].trim(), 'chat').catch((e) => import('../account/api.js').then((m) => toast(m.errorText(e), 'warn')).catch(() => {}));
     }
     await this.respond(msg, { voice: false });
   }
@@ -1283,13 +1283,15 @@ export class ChatApp {
   openCanvas(art0) {
     const art = { ...art0, content: cleanArtifact(art0.content, art0.name) };
     const isHtml = art.mime === 'text/html' || /\.html?$/.test(art.name);
+    // Markdown (o texto con formato Markdown): la «Vista previa» lo muestra con formato, no con «##» crudos.
+    const isMd = !isHtml && (previewKind(art) === 'markdown' || looksLikeMarkdown(art.content, art.name));
     const ta = h('textarea', { class: 'canvas-code', spellcheck: 'false', 'aria-label': 'Contenido editable' });
     ta.value = art.content;
     const frame = h('iframe', { class: 'canvas-frame', title: 'Vista previa aislada', sandbox: 'allow-scripts allow-modals', src: '/app/preview.html', referrerpolicy: 'no-referrer' });
     const preview = h('div', { class: 'canvas-preview' }, frame);
     const tabs = h('div', { class: 'canvas-tabs', role: 'tablist' });
     const setTab = (t) => { tabs.querySelectorAll('button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === t))); ta.hidden = t !== 'code'; preview.hidden = t !== 'preview'; if (t === 'preview') send(); };
-    const send = () => frame.contentWindow && frame.contentWindow.postMessage({ type: 'ac-preview', html: isHtml ? ta.value : `<pre style="white-space:pre-wrap;font:14px/1.5 ui-monospace,monospace;padding:16px">${esc(ta.value)}</pre>` }, '*');
+    const send = () => frame.contentWindow && frame.contentWindow.postMessage({ type: 'ac-preview', html: isHtml ? ta.value : isMd ? previewHtml({ name: 'doc.md', mime: 'text/markdown', content: ta.value }) : `<pre style="white-space:pre-wrap;font:14px/1.5 ui-monospace,monospace;padding:16px">${esc(ta.value)}</pre>` }, '*');
     frame.addEventListener('load', send);
     tabs.append(h('button', { type: 'button', role: 'tab', 'data-tab': 'code', onclick: () => setTab('code') }, 'Código'), h('button', { type: 'button', role: 'tab', 'data-tab': 'preview', onclick: () => setTab('preview') }, 'Vista previa'));
     const body = h('div', { class: 'canvas' }, tabs, ta, preview);
@@ -1300,7 +1302,7 @@ export class ChatApp {
         { label: 'Descargar', class: 'btn-primary', onClick: () => { download(art.name, ta.value, art.mime || 'text/plain'); return false; } }
       ]
     });
-    setTab(isHtml ? 'preview' : 'code');
+    setTab(isHtml || isMd ? 'preview' : 'code');
   }
 
   /* =================== Conversaciones =================== */

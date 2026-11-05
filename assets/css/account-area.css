@@ -151,8 +151,10 @@ dialog.acc-dialog::backdrop { background: rgba(15, 14, 20, .45); backdrop-filter
 .acc-conn-logo svg { width: 24px; height: 24px; }
 .acc-conn-t { display: grid; gap: 4px; justify-items: start; }
 .acc-perms { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: .88rem; color: var(--ink-2, #3f3f46); }
-.acc-perms li { display: flex; gap: 8px; align-items: center; }
-.acc-perms em { font-style: normal; font-size: .76rem; color: #3f6212; background: #f6ffe6; padding: 1px 7px; border-radius: 999px; }
+.acc-perms li { display: flex; gap: 8px; align-items: flex-start; }
+.acc-perms li > span:last-child { min-width: 0; line-height: 1.45; }
+.acc-perms .acc-perm-ic { flex: none; margin-top: 1px; }
+.acc-perms em { font-style: normal; font-size: .76rem; color: #3f6212; background: #f6ffe6; padding: 1px 7px; border-radius: 999px; white-space: nowrap; }
 .acc-perm-ic { display: inline-grid; width: 16px; height: 16px; color: var(--muted); flex: none; }
 .acc-perm-ic svg { width: 16px; height: 16px; }
 .acc-who { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 14px; background: #f8f9fc; border: 1px solid var(--line); min-width: 0; }
@@ -285,3 +287,28 @@ dialog.acc-dialog::backdrop { background: rgba(15, 14, 20, .45); backdrop-filter
 .acc-login-t { display: grid; gap: 2px; flex: 1; min-width: 0; }
 .acc-login-t strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .95rem; }
 .acc-login-t small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ------------------------- Fase 2: tareas, memoria, proyectos ------------------------- */
+.acc-task-edit { box-shadow: none; background: #f8f9fc; }
+.acc-task-hist { border-top: 1px solid var(--line); padding-top: 8px; }
+.acc-task-hist summary { cursor: pointer; font-weight: 650; font-size: .9rem; min-height: 32px; display: flex; align-items: center; }
+.acc-hist { list-style: none; margin: 6px 0 0; padding: 0; display: grid; gap: 8px; }
+.acc-hist li { display: grid; grid-template-columns: auto 1fr; gap: 4px 10px; align-items: center; font-size: .86rem; padding: 8px 10px; border-radius: 12px; background: #f8f9fc; }
+.acc-hist-when { color: var(--muted); font-variant-numeric: tabular-nums; }
+.acc-hist-sum { grid-column: 1 / -1; color: var(--ink-2, #3f3f46); overflow-wrap: anywhere; }
+.acc-mem-head { justify-content: space-between; }
+.acc-mem-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.acc-mem { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 10px 12px; }
+.acc-mem-view { display: flex; gap: 10px; align-items: flex-start; justify-content: space-between; }
+.acc-mem-body { display: grid; gap: 2px; min-width: 0; }
+.acc-mem-t { margin: 0; overflow-wrap: anywhere; line-height: 1.4; }
+.acc-mem-acts { display: flex; gap: 4px; flex: none; }
+.acc-mem-edit { display: grid; gap: 8px; }
+.acc-projects { display: grid; gap: 12px; }
+@media (min-width: 720px) { .acc-projects { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.acc-project { background: #fff; border: 1px solid var(--line); border-radius: 22px; padding: 16px; display: grid; gap: 10px; box-shadow: 0 1px 2px rgba(20, 20, 40, .04), 0 12px 30px rgba(20, 20, 40, .05); }
+.acc-project > div { display: grid; gap: 10px; }
+.acc-proj-chats { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: .9rem; }
+.acc-proj-chats li { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.acc-proj-chats .linklike { color: var(--ink); text-align: left; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-height: 28px; }
+.acc-voice { display: flex; gap: 10px; align-items: center; }

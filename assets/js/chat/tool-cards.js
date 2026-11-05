@@ -12,7 +12,7 @@ import { startConnect } from '../account/oauth-connect.js';
 import { applyCard } from './apply-card.js';
 
 /* ------------------- «Conectá X para seguir» (cuenta que falta) ------------------- */
-const NEED_LOGO = { github: 'github', google: 'google', linkedin: 'linkedin', cloudflare: 'cloudflare' };
+const NEED_LOGO = { github: 'github', google: 'google', gcalendar: 'gcalendar', gdrive: 'gdrive', linkedin: 'linkedin', cloudflare: 'cloudflare' };
 export function needCard(n, m) {
   const state = h('p', { class: 'tc-state', role: 'status', 'aria-live': 'polite' });
   const title = n.state === 'disabled' ? `Activá ${n.label} para seguir` : n.state === 'expired' ? `Reconectá ${n.label} para seguir` : `Conectá ${n.label} para seguir`;
@@ -182,5 +182,5 @@ export function toolBlock(m) {
 export function wantsTools(text) {
   // Las direcciones web no cuentan («…workers.dev/…» no es un pedido sobre Cloudflare Workers).
   const t = String(text || '').replace(/\bhttps?:\/\/\S+/gi, ' ');
-  return /(\bgmail\b|\b(mis|mi|los|el) (e-?mails?|mails?|correos?)\b|\binbox\b|mis correos|mi correo|mail(s)? nuevos|bandeja|borrador de correo|mand[aá](le|me)? (un|el) (correo|mail)|\bgithub\b|\brepo(s|sitorio)?s?\b|\bissue\b|\bcommit\b|\bcloudflare\b|\bworkers?\b|\blinkedin\b|public[aá] en|(busc|encontr)\S*\s[^.?!]{0,40}(trabajo|empleo|ofertas?|vacantes?|laburo)|ofertas? de (trabajo|empleo)|\bpostul)/i.test(t);
+  return /(\bgmail\b|\b(mis|mi|los|el) (e-?mails?|mails?|correos?)\b|\binbox\b|mis correos|mi correo|mail(s)? nuevos|bandeja|borrador de correo|mand[aá](le|me)? (un|el) (correo|mail)|\bgithub\b|\brepo(s|sitorio)?s?\b|\bissue\b|\bcommit\b|\bcloudflare\b|\bworkers?\b|\blinkedin\b|\bgoogle calendar\b|\bcalendario\b|\bmi agenda\b|\bagend[aá](me|r)\b|\bmi drive\b|\bgoogle drive\b|guard[aá]\S* en (mi )?drive|public[aá] en|(busc|encontr)\S*\s[^.?!]{0,40}(trabajo|empleo|ofertas?|vacantes?|laburo)|ofertas? de (trabajo|empleo)|\bpostul)/i.test(t);
 }

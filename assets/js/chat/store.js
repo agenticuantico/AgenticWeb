@@ -4,6 +4,9 @@
  *  - Con cuenta: Firestore users/{uid}/chats/{chatId} y users/{uid}/private/workspace,
  *    con caché local. Si Firestore no responde, sigue funcionando en local.
  *  - Incógnito: nunca se guarda.
+ *  - Fase 2: con cuenta, la MEMORIA y los PROYECTOS (y a qué proyecto va cada chat) viven en el servidor (D1, por
+ *    usuario). La primera vez se importa una sola vez lo que había en el dispositivo. Si el servidor no responde, se
+ *    sigue con la copia local como antes. Los métodos addMemory/editMemory/… son la única forma de cambiarlos.
  */
 import { getStore } from '../firebase.js';
 
@@ -40,7 +43,10 @@ export class ChatStore {
     this.ws = { ...DEFAULT_WS(), ...readLS(LS_WS, {}) };
     this.listeners = new Set();
     this.remoteOk = false;
+    this.serverOk = false;
     this._timers = new Map();
+    // El área «Tu cuenta» cambia memoria/proyectos directo en el servidor: al avisar, se vuelve a leer.
+    if (typeof document !== 'undefined') document.addEventListener('workspace:refresh', () => { if (this.uid) this.syncServer(); });
   }
   on(fn) { this.listeners.add(fn); return () => this.listeners.delete(fn); }
   emit() { this.listeners.forEach((fn) => fn(this)); }
@@ -51,7 +57,7 @@ export class ChatStore {
   /** Conecta la cuenta: trae chats remotos y sube una vez los locales de invitado. */
   async attachUser(uid) {
     this.uid = uid;
-    if (!uid) { this.remoteOk = false; this.chats = readLS(LS_CHATS, []); this.emit(); return; }
+    if (!uid) { this.remoteOk = false; this.serverOk = false; this.chats = readLS(LS_CHATS, []); this.emit(); return; }
     try {
       const { fs, db } = await getStore();
       const q = fs.query(fs.collection(db, 'users', uid, 'chats'), fs.orderBy('updatedAt', 'desc'), fs.limit(100));
@@ -70,6 +76,107 @@ export class ChatStore {
       this.remoteOk = false;
     }
     this.emit();
+    await this.syncServer();
+  }
+
+  /* ---------- Memoria y proyectos en el servidor (Fase 2) ---------- */
+  async _api(path, body) {
+    const { call } = await import('../account/api.js');
+    return call(path, body === undefined ? {} : { method: 'POST', body });
+  }
+  /** Trae memoria y proyectos del servidor (e importa una vez lo local). Sin servidor, queda la copia local. */
+  async syncServer() {
+    this.serverOk = false;
+    if (!this.uid) return false;
+    try {
+      let w = await this._api('/api/workspace');
+      if (!w.importedAt) {
+        const chats = {};
+        for (const c of this.chats) if (c.projectId) chats[c.id] = c.projectId;
+        const r = await this._api('/api/workspace/import', { memoryOn: this.ws.memoryOn !== false, memory: this.ws.memory || [], projects: this.ws.projects || [], chats });
+        w = r.workspace;
+      }
+      this._applyServer(w);
+      this.serverOk = true;
+    } catch (e) { console.warn('[workspace] servidor no disponible:', e && e.code); }
+    this.emit();
+    return this.serverOk;
+  }
+  _applyServer(w) {
+    this.ws.memoryOn = w.memoryOn !== false;
+    this.ws.memory = (w.memory || []).map((m) => ({ id: m.id, text: m.text, at: m.createdAt, source: m.source }));
+    this.ws.projects = (w.projects || []).map((p) => ({ id: p.id, name: p.name, description: p.description || '' }));
+    const map = w.chats || {};
+    for (const c of this.chats) {
+      const pid = map[c.id] || null;
+      if ((c.projectId || null) !== pid) { c.projectId = pid; this._persistLocal(); }
+    }
+    writeLS(LS_WS, this.ws);
+  }
+  /** Guarda memoria/proyectos: servidor si hay cuenta y responde; si no, como antes (dispositivo/Firestore). */
+  async _local() { await this.saveWorkspace(); }
+
+  async addMemory(text, source = 'manual') {
+    const t = String(text || '').trim();
+    if (!t) return null;
+    if (this.serverOk) {
+      const r = await this._api('/api/memory', { text: t, source });
+      if (!this.ws.memory.some((m) => m.id === r.memory.id)) this.ws.memory.push({ id: r.memory.id, text: r.memory.text, at: r.memory.createdAt, source: r.memory.source });
+      writeLS(LS_WS, this.ws); this.emit(); return r.memory;
+    }
+    const m = { id: 'mem' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), text: t.slice(0, 300), at: Date.now() };
+    this.ws.memory.push(m); await this._local(); return m;
+  }
+  async editMemory(id, text) {
+    const t = String(text || '').trim();
+    if (this.serverOk) await this._api(`/api/memory/${encodeURIComponent(id)}/edit`, { text: t });
+    const m = this.ws.memory.find((x) => x.id === id); if (m) m.text = t;
+    if (this.serverOk) { writeLS(LS_WS, this.ws); this.emit(); } else await this._local();
+  }
+  async deleteMemory(id) {
+    if (this.serverOk) await this._api(`/api/memory/${encodeURIComponent(id)}/delete`, {});
+    this.ws.memory = this.ws.memory.filter((x) => x.id !== id);
+    if (this.serverOk) { writeLS(LS_WS, this.ws); this.emit(); } else await this._local();
+  }
+  async clearMemory() {
+    if (this.serverOk) await this._api('/api/memory/clear', {});
+    this.ws.memory = [];
+    if (this.serverOk) { writeLS(LS_WS, this.ws); this.emit(); } else await this._local();
+  }
+  async setMemoryOn(on) {
+    if (this.serverOk) await this._api('/api/workspace/settings', { memoryOn: !!on });
+    this.ws.memoryOn = !!on;
+    if (this.serverOk) { writeLS(LS_WS, this.ws); this.emit(); } else await this._local();
+  }
+  async addProject(name, description = '') {
+    const n = String(name || '').trim().slice(0, 60);
+    if (!n) return null;
+    if (this.serverOk) {
+      const r = await this._api('/api/projects', { name: n, description });
+      this.ws.projects.push({ id: r.project.id, name: r.project.name, description: r.project.description || '' });
+      writeLS(LS_WS, this.ws); this.emit(); return r.project;
+    }
+    const p = { id: 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), name: n, description };
+    this.ws.projects.push(p); await this._local(); return p;
+  }
+  async editProject(id, name, description = '') {
+    const n = String(name || '').trim().slice(0, 60);
+    if (this.serverOk) await this._api(`/api/projects/${encodeURIComponent(id)}/edit`, { name: n, description });
+    const p = this.ws.projects.find((x) => x.id === id); if (p) { p.name = n; p.description = description; }
+    if (this.serverOk) { writeLS(LS_WS, this.ws); this.emit(); } else await this._local();
+  }
+  /** Borra el proyecto: sus chats quedan sin proyecto (no se borran). */
+  async deleteProject(id) {
+    if (this.serverOk) await this._api(`/api/projects/${encodeURIComponent(id)}/delete`, {});
+    this.ws.projects = this.ws.projects.filter((x) => x.id !== id);
+    for (const c of this.chats) if (c.projectId === id) { c.projectId = null; this.save(c); }
+    if (this.serverOk) { writeLS(LS_WS, this.ws); this.emit(); } else await this._local();
+  }
+  /** Mueve un chat a un proyecto (o lo saca con null). */
+  async setChatProject(chat, projectId) {
+    if (this.serverOk) await this._api('/api/projects/assign', { chatId: chat.id, projectId: projectId || null, title: chat.title });
+    chat.projectId = projectId || null;
+    this.save(chat);
   }
 
   save(chat, { immediate = false } = {}) {
@@ -120,7 +227,11 @@ export class ChatStore {
     if (this.uid && this.remoteOk !== false) {
       try {
         const { fs, db } = await getStore();
-        await fs.setDoc(fs.doc(db, 'users', this.uid, 'private', 'workspace'), JSON.parse(JSON.stringify(this.ws)));
+        // Con el servidor activo, memoria y proyectos viven en D1: el resto del espacio se guarda sin pisar esos campos.
+        if (this.serverOk) {
+          const { memory, projects, memoryOn, ...rest } = JSON.parse(JSON.stringify(this.ws));
+          await fs.setDoc(fs.doc(db, 'users', this.uid, 'private', 'workspace'), rest, { merge: true });
+        } else await fs.setDoc(fs.doc(db, 'users', this.uid, 'private', 'workspace'), JSON.parse(JSON.stringify(this.ws)));
       } catch (e) { console.warn('[workspace] no se pudo sincronizar', e && e.code); }
     }
     this.emit();

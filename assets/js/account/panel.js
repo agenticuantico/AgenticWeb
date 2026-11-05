@@ -1,20 +1,23 @@
 /**
  * Área «Tu cuenta» dentro de /app/: perfil, uso del día, planes, tareas programadas, cuentas conectadas y empleo.
  * Se abre desde la tarjeta de cuenta de la barra lateral o con #cuenta, #cuenta/uso, #cuenta/tareas,
- * #cuenta/conexiones, #cuenta/empleo. Es un <dialog> nativo (foco atrapado, Esc cierra, accesible).
+ * #cuenta/conexiones, #cuenta/memoria, #cuenta/proyectos, #cuenta/empleo. Es un <dialog> nativo (foco atrapado, Esc cierra, accesible).
  */
 import { h, icon, esc } from '../ui.js';
 import { call, errorText } from './api.js';
 import { renderTasks } from './tasks.js';
 import { renderConnections, finishOAuthFromHash } from './connections.js';
 import { renderJobs } from './jobs.js';
+import { renderMemory, renderProjects } from './workspace.js';
 
-const CSS = '/assets/css/account-area.css?v=1.0.0';
+const CSS = '/assets/css/account-area.css?v=1.1.0';
 const TABS = [
   ['perfil', 'Perfil', 'user'],
   ['uso', 'Uso y plan', 'chart'],
   ['tareas', 'Tareas', 'clock'],
   ['conexiones', 'Cuentas conectadas', 'plug'],
+  ['memoria', 'Memoria', 'memory'],
+  ['proyectos', 'Proyectos', 'folder'],
   ['empleo', 'Empleo', 'briefcase']
 ];
 const METERS = [
@@ -100,7 +103,7 @@ export function openAccount(tab = 'perfil', opts = {}) {
     pane.innerHTML = '';
     pane.append(h('div', { class: 'acc-loading' }, h('span', { class: 'acc-spin', 'aria-hidden': 'true' }), 'Cargando…'));
     try {
-      const view = { perfil: viewProfile, uso: viewUsage, tareas: renderTasks, conexiones: renderConnections, empleo: renderJobs }[id];
+      const view = { perfil: viewProfile, uso: viewUsage, tareas: renderTasks, conexiones: renderConnections, memoria: renderMemory, proyectos: renderProjects, empleo: renderJobs }[id];
       const el = h('div', { class: 'acc-view' });
       await view(el, ctx, load);
       if (my !== token) return;
@@ -153,10 +156,26 @@ async function viewProfile(el, ctx, load) {
     h('div', { class: 'acc-tiles' },
       tile('clock', 'Tareas activas', `${s.tasks.active} de ${s.tasks.max}`, () => ctx.show('tareas')),
       tile('plug', 'Cuentas conectadas', `${s.connectors.filter((c) => c.status === 'connected').length} de ${s.connectors.length}`, () => ctx.show('conexiones')),
-      tile('briefcase', 'Empleo', 'Buscar y preparar postulaciones', () => ctx.show('empleo'))),
+      tile('memory', 'Memoria', 'Ver y editar', () => ctx.show('memoria')),
+      tile('folder', 'Proyectos', 'Agrupar chats', () => ctx.show('proyectos')),
+      tile('briefcase', 'Empleo', 'Ofertas y CV', () => ctx.show('empleo'))),
+    voiceLine(),
     h('div', { class: 'acc-links' },
       h('a', { class: 'btn btn-ghost btn-sm', href: '/cuenta/' }, h('span', { html: icon('card') }), 'Suscripción y seguridad'),
       h('a', { class: 'btn btn-ghost btn-sm', href: '/planes.html' }, h('span', { html: icon('spark') }), 'Ver planes')));
+}
+
+/** Voz del chat: qué hay disponible. Las opciones con proveedor propio solo aparecen si están activas. */
+function voiceLine() {
+  const box = h('p', { class: 'acc-note acc-voice', 'aria-live': 'polite' }, h('span', { html: icon('mic') }), h('span', {}, 'Voz del chat: revisando…'));
+  call('/api/voice').then((v) => {
+    const txt = !v.stt.available && !v.tts.available ? 'Voz del chat: no disponible en este momento. Podés escribir igual.'
+      : v.elevenlabs ? 'Voz del chat: voz natural premium activa.'
+      : v.deepgram ? 'Voz del chat: voz neural Deepgram activa, con respaldo gratis.'
+      : 'Voz del chat: voz neural gratis (con un tope diario; si se agota, usa la voz de tu navegador).';
+    box.lastChild.textContent = txt;
+  }).catch(() => { box.remove(); });
+  return box;
 }
 
 function tile(ic, title, value, onClick) {

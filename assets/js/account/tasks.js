@@ -1,6 +1,7 @@
 /**
  * Pestaña «Tareas»: tareas programadas de la persona (búsqueda diaria de empleo, resumen web) y sus resultados.
- * Las corre el servidor con Cron Triggers; acá se crean, se pausan, se ejecutan una vez y se ven los resultados.
+ * Las corre el servidor con un solo Cron Trigger (plan gratis); acá se crean, se editan, se pausan, se ejecutan una vez,
+ * se ve el historial de ejecuciones y se borran.
  */
 import { h, icon, toast, confirmDialog, timeAgo } from '../ui.js';
 import { call, errorText } from './api.js';
@@ -53,14 +54,49 @@ function taskCard(t, ctx, root) {
     if (!(await confirmDialog({ title: 'Borrar tarea', text: `¿Borrar «${t.title}» y sus resultados?`, ok: 'Borrar', danger: true }))) return;
     try { await call(`/api/tasks/${t.id}/delete`, { method: 'POST', body: {} }); ctx.summary = null; rerender(root, ctx); } catch (e) { toast(errorText(e), 'warn'); }
   } });
-  return h('article', { class: 'acc-task' },
+  const card = h('article', { class: 'acc-task', 'aria-label': `Tarea: ${t.title}` });
+  const edit = h('button', { class: 'btn btn-sm', type: 'button', 'aria-expanded': 'false' }, h('span', { html: icon('edit') }), 'Editar');
+  edit.addEventListener('click', () => {
+    const open = card.querySelector('.acc-task-edit');
+    if (open) { open.remove(); edit.setAttribute('aria-expanded', 'false'); edit.focus(); return; }
+    const f = taskForm(ctx, root, null, t, () => { f.remove(); edit.setAttribute('aria-expanded', 'false'); edit.focus(); });
+    f.classList.add('acc-task-edit');
+    card.insertBefore(f, card.querySelector('.acc-task-hist'));
+    edit.setAttribute('aria-expanded', 'true');
+    f.querySelector('select, input').focus();
+  });
+  const hist = historyBox(t);
+  card.append(
     h('div', { class: 'acc-task-top' },
       h('span', { class: 'acc-task-ic', html: icon(t.kind === 'job_search' ? 'briefcase' : 'globe') }),
       h('div', { class: 'acc-task-t' }, h('strong', {}, t.title), h('small', { class: 'muted' }, t.schedule)),
       status),
     h('p', { class: 'acc-task-next muted' }, t.status === 'active' ? `Próxima: ${new Date(t.nextRunAt).toLocaleString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires', weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}` : t.failCount >= 5 ? 'Se pausó sola después de 5 fallas seguidas.' : 'No se ejecuta mientras esté pausada.'),
     results,
-    h('div', { class: 'acc-row' }, runBtn, toggle, del));
+    h('div', { class: 'acc-row' }, runBtn, toggle, edit, del),
+    hist);
+  return card;
+}
+
+/** «Historial»: se carga al abrirlo (últimas 10 ejecuciones, con estado, cuándo y si fue manual). */
+function historyBox(t) {
+  const list = h('div', { class: 'acc-hist-list', 'aria-live': 'polite' });
+  const det = h('details', { class: 'acc-task-hist' }, h('summary', {}, 'Historial de ejecuciones'), list);
+  let loaded = false;
+  det.addEventListener('toggle', async () => {
+    if (!det.open || loaded) return;
+    loaded = true;
+    list.replaceChildren(h('p', { class: 'muted acc-small' }, 'Cargando…'));
+    try {
+      const r = await call(`/api/tasks/${t.id}/runs?limit=10`);
+      if (!r.runs.length) { list.replaceChildren(h('p', { class: 'muted acc-small' }, 'Todavía no se ejecutó.')); return; }
+      list.replaceChildren(h('ol', { class: 'acc-hist' }, ...r.runs.map((x) => h('li', { class: x.status },
+        h('span', { class: 'acc-chip ' + (x.status === 'ok' ? 'ok' : x.status === 'error' ? 'warn' : '') }, x.status === 'ok' ? 'Bien' : x.status === 'error' ? 'Con problemas' : 'En curso'),
+        h('span', { class: 'acc-hist-when' }, new Date(x.startedAt).toLocaleString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }), x.trigger === 'manual' ? ' · manual' : ' · programada'),
+        x.summary ? h('span', { class: 'acc-hist-sum' }, x.summary) : null))));
+    } catch (e) { loaded = false; list.replaceChildren(h('p', { class: 'error-text' }, errorText(e))); }
+  });
+  return det;
 }
 
 function runView(r) {
@@ -78,30 +114,42 @@ function runView(r) {
   return box;
 }
 
-function taskForm(ctx, root, data) {
+function taskForm(ctx, root, data, task = null, onCancel = null) {
   const kind = h('select', { class: 'input', name: 'kind' }, h('option', { value: 'job_search' }, 'Buscar empleo'), h('option', { value: 'web_digest' }, 'Resumen de la web'));
   const query = h('input', { class: 'input', name: 'query', required: true, maxlength: 120, placeholder: 'Ej.: atención al cliente remoto Argentina', autocomplete: 'off' });
   const cadence = h('select', { class: 'input', name: 'cadence' }, h('option', { value: 'daily' }, 'Todos los días'), h('option', { value: 'weekly' }, 'Una vez por semana'));
-  const weekday = h('select', { class: 'input', name: 'weekday' }, ...DAYS.map((d, i) => h('option', { value: String(i), selected: i === 1 || null }, d)));
-  const hour = h('select', { class: 'input', name: 'hour' }, ...Array.from({ length: 24 }, (_, i) => h('option', { value: String(i), selected: i === 9 || null }, `${String(i).padStart(2, '0')}:00`)));
+  const wd = task && task.weekday !== null && task.weekday !== undefined ? task.weekday : 1;
+  const hr = task ? task.hourArt : 9;
+  const weekday = h('select', { class: 'input', name: 'weekday' }, ...DAYS.map((d, i) => h('option', { value: String(i), selected: i === wd || null }, d)));
+  const hour = h('select', { class: 'input', name: 'hour' }, ...Array.from({ length: 24 }, (_, i) => h('option', { value: String(i), selected: i === hr || null }, `${String(i).padStart(2, '0')}:00`)));
+  const title = task ? h('input', { class: 'input', name: 'title', maxlength: 80, autocomplete: 'off', value: task.title }) : null;
+  if (task) { kind.value = task.kind; query.value = (task.params && task.params.query) || ''; cadence.value = task.cadence; }
   const dayField = field('Día', weekday);
-  dayField.hidden = true;
+  dayField.hidden = cadence.value !== 'weekly';
   cadence.addEventListener('change', () => { dayField.hidden = cadence.value !== 'weekly'; });
   const err = h('p', { class: 'error-text', role: 'alert' });
-  const submit = h('button', { class: 'btn btn-primary', type: 'submit' }, h('span', { html: icon('plus') }), 'Crear tarea');
-  const full = data.tasks.filter((t) => t.status === 'active').length >= data.max;
-  const form = h('form', { class: 'acc-card acc-form', novalidate: true },
-    h('h4', {}, 'Nueva tarea'),
+  const submit = h('button', { class: 'btn btn-primary', type: 'submit' }, h('span', { html: icon(task ? 'check' : 'plus') }), task ? 'Guardar cambios' : 'Crear tarea');
+  const cancel = task ? h('button', { class: 'btn btn-ghost', type: 'button', onclick: () => onCancel && onCancel() }, 'Cancelar') : null;
+  const full = !task && data.tasks.filter((t) => t.status === 'active').length >= data.max;
+  const form = h('form', { class: 'acc-card acc-form', novalidate: true, 'aria-label': task ? `Editar ${task.title}` : 'Nueva tarea' },
+    h('h4', {}, task ? 'Editar tarea' : 'Nueva tarea'),
     full ? h('p', { class: 'acc-note' }, h('span', { html: icon('info') }), 'Llegaste al máximo de tareas activas de tu plan. Pausá o borrá una para crear otra.') : null,
-    h('div', { class: 'acc-form-grid' }, field('Qué hace', kind), field('Qué buscar', query), field('Frecuencia', cadence), dayField, field('Hora (Argentina)', hour)),
-    err, h('div', { class: 'acc-row' }, submit));
+    h('div', { class: 'acc-form-grid' }, title ? field('Nombre', title) : null, field('Qué hace', kind), field('Qué buscar', query), field('Frecuencia', cadence), dayField, field('Hora (Argentina)', hour)),
+    err, h('div', { class: 'acc-row' }, submit, cancel));
   form.addEventListener('submit', async (e) => {
     e.preventDefault(); err.textContent = '';
     if (query.value.trim().length < 2) { err.textContent = 'Escribí qué querés buscar.'; query.focus(); return; }
     submit.disabled = true;
+    const body = { kind: kind.value, params: { query: query.value.trim() }, cadence: cadence.value, hourArt: Number(hour.value), weekday: cadence.value === 'weekly' ? Number(weekday.value) : undefined };
     try {
-      await call('/api/tasks', { method: 'POST', body: { kind: kind.value, params: { query: query.value.trim() }, cadence: cadence.value, hourArt: Number(hour.value), weekday: cadence.value === 'weekly' ? Number(weekday.value) : undefined } });
-      toast('Tarea creada.', 'ok'); ctx.summary = null; rerender(root, ctx);
+      if (task) {
+        await call(`/api/tasks/${task.id}/edit`, { method: 'POST', body: { ...body, title: title.value.trim() || undefined } });
+        toast('Cambios guardados.', 'ok');
+      } else {
+        await call('/api/tasks', { method: 'POST', body });
+        toast('Tarea creada.', 'ok');
+      }
+      ctx.summary = null; rerender(root, ctx);
     } catch (e2) { err.textContent = errorText(e2); submit.disabled = false; }
   });
   return form;

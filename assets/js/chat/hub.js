@@ -139,25 +139,27 @@ async function automatizaciones(pane, chat) {
 }
 
 function memoria(pane, chat) {
-  const ws = chat.store.ws;
+  const st = chat.store, ws = st.ws;
+  const fail = (e) => import('../account/api.js').then((m) => toast(m.errorText(e), 'warn')).catch(() => toast('No se pudo guardar.', 'warn'));
   const sw = h('input', { type: 'checkbox', checked: ws.memoryOn || null, 'aria-label': 'Usar memoria' });
-  sw.addEventListener('change', () => { ws.memoryOn = sw.checked; chat.store.saveWorkspace(); });
-  pane.append(h('label', { class: 'hub-item' }, h('div', {}, h('strong', {}, 'Usar memoria'), h('p', { class: 'muted small' }, 'Datos que recuerdo entre conversaciones. Decí «Recordá que…» para agregar uno. Los chats incógnito nunca se usan ni se guardan.')), h('span', { class: 'switch' }, sw, h('span'))));
+  sw.addEventListener('change', () => st.setMemoryOn(sw.checked).catch((e) => { sw.checked = !sw.checked; fail(e); }));
+  pane.append(h('label', { class: 'hub-item' }, h('div', {}, h('strong', {}, 'Usar memoria'), h('p', { class: 'muted small' }, 'Datos que recuerdo entre conversaciones. Decí «Recordá que…» para agregar uno. Los chats incógnito nunca se usan ni se guardan.'), h('p', { class: 'muted small' }, st.serverOk ? 'Se guarda en tu cuenta. Nunca guardo contraseñas, códigos ni tarjetas.' : 'Nunca guardo contraseñas, códigos ni tarjetas.')), h('span', { class: 'switch' }, sw, h('span'))));
   const list = h('div', { class: 'hub-list' });
+  const clearBox = h('div');
   const draw = () => {
-    list.innerHTML = '';
+    list.innerHTML = ''; clearBox.innerHTML = '';
     if (!ws.memory.length) list.append(h('p', { class: 'muted small' }, 'No hay datos guardados.'));
     ws.memory.forEach((m) => {
       const input = h('input', { class: 'input', value: m.text, maxlength: 300, 'aria-label': 'Dato guardado' });
-      input.addEventListener('change', () => { m.text = input.value.trim(); chat.store.saveWorkspace(); toast('Memoria actualizada'); });
-      list.append(h('div', { class: 'hub-item' }, input, h('button', { class: 'icon-btn sm', type: 'button', 'aria-label': 'Borrar dato', html: icon('trash'), onclick: () => { ws.memory = ws.memory.filter((x) => x !== m); chat.store.saveWorkspace(); draw(); } })));
+      input.addEventListener('change', () => { const v = input.value.trim(); if (!v) { input.value = m.text; return; } st.editMemory(m.id, v).then(() => toast('Memoria actualizada')).catch((e) => { input.value = m.text; fail(e); }); });
+      list.append(h('div', { class: 'hub-item' }, input, h('button', { class: 'icon-btn sm', type: 'button', 'aria-label': 'Borrar dato: ' + m.text, html: icon('trash'), onclick: () => st.deleteMemory(m.id).then(draw).catch(fail) })));
     });
+    if (ws.memory.length) clearBox.append(h('button', { class: 'btn btn-danger-ghost btn-sm', type: 'button', style: 'margin-top:16px', onclick: async () => { if (await confirmDialog({ title: 'Borrar memoria', text: '¿Borrar todos los datos guardados?', danger: true, ok: 'Borrar todo' })) st.clearMemory().then(draw).catch(fail); } }, 'Borrar toda la memoria'));
   };
   draw();
   const add = h('form', { class: 'row', style: 'margin-top:12px' }, h('input', { class: 'input', name: 'm', maxlength: 300, placeholder: 'Agregar un dato (ej.: Mi empresa vende café)', style: 'flex:1;min-width:200px', 'aria-label': 'Nuevo dato' }), h('button', { class: 'btn', type: 'submit' }, 'Agregar'));
-  add.addEventListener('submit', (e) => { e.preventDefault(); const v = add.m.value.trim(); if (!v) return; ws.memory.push({ id: uid('mem'), text: v, at: Date.now() }); chat.store.saveWorkspace(); add.reset(); draw(); });
-  pane.append(list, add);
-  if (ws.memory.length) pane.append(h('button', { class: 'btn btn-danger-ghost btn-sm', type: 'button', style: 'margin-top:16px', onclick: async () => { if (await confirmDialog({ title: 'Borrar memoria', text: '¿Borrar todos los datos guardados?', danger: true, ok: 'Borrar todo' })) { ws.memory = []; chat.store.saveWorkspace(); draw(); } } }, 'Borrar toda la memoria'));
+  add.addEventListener('submit', (e) => { e.preventDefault(); const v = add.m.value.trim(); if (!v) return; st.addMemory(v).then(() => { add.reset(); draw(); }).catch(fail); });
+  pane.append(list, add, clearBox);
 }
 
 function instrucciones(pane, chat) {

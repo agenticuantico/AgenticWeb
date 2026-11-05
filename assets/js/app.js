@@ -8,6 +8,8 @@ import { readConnectReturn, takeResume, returnMessage } from './account/oauth-co
 import { prefs } from './consent.js';
 
 const $ = (id) => document.getElementById(id);
+/** Mensaje claro para errores del servidor (memoria, proyectos). */
+const errText = async (e) => { try { return (await import('./account/api.js')).errorText(e); } catch { return 'Algo falló. Probá de nuevo.'; } };
 const store = new ChatStore();
 const chat = new ChatApp($('appChat'), { variant: 'full', avatar: null, store });
 // Conversación abierta desde el chat de la portada (botón de pantalla completa)
@@ -43,8 +45,7 @@ $('sbHub').addEventListener('click', () => chat.openHub());
 $('sbNewProject').addEventListener('click', async () => {
   const name = await promptText('Nuevo proyecto', 'Nombre del proyecto', '');
   if (!name) return;
-  store.ws.projects.push({ id: uid('p'), name: name.slice(0, 60) });
-  store.saveWorkspace();
+  try { await store.addProject(name.slice(0, 60)); } catch (e) { toast(await errText(e), 'warn'); }
 });
 
 function chatItem(c) {
@@ -61,7 +62,7 @@ function chatMenu(btn, c) {
   popover(btn, [
     { label: c.pinned ? 'Desfijar' : 'Fijar arriba', icon: 'pin', onClick: () => { c.pinned = !c.pinned; store.save(c); } },
     { label: 'Renombrar', icon: 'edit', onClick: async () => { const t = await promptText('Renombrar', 'Título', c.title); if (t) { c.title = t.slice(0, 100); store.save(c); } } },
-    ...(projects.length ? [{ heading: 'Mover a proyecto' }, ...projects.map((p) => ({ label: p.name, icon: 'folder', checked: c.projectId === p.id, onClick: () => { c.projectId = c.projectId === p.id ? null : p.id; store.save(c); } }))] : []),
+    ...(projects.length ? [{ heading: 'Mover a proyecto' }, ...projects.map((p) => ({ label: p.name, icon: 'folder', checked: c.projectId === p.id, onClick: () => store.setChatProject(c, c.projectId === p.id ? null : p.id).catch(async (e) => toast(await errText(e), 'warn')) }))] : []),
     'sep',
     { label: 'Eliminar', icon: 'trash', danger: true, onClick: async () => { if (await confirmDialog({ title: 'Eliminar conversación', text: `¿Eliminar «${c.title}»? No se puede deshacer.`, ok: 'Eliminar', danger: true })) { await store.remove(c.id); if (chat.chat.id === c.id) chat.newChat(); } } }
   ], { align: 'end' });
@@ -74,7 +75,7 @@ function renderSidebar() {
   for (const p of store.ws.projects) {
     const items = list.filter((c) => c.projectId === p.id);
     const det = h('details', { class: 'sb-project', open: items.some((c) => c.id === chat.chat.id) || null }, h('summary', { html: icon('folder') + `<span>${esc(p.name)}</span><small>${items.length}</small>` }), ...items.map(chatItem));
-    const del = h('button', { class: 'icon-btn sm', type: 'button', 'aria-label': 'Eliminar proyecto ' + p.name, html: icon('trash'), onclick: async (e) => { e.preventDefault(); if (await confirmDialog({ title: 'Eliminar proyecto', text: 'Los chats quedan sin proyecto, no se borran.', ok: 'Eliminar', danger: true })) { store.ws.projects = store.ws.projects.filter((x) => x.id !== p.id); items.forEach((c) => { c.projectId = null; store.save(c); }); store.saveWorkspace(); } } });
+    const del = h('button', { class: 'icon-btn sm', type: 'button', 'aria-label': 'Eliminar proyecto ' + p.name, html: icon('trash'), onclick: async (e) => { e.preventDefault(); if (await confirmDialog({ title: 'Eliminar proyecto', text: 'Los chats quedan sin proyecto, no se borran.', ok: 'Eliminar', danger: true })) { try { await store.deleteProject(p.id); } catch (err) { toast(await errText(err), 'warn'); } } } });
     det.querySelector('summary').append(del);
     pl.append(det);
   }
@@ -116,7 +117,7 @@ function promptText(title, label, value) {
 }
 
 /* ---------- Tu cuenta (perfil, uso, tareas, cuentas conectadas, empleo) ---------- */
-const ACC_TABS = { '': 'perfil', uso: 'uso', tareas: 'tareas', conexiones: 'conexiones', empleo: 'empleo' };
+const ACC_TABS = { '': 'perfil', uso: 'uso', tareas: 'tareas', conexiones: 'conexiones', memoria: 'memoria', proyectos: 'proyectos', empleo: 'empleo' };
 async function openAccountPanel(tab) {
   const m = await import('./account/panel.js');
   m.openAccount(tab, { chat });

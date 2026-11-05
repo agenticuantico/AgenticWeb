@@ -1,5 +1,5 @@
 /**
- * Pestaña «Cuentas conectadas»: galería de conectores (GitHub, Gmail, LinkedIn y Cloudflare).
+ * Pestaña «Cuentas conectadas»: galería de conectores (GitHub, Gmail, Google Calendar, Google Drive, LinkedIn y Cloudflare).
  * - OAuth (GitHub, Gmail, LinkedIn): «Conectar» lleva directo a la pantalla de permiso del proveedor en esta misma
  *   pestaña; al aprobar, el servidor guarda la conexión cifrada y vuelve a /app/?cuenta=conectada&proveedor=…
  *   Los tokens quedan cifrados en el servidor y nunca llegan acá.
@@ -15,6 +15,9 @@ export const LOGOS = {
   github: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.05-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.42-2.7 5.39-5.26 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5z"/></svg>',
   google: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#ea4335" d="M3 6.5 12 13l9-6.5V18a1.5 1.5 0 0 1-1.5 1.5H18V9.8l-6 4.3-6-4.3v9.7H4.5A1.5 1.5 0 0 1 3 18z"/><path fill="#c5221f" d="M21 6.5 12 13 3 6.5V6a1.5 1.5 0 0 1 2.4-1.2L12 9.6l6.6-4.8A1.5 1.5 0 0 1 21 6z"/></svg>',
   linkedin: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="4" fill="#0a66c2"/><path fill="#fff" d="M7.1 9.4h-2.6V19h2.6zM5.8 5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM19.5 13.4c0-2.6-1.4-4.2-3.6-4.2-1.3 0-2.1.7-2.5 1.3V9.4h-2.5V19h2.6v-5.1c0-1.3.6-2.1 1.7-2.1 1 0 1.6.7 1.6 2.1V19h2.7z"/></svg>',
+  // Íconos propios (dibujo genérico de calendario y carpeta), no los logos de Google.
+  gcalendar: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16" rx="3" fill="#1a73e8"/><rect x="3" y="4.5" width="18" height="5" rx="2" fill="#174ea6"/><rect x="7" y="2.5" width="2" height="4" rx="1" fill="#174ea6"/><rect x="15" y="2.5" width="2" height="4" rx="1" fill="#174ea6"/><path fill="#fff" d="M7 12h3v3H7zm3.5 0h3v3h-3zm3.5 0h3v3h-3zM7 15.8h3v3H7zm3.5 0h3v3h-3z"/></svg>',
+  gdrive: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#188038" d="M2.5 7.5A2.5 2.5 0 0 1 5 5h4.2l2 2.2H19a2.5 2.5 0 0 1 2.5 2.5v8.3A2.5 2.5 0 0 1 19 20.5H5A2.5 2.5 0 0 1 2.5 18z"/><path fill="#fff" d="M8 12.2h8v1.6H8zm0 3h5.5v1.6H8z"/></svg>',
   cloudflare: '<svg viewBox="0 0 32 32" aria-hidden="true"><path fill="#f38020" d="M21.9 22.6l.3-1c.3-1.1.2-2.1-.4-2.8-.5-.6-1.3-1-2.3-1.1l-11.6-.1a.3.3 0 0 1-.2-.1.3.3 0 0 1 0-.3c0-.1.1-.2.3-.2l11.7-.1c1.4-.1 2.9-1.2 3.4-2.6l.7-1.8.1-.4A7.6 7.6 0 0 0 9.3 11a3.4 3.4 0 0 0-5.4 3.6A4.8 4.8 0 0 0-.5 19.6c0 .2 0 .5.1.7 0 .1.1.2.2.2h21.5c.1 0 .2-.1.3-.2z"/><path fill="#faae40" d="M25.6 14.9h-.3l-.2.1-.5 1.6c-.3 1.1-.2 2.1.4 2.8.5.6 1.3 1 2.3 1.1l2.5.1a.3.3 0 0 1 .2.1.3.3 0 0 1 0 .3c0 .1-.1.2-.3.2l-2.6.1c-1.4.1-2.9 1.2-3.4 2.6l-.2.5c0 .1 0 .2.2.2h8.9c.1 0 .2-.1.2-.2a6.4 6.4 0 0 0-7.2-9.5z"/></svg>'
 };
 const STATUS = {
@@ -78,11 +81,13 @@ export async function renderConnections(el, ctx) {
 const BLURB = {
   github: 'Tus repositorios y archivos: listar, leer y guardar cambios.',
   google: 'Tu correo: resumir lo nuevo, preparar borradores y enviar.',
+  gcalendar: 'Tu agenda: ver lo que viene y crear eventos con tu aprobación.',
+  gdrive: 'Tus documentos: guardar informes en tu Drive y volver a leerlos.',
   linkedin: 'Tu perfil: datos básicos y publicaciones con tu aprobación.',
   cloudflare: 'Tus Workers: ver su estado y publicar nuevas versiones.'
 };
-const labelFor = (p) => ({ github: 'GitHub', google: 'Gmail', linkedin: 'LinkedIn', cloudflare: 'Cloudflare', jobs: 'Empleo', tools: 'Herramientas' })[p] || p;
-const actionLabel = (a) => ({ chat_enable: 'activó en el chat', chat_disable: 'desactivó en el chat', connect: 'conectó', connect_start: 'empezó a conectar', disconnect: 'desconectó', refresh: 'renovó el permiso', gmail_send: 'envío de correo', gmail_create_draft: 'borrador', github_create_issue: 'issue', github_commit_file: 'commit', linkedin_post: 'publicación', cloudflare_worker_health: 'estado de Worker', deploy_worker: 'publicó un Worker', open_apply_link: 'abrió una oferta' })[a] || a;
+const labelFor = (p) => ({ github: 'GitHub', google: 'Gmail', gcalendar: 'Google Calendar', gdrive: 'Google Drive', linkedin: 'LinkedIn', cloudflare: 'Cloudflare', jobs: 'Empleo', tools: 'Herramientas' })[p] || p;
+const actionLabel = (a) => ({ chat_enable: 'activó en el chat', chat_disable: 'desactivó en el chat', connect: 'conectó', connect_start: 'empezó a conectar', disconnect: 'desconectó', refresh: 'renovó el permiso', gmail_send: 'envío de correo', gmail_create_draft: 'borrador', github_create_issue: 'issue', github_commit_file: 'commit', linkedin_post: 'publicación', calendar_create_event: 'evento creado', drive_create_file: 'documento guardado', cloudflare_worker_health: 'estado de Worker', deploy_worker: 'publicó un Worker', open_apply_link: 'abrió una oferta' })[a] || a;
 
 function card(p, ctx, root) {
   const [tone, label] = STATUS[p.status] || STATUS.available;
@@ -115,8 +120,8 @@ function card(p, ctx, root) {
       h('div', { class: 'acc-conn-t' }, h('strong', {}, p.label), h('span', { class: `acc-chip ${tone}` }, label))),
     BLURB[p.id] ? h('p', { class: 'acc-blurb' }, BLURB[p.id]) : null,
     h('ul', { class: 'acc-perms' },
-      ...p.reads.map((r) => h('li', {}, h('span', { class: 'acc-perm-ic', html: icon('eye') }), r)),
-      ...p.writes.map((w) => h('li', {}, h('span', { class: 'acc-perm-ic w', html: icon('lock') }), `${w} `, h('em', {}, 'con confirmación')))),
+      ...p.reads.map((r) => h('li', {}, h('span', { class: 'acc-perm-ic', html: icon('eye') }), h('span', {}, r))),
+      ...p.writes.map((w) => h('li', {}, h('span', { class: 'acc-perm-ic w', html: icon('lock') }), h('span', {}, `${w} `, h('em', {}, 'con confirmación'))))),
     p.note ? h('p', { class: 'acc-small muted' }, p.note) : null,
     body, acts);
 }
@@ -187,7 +192,7 @@ export async function finishOAuthFromHash(ctx) {
   const prov = q.get('conectar');
   history.replaceState(null, '', location.pathname + location.search + '#cuenta/conexiones');
   if (!prov || !/^[a-z]{3,12}$/.test(prov)) return;
-  const label = { github: 'GitHub', google: 'Gmail', linkedin: 'LinkedIn' }[prov] || prov;
+  const label = { github: 'GitHub', google: 'Gmail', gcalendar: 'Google Calendar', gdrive: 'Google Drive', linkedin: 'LinkedIn' }[prov] || prov;
   const err = q.get('error');
   if (err) {
     toast(({ denied: `Cancelaste la conexión con ${label}.`, not_configured: `La conexión con ${label} no está configurada.`, expired: 'El enlace venció. Probá de nuevo.' })[err] || `No se pudo conectar ${label}. Probá de nuevo.`, 'warn', 6000);

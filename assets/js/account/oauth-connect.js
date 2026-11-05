@@ -10,7 +10,7 @@ import { call } from './api.js';
 
 const RESUME_KEY = 'ac.connect.resume';
 const RESUME_TTL = 15 * 60_000;
-export const PROVIDER_LABEL = { github: 'GitHub', google: 'Gmail', linkedin: 'LinkedIn', cloudflare: 'Cloudflare' };
+export const PROVIDER_LABEL = { github: 'GitHub', google: 'Gmail', gcalendar: 'Google Calendar', gdrive: 'Google Drive', linkedin: 'LinkedIn', cloudflare: 'Cloudflare' };
 
 /** Dirección de vuelta: siempre /app/ de este mismo sitio (el servidor la valida contra su lista permitida). */
 export const returnUrl = () => `${location.origin}/app/`;
