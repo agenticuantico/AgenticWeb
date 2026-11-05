@@ -1935,5 +1935,14 @@
 "Ver cuentas conectadas": "See connected accounts",
 "Creá una tarea": "Create a task",
 "Dejá algo andando solo: por ejemplo, buscar empleo remoto todos los días a las 9. Los resultados quedan en Tu cuenta.": "Leave something running on its own: for example, search for remote jobs every day at 9. Results stay in Your account.",
-"Crear una tarea": "Create a task"
+"Crear una tarea": "Create a task",
+"Cualquier nivel": "Any level",
+"Sin inglés": "No English",
+"Solo inglés escrito": "Written English only",
+"Filtros de la búsqueda": "Search filters",
+"Solo remoto desde Argentina": "Remote from Argentina only",
+"Según mi perfil": "Based on my profile",
+"Inglés en las ofertas": "English in offers",
+"Oculté 1 oferta que pide inglés.": "I hid 1 offer that asks for English.",
+"Oculté 1 oferta que no acepta Argentina.": "I hid 1 offer that doesn’t accept Argentina."
 }

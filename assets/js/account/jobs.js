@@ -64,10 +64,24 @@ function profileForm(p) {
   return det;
 }
 
+/** Filtro de inglés por defecto (igual que el servidor): «no hablo» → sin inglés; «escrito» → solo escrito. */
+export function defaultEnglishFilter(profile) {
+  const pr = (profile && profile.preferences) || {};
+  if (['any', 'none', 'written'].includes(pr.englishFilter)) return pr.englishFilter;
+  return profile && profile.english === 'none' ? 'none' : profile && profile.english === 'written' ? 'written' : 'any';
+}
+
 function searchForm(results, info, profile) {
-  const q = h('input', { class: 'input', type: 'search', name: 'q', maxlength: 120, value: (profile && profile.preferences && profile.preferences.roles[0]) || 'atención al cliente remoto Argentina', 'aria-label': 'Qué trabajo buscás', enterkeyhint: 'search' });
+  const q = h('input', { class: 'input', type: 'search', name: 'q', maxlength: 120, value: (profile && profile.preferences && profile.preferences.roles[0]) || 'atención al cliente', 'aria-label': 'Qué trabajo buscás', enterkeyhint: 'search' });
   const btn = h('button', { class: 'btn btn-primary', type: 'submit' }, h('span', { html: icon('search') }), 'Buscar');
-  const f = h('form', { class: 'acc-search', role: 'search' }, q, btn);
+  // Fase 3: filtros que se aplican de verdad (no solo bajan el puesto en el orden).
+  const engId = fid();
+  const english = h('select', { class: 'input input-sm', id: engId, name: 'english' }, ...[['any', 'Cualquier nivel'], ['none', 'Sin inglés'], ['written', 'Solo inglés escrito']].map(([v, l]) => h('option', { value: v, selected: defaultEnglishFilter(profile) === v || null }, l)));
+  const ar = h('input', { type: 'checkbox', name: 'remoteArgentina', id: fid(), checked: (profile && profile.preferences && profile.preferences.remoteArgentina) !== false || null });
+  const filters = h('fieldset', { class: 'acc-filters' }, h('legend', { class: 'sr-only' }, 'Filtros de la búsqueda'),
+    h('label', { class: 'acc-filter', for: engId }, h('span', {}, 'Inglés'), english),
+    h('label', { class: 'acc-filter acc-check-row', for: ar.id }, ar, h('span', {}, 'Solo remoto desde Argentina')));
+  const f = h('form', { class: 'acc-search-wrap', role: 'search' }, h('div', { class: 'acc-search' }, q, btn), filters);
   f.addEventListener('submit', async (e) => {
     e.preventDefault();
     const query = q.value.trim();
@@ -75,9 +89,12 @@ function searchForm(results, info, profile) {
     btn.disabled = true; btn.lastChild.textContent = 'Buscando…';
     results.innerHTML = ''; info.textContent = 'Buscando en bolsas de empleo públicas…';
     try {
-      const r = await call('/api/jobs/search', { method: 'POST', body: { query } });
+      const r = await call('/api/jobs/search', { method: 'POST', body: { query, english: english.value, remoteArgentina: ar.checked } });
       const src = r.sources.map((s) => `${s.source}${s.status === 'ok' ? ` (${s.count})` : s.status === 'robots' ? ' (no permitido por el sitio)' : ' (sin respuesta)'}`).join(' · ');
       info.textContent = r.offers.length ? `${r.offers.length} ofertas ordenadas por encaje. Fuentes: ${src}.` : `No encontré ofertas que encajen. Fuentes: ${src}.`;
+      const hid = r.hidden || {};
+      if (hid.english) info.append(h('span', { class: 'acc-hidden' }, ` ${hid.english === 1 ? 'Oculté 1 oferta que pide inglés.' : `Oculté ${hid.english} ofertas que piden inglés.`}`));
+      if (hid.region) info.append(h('span', { class: 'acc-hidden' }, ` ${hid.region === 1 ? 'Oculté 1 oferta que no acepta Argentina.' : `Oculté ${hid.region} ofertas que no aceptan Argentina.`}`));
       if (!r.profile) info.append(h('span', {}, ' Completá tu perfil para que el orden sea más preciso y para preparar borradores.'));
       r.offers.forEach((o) => results.append(offerCard(o)));
     } catch (e2) { info.textContent = errorText(e2); }
