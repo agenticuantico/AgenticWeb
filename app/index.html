@@ -34,6 +34,36 @@
 
 <script src="/assets/js/theme-init.js?v=7.0.0"></script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "Organization", "name": "AgentiCuántico", "url": "https://agenticuantico.dev.ar/", "logo": "https://agenticuantico.dev.ar/apple-touch-icon.png", "address": {"@type": "PostalAddress", "addressLocality": "Bahía Blanca", "addressRegion": "Buenos Aires", "addressCountry": "AR"}, "sameAs": ["https://github.com/agenticuantico"]}</script>
+<!-- modulepreload:start (tools/perf/modulepreload.mjs) -->
+<link rel="preload" href="/assets/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="modulepreload" href="/assets/js/account/api.js">
+<link rel="modulepreload" href="/assets/js/account/oauth-connect.js">
+<link rel="modulepreload" href="/assets/js/auth.js">
+<link rel="modulepreload" href="/assets/js/chat/agents.js">
+<link rel="modulepreload" href="/assets/js/chat/apply-card.js">
+<link rel="modulepreload" href="/assets/js/chat/chat.js">
+<link rel="modulepreload" href="/assets/js/chat/clean.js">
+<link rel="modulepreload" href="/assets/js/chat/docs-local.js">
+<link rel="modulepreload" href="/assets/js/chat/docs.js">
+<link rel="modulepreload" href="/assets/js/chat/engine.js">
+<link rel="modulepreload" href="/assets/js/chat/intent.js">
+<link rel="modulepreload" href="/assets/js/chat/languages.js">
+<link rel="modulepreload" href="/assets/js/chat/md.js">
+<link rel="modulepreload" href="/assets/js/chat/media.js">
+<link rel="modulepreload" href="/assets/js/chat/preview-card.js">
+<link rel="modulepreload" href="/assets/js/chat/recorder.js">
+<link rel="modulepreload" href="/assets/js/chat/store.js">
+<link rel="modulepreload" href="/assets/js/chat/tool-cards.js">
+<link rel="modulepreload" href="/assets/js/chat/voice.js">
+<link rel="modulepreload" href="/assets/js/chat/webdesign.js">
+<link rel="modulepreload" href="/assets/js/config.js">
+<link rel="modulepreload" href="/assets/js/consent.js">
+<link rel="modulepreload" href="/assets/js/firebase-config.js">
+<link rel="modulepreload" href="/assets/js/firebase.js">
+<link rel="modulepreload" href="/assets/js/i18n.js">
+<link rel="modulepreload" href="/assets/js/sysconfig.js">
+<link rel="modulepreload" href="/assets/js/ui.js">
+<!-- modulepreload:end -->
 </head>
 <body class="app-body">
 <a class="skip-link" href="#appChat">Saltar al chat</a>
@@ -64,7 +94,7 @@
   </aside>
   <div class="sb-backdrop" id="sbBackdrop" hidden></div>
   <main class="app-main" id="main">
-    <div id="appChat" class="chat-host"></div>
+    <div id="appChat" class="chat-host"><div class="chat-boot"><span class="chat-boot-orb" aria-hidden="true"></span><p>Preparando el chat…</p></div></div>
   </main>
 </div>
 <noscript><p style="padding:24px">Activá JavaScript para usar el chat de AgentiCuántico.</p></noscript>

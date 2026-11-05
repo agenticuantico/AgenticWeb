@@ -6,7 +6,6 @@
  *  - Si el usuario ESCRIBE, la respuesta es solo texto (puede escucharla con el botón de altavoz).
  *  - Conversación manos libres: graba, envía, responde con voz y vuelve a escuchar, por turnos.
  */
-import { getAvatarCall } from './avatar-call.js';
 import { h, icon, esc, toast, modal, popover, uid } from '../ui.js';
 import { CONFIG, PLANS, formatARS, mailtoCommercial } from '../config.js';
 import { prefs } from '../consent.js';
@@ -18,8 +17,8 @@ import { AGENTS, TOOLS, SKILLS, CONNECTORS, agentById, initials } from './agents
 import { speak, stop as stopSpeech } from './voice.js';
 import { VoiceRecorder, fmtClock } from './recorder.js';
 import { readFile, fmtSize } from './docs.js';
-import { needsWebAction, isFollowUp, AgentBrowserCard } from '../agent-browser.js';
-import { routeWebIntent } from './intent.js';
+// Rendimiento (Fase 3): la computadora del agente y la videollamada se cargan recién cuando se usan.
+import { needsWebAction, isFollowUp, routeWebIntent } from './intent.js';
 import { detectMediaIntent, mediaMessage, mediaCard, isMediaMessage, runMedia as runMediaTask } from './media.js';
 import { cleanArtifact, cleanThought } from './clean.js';
 import { PreviewCard, LiveFrame, previewKind, previewHtml, isPreviewable } from './preview-card.js';
@@ -32,7 +31,7 @@ const MODES = {
 };
 
 const PHASES = { thinking: 'Pensando', searching: 'Buscando', coding: 'Escribiendo código', verifying: 'Verificando', reading: 'Leyendo', agent: 'Especialista', confirm: 'Confirmación' };
-const FACE = '/media/agenticuantico-avatar.jpg';
+const FACE = '/media/agenticuantico-avatar.webp';
 
 const SUGGESTIONS = [
   { t: '¿Qué es AgentiCuántico?', i: 'info' },
@@ -495,13 +494,12 @@ export class ChatApp {
   /** Abre la videollamada flotante con el avatar (al mandar voz o al responder con voz). */
   openCall() {
     if (!this.flag('voice')) return;
-    if (!this._call) {
-      this._call = getAvatarCall();
-      this._call.onClose = () => { stopSpeech(); if (this.handsFree) this.act_handsfree(); };
-    }
-    const st = this.avatar.state;
-    this._call.open(this.$('form') || this.root);
-    this._call.setState(st);
+    const show = () => { const st = this.avatar.state; this._call.open(this.$('form') || this.root); this._call.setState(st); };
+    if (this._call) { show(); return; }
+    import('./avatar-call.js').then(({ getAvatarCall }) => {
+      if (!this._call) { this._call = getAvatarCall(); this._call.onClose = () => { stopSpeech(); if (this.handsFree) this.act_handsfree(); }; }
+      show();
+    }).catch(() => {});
   }
   async act_mic() {
     if (this.recorder) return;
@@ -636,6 +634,7 @@ export class ChatApp {
       msg._browser = true;
       if (this.browserCard) this.browserCard.detach();
       const chatId = this.chat.id;
+      const { AgentBrowserCard } = await import('../agent-browser.js');
       this.browserCard = new AgentBrowserCard({
         thread: this.$('inner'), composer: this.$('form'), text, conv: chatId, lang: this.lang.code, isPaid: this.isPaid,
         idToken: this.user ? () => this.user.getIdToken() : null, onScroll: () => this.scrollToEnd(true),
