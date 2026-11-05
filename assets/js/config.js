@@ -29,22 +29,28 @@ export const CONFIG = Object.freeze({
     pro: { usd: 10, ars: 15600 },
     empresa: { usd: 30, ars: 46800 }
   },
+  /** Fase 1: todas las funciones en todos los planes; los planes solo cambian el uso diario (igual que el servidor). */
+  ALL_FEATURES_ALL_PLANS: true,
   /** Cloudflare Turnstile (anti-bot). Vacío = desactivado. */
   TURNSTILE_SITE_KEY: ''
 });
 
+/**
+ * Fase 1: TODAS las funciones están en todos los planes. Lo único que cambia es cuánto se usa por día
+ * (mismos números que el servidor: worker-v2/src/billing/limits.ts y wrangler.toml). Se renueva 21:00 (Argentina).
+ */
 export const PLANS = [
   {
-    id: 'gratis', name: 'Gratis', tagline: 'Para conocer AgentiCuántico.',
-    features: ['Chat con el asistente general', 'Voz femenina en 7 idiomas', 'Análisis de documentos en tu dispositivo', 'Historial en tu cuenta', '20 mensajes por día']
+    id: 'gratis', name: 'Gratis', tagline: 'Todas las funciones, para probar con calma.',
+    features: ['Todas las funciones de AgentiCuántico', '20 mensajes por día', '8 búsquedas web en vivo por día', '3 búsquedas de empleo y 3 postulaciones automáticas por día', '30 acciones con tus cuentas conectadas por día', '2 tareas programadas activas']
   },
   {
     id: 'pro', name: 'Pro', tagline: 'Para profesionales y creadores.', featured: true,
-    features: ['Todo lo de Gratis', 'Agentes invitables: programador, investigadora, diseñador y más', 'Modo «Hace todo por vos» con herramientas', 'Razonamiento profundo', 'Automatizaciones y conectores (próximamente)', '500 mensajes por día']
+    features: ['Todas las funciones de AgentiCuántico', '500 mensajes por día', '60 búsquedas web en vivo por día', '30 búsquedas de empleo y 15 postulaciones automáticas por día', '300 acciones con tus cuentas conectadas por día', '10 tareas programadas activas']
   },
   {
-    id: 'empresa', name: 'Empresa', tagline: 'Para equipos y empresas.',
-    features: ['Todo lo de Pro', 'Agentes personalizados para tu empresa', 'Prioridad en la cola de procesamiento', 'Soporte prioritario por correo', '3000 mensajes por día']
+    id: 'empresa', name: 'Empresa', tagline: 'Para equipos y uso intensivo.',
+    features: ['Todas las funciones de AgentiCuántico', '3000 mensajes por día', '200 búsquedas web en vivo por día', '100 búsquedas de empleo y 40 postulaciones automáticas por día', '1500 acciones con tus cuentas conectadas por día', '30 tareas programadas activas y soporte prioritario por correo']
   }
 ];
 
