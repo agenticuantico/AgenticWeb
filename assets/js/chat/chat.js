@@ -184,7 +184,9 @@ export class ChatApp {
       const on = b.dataset.mode === this.mode;
       b.setAttribute('aria-checked', String(on));
       b.tabIndex = on ? 0 : -1;
-      if (on && b.parentElement.scrollWidth > b.parentElement.clientWidth) b.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+      // Solo se desplaza la tira de modos (scrollIntoView movía toda la página en el celular al cargar la portada).
+      const strip = b.parentElement;
+      if (on && strip.scrollWidth > strip.clientWidth) { const l = b.getBoundingClientRect().left - strip.getBoundingClientRect().left + strip.scrollLeft; if (l < strip.scrollLeft) strip.scrollLeft = l; else if (l + b.offsetWidth > strip.scrollLeft + strip.clientWidth) strip.scrollLeft = l + b.offsetWidth - strip.clientWidth; }
     });
     this.$('modeStrip').dataset.mode = this.mode;
     this.$('input').placeholder = this.mode === 'auto' ? 'Describí la tarea para el agente' : 'Preguntá lo que quieras';

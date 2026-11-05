@@ -14,11 +14,14 @@ body.app-body { overflow: hidden; background: var(--surface); }
 .sb-top { display: flex; align-items: center; justify-content: space-between; padding: 12px 10px 8px 14px; }
 .sb-top .brand { font-size: 1rem; }
 .sb-top .brand img { width: 30px; height: 30px; }
-.sb-actions { display: grid; gap: 2px; padding: 4px 8px 8px; }
+.sb-actions { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; padding: 4px 8px 8px; container-type: inline-size; }
+/* Sin lugar para el atajo junto al texto: se oculta (queda en el título del botón y en aria-keyshortcuts). */
+@container (max-width: 300px) { .sb-item .kbd { display: none; } }
 .sb-item { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border: 0; background: none; border-radius: var(--r-md); font-size: var(--fs-sm); font-weight: 550; color: var(--ink-2); text-align: left; }
 .sb-item:hover { background: var(--surface-3); color: var(--ink); }
 .sb-item svg { width: 18px; height: 18px; }
-.sb-item .kbd { margin-left: auto; }
+.sb-item .kbd { margin-left: auto; flex-shrink: 0; white-space: nowrap; }
+.sb-item > span:not([data-icon]) { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .sb-scroll { flex: 1; overflow-y: auto; padding: 4px 8px 12px; }
 .sb-section { margin-top: 10px; }
 .sb-head { display: flex; align-items: center; justify-content: space-between; padding: 4px 10px; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); font-weight: 650; }
@@ -96,6 +99,8 @@ body.app-body { background: #fff; color: #111; }
 .sb-backdrop { background: rgba(15, 14, 20, .5); z-index: 1000; }
 @media (max-width: 900px) {
   .app-body .sidebar { z-index: 1001; background: #fff !important; box-shadow: 0 20px 60px rgba(0, 0, 0, .25); }
+  .app-body .sidebar:not(.open) { box-shadow: none; visibility: hidden; transition: transform var(--t) var(--ease), visibility 0s var(--t); }
+  .app-body .sidebar.open { visibility: visible; transition: transform var(--t) var(--ease); }
   .app-shell, .app-shell.sb-collapsed, .app-shell.no-avatar { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 900px), (hover: none) { .sb-item .kbd { display: none; } }
