@@ -914,7 +914,8 @@ export class ChatApp {
     this.webSearch = !this.webSearch;
     this.root.querySelectorAll('[data-act="websearch"]').forEach((b) => { b.setAttribute('aria-pressed', this.webSearch ? 'true' : 'false'); b.classList.toggle('on', this.webSearch); });
     toast(this.webSearch ? 'Búsqueda en la web activada' : 'Búsqueda en la web desactivada');
-    this.$('input').focus({ preventScroll: true });
+    // Hotfix: no se enfoca el campo de texto (en el celular abría el teclado). El foco queda en el botón,
+    // que anuncia su estado con aria-pressed.
   }
   /** Eventos del servidor: search_start → search_sources (Leyendo N fuentes) → search_done (Redactando…). */
   onSearchEvent(a, ev) {
