@@ -21,32 +21,65 @@ const sleep = (ms, signal) => new Promise((res, rej) => {
 function abortErr() { const e = new Error('aborted'); e.name = 'AbortError'; return e; }
 
 /* ---------- Servidor ---------- */
+/*
+ * Estado del servidor. Antes, un solo /api/health lento (>2,5 s en red móvil) o un pedido del chat cortado por la red
+ * dejaba la página entera «sin servidor» hasta recargar (y el resultado negativo quedaba 5 min en sessionStorage):
+ * el Centro de control mostraba «El servidor no está disponible» con el servidor en línea.
+ * Ahora: solo se guarda el resultado POSITIVO, un fallo vuelve a comprobarse en el próximo uso y ensureLive()
+ * reintenta con más tiempo antes de dar el servidor por caído.
+ */
 let initP;
-export function init() {
-  if (initP) return initP;
-  const base = String(CONFIG.API_BASE || '').replace(/\/+$/, '');
-  if (!base || /[?&]local=1\b/.test(location.search)) { state.checked = true; return (initP = Promise.resolve(state)); }
-  try {
-    const c = JSON.parse(sessionStorage.getItem('ac.health') || 'null');
-    if (c && c.base === base && Date.now() - c.at < 5 * 60_000) {
-      Object.assign(state, { live: c.ok, caps: c.caps, base: c.ok ? base : '', checked: true });
-      return (initP = Promise.resolve(state));
-    }
-  } catch {}
+let lastCheck = 0;
+const RECHECK_AFTER_MS = 8_000;
+const apiBase = () => String(CONFIG.API_BASE || '').replace(/\/+$/, '');
+function check(base, timeoutMs) {
   const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), CONFIG.HEALTH_TIMEOUT_MS);
-  initP = fetch(base + '/api/health', { signal: ctrl.signal, credentials: 'include', cache: 'no-store' })
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+  return fetch(base + '/api/health', { signal: ctrl.signal, credentials: 'include', cache: 'no-store' })
     .then((r) => (r.ok ? r.json() : null))
     .then((j) => { const ok = !!(j && j.ok && j.llm); Object.assign(state, { live: ok, caps: ok ? j : null, base: ok ? base : '' }); })
     .catch(() => Object.assign(state, { live: false, caps: null, base: '' }))
     .then(() => {
-      clearTimeout(timer); state.checked = true;
-      try { sessionStorage.setItem('ac.health', JSON.stringify({ base, ok: state.live, caps: state.caps, at: Date.now() })); } catch {}
+      clearTimeout(timer); state.checked = true; lastCheck = Date.now();
+      try {
+        if (state.live) sessionStorage.setItem('ac.health', JSON.stringify({ base, ok: true, caps: state.caps, at: Date.now() }));
+        else sessionStorage.removeItem('ac.health');
+      } catch {}
       return state;
     });
-  return initP;
 }
-function markOffline() { state.live = false; state.base = ''; try { sessionStorage.removeItem('ac.health'); } catch {} }
+export function init() {
+  const base = apiBase();
+  if (!base || /[?&]local=1\b/.test(location.search)) { state.checked = true; return (initP = initP || Promise.resolve(state)); }
+  // Un fallo anterior no es definitivo: pasado un rato, el próximo uso vuelve a preguntar.
+  if (initP && state.checked && !state.live && Date.now() - lastCheck > RECHECK_AFTER_MS) initP = null;
+  if (initP) return initP;
+  try {
+    const c = JSON.parse(sessionStorage.getItem('ac.health') || 'null');
+    if (c && c.ok && c.base === base && Date.now() - c.at < 5 * 60_000) {
+      Object.assign(state, { live: true, caps: c.caps, base, checked: true });
+      return (initP = Promise.resolve(state));
+    }
+  } catch {}
+  return (initP = check(base, CONFIG.HEALTH_TIMEOUT_MS));
+}
+/**
+ * Para pantallas que necesitan el servidor (Centro de control, Tu cuenta): si figura caído, vuelve a comprobar
+ * con más tiempo (red móvil lenta) y un reintento antes de rendirse. Devuelve el estado.
+ */
+export async function ensureLive({ timeoutMs = 8000, tries = 2 } = {}) {
+  await init();
+  const base = apiBase();
+  if (state.live || !base || /[?&]local=1\b/.test(location.search)) return state;
+  for (let i = 0; i < tries && !state.live; i++) {
+    if (i) await new Promise((r) => setTimeout(r, 1200));
+    initP = check(base, timeoutMs);
+    await initP;
+  }
+  return state;
+}
+/** Un corte de red en un pedido no apaga el servidor para siempre: el próximo uso vuelve a comprobar. */
+function markOffline() { state.live = false; state.base = ''; lastCheck = 0; initP = null; try { sessionStorage.removeItem('ac.health'); } catch {} }
 
 let idToken = null;
 /** El chat informa el token de Firebase del usuario para que el servidor verifique la cuenta. */
@@ -106,6 +139,7 @@ async function continueCut(o, text) {
  * o: { messages:[{role,content}], lang, mode:'fast'|'deep', agent?:{id,name,system}, system?, attachments?, signal, onDelta, search?:boolean, onEvent? }
  */
 export async function chat(o) {
+  if (!state.live && state.checked) await init(); // se recupera solo tras un corte
   if (!state.live) return localChat(o);
   let text = '';
   try {
@@ -208,6 +242,7 @@ export async function synthesize(text, lang, signal) {
  * o: { task, lang, agents:[agent], attachments, signal, onEvent(ev), confirm(question) => Promise<boolean> }
  */
 export async function autoRun(o) {
+  if (!state.live && state.checked) await init();
   if (state.live) {
     let got = false;
     try {

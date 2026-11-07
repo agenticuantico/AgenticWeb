@@ -2,7 +2,7 @@
  * Cliente del área «Cuenta» (worker /api/account, /api/connectors, /api/jobs, /api/tasks, /api/tools).
  * Usa el mismo canal autenticado que el chat (token de Firebase). Nunca recibe ni guarda tokens de terceros.
  */
-import { init, apiFetch, state } from '../chat/engine.js';
+import { ensureLive, apiFetch, state } from '../chat/engine.js';
 
 export class ApiError extends Error {
   constructor(status, code) { super(code); this.status = status; this.code = code; }
@@ -10,10 +10,11 @@ export class ApiError extends Error {
 
 /** GET/POST JSON. Lanza ApiError con el código del servidor («login_required», «task_limit_reached», …). */
 export async function call(path, { method = 'GET', body } = {}) {
-  await init();
-  if (!state.live) throw new ApiError(0, 'offline');
+  // Si el servidor figuraba caído (p. ej. un /api/health lento en el celular), se vuelve a comprobar antes de rendirse.
+  await ensureLive();
+  if (!state.live) throw new ApiError(0, typeof navigator !== 'undefined' && navigator.onLine === false ? 'network' : 'offline');
   let res;
-  try { res = await apiFetch(path, { method, body }); } catch { throw new ApiError(0, 'network'); }
+  try { res = await apiFetch(path, { method, body }); } catch { throw new ApiError(0, typeof navigator !== 'undefined' && navigator.onLine === false ? 'network' : 'offline'); }
   const j = await res.json().catch(() => ({}));
   if (!res.ok) throw new ApiError(res.status, j.error || 'error');
   return j;
@@ -24,6 +25,7 @@ const MSG = {
   offline: 'El servidor no responde en este momento. Probá de nuevo en un rato.',
   network: 'No hay conexión. Revisá internet y probá de nuevo.',
   login_required: 'Ingresá a tu cuenta para ver esta sección.',
+  session_expired: 'Tu sesión venció. Ingresá de nuevo.',
   rate_limited: 'Demasiados pedidos seguidos. Esperá unos segundos.',
   maintenance: 'Estamos haciendo mantenimiento. Volvé en unos minutos.',
   connectors_unavailable: 'Los conectores no están disponibles en este momento.',
