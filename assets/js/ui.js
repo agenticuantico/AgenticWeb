@@ -73,7 +73,10 @@ const P = {
   phone: '<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/>',
   micOff: '<path d="M9 9v2a3 3 0 0 0 5.1 2.1M15 10V6a3 3 0 0 0-5.7-1.3M5.5 11a6.5 6.5 0 0 0 10.9 4.8M18.5 11a6.5 6.5 0 0 1-.4 2.2M12 17.5V21M3 3l18 18"/>',
   briefcase: '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/>',
-  upload: '<path d="M12 16V5M7.5 9.5L12 5l4.5 4.5M5 19h14"/>'
+  upload: '<path d="M12 16V5M7.5 9.5L12 5l4.5 4.5M5 19h14"/>',
+  thumbUp: '<path d="M7 10v10H4V10h3zM7 10l4-7a2 2 0 0 1 2.6 1.9L13 9h5.4a2 2 0 0 1 2 2.4l-1.4 7A2 2 0 0 1 17 20H7"/>',
+  thumbDown: '<path d="M17 14V4h3v10h-3zM17 14l-4 7a2 2 0 0 1-2.6-1.9L11 15H5.6a2 2 0 0 1-2-2.4l1.4-7A2 2 0 0 1 7 4h10"/>',
+  book: '<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2V5z"/><path d="M4 19a2 2 0 0 1 2-2h13"/>'
 };
 
 export function icon(name, cls = '') {
@@ -157,17 +160,21 @@ export function confirmDialog({ title, text, ok = 'Confirmar', cancel = 'Cancela
 }
 
 /** Menú desplegable anclado a un botón. items: [{label, icon, onClick, checked, danger, sub}] | 'sep' | {heading} */
-export function popover(anchor, items, { align = 'start', place = 'bottom', className = '' } = {}) {
+/**
+ * Menú flotante. multi: true → las opciones con `checked` son casillas (menuitemcheckbox, aria-checked):
+ * tocarlas cambia su estado sin cerrar el menú; se cierra tocando afuera, con Escape o con «Listo».
+ */
+export function popover(anchor, items, { align = 'start', place = 'bottom', className = '', multi = false, label = '' } = {}) {
   const wasOpen = [...document.querySelectorAll('.popover')].some((p) => p._anchor === anchor);
   closePopovers();
   if (wasOpen) return null; // segundo toque sobre el mismo botón: cerrar
   const wrap = anchor.closest('[data-popover-host]') || anchor.parentElement;
   wrap.style.position = wrap.style.position || 'relative';
-  const pop = h('div', { class: 'popover ' + className, role: 'menu', 'data-align': align, 'data-place': place });
+  const pop = h('div', { class: 'popover ' + className + (multi ? ' is-multi' : ''), role: 'menu', 'data-align': align, 'data-place': place, 'aria-label': label || null });
   for (const it of items) {
     if (it === 'sep') { pop.append(h('div', { class: 'menu-sep', role: 'separator' })); continue; }
     if (it.heading) { pop.append(h('div', { class: 'menu-label' }, it.heading)); continue; }
-    const btn = h('button', { class: 'menu-item' + (it.danger ? ' danger' : ''), type: 'button', role: it.checked !== undefined ? 'menuitemradio' : 'menuitem', 'aria-checked': it.checked !== undefined ? String(!!it.checked) : null, disabled: it.disabled || null });
+    const btn = h('button', { class: 'menu-item' + (it.danger ? ' danger' : ''), type: 'button', role: it.checked !== undefined ? (multi ? 'menuitemcheckbox' : 'menuitemradio') : 'menuitem', 'aria-checked': it.checked !== undefined ? String(!!it.checked) : null, disabled: it.disabled || null });
     if (it.img) btn.append(h('img', { class: 'flag', src: it.img, alt: '', width: 24, height: 24 }));
     else if (it.icon) btn.insertAdjacentHTML('beforeend', icon(it.icon));
     const meta = h('span', { class: 'meta' }, h('span', {}, it.label));
@@ -175,8 +182,20 @@ export function popover(anchor, items, { align = 'start', place = 'bottom', clas
     btn.append(meta);
     if (it.badge) btn.append(h('span', { class: 'chip ' + (it.badgeClass || ''), style: 'margin-left:auto' }, it.badge));
     if (it.checked !== undefined) btn.insertAdjacentHTML('beforeend', icon('check', 'check-mark'));
-    btn.addEventListener('click', (e) => { e.stopPropagation(); closePopovers(); it.onClick && it.onClick(); });
+    if (multi && it.checked !== undefined) {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation(); e.preventDefault();
+        it.checked = !it.checked;
+        btn.setAttribute('aria-checked', String(it.checked));
+        it.onClick && it.onClick(it.checked);
+      });
+    } else btn.addEventListener('click', (e) => { e.stopPropagation(); closePopovers(); it.onClick && it.onClick(); });
     pop.append(btn);
+  }
+  if (multi) {
+    const done = h('button', { class: 'menu-item menu-done', type: 'button', role: 'menuitem' }, h('span', { class: 'meta' }, h('span', {}, 'Listo')));
+    done.addEventListener('click', (e) => { e.stopPropagation(); closePopovers(); anchor.focus({ preventScroll: true }); });
+    pop.append(h('div', { class: 'menu-sep', role: 'separator' }), done);
   }
   wrap.append(pop);
   anchor.setAttribute('aria-expanded', 'true');

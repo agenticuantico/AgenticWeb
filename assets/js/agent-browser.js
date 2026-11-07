@@ -20,7 +20,7 @@ export { needsWebAction, isFollowUp };
 (function css() {
   if (typeof document === 'undefined' || document.getElementById('ac-ab2-css')) return;
   const l = document.createElement('link');
-  l.id = 'ac-ab2-css'; l.rel = 'stylesheet'; l.href = '/assets/css/agent-browser.css?v=2.0.1';
+  l.id = 'ac-ab2-css'; l.rel = 'stylesheet'; l.href = '/assets/css/agent-browser.css?v=2.1.1';
   document.head.appendChild(l);
 })();
 
@@ -69,7 +69,8 @@ export class AgentBrowserCard {
   constructor(o) {
     this.o = o;
     this.goal = String(o.text || '').trim();
-    this.url = guessUrl(this.goal);
+    // Fase 5: «Conectar» desde Cuentas conectadas pasa la página de login oficial y arranca con «Tomar el control».
+    this.url = o.url || guessUrl(this.goal);
     this.state = null;
     this.timer = 0; this.tick = 0;
     this.stopped = false; this.stepping = false; this.approving = false; this.askKey = '';
@@ -94,6 +95,8 @@ export class AgentBrowserCard {
     this.notice = h('div', { class: 'ab-notice', hidden: true });
     this.approvals = h('div', { class: 'ab-approvals' });
     this.asks = h('div', { class: 'ab-asks' });
+    this.saveBox = h('div', { class: 'ab-save', hidden: true });
+    this.saveKey = '';
     this.filesBox = h('div', { class: 'ab-files', hidden: true });
     this.result = h('div', { class: 'ab-result', hidden: true });
     this.takeBtn = h('button', { class: 'ab-tbtn', type: 'button', onclick: () => this.setTakeover(!(this.state && this.state.status === 'takeover')) }, h('span', { html: icon('keyboard') }), h('span', { class: 'ab-tbtn-t' }, 'Tomar el control'));
@@ -107,7 +110,7 @@ export class AgentBrowserCard {
     this.kb = this.keyboardBar();
     this.el = h('section', { class: 'ab-card', 'aria-label': 'Computadora del agente' },
       h('header', { class: 'ab-head' }, h('span', { class: 'ab-title', html: icon('monitor') + '<span>Computadora del agente</span>' }), this.pill, this.clock, h('span', { class: 'ab-actions' }, this.minBtn, this.fullBtn, this.stopBtn)),
-      this.modeBar, this.addr, this.view, this.kb, this.controls, this.notice, this.asks, this.approvals, this.planBox, this.stepsBox, this.filesBox, this.result);
+      this.modeBar, this.addr, this.view, this.kb, this.controls, this.notice, this.asks, this.saveBox, this.approvals, this.planBox, this.stepsBox, this.filesBox, this.result);
     this.o.thread.append(this.el);
     this.o.onScroll && this.o.onScroll();
   }
@@ -136,7 +139,7 @@ export class AgentBrowserCard {
   async api(path, { method = 'POST', body } = {}) {
     const headers = {};
     if (method !== 'GET') headers['Content-Type'] = 'application/json';
-    const t = this.o.idToken ? await this.o.idToken().catch(() => null) : null;
+    const t = this.o.idToken ? await this.o.idToken().catch(() => null) : await engine.currentIdToken();
     if (t) headers.Authorization = 'Bearer ' + t;
     const r = await fetch(engine.state.base + path, { method, credentials: 'include', headers, body: method !== 'GET' ? JSON.stringify(body || {}) : undefined });
     const j = await r.json().catch(() => ({}));
@@ -178,7 +181,7 @@ export class AgentBrowserCard {
       this.apply(s);
       this.tick = setInterval(() => this.renderClock(), 1000);
       this.poll();
-      this.loop();
+      if (this.o.takeover) this.setTakeover(true); else this.loop();
     } catch (e) { this.explain(e); }
   }
 
@@ -228,6 +231,7 @@ export class AgentBrowserCard {
     this.view.classList.toggle('is-takeover', take);
     this.takeBtn.querySelector('.ab-tbtn-t').textContent = take ? 'Devolver el control' : 'Tomar el control';
     this.takeBtn.classList.toggle('on', take);
+    this.renderSaveOffer(s);
     // Tarjetas
     if (s.status === 'awaiting_approval' && s.pending && !this.approving) this.askApproval(s.pending);
     if (s.status === 'needs_user' && s.ask) this.renderAsk(s.ask);
@@ -440,6 +444,44 @@ export class AgentBrowserCard {
     this.setPill(kind === 'pdf' ? 'Creando el PDF' : kind === 'screenshot' ? 'Sacando la captura' : 'Guardando el texto', 'run');
     try { this.apply(await this.api('/api/agent/browser/capture', { body: { kind } })); }
     catch (e) { this.showNotice(e.code === 'nothing_to_capture' ? 'Todavía no hay una página abierta para guardar.' : e.status === 429 ? 'Para la captura o el PDF hace falta el navegador real y hoy no hay minutos. Probá «Texto de la página».' : 'No pude guardarlo. Probá de nuevo.', 'warn'); if (this.state) this.apply(this.state); }
+  }
+
+  /* ---------- Fase 5: guardar la sesión iniciada por la persona ---------- */
+
+  /** Al devolver el control se ofrece guardar la sesión de ESE sitio (cookies cifradas, con vencimiento). */
+  renderSaveOffer(s) {
+    const o = s.offerSave && s.status !== 'takeover' ? s.offerSave : null;
+    if (!o) { if (this.saveKey && this.saveKey !== 'done') { this.saveBox.hidden = true; this.saveKey = ''; } return; }
+    if (this.saveKey === o.host || this.saveKey === 'done') return;
+    this.saveKey = o.host;
+    const sel = h('select', { class: 'input ab-save-ttl', id: 'abSaveTtl', 'aria-describedby': 'abSaveHelp' },
+      h('option', { value: '1' }, '1 día'), h('option', { value: '7', selected: true }, '7 días'), h('option', { value: '30' }, '30 días'));
+    const err = h('p', { class: 'error-text', role: 'alert' });
+    const saveBtn = h('button', { class: 'btn btn-sm btn-primary', type: 'button' }, 'Guardar sesión');
+    const noBtn = h('button', { class: 'btn btn-sm btn-ghost', type: 'button' }, 'Ahora no');
+    saveBtn.addEventListener('click', async () => {
+      err.textContent = ''; saveBtn.disabled = true; noBtn.disabled = true; saveBtn.textContent = 'Guardando…';
+      try {
+        const r = await this.api('/api/agent/sessions/save', { body: { host: o.host, days: Number(sel.value) } });
+        const until = new Intl.DateTimeFormat('es-AR', { day: 'numeric', month: 'long' }).format(new Date(r.session.expiresAt));
+        this.saveKey = 'done';
+        this.saveBox.replaceChildren(h('div', { class: 'ab-save-ok', role: 'status' }, h('span', { html: icon('check') }),
+          h('p', {}, h('strong', { 'data-no-i18n': '' }, `Sesión de ${r.session.host} guardada`), h('small', { class: 'muted' }, `Vence el ${until}. La uso solo cuando me pidas algo en ese sitio. Podés borrarla en Tu cuenta → Cuentas conectadas.`))));
+      } catch (e) {
+        saveBtn.disabled = false; noBtn.disabled = false; saveBtn.textContent = 'Guardar sesión';
+        err.textContent = e.code === 'session_empty' ? 'No encontré una sesión iniciada en ese sitio. Iniciá sesión con «Tomar el control» y probá de nuevo.'
+          : e.code === 'takeover_required' ? 'Primero tomá el control e iniciá sesión vos en el sitio.'
+          : e.code === 'session_too_large' ? 'La sesión de ese sitio es demasiado grande para guardarla.' : 'No se pudo guardar. Probá de nuevo.';
+      }
+    });
+    noBtn.addEventListener('click', async () => { this.saveKey = 'done'; this.saveBox.hidden = true; try { await this.api('/api/agent/sessions/dismiss', { body: {} }); } catch { /* sin efecto */ } });
+    this.saveBox.hidden = false;
+    this.saveBox.replaceChildren(h('div', { class: 'ab-save-card', role: 'group', 'aria-labelledby': 'abSaveT' },
+      h('div', { class: 'ab-save-h' }, h('span', { html: icon('lock') }), h('strong', { id: 'abSaveT', 'data-no-i18n': '' }, `¿Guardar tu sesión de ${o.host}?`)),
+      h('p', { id: 'abSaveHelp', class: 'ab-save-p' }, 'Así, la próxima vez que me pidas algo en ese sitio, no tenés que iniciar sesión de nuevo. Se guardan solo las cookies de ese sitio, cifradas. Nunca lo que escribiste ni tu contraseña.'),
+      h('div', { class: 'ab-save-row' }, h('label', { for: 'abSaveTtl' }, 'Vence en'), sel),
+      err, h('div', { class: 'ab-save-acts' }, noBtn, saveBtn)));
+    this.o.onScroll && this.o.onScroll();
   }
 
   /* ---------- Control manual ---------- */

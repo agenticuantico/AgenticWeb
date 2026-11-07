@@ -12,7 +12,7 @@ import { startConnect } from '../account/oauth-connect.js';
 import { applyCard } from './apply-card.js';
 
 /* ------------------- «Conectá X para seguir» (cuenta que falta) ------------------- */
-const NEED_LOGO = { github: 'github', google: 'google', gcalendar: 'gcalendar', gdrive: 'gdrive', linkedin: 'linkedin', cloudflare: 'cloudflare' };
+const NEED_LOGO = { github: 'github', google: 'google', gcalendar: 'gcalendar', gdrive: 'gdrive', gcloud: 'gcloud', linkedin: 'linkedin', cloudflare: 'cloudflare' };
 export function needCard(n, m) {
   const state = h('p', { class: 'tc-state', role: 'status', 'aria-live': 'polite' });
   const title = n.state === 'disabled' ? `Activá ${n.label} para seguir` : n.state === 'expired' ? `Reconectá ${n.label} para seguir` : `Conectá ${n.label} para seguir`;

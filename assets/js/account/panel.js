@@ -10,7 +10,7 @@ import { renderConnections, finishOAuthFromHash } from './connections.js';
 import { renderJobs } from './jobs.js';
 import { renderMemory, renderProjects } from './workspace.js';
 
-const CSS = '/assets/css/account-area.css?v=1.1.0';
+const CSS = '/assets/css/account-area.css?v=1.3.0';
 const TABS = [
   ['perfil', 'Perfil', 'user'],
   ['uso', 'Uso y plan', 'chart'],

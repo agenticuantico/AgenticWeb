@@ -53,6 +53,8 @@ let idToken = null;
 export function setIdTokenProvider(fn) { idToken = fn; }
 /** ¿Hay una cuenta iniciada? (lo usan el área Cuenta y el chat con herramientas). */
 export function hasAccount() { return typeof idToken === 'function'; }
+/** Token de la cuenta para módulos que hacen su propio fetch (computadora del agente desde Cuentas conectadas). */
+export async function currentIdToken() { if (!idToken) return null; try { return (await idToken()) || null; } catch { return null; } }
 
 /** Llamada autenticada al servidor (la usan media.js y otros módulos del chat). */
 export function apiFetch(path, opts) { return api(path, opts); }
@@ -117,7 +119,7 @@ export async function chat(o) {
         if (d === '[DONE]') done = true;
         else if (d && typeof d.delta === 'string') { text += d.delta; o.onDelta(d.delta); }
         // Búsqueda web en vivo: search_start / search_sources / search_limit / search_done
-        else if (d && typeof d.type === 'string' && /^search_/.test(d.type) && o.onEvent) { try { o.onEvent(d); } catch {} }
+        else if (d && typeof d.type === 'string' && /^(search|kb)_/.test(d.type) && o.onEvent) { try { o.onEvent(d); } catch {} }
       }, o.signal);
     } catch (e) { if (e.name === 'AbortError') throw e; }
     if (!text) { const r = await localChat(o); r.notice = 'fallback'; return r; }

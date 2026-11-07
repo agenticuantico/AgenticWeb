@@ -10,7 +10,7 @@ import { call } from './api.js';
 
 const RESUME_KEY = 'ac.connect.resume';
 const RESUME_TTL = 15 * 60_000;
-export const PROVIDER_LABEL = { github: 'GitHub', google: 'Gmail', gcalendar: 'Google Calendar', gdrive: 'Google Drive', linkedin: 'LinkedIn', cloudflare: 'Cloudflare' };
+export const PROVIDER_LABEL = { github: 'GitHub', google: 'Gmail', gcalendar: 'Google Calendar', gdrive: 'Google Drive', gcloud: 'Google Cloud', linkedin: 'LinkedIn', cloudflare: 'Cloudflare' };
 
 /** Dirección de vuelta: siempre /app/ de este mismo sitio (el servidor la valida contra su lista permitida). */
 export const returnUrl = () => `${location.origin}/app/`;
@@ -19,8 +19,9 @@ export const returnUrl = () => `${location.origin}/app/`;
  * Empieza la conexión. `resume` = { chatId, text } para retomar un pedido del chat al volver.
  * Devuelve { mode: 'device', … } solo si GitHub está en modo código (sin secreto del servidor); si no, navega.
  */
-export async function startConnect(provider, { resume } = {}) {
-  const r = await call(`/api/connectors/${provider}/start`, { method: 'POST', body: { return: returnUrl() } });
+export async function startConnect(provider, { resume, level } = {}) {
+  // Fase 5: nivel de permiso elegido («read» = Solo leer, «confirm» = Actuar pidiendo confirmación).
+  const r = await call(`/api/connectors/${provider}/start`, { method: 'POST', body: { return: returnUrl(), ...(level ? { level } : {}) } });
   if (r.url) {
     try {
       if (resume && resume.text) sessionStorage.setItem(RESUME_KEY, JSON.stringify({ provider, chatId: resume.chatId || null, text: String(resume.text).slice(0, 4000), at: Date.now() }));

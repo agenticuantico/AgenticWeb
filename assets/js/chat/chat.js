@@ -412,13 +412,15 @@ export class ChatApp {
   act_invite(btn, e, fromMention = false) {
     if (!this.featuresUnlocked) { if (!fromMention) this.paywall('Los agentes invitables'); return; }
     const all = [...AGENTS, ...(this.store.ws.customAgents || [])];
-    popover(btn, [{ heading: 'Invitar especialista a la conversación' }, ...all.map((a) => ({
+    // Fase 5: selección múltiple (casillas). Elegir o quitar un rol no cierra el menú ni abre el teclado;
+    // se cierra tocando afuera, con Escape o con «Listo». La mención con @ sigue siendo de una sola elección.
+    popover(btn, [{ heading: fromMention ? 'Invitar especialista a la conversación' : 'Elegí los roles del equipo' }, ...all.map((a) => ({
       label: a.name, sub: a.role, icon: a.icon || 'user', checked: this.chat.agents.includes(a.id),
       onClick: () => {
         if (fromMention) { const inp = this.$('input'); inp.value = inp.value.replace(/@\w*$/, '@' + a.name.split(' ')[0] + ' '); inp.focus(); }
         this.toggleAgent(a.id);
       }
-    })), 'sep', { label: 'Crear agente propio…', icon: 'plus', onClick: () => this.openHub('agentes') }], { place: 'top' });
+    })), 'sep', { label: 'Crear agente propio…', icon: 'plus', onClick: () => this.openHub('agentes') }], { place: 'top', multi: !fromMention, label: 'Equipo de agentes' });
   }
   toggleAgent(id) {
     if (this.chat.agents.includes(id)) return this.removeAgent(id);
@@ -914,10 +916,16 @@ export class ChatApp {
     this.webSearch = !this.webSearch;
     this.root.querySelectorAll('[data-act="websearch"]').forEach((b) => { b.setAttribute('aria-pressed', this.webSearch ? 'true' : 'false'); b.classList.toggle('on', this.webSearch); });
     toast(this.webSearch ? 'Búsqueda en la web activada' : 'Búsqueda en la web desactivada');
-    this.$('input').focus({ preventScroll: true });
+    // Fase 5: no se enfoca el campo de texto (en el celular abría el teclado). El foco queda en el botón,
+    // que anuncia su estado con aria-pressed.
   }
   /** Eventos del servidor: search_start → search_sources (Leyendo N fuentes) → search_done (Redactando…). */
   onSearchEvent(a, ev) {
+    // Fase 4 · fragmentos de la base de conocimiento propia (fuentes públicas citadas)
+    if (ev.type === 'kb_sources') {
+      a.kb = (Array.isArray(ev.sources) ? ev.sources : []).map((x) => ({ id: String(x && x.id || '').slice(0, 40), title: String(x && x.title || '').slice(0, 200), url: String(x && x.url || ''), license: String(x && x.license || '').slice(0, 120), date: String(x && x.date || '').slice(0, 10) })).filter((x) => /^https:\/\//i.test(x.url)).slice(0, 5);
+      this.updateMessage(a); return;
+    }
     const s = a.search || (a.search = { state: 'searching', query: '', sources: [] });
     if (ev.type === 'search_start') { s.state = 'searching'; s.query = String(ev.query || '').slice(0, 160); }
     else if (ev.type === 'search_limit') { s.limit = { reason: ev.reason === 'global' ? 'global' : 'plan', n: Number(ev.limit) || 0 }; }
@@ -954,6 +962,22 @@ export class ChatApp {
     const host = (u) => { try { return new URL(u).hostname.replace(/^www\./, ''); } catch { return ''; } };
     return h('nav', { class: 'ace-sources', 'aria-label': 'Fuentes' }, h('strong', {}, 'Fuentes'),
       h('ol', {}, ...src.map((x, i) => h('li', {}, h('a', { href: x.url, target: '_blank', rel: 'noopener noreferrer nofollow', title: x.title }, h('span', { class: 'ace-src-n' }, String(i + 1)), h('span', { class: 'ace-src-t', 'data-no-i18n': '' }, x.title || host(x.url)), h('small', {}, host(x.url)))))));
+  }
+
+  /** Fase 4 · «De la base de conocimiento»: fuente, licencia y fecha de cada fragmento usado. */
+  kbList(m) {
+    const fmt = (d) => { const t = Date.parse(d + 'T12:00:00Z'); return Number.isFinite(t) ? new Date(t).toLocaleDateString(this.lang && this.lang.code || 'es-AR', { day: 'numeric', month: 'short', year: 'numeric' }) : ''; };
+    return h('nav', { class: 'ace-sources ace-kb', 'aria-label': 'De la base de conocimiento' }, h('strong', {}, 'De la base de conocimiento'),
+      h('ol', {}, ...m.kb.map((x, i) => h('li', {}, h('a', { href: x.url, target: '_blank', rel: 'noopener noreferrer nofollow', title: x.title },
+        h('span', { class: 'ace-src-n' }, 'B' + (i + 1)), h('span', { class: 'ace-src-t', 'data-no-i18n': '' }, x.title),
+        h('small', { 'data-no-i18n': '' }, [x.license, fmt(x.date)].filter(Boolean).join(' · ')))))));
+  }
+  /** Fase 4 · voto 👍/👎 anónimo (sin texto ni usuario): mejora el ranking de la base. Un voto por respuesta. */
+  async vote(m, rating) {
+    if (m.vote) return;
+    m.vote = rating; this.updateMessage(m, { now: true }); this.persist();
+    toast(rating > 0 ? 'Gracias, me sirve para mejorar.' : 'Gracias. Lo tengo en cuenta para mejorar.');
+    try { await engine.apiFetch('/api/feedback', { method: 'POST', body: { rating, mode: this.mode === 'deep' ? 'deep' : this.mode === 'auto' ? 'auto' : 'fast', lang: (this.lang && this.lang.code) || 'es', searched: !!m.search, kbIds: (m.kb || []).map((x) => x.id) } }); } catch { /* sin conexión: el voto queda solo en este dispositivo */ }
   }
 
   /* =================== Mensajes =================== */
@@ -1065,6 +1089,7 @@ export class ChatApp {
     md.innerHTML = m.content ? renderMarkdown(m.content) : (m.streaming && !(m.steps && m.steps.length) && !m.search ? '<span class="typing" aria-label="Escribiendo"><i></i><i></i><i></i></span>' : '');
     body.append(md);
     if (m.search && m.search.sources && m.search.sources.length && (!m.streaming || m.search.state === 'writing')) body.append(this.sourcesList(m));
+    if (m.kb && m.kb.length && !m.streaming) body.append(this.kbList(m));
     if (m.tools) {
       // Tarjetas de herramientas: un solo nodo por mensaje, conservado entre redibujos (mismo mecanismo que la vista previa).
       const blk = toolBlock(m);
@@ -1075,7 +1100,9 @@ export class ChatApp {
     if (!m.streaming && m.content) {
       body.append(h('div', { class: 'msg-actions ace-acts' },
         h('button', { class: 'ace-ib sm', type: 'button', 'aria-label': 'Copiar respuesta', title: 'Copiar', html: icon('copy'), onclick: () => navigator.clipboard.writeText(m.content).then(() => toast('Copiado')) }),
-        h('button', { class: 'ace-ib sm', type: 'button', 'aria-label': 'Escuchar respuesta', title: 'Escuchar', html: icon('speaker'), onclick: () => this.say(m.content) })));
+        h('button', { class: 'ace-ib sm', type: 'button', 'aria-label': 'Escuchar respuesta', title: 'Escuchar', html: icon('speaker'), onclick: () => this.say(m.content) }),
+        h('button', { class: 'ace-ib sm ace-vote' + (m.vote === 1 ? ' on' : ''), type: 'button', 'aria-label': 'Me sirvió', title: 'Me sirvió', 'aria-pressed': m.vote === 1 ? 'true' : 'false', disabled: m.vote ? '' : null, html: icon('thumbUp'), onclick: () => this.vote(m, 1) }),
+        h('button', { class: 'ace-ib sm ace-vote' + (m.vote === -1 ? ' on' : ''), type: 'button', 'aria-label': 'No me sirvió', title: 'No me sirvió', 'aria-pressed': m.vote === -1 ? 'true' : 'false', disabled: m.vote ? '' : null, html: icon('thumbDown'), onclick: () => this.vote(m, -1) })));
     }
     el.append(face, body);
     return el;

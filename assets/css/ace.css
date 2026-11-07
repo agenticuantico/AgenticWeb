@@ -276,4 +276,12 @@ body.design-lock { overflow: hidden; }
 .ace-src-n { flex: 0 0 24px; height: 24px; border-radius: 8px; display: grid; place-items: center; background: var(--a-soft); font-size: 12px; font-weight: 700; color: #3f3f46; }
 .ace-src-t { flex: 1; min-width: 0; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ace-sources small { flex: 0 1 auto; max-width: 40%; font-size: 12px; color: var(--a-faint); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Fase 4 · base de conocimiento: título arriba y «licencia · fecha» abajo (sin cortar la licencia de golpe) */
+.ace-kb a { align-items: flex-start; flex-wrap: wrap; row-gap: 2px; padding-top: 8px; padding-bottom: 8px; }
+.ace-kb .ace-src-n { background: #ecfccb; color: #3f6212; }
+.ace-kb .ace-src-t { flex: 1 1 calc(100% - 40px); }
+.ace-kb small { flex: 1 1 100%; max-width: none; margin-left: 34px; white-space: normal; color: #52525b; line-height: 1.35; }
+/* Fase 4 · votos 👍/👎 */
+.ace-vote.on { color: #3f6212; background: #ecfccb; }
+.ace-vote[disabled]:not(.on) { opacity: .45; }
 @media (max-width: 380px) { .chat.ace .ace-web { width: 34px; height: 34px; } }

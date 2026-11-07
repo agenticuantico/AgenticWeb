@@ -246,10 +246,15 @@ dialog.modal::backdrop { background: rgba(15, 14, 20, .45); backdrop-filter: blu
 .menu-item .meta small { color: var(--muted); font-size: var(--fs-xs); }
 .menu-item .check-mark { margin-left: auto; width: 16px; height: 16px; color: var(--gold); visibility: hidden; }
 .menu-item[aria-checked="true"] .check-mark { visibility: visible; }
+/* Selección múltiple (Equipo de agentes): casilla visible, el menú no se cierra al elegir */
+.popover.is-multi .menu-item[role="menuitemcheckbox"] .check-mark { visibility: visible; box-sizing: border-box; width: 22px; height: 22px; padding: 2px; flex: none; border: 1.5px solid var(--muted); border-radius: 7px; background: #fff; color: transparent; }
+.popover.is-multi .menu-item[role="menuitemcheckbox"][aria-checked="true"] .check-mark { background: var(--ink); border-color: var(--ink); color: #fff; }
+.popover.is-multi .menu-done { position: sticky; bottom: 0; justify-content: center; font-weight: 700; background: var(--surface, #fff); }
+.popover.is-multi .menu-done .meta { align-items: center; }
 .menu-item svg { width: 18px; height: 18px; flex: none; color: var(--ink-2); }
 .menu-item.danger, .menu-item.danger svg { color: var(--danger); }
 .menu-sep { height: 1px; background: var(--line); margin: 6px 4px; }
-.menu-label { padding: 8px 10px 4px; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); font-weight: 650; }
+.menu-label { padding: 8px 10px 4px; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-weight: 650; }
 
 /* ---------- Tablas ---------- */
 .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--r-md); }

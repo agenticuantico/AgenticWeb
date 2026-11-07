@@ -1,0 +1,36 @@
+/* /aprendi/ · «Qué aprendí hoy» (Fase 4). Usa el lenguaje visual clásico del sitio (fondo gris-azul, verde lima, píldoras). */
+.kb-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 0 0 20px; }
+.kb-stat { background: #fff; border: 1px solid rgba(15, 23, 42, .08); border-radius: 18px; padding: 16px; min-width: 0; }
+.kb-stat strong { display: block; font-size: 28px; line-height: 1.1; color: #0f172a; }
+.kb-stat span { display: block; margin-top: 4px; font-size: 13px; color: #475569; }
+.kb-state { margin: 8px 0 18px; padding: 14px 16px; border-radius: 14px; background: #fff; border: 1px solid rgba(15, 23, 42, .08); color: #334155; }
+.kb-state.empty { background: #f7fee7; border-color: #d9f99d; color: #365314; }
+.kb-state.error { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+.kb-list { display: grid; gap: 16px; }
+.kb-group { background: #fff; border: 1px solid rgba(15, 23, 42, .08); border-radius: 20px; padding: 18px 18px 6px; min-width: 0; }
+.kb-gt { font-size: 17px; margin: 0 0 10px; }
+.kb-count { color: #64748b; font-weight: 500; }
+.kb-group ul { list-style: none; margin: 0; padding: 0; }
+.kb-item { padding: 12px 0; border-top: 1px solid rgba(15, 23, 42, .07); min-width: 0; }
+.kb-item:first-child { border-top: 0; padding-top: 0; }
+.kb-item a { font-weight: 700; color: #0f172a; text-decoration: underline; text-decoration-color: rgba(101, 163, 13, .55); text-underline-offset: 3px; overflow-wrap: anywhere; }
+.kb-item a:focus-visible { outline: 2px solid #1d4ed8; outline-offset: 2px; border-radius: 4px; }
+.kb-item p { margin: 6px 0 4px; color: #334155; font-size: 15px; line-height: 1.5; overflow-wrap: anywhere; }
+.kb-item small { color: #52525b; font-size: 12.5px; overflow-wrap: anywhere; }
+.kb-more { margin: 4px 0 12px; min-height: 40px; padding: 8px 16px; border-radius: 999px; border: 1px solid rgba(15, 23, 42, .14); background: #fff; color: #0f172a; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+.kb-more:hover { background: #f7fee7; }
+.kb-more:focus-visible { outline: 2px solid #1d4ed8; outline-offset: 2px; }
+.kb-h2 { margin: 30px 0 12px; font-size: 20px; }
+.kb-table-wrap { overflow-x: auto; background: #fff; border: 1px solid rgba(15, 23, 42, .08); border-radius: 16px; }
+.kb-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.kb-table th, .kb-table td { text-align: left; padding: 10px 14px; border-top: 1px solid rgba(15, 23, 42, .07); vertical-align: top; }
+.kb-table thead th { border-top: 0; color: #475569; font-weight: 700; font-size: 13px; }
+.kb-table small { color: #52525b; }
+.kb-how { padding-left: 20px; color: #334155; line-height: 1.6; }
+.kb-how li { margin: 6px 0; }
+@media (max-width: 720px) {
+  .kb-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .kb-stat strong { font-size: 24px; }
+  .kb-group { padding: 14px 14px 4px; border-radius: 16px; }
+  .kb-table th, .kb-table td { padding: 9px 10px; }
+}
