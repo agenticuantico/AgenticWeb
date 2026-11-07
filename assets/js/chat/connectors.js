@@ -412,6 +412,8 @@ function oauthCard(chat, p, redraw) {
   btn.addEventListener('click', () => goConnect(btn, p.id, p.label, c));
   c = card(p.id, p.label, desc,
     h('ul', { class: 'conn-points' }, h('li', {}, `Iniciás sesión en ${p.label}, aprobás el acceso y volvés acá ya conectado.`), h('li', {}, 'Todo lo que publica o envía te pide «Confirmar» antes.')),
+    // Límite real del proveedor que informa el servidor (p. ej. Google en modo de prueba: solo usuarios de prueba).
+    p.note ? h('p', { class: 'muted small conn-note', 'data-conn-limit': '' }, h('span', { class: 'conn-inline-ic', html: icon('info') }), String(p.note)) : null,
     h('div', { class: 'conn-actions' }, btn));
   return c;
 }
