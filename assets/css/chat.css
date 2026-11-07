@@ -248,6 +248,8 @@
 .hub-tabs button svg { width: 18px; height: 18px; }
 .hub-tabs button[aria-selected="true"] { background: var(--surface-3); color: var(--ink); }
 .hub-pane { min-width: 0; }
+/* Red de seguridad: ningún ícono del Centro de control puede crecer sin tamaño (antes un candado ocupaba media pantalla). */
+.hub-pane svg { max-width: 48px; max-height: 48px; }
 .hub-list { display: grid; gap: 8px; }
 .hub-item { display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface); }
 .hub-item > div { flex: 1; min-width: 0; }

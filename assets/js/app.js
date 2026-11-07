@@ -4,7 +4,7 @@ import { ChatStore } from './chat/store.js';
 import { watchUser, getProfile } from './auth.js';
 import { setIdTokenProvider } from './chat/engine.js';
 import { h, icon, esc, modal, popover, confirmDialog, uid, timeAgo, toast } from './ui.js';
-import { readConnectReturn, takeResume, returnMessage } from './account/oauth-connect.js';
+import { readConnectReturn, takeResume, returnMessage, takeConnectFrom } from './account/oauth-connect.js';
 import { prefs } from './consent.js';
 
 const $ = (id) => document.getElementById(id);
@@ -133,7 +133,10 @@ function routeHash() {
   if (m) openAccountPanel(ACC_TABS[m[1] || ''] || 'perfil');
 }
 window.addEventListener('hashchange', routeHash);
-if (connectReturn && !connectResume) {
+if (connectReturn && !connectResume && takeConnectFrom(connectReturn.provider) === 'hub') {
+  // Conexión desde el Centro de control: se vuelve a abrir en «Conectores» y se avisa el resultado.
+  import('./chat/connectors.js').then((m) => { m.setHubNotice({ ok: connectReturn.ok, text: returnMessage(connectReturn) }); chat.openHub('conectores'); });
+} else if (connectReturn && !connectResume) {
   // Conexión desde «Cuentas conectadas»: se abre esa pestaña y se avisa el resultado.
   import('./account/connections.js').then((m) => { m.setConnectNotice({ ok: connectReturn.ok, text: returnMessage(connectReturn) }); openAccountPanel('conexiones'); });
 } else if (connectResume) toast(`${returnMessage(connectReturn)} Sigo con tu pedido…`, 'ok', 5000);

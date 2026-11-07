@@ -99,7 +99,7 @@ function card(p, ctx, root) {
       c.avatar ? h('img', { src: c.avatar, alt: '', width: 28, height: 28, referrerpolicy: 'no-referrer' }) : h('span', { class: 'acc-who-ava', html: icon('user') }),
       h('span', {}, h('small', { class: 'muted' }, 'Conectada como'), h('strong', {}, c.login || c.name || '—'))));
     if (p.status === 'connected') body.append(chatSwitch(p));
-    if (p.status === 'expired' || p.kind === 'oauth2') acts.append(h('button', { class: 'btn btn-sm' + (p.status === 'expired' ? ' btn-primary' : ''), type: 'button', onclick: (e) => connect(p, e.currentTarget) }, p.status === 'expired' ? 'Reconectar' : 'Cambiar cuenta'));
+    if (p.status === 'expired' || p.kind === 'oauth2' || p.oauth) acts.append(h('button', { class: 'btn btn-sm' + (p.status === 'expired' ? ' btn-primary' : ''), type: 'button', onclick: (e) => connect(p, e.currentTarget) }, p.status === 'expired' ? 'Reconectar' : 'Cambiar cuenta'));
     acts.append(h('button', { class: 'btn btn-sm btn-danger-ghost', type: 'button', onclick: async () => {
       if (!(await confirmDialog({ title: `Desconectar ${p.label}`, text: `Se borra el acceso guardado${p.kind === 'oauth2' ? ' y se revoca el permiso en ' + p.label : ''}. Podés volver a conectarla cuando quieras.`, ok: 'Desconectar', danger: true }))) return;
       try { await call(`/api/connectors/${p.id}/disconnect`, { method: 'POST', body: {} }); toast(`${p.label} desconectada.`); ctx.summary = null; root.innerHTML = ''; renderConnections(root, ctx); }
@@ -108,9 +108,12 @@ function card(p, ctx, root) {
   } else if (p.status === 'not_configured') {
     body.append(h('p', { class: 'acc-note' }, h('span', { html: icon('info') }), 'Esta conexión todavía no está habilitada en AgentiCuántico. Va a aparecer acá apenas esté lista.'));
   } else if (p.id === 'cloudflare') {
-    // Cloudflare no ofrece permiso por redirección: «Conectar» despliega el campo para pegar un token acotado.
-    const btn = h('button', { class: 'btn btn-sm btn-primary', type: 'button', 'aria-expanded': 'false', onclick: () => { btn.remove(); const f = cloudflareForm(ctx, root); body.append(f); f.querySelector('input').focus(); } }, 'Conectar');
-    acts.append(btn);
+    // Camino principal: iniciar sesión en Cloudflare (si el servidor tiene su cliente OAuth). Respaldo: token en «Opciones avanzadas».
+    const adv = h('details', { class: 'acc-help acc-cf-adv' }, h('summary', {}, 'Opciones avanzadas: conectar con un API token'));
+    adv.addEventListener('toggle', () => { if (adv.open && !adv.querySelector('form')) { const f = cloudflareForm(ctx, root); adv.append(f); f.querySelector('input').focus(); } }, { once: false });
+    const note = h('p', { class: 'acc-small muted', role: 'status', hidden: true }, 'El inicio de sesión directo con Cloudflare todavía no está habilitado. Mientras tanto podés conectar con un API token en «Opciones avanzadas».');
+    acts.append(h('button', { class: 'btn btn-sm btn-primary', type: 'button', onclick: (e) => { if (p.oauth) return connect(p, e.currentTarget); note.hidden = false; adv.open = true; } }, 'Conectar'));
+    body.append(note, adv);
   } else {
     acts.append(h('button', { class: 'btn btn-sm btn-primary', type: 'button', onclick: (e) => connect(p, e.currentTarget) }, 'Conectar'));
   }

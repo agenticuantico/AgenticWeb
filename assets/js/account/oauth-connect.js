@@ -9,6 +9,7 @@
 import { call } from './api.js';
 
 const RESUME_KEY = 'ac.connect.resume';
+const FROM_KEY = 'ac.connect.from';
 const RESUME_TTL = 15 * 60_000;
 export const PROVIDER_LABEL = { github: 'GitHub', google: 'Gmail', gcalendar: 'Google Calendar', gdrive: 'Google Drive', linkedin: 'LinkedIn', cloudflare: 'Cloudflare' };
 
@@ -19,10 +20,13 @@ export const returnUrl = () => `${location.origin}/app/`;
  * Empieza la conexión. `resume` = { chatId, text } para retomar un pedido del chat al volver.
  * Devuelve { mode: 'device', … } solo si GitHub está en modo código (sin secreto del servidor); si no, navega.
  */
-export async function startConnect(provider, { resume } = {}) {
+export async function startConnect(provider, { resume, from } = {}) {
   const r = await call(`/api/connectors/${provider}/start`, { method: 'POST', body: { return: returnUrl() } });
   if (r.url) {
     try {
+      // Desde dónde se conectó (p. ej. el Centro de control), para volver a abrir esa misma pantalla al regresar.
+      if (from === 'hub') sessionStorage.setItem(FROM_KEY, JSON.stringify({ from, provider, at: Date.now() }));
+      else sessionStorage.removeItem(FROM_KEY);
       if (resume && resume.text) sessionStorage.setItem(RESUME_KEY, JSON.stringify({ provider, chatId: resume.chatId || null, text: String(resume.text).slice(0, 4000), at: Date.now() }));
       else sessionStorage.removeItem(RESUME_KEY);
     } catch { /* modo privado sin almacenamiento: se conecta igual, sin retomar */ }
@@ -55,6 +59,17 @@ export function takeResume(provider) {
     const r = JSON.parse(raw);
     if (r.provider !== provider || Date.now() - r.at > RESUME_TTL || !r.text) return null;
     return r;
+  } catch { return null; }
+}
+
+/** ¿La conexión que acaba de volver empezó en el Centro de control? (se consume una sola vez). */
+export function takeConnectFrom(provider) {
+  try {
+    const raw = sessionStorage.getItem(FROM_KEY);
+    sessionStorage.removeItem(FROM_KEY);
+    if (!raw) return null;
+    const r = JSON.parse(raw);
+    return r.provider === provider && Date.now() - r.at < RESUME_TTL ? r.from : null;
   } catch { return null; }
 }
 

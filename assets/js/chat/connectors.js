@@ -1,11 +1,14 @@
 /**
- * Conectores por usuario (Centro de control → Conectores): GitHub (OAuth) y Cloudflare (API token).
+ * Conectores por usuario (Centro de control → Conectores): GitHub, Cloudflare, LinkedIn y Google (Gmail, Calendar, Drive).
+ * «Conectar» lleva al inicio de sesión del proveedor en esta misma pestaña y vuelve ya conectado (OAuth).
+ * Cloudflare usa inicio de sesión si el servidor tiene su cliente OAuth; el API token queda en «Opciones avanzadas».
  * Los tokens viven cifrados en el servidor; el navegador nunca los vuelve a ver.
  * Toda acción que crea, modifica o publica algo pide confirmación con una vista previa del servidor.
  */
 import { h, icon, toast, modal, confirmDialog, uid } from '../ui.js';
 import { state as engineState, init as engineInit } from './engine.js';
 import { getSiteLang } from '../i18n.js';
+import { startConnect } from '../account/oauth-connect.js';
 
 /* Frases con datos variables (las fijas las traduce el diccionario del sitio). */
 const TPL = {
@@ -25,7 +28,7 @@ function T(k, vars = {}) {
   return s.replace(/\{(\w+)\}/g, (_, n) => String(vars[n] ?? ''));
 }
 
-const CSS = '/assets/css/connectors.css?v=1.0.0';
+const CSS = '/assets/css/connectors.css?v=1.1.0';
 function ensureCss() {
   if (document.querySelector('link[data-conn-css]')) return;
   document.head.append(h('link', { rel: 'stylesheet', href: CSS, 'data-conn-css': '' }));
@@ -33,6 +36,7 @@ function ensureCss() {
 
 const LOGO = {
   github: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.05-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.68 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.41-2.69 5.38-5.26 5.67.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5z"/></svg>',
+  linkedin: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="4" fill="#0a66c2"/><path fill="#fff" d="M7.1 9.4h-2.6V19h2.6zM5.8 5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM19.5 13.4c0-2.6-1.4-4.2-3.6-4.2-1.3 0-2.1.7-2.5 1.3V9.4h-2.5V19h2.6v-5.1c0-1.3.6-2.1 1.7-2.1 1 0 1.6.7 1.6 2.1V19h2.7z"/></svg>',
   cloudflare: '<svg viewBox="0 0 32 32" aria-hidden="true"><path fill="#f38020" d="M21.9 22.6l.3-1c.3-1.1.2-2.1-.4-2.8-.5-.6-1.3-1-2.3-1.1l-11.6-.1a.3.3 0 0 1-.2-.1.3.3 0 0 1 0-.3c0-.1.1-.2.3-.2l11.7-.1c1.4-.1 2.9-1.2 3.4-2.6l.7-1.8.1-.4A7.6 7.6 0 0 0 9.3 11a3.4 3.4 0 0 0-5.4 3.6A4.9 4.9 0 0 0 0 19.4c0 .2 0 .5.1.7 0 .1.1.2.2.2h21.3c.1 0 .2-.1.3-.2z"/><path fill="#faae40" d="M25.7 14.8h-.3c-.1 0-.2.1-.2.2l-.5 1.6c-.3 1.1-.2 2.1.4 2.8.5.6 1.3 1 2.3 1.1l2.5.1c.1 0 .2.1.2.1v.3c0 .1-.1.2-.3.2l-2.6.1c-1.4.1-2.9 1.2-3.4 2.6l-.2.6c0 .1 0 .2.2.2h8.9c.1 0 .2-.1.2-.2a6.4 6.4 0 0 0-6.2-7.7z"/></svg>'
 };
 
@@ -65,7 +69,15 @@ const ERR = {
   invalid_state: 'La autorización no se pudo verificar. Probá conectar de nuevo.',
   not_configured: 'La conexión con GitHub todavía no está habilitada.',
   failed: 'GitHub no completó la autorización. Probá de nuevo.',
-  invalid_request: 'La autorización no se pudo verificar. Probá conectar de nuevo.'
+  invalid_request: 'La autorización no se pudo verificar. Probá conectar de nuevo.',
+  cloudflare_oauth_not_configured: 'El inicio de sesión con Cloudflare todavía no está habilitado. Podés conectar con un token en «Opciones avanzadas».',
+  linkedin_not_configured: 'La conexión con LinkedIn todavía no está habilitada.',
+  google_not_configured: 'La conexión con Gmail todavía no está habilitada.',
+  gcalendar_not_configured: 'La conexión con Google Calendar todavía no está habilitada.',
+  gdrive_not_configured: 'La conexión con Google Drive todavía no está habilitada.',
+  invalid_return: 'No se pudo preparar la vuelta a AgentiCuántico. Recargá la página y probá de nuevo.',
+  offline: 'El servidor no responde en este momento. Probá de nuevo en un rato.',
+  network: 'No hay conexión. Revisá internet y probá de nuevo.'
 };
 const errText = (code) => ERR[code] || 'No se pudo completar la acción. Probá de nuevo en unos minutos.';
 
@@ -106,8 +118,16 @@ function fail(e, where) {
 const clearErr = (where) => { const el = where && where.querySelector(':scope > .conn-err'); if (el) el.remove(); };
 
 /* =================== Panel =================== */
+/** Aviso de la vuelta del proveedor: se muestra DENTRO del panel (un aviso flotante quedaría detrás del diálogo). */
+let hubNotice = null;
+export function setHubNotice(n) { hubNotice = n; }
+
 export async function renderConnectors(pane, chat, others) {
   ensureCss();
+  if (hubNotice) {
+    const n = hubNotice; hubNotice = null;
+    pane.append(h('div', { class: 'alert ' + (n.ok ? 'ok' : 'warn') + ' conn-return', role: n.ok ? 'status' : 'alert' }, h('span', { html: icon(n.ok ? 'check' : 'info') }), h('div', {}, n.text)));
+  }
   pane.append(h('p', { class: 'muted' }, 'Conectá tus cuentas para que el agente trabaje en tu nombre. Antes de crear, modificar o publicar algo, siempre te pide confirmación.'));
   const box = h('div', { class: 'conn-grid' });
   pane.append(box);
@@ -118,6 +138,7 @@ export async function renderConnectors(pane, chat, others) {
     if (!chat.user) {
       box.append(card('github', 'GitHub', 'Repositorios: ver, crear y subir archivos.', h('div', { class: 'conn-actions' }, h('button', { class: 'btn btn-primary btn-sm', type: 'button', onclick: () => chat.loginPrompt('Ingresá a tu cuenta para conectar GitHub y Cloudflare.') }, 'Ingresar para conectar'))));
       box.append(card('cloudflare', 'Cloudflare', 'Workers y sitios: ver y publicar.', h('div', { class: 'conn-actions' }, h('button', { class: 'btn btn-sm', type: 'button', onclick: () => chat.loginPrompt('Ingresá a tu cuenta para conectar GitHub y Cloudflare.') }, 'Ingresar para conectar'))));
+      box.append(card('linkedin', 'LinkedIn', OAUTH_BLURB.linkedin, h('div', { class: 'conn-actions' }, h('button', { class: 'btn btn-sm', type: 'button', onclick: () => chat.loginPrompt('Ingresá a tu cuenta para conectar LinkedIn.') }, 'Ingresar para conectar'))));
       return;
     }
     box.append(h('div', { class: 'conn-card skeleton-card' }, h('div', { class: 'skeleton', style: 'height:18px;width:40%' }), h('div', { class: 'skeleton', style: 'height:14px;width:70%;margin-top:10px' })));
@@ -125,6 +146,7 @@ export async function renderConnectors(pane, chat, others) {
     try { st = await api(chat, '/api/connectors'); } catch (e) { box.innerHTML = ''; box.append(h('div', { class: 'alert warn' }, h('span', { html: icon('info') }), h('div', {}, errText(e.code)))); return; }
     box.innerHTML = '';
     box.append(githubCard(chat, st, draw), cloudflareCard(chat, st, draw));
+    for (const id of OAUTH_CARDS) { const p = (st.providers || []).find((x) => x.id === id); if (p) box.append(oauthCard(chat, p, draw)); }
   };
   await draw();
   if (others) others(pane);
@@ -246,6 +268,8 @@ function cloudflareCard(chat, st, redraw) {
         } }, 'Desconectar')));
   }
   const tokenId = uid('cft'), accId = uid('cfa');
+  const cfp = (st.providers || []).find((x) => x.id === 'cloudflare') || {};
+  const oauthReady = !!((st.available && st.available.cloudflareOAuth) || cfp.oauth);
   const form = h('form', { class: 'conn-form', autocomplete: 'off' },
     h('ol', { class: 'conn-steps' },
       h('li', {}, 'Abrí ', h('a', { href: 'https://dash.cloudflare.com/profile/api-tokens', target: '_blank', rel: 'noopener' }, 'dash.cloudflare.com/profile/api-tokens'), ' y tocá «Create Token» → «Create Custom Token».'),
@@ -257,10 +281,9 @@ function cloudflareCard(chat, st, redraw) {
           h('li', {}, h('code', {}, 'User · User Details · Read ', h('em', {}, '(opt.)'))))),
       h('li', {}, 'En «Account Resources» elegí tu cuenta, creá el token y copialo.')),
     h('div', { class: 'field' }, h('label', { for: tokenId }, 'API token'), h('input', { class: 'input', id: tokenId, name: 'token', type: 'password', required: true, minlength: 30, maxlength: 200, autocomplete: 'off', spellcheck: 'false', placeholder: 'Pegá tu API token' })),
-    h('details', { class: 'conn-adv' }, h('summary', {}, 'Opciones avanzadas'),
-      h('div', { class: 'field' }, h('label', { for: accId }, 'Account ID (opcional)'), h('input', { class: 'input', id: accId, name: 'accountId', maxlength: 32, pattern: '[a-fA-F0-9]{32}', autocomplete: 'off', spellcheck: 'false' }))),
+    h('div', { class: 'field' }, h('label', { for: accId }, 'Account ID (opcional)'), h('input', { class: 'input', id: accId, name: 'accountId', maxlength: 32, pattern: '[a-fA-F0-9]{32}', autocomplete: 'off', spellcheck: 'false' })),
     h('p', { class: 'muted small' }, 'Se guarda cifrado y nunca se muestra de nuevo. Podés revocarlo cuando quieras desde Cloudflare o desconectarlo acá.'),
-    h('div', { class: 'conn-actions' }, h('button', { class: 'btn btn-primary btn-sm', type: 'submit' }, 'Verificar y conectar')));
+    h('div', { class: 'conn-actions' }, h('button', { class: 'btn btn-sm', type: 'submit' }, 'Verificar y conectar')));
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const b = form.querySelector('button[type=submit]');
@@ -274,12 +297,69 @@ function cloudflareCard(chat, st, redraw) {
       redraw();
     } catch (err) { fail(err, form); } finally { b.disabled = false; }
   });
-  const toggle = h('button', { class: 'btn btn-primary btn-sm', type: 'button', 'aria-expanded': 'false' }, h('span', { class: 'conn-btn-ic', html: LOGO.cloudflare }), 'Conectar con token');
-  const wrap = h('div', { class: 'conn-collapse', hidden: true }, form);
-  toggle.addEventListener('click', () => { const open = wrap.hidden; wrap.hidden = !open; toggle.setAttribute('aria-expanded', String(open)); if (open) form.token.focus(); });
-  return card('cloudflare', 'Cloudflare', 'Workers y sitios: ver y publicar.',
-    h('ul', { class: 'conn-points' }, h('li', {}, 'Cloudflare no ofrece inicio de sesión para apps externas: se conecta con un API token con permisos acotados.')),
-    h('div', { class: 'conn-actions' }, toggle), wrap);
+  // Respaldo: el token queda plegado en «Opciones avanzadas»; el camino principal es iniciar sesión en Cloudflare.
+  const adv = h('details', { class: 'conn-adv conn-collapse' }, h('summary', {}, 'Opciones avanzadas: conectar con un API token'), form);
+  const note = h('p', { class: 'muted small conn-note', role: 'status', hidden: true }, 'El inicio de sesión directo con Cloudflare todavía no está habilitado. Mientras tanto podés conectar con un API token acá abajo.');
+  const btn = h('button', { class: 'btn btn-primary btn-sm', type: 'button' }, h('span', { class: 'conn-btn-ic', html: LOGO.cloudflare }), 'Conectar con Cloudflare');
+  btn.addEventListener('click', async () => {
+    if (!oauthReady) { note.hidden = false; adv.open = true; form.token.focus(); return; }
+    await goConnect(btn, 'cloudflare', 'Cloudflare', wrapCard);
+  });
+  const wrapCard = card('cloudflare', 'Cloudflare', 'Workers y sitios: ver y publicar.',
+    h('ul', { class: 'conn-points' }, h('li', {}, 'Tocás «Conectar», iniciás sesión en Cloudflare, aprobás el acceso y volvés acá ya conectado.'), h('li', {}, 'Podés desconectarlo cuando quieras.')),
+    h('div', { class: 'conn-actions' }, btn), note, adv);
+  return wrapCard;
+}
+
+/* ---------- LinkedIn y Google (OAuth por redirección) ---------- */
+const OAUTH_CARDS = ['linkedin', 'google', 'gcalendar', 'gdrive'];
+const OAUTH_BLURB = {
+  linkedin: 'Tu perfil: datos básicos y publicaciones con tu aprobación.',
+  google: 'Tu correo: resumir lo nuevo, preparar borradores y enviar.',
+  gcalendar: 'Tu agenda: ver lo que viene y crear eventos con tu aprobación.',
+  gdrive: 'Tus documentos: guardar informes en tu Drive y volver a leerlos.'
+};
+const GOOGLE_LOGO = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M22.6 12.3c0-.8-.1-1.5-.2-2.2H12v4.2h5.9a5 5 0 0 1-2.2 3.3v2.7h3.6c2.1-1.9 3.3-4.8 3.3-8z"/><path fill="#34A853" d="M12 23c3 0 5.5-1 7.3-2.7l-3.6-2.7c-1 .7-2.2 1.1-3.7 1.1-2.9 0-5.3-1.9-6.2-4.5H2.1v2.8A11 11 0 0 0 12 23z"/><path fill="#FBBC05" d="M5.8 14.2a6.6 6.6 0 0 1 0-4.3V7.1H2.1a11 11 0 0 0 0 9.9z"/><path fill="#EA4335" d="M12 5.4c1.6 0 3.1.6 4.2 1.7l3.2-3.2A11 11 0 0 0 2.1 7.1l3.7 2.8C6.7 7.3 9.1 5.4 12 5.4z"/></svg>';
+for (const id of ['google', 'gcalendar', 'gdrive']) LOGO[id] = GOOGLE_LOGO;
+
+/** «Conectar»: un toque → pantalla de permiso del proveedor en esta pestaña → vuelve al Centro de control conectado. */
+async function goConnect(btn, provider, label, where) {
+  const prev = btn.innerHTML;
+  btn.disabled = true; btn.setAttribute('aria-busy', 'true');
+  btn.textContent = `Abriendo ${label}…`;
+  clearErr(where);
+  try {
+    const r = await startConnect(provider, { from: 'hub' });
+    if (r && r.mode === 'redirect') return;
+    if (r && r.mode === 'device' && r.userCode) { toast(`Abrí ${r.verificationUri} y escribí el código ${r.userCode}`, '', 15000); window.open(r.verificationUri, '_blank', 'noopener'); }
+  } catch (e) { fail(e, where); }
+  btn.disabled = false; btn.removeAttribute('aria-busy'); btn.innerHTML = prev;
+}
+
+function oauthCard(chat, p, redraw) {
+  const desc = OAUTH_BLURB[p.id] || '';
+  if (p.status === 'connected' || p.status === 'expired') {
+    const conn = p.connection || {};
+    const acts = h('div', { class: 'conn-actions' });
+    let c;
+    if (p.status === 'expired') { const rb = h('button', { class: 'btn btn-primary btn-sm', type: 'button', onclick: () => goConnect(rb, p.id, p.label, c) }, 'Reconectar'); acts.append(rb); }
+    acts.append(h('button', { class: 'btn btn-sm btn-danger-ghost', type: 'button', onclick: async () => {
+      if (!(await confirmDialog({ title: `Desconectar ${p.label}`, text: `Se borra el acceso guardado y se revoca el permiso en ${p.label}. Podés volver a conectarla cuando quieras.`, ok: 'Desconectar', danger: true }))) return;
+      try { await api(chat, `/api/connectors/${p.id}/disconnect`, { method: 'POST', body: {} }); toast(`${p.label} desconectada`); redraw(); } catch (e) { fail(e, c); }
+    } }, 'Desconectar'));
+    c = card(p.id, p.label, desc, who({ ...conn, login: conn.login || conn.name || '' }, p.status === 'expired' ? 'El permiso venció' : 'Conectado como'), acts);
+    return c;
+  }
+  if (p.status === 'not_configured') {
+    return card(p.id, p.label, desc, h('p', { class: 'muted small conn-note' }, h('span', { class: 'conn-inline-ic', html: icon('info') }), `La conexión con ${p.label} todavía no está habilitada en AgentiCuántico.`));
+  }
+  const btn = h('button', { class: 'btn btn-primary btn-sm', type: 'button' }, h('span', { class: 'conn-btn-ic', html: LOGO[p.id] || '' }), `Conectar con ${p.label}`);
+  let c;
+  btn.addEventListener('click', () => goConnect(btn, p.id, p.label, c));
+  c = card(p.id, p.label, desc,
+    h('ul', { class: 'conn-points' }, h('li', {}, `Iniciás sesión en ${p.label}, aprobás el acceso y volvés acá ya conectado.`), h('li', {}, 'Todo lo que publica o envía te pide «Confirmar» antes.')),
+    h('div', { class: 'conn-actions' }, btn));
+  return c;
 }
 
 async function workersDialog(chat) {

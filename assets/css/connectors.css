@@ -54,3 +54,41 @@ a.conn-row:hover { border-color: color-mix(in srgb, var(--ink) 25%, var(--line))
   .conn-card { padding: 16px; border-radius: 16px; }
   .conn-actions .btn { flex: 1 1 auto; justify-content: center; }
 }
+/* v1.1.0 · Centro de control: íconos con tamaño fijo (sin SVG gigantes), Cloudflare/LinkedIn por inicio de sesión, cuentas de la computadora del agente. */
+.conn-subtitle { display: flex; align-items: center; gap: 8px; }
+.conn-subtitle > span:first-child { display: inline-grid; place-items: center; width: 20px; height: 20px; flex: none; color: var(--ink-2); }
+.conn-subtitle svg { width: 20px; height: 20px; }
+.conn-logo.conn-linkedin svg { width: 26px; height: 26px; }
+.conn-note { display: flex; align-items: flex-start; gap: 8px; margin: 0; line-height: 1.45; }
+.conn-inline-ic { display: inline-grid; place-items: center; width: 18px; height: 18px; flex: none; margin-top: 1px; }
+.conn-inline-ic svg { width: 18px; height: 18px; }
+.conn-adv.conn-collapse { margin: 0; }
+.conn-adv.conn-collapse > summary { margin-bottom: 0; padding: 6px 0; min-height: 44px; display: flex; align-items: center; gap: 8px; list-style: none; }
+.conn-adv.conn-collapse > summary::-webkit-details-marker { display: none; }
+.conn-adv.conn-collapse > summary::before { content: ''; flex: none; width: 8px; height: 8px; margin: 0 4px 0 2px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(-45deg); transition: transform .15s ease; }
+.conn-adv.conn-collapse[open] > summary::before { transform: rotate(45deg); }
+.conn-adv.conn-collapse[open] > summary { margin-bottom: 12px; }
+.conn-return { margin: 0 0 12px; }
+/* Cuentas guardadas de la computadora del agente */
+.lg-sec { margin-top: 8px; }
+.lg-sec > p { margin: 0 0 12px; }
+.lg-list { display: grid; gap: 8px; }
+.lg-row { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 14px; background: #fff; min-width: 0; }
+.lg-ic { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 10px; background: var(--surface-2, #f7f6f2); flex: none; }
+.lg-ic svg { width: 18px; height: 18px; }
+.lg-who { flex: 1; min-width: 0; display: grid; }
+.lg-who strong, .lg-who small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lg-row .ace-ib { display: inline-grid; place-items: center; width: 40px; height: 40px; border: 0; border-radius: 10px; background: none; color: var(--ink-2); cursor: pointer; flex: none; }
+.lg-row .ace-ib:hover { background: var(--surface-3); }
+.lg-row .ace-ib svg { width: 18px; height: 18px; }
+.lg-empty { margin: 0; }
+.lg-form { display: grid; gap: 12px; padding: 16px; border: 1px solid var(--line); border-radius: 16px; background: #fff; margin-top: 4px; }
+.lg-grid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); }
+.lg-grid label { display: grid; gap: 6px; min-width: 0; }
+.lg-grid label > span { font-size: var(--fs-sm); font-weight: 600; color: var(--ink-2); }
+.lg-grid input { width: 100%; min-width: 0; min-height: 44px; padding: 10px 12px; font: inherit; font-size: 16px; color: var(--ink); background: #fff; border: 1px solid var(--line); border-radius: 12px; }
+.lg-grid input:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; border-color: var(--ink); }
+.lg-form .btn { justify-self: start; display: inline-flex; align-items: center; gap: 8px; }
+.lg-form .btn > span { display: inline-grid; place-items: center; width: 18px; height: 18px; }
+.lg-form .btn svg { width: 18px; height: 18px; }
+@media (max-width: 520px) { .lg-form .btn { justify-self: stretch; justify-content: center; } }

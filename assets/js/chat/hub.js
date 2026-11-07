@@ -85,7 +85,7 @@ function habilidades(pane, chat) {
 }
 
 function conectores(pane, chat) {
-  // GitHub y Cloudflare se conectan de verdad (por usuario); el resto queda en «Próximamente».
+  // GitHub, Cloudflare, LinkedIn y Google (Gmail, Calendar, Drive) se conectan de verdad (por usuario); el resto queda en «Próximamente».
   import('./connectors.js').then((mod) => mod.renderConnectors(pane, chat, (p) => { import('./logins.js').then((lg) => lg.renderLogins(p, chat)).catch(() => {}).finally(() => proximamente(p, chat)); })).catch(() => proximamente(pane, chat));
 }
 
@@ -93,7 +93,8 @@ function proximamente(pane, chat) {
   const ws = chat.store.ws;
   pane.append(h('h3', { class: 'conn-subtitle' }, 'Próximamente'));
   const list = h('div', { class: 'hub-list' });
-  for (const c of CONNECTORS.filter((x) => x.id !== 'github' && x.id !== 'cloudflare')) {
+  const REAL = ['github', 'cloudflare', 'gmail', 'gcal', 'gdrive', 'linkedin'];
+  for (const c of CONNECTORS.filter((x) => !REAL.includes(x.id))) {
     const want = (ws.connectorsWanted || []).includes(c.id);
     const b = h('button', { class: 'btn btn-sm' + (want ? '' : ' btn-ghost'), type: 'button', 'aria-pressed': String(want) }, want ? 'Te avisamos' : 'Avisarme');
     b.addEventListener('click', () => {
