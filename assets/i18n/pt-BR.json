@@ -2084,5 +2084,18 @@
 "Sitios web": "Sites",
 "Sin resultados para esa búsqueda": "Sem resultados para essa busca",
 "Elegí los roles del equipo": "Escolha as funções da equipe",
-"Equipo de agentes": "Equipe de agentes"
+"Equipo de agentes": "Equipe de agentes",
+"El código cambió en GitHub desde la propuesta. Pedime el arreglo de nuevo y lo rehago sobre la versión actual.": "O código mudou no GitHub desde a proposta. Peça a correção de novo e eu refaço sobre a versão atual.",
+"Ese archivo está protegido: el modo desarrollador no lo puede editar.": "Esse arquivo está protegido: o modo desenvolvedor não pode editá-lo.",
+"El cambio incluía algo que parece un secreto: no se abrió nada.": "A alteração incluía algo que parece um segredo: nada foi aberto.",
+"El cambio es demasiado grande para un PR automático. Pedilo en partes más chicas.": "A alteração é grande demais para um PR automático. Peça em partes menores.",
+"Esto solo lo puede hacer la cuenta dueña.": "Só a conta proprietária pode fazer isso.",
+"GitHub no dio permiso para esa acción. Revisá el acceso de la cuenta conectada al repo.": "O GitHub não permitiu essa ação. Verifique o acesso da conta conectada ao repositório.",
+"GitHub rechazó el cambio (por ejemplo, la rama ya existe). Pedilo de nuevo.": "O GitHub rejeitou a alteração (por exemplo, o branch já existe). Peça de novo.",
+"Revisando el código…": "Revisando o código…",
+"Frené el modo desarrollador un momento (límite de seguridad). Probá en unos minutos.": "Pausei o modo desenvolvedor por um momento (limite de segurança). Tente em alguns minutos.",
+"No pude revisar el código en este momento. Probá de nuevo.": "Não consegui revisar o código agora. Tente de novo.",
+"Pull Request abierto (sin merge ni deploy): ": "Pull Request aberto (sem merge nem deploy): ",
+"No se pudo abrir el Pull Request. No se cambió nada en GitHub.": "Não foi possível abrir o Pull Request. Nada mudou no GitHub.",
+"Cambios propuestos (diff)": "Alterações propostas (diff)"
 }

@@ -860,5 +860,18 @@
 "Lo que escribís va directo a la página: la IA no lo ve y no se guarda tu contraseña.": "Lo que escribes va directo a la página: la IA no lo ve y no se guarda tu contraseña.",
 "No pude abrir la computadora virtual. Probá de nuevo en un rato.": "No he podido abrir el ordenador virtual. Prueba de nuevo en un rato.",
 "Música y video": "Música y vídeo",
-"Elegí los roles del equipo": "Elige los roles del equipo"
+"Elegí los roles del equipo": "Elige los roles del equipo",
+"El código cambió en GitHub desde la propuesta. Pedime el arreglo de nuevo y lo rehago sobre la versión actual.": "El código cambió en GitHub desde la propuesta. Pídeme el arreglo de nuevo y lo rehago sobre la versión actual.",
+"Ese archivo está protegido: el modo desarrollador no lo puede editar.": "Ese archivo está protegido: el modo desarrollador no puede editarlo.",
+"El cambio incluía algo que parece un secreto: no se abrió nada.": "El cambio incluía algo que parece un secreto: no se abrió nada.",
+"El cambio es demasiado grande para un PR automático. Pedilo en partes más chicas.": "El cambio es demasiado grande para un PR automático. Pídelo en partes más pequeñas.",
+"Esto solo lo puede hacer la cuenta dueña.": "Esto solo puede hacerlo la cuenta propietaria.",
+"GitHub no dio permiso para esa acción. Revisá el acceso de la cuenta conectada al repo.": "GitHub no dio permiso para esa acción. Revisa el acceso de la cuenta conectada al repositorio.",
+"GitHub rechazó el cambio (por ejemplo, la rama ya existe). Pedilo de nuevo.": "GitHub rechazó el cambio (por ejemplo, la rama ya existe). Pídelo de nuevo.",
+"Revisando el código…": "Revisando el código…",
+"Frené el modo desarrollador un momento (límite de seguridad). Probá en unos minutos.": "He pausado el modo desarrollador un momento (límite de seguridad). Prueba en unos minutos.",
+"No pude revisar el código en este momento. Probá de nuevo.": "No he podido revisar el código ahora. Prueba de nuevo.",
+"Pull Request abierto (sin merge ni deploy): ": "Pull Request abierto (sin merge ni despliegue): ",
+"No se pudo abrir el Pull Request. No se cambió nada en GitHub.": "No se pudo abrir el Pull Request. No se cambió nada en GitHub.",
+"Cambios propuestos (diff)": "Cambios propuestos (diff)"
 }

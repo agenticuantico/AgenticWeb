@@ -18,7 +18,7 @@ import { speak, stop as stopSpeech } from './voice.js';
 import { VoiceRecorder, fmtClock } from './recorder.js';
 import { readFile, fmtSize } from './docs.js';
 // Rendimiento (Fase 3): la computadora del agente y la videollamada se cargan recién cuando se usan.
-import { needsWebAction, isFollowUp, routeWebIntent } from './intent.js';
+import { needsWebAction, isFollowUp, routeWebIntent, classifyServiceIntent } from './intent.js';
 import { detectMediaIntent, mediaMessage, mediaCard, isMediaMessage, runMedia as runMediaTask } from './media.js';
 import { cleanArtifact, cleanThought } from './clean.js';
 import { PreviewCard, LiveFrame, previewKind, previewHtml, isPreviewable } from './preview-card.js';
@@ -632,7 +632,12 @@ export class ChatApp {
     // (más rápidas y sin gastar minutos de navegador). Cualquier escritura pide «Confirmar» en una tarjeta.
     // Rápido/Profundo: «Buscá en la web: …», «averiguá…», «con fuentes» → búsqueda en vivo (no la computadora del agente).
     const route = detectMediaIntent(text) ? null : routeWebIntent(text, this.mode);
-    if (!detectMediaIntent(text) && this.toolsReady() && wantsTools(text) && !follow) msg._tools = true;
+    // Fase 6: el dueño que pide arreglar o mejorar el propio sistema → modo desarrollador (lee el código y propone un
+    // Pull Request con «Confirmar»). Nombrar LinkedIn/Gmail/GitHub en ese pedido no pide conectar nada.
+    const earlier = this.chat.messages.filter((m) => m.role === 'user' && m !== msg).slice(-6).map((m) => m.content || '');
+    const svc = classifyServiceIntent(text, earlier);
+    if (!detectMediaIntent(text) && svc.dev && this.devReady()) msg._dev = true;
+    else if (!detectMediaIntent(text) && this.toolsReady() && wantsTools(text, earlier) && !follow) msg._tools = true;
     else if (route === 'search' && !follow) msg._search = true;
     else if (!detectMediaIntent(text) && (route === 'browser' || follow)) {
       msg._browser = true;
@@ -730,6 +735,28 @@ export class ChatApp {
     this.send(text);
   }
 
+  /** Modo desarrollador: solo la cuenta dueña (el servidor lo vuelve a verificar en cada pedido). */
+  devReady() { return !!(this.toolsReady() && engine.state.caps.dev && this.profile && this.profile.owner); }
+
+  /** Modo desarrollador: diagnóstico + propuesta de Pull Request con diff y «Confirmar / Cancelar». */
+  async runDev(userMsg, ctrl) {
+    // Primero el servidor (que verifica que sea la cuenta dueña); si responde 403 sigue el chat normal.
+    const a = { id: uid('m'), role: 'assistant', content: '', at: Date.now() };
+    try {
+      const res = await engine.apiFetch('/api/dev/chat', { method: 'POST', signal: ctrl.signal, body: { messages: this.history().slice(-8), lang: this.lang.code } });
+      const j = await res.json().catch(() => ({}));
+      if (res.status === 403) return null;
+      if (res.ok) { a.content = j.reply || ''; a.tools = { steps: j.steps || [], actions: j.actions || [], needs: j.needs || [], dev: true, resumeText: userMsg.content, chatId: this.chat.id }; }
+      else a.content = res.status === 429 ? 'Frené el modo desarrollador un momento (límite de seguridad). Probá en unos minutos.' : 'No pude revisar el código en este momento. Probá de nuevo.';
+    } catch (e) {
+      if (e.name === 'AbortError') throw e;
+      a.content = 'No pude revisar el código en este momento. Probá de nuevo.';
+    }
+    this.pushMessage(a);
+    this.updateMessage(a, { now: true });
+    return a.content;
+  }
+
   /** El servidor tiene herramientas y hay una cuenta iniciada. */
   toolsReady() { return !!(engine.state.live && engine.state.caps && engine.state.caps.tools && engine.hasAccount()); }
 
@@ -757,6 +784,21 @@ export class ChatApp {
   async respond(userMsg, { voice }) {
     const media = userMsg && userMsg.role === 'user' ? detectMediaIntent(userMsg.content) : null;
     if (media) { await this.createMedia(media); return; }
+    if (userMsg && userMsg._dev && this.devReady()) {
+      const ctrl = new AbortController();
+      this.busy = { ctrl, label: 'Revisando el código…' };
+      this.updateStatus(); this.syncSend();
+      this.avatar && (this.avatar.pulse(1), this.avatar.setState('thinking'));
+      let done = true;
+      try {
+        done = (await this.runDev(userMsg, ctrl)) !== null;
+        if (done && this.chat.title === 'Nueva conversación') this.chat.title = (userMsg.content || '').replace(/\s+/g, ' ').slice(0, 60);
+        this.persist();
+      } catch (e) { if (e.name !== 'AbortError') this.addNotice('Algo falló al responder. Probá de nuevo.', 'warn'); }
+      this.finish();
+      if (done) return;
+      userMsg._dev = false; // no es la cuenta dueña: respuesta normal del chat
+    }
     if (userMsg && userMsg._tools && this.toolsReady()) {
       const ctrl = new AbortController();
       this.busy = { ctrl, label: 'Usando tus cuentas…' };

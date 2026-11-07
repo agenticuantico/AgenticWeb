@@ -2084,5 +2084,18 @@
 "Sitios web": "Websites",
 "Sin resultados para esa búsqueda": "No results for that search",
 "Elegí los roles del equipo": "Choose the team roles",
-"Equipo de agentes": "Agent team"
+"Equipo de agentes": "Agent team",
+"El código cambió en GitHub desde la propuesta. Pedime el arreglo de nuevo y lo rehago sobre la versión actual.": "The code changed on GitHub since the proposal. Ask me for the fix again and I will redo it on the current version.",
+"Ese archivo está protegido: el modo desarrollador no lo puede editar.": "That file is protected: developer mode cannot edit it.",
+"El cambio incluía algo que parece un secreto: no se abrió nada.": "The change included something that looks like a secret: nothing was opened.",
+"El cambio es demasiado grande para un PR automático. Pedilo en partes más chicas.": "The change is too big for an automatic PR. Ask for it in smaller parts.",
+"Esto solo lo puede hacer la cuenta dueña.": "Only the owner account can do this.",
+"GitHub no dio permiso para esa acción. Revisá el acceso de la cuenta conectada al repo.": "GitHub did not allow that action. Check the connected account's access to the repo.",
+"GitHub rechazó el cambio (por ejemplo, la rama ya existe). Pedilo de nuevo.": "GitHub rejected the change (for example, the branch already exists). Ask again.",
+"Revisando el código…": "Reviewing the code…",
+"Frené el modo desarrollador un momento (límite de seguridad). Probá en unos minutos.": "I paused developer mode for a moment (safety limit). Try again in a few minutes.",
+"No pude revisar el código en este momento. Probá de nuevo.": "I could not review the code right now. Try again.",
+"Pull Request abierto (sin merge ni deploy): ": "Pull Request opened (no merge, no deploy): ",
+"No se pudo abrir el Pull Request. No se cambió nada en GitHub.": "The Pull Request could not be opened. Nothing changed on GitHub.",
+"Cambios propuestos (diff)": "Proposed changes (diff)"
 }

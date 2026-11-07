@@ -83,7 +83,14 @@ const MSG = {
   invalid_recipient: 'Revisá el correo del destinatario.',
   action_expired: 'Esta acción venció (30 min). Pedila de nuevo en el chat.',
   action_already_decided: 'Esta acción ya se confirmó o se canceló.',
-  offer_not_found: 'Esa oferta ya no está en tu última búsqueda. Buscá de nuevo.'
+  offer_not_found: 'Esa oferta ya no está en tu última búsqueda. Buscá de nuevo.',
+  dev_base_changed: 'El código cambió en GitHub desde la propuesta. Pedime el arreglo de nuevo y lo rehago sobre la versión actual.',
+  dev_path_not_allowed: 'Ese archivo está protegido: el modo desarrollador no lo puede editar.',
+  dev_secret_detected: 'El cambio incluía algo que parece un secreto: no se abrió nada.',
+  dev_diff_too_large: 'El cambio es demasiado grande para un PR automático. Pedilo en partes más chicas.',
+  owner_only: 'Esto solo lo puede hacer la cuenta dueña.',
+  github_forbidden: 'GitHub no dio permiso para esa acción. Revisá el acceso de la cuenta conectada al repo.',
+  github_validation_failed: 'GitHub rechazó el cambio (por ejemplo, la rama ya existe). Pedilo de nuevo.'
 };
 export function errorText(e) {
   const code = e && e.code ? e.code : 'error';

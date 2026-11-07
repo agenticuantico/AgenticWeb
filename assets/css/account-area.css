@@ -227,6 +227,15 @@ dialog.acc-dialog::backdrop { background: rgba(15, 14, 20, .45); backdrop-filter
 .tc-fields dd { margin: 0; font-weight: 600; overflow-wrap: anywhere; }
 .tc-body { margin: 0; max-height: 220px; overflow: auto; padding: 10px 12px; border-radius: 12px; background: #f8f9fc; border: 1px solid var(--line); font: .84rem/1.5 var(--font); white-space: pre-wrap; overflow-wrap: anywhere; }
 .tc-state { margin: 0; font-size: .86rem; font-weight: 600; overflow-wrap: anywhere; }
+/* Fase 6 · diff del modo desarrollador (contraste AA sobre fondo claro; sin depender solo del color: +/− quedan visibles) */
+.tc-sum { white-space: pre-line; }
+.tc-diff { max-height: 320px; padding: 8px 0; font: .78rem/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: pre; overflow: auto; overflow-wrap: normal; background: #fbfbfd; }
+.tc-dl { display: block; padding: 0 12px; min-width: max-content; color: #27272a; }
+.tc-dl-a { background: #e6f6ea; color: #14532d; }
+.tc-dl-d { background: #fdeaea; color: #7f1d1d; }
+.tc-dl-h { color: #3f3f9e; background: #eef0fb; font-weight: 600; }
+.tc-dl-f { color: #52525b; font-weight: 600; }
+.tc-state a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
 .tc-state:empty { display: none; }
 
 /* Galería de conectores (Fase 1) */

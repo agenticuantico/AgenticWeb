@@ -54,17 +54,26 @@ export function confirmCard(action, { onDone } = {}) {
     h('div', { class: 'tc-confirm-h' }, h('span', { class: 'tc-lock', html: icon('shield') }), h('div', {}, h('strong', {}, pv.title || action.label), h('small', {}, 'Necesita tu confirmación'))),
     pv.summary ? h('p', { class: 'tc-sum' }, pv.summary) : null,
     pv.fields && pv.fields.length ? h('dl', { class: 'tc-fields' }, ...pv.fields.flatMap((f) => [h('dt', {}, f.label), h('dd', {}, f.value)])) : null,
-    pv.body ? h('pre', { class: 'tc-body', tabindex: '0', 'aria-label': 'Contenido' }, pv.body) : null,
+    pv.body ? (pv.kind === 'diff' ? diffView(pv.body) : h('pre', { class: 'tc-body', tabindex: '0', 'aria-label': 'Contenido' }, pv.body)) : null,
     acts, state);
-  const finish = (txt, tone) => { acts.remove(); state.textContent = txt; card.classList.add(tone); onDone && onDone(); };
-  if (action.status && action.status !== 'pending') finish(statusText(action), action.status === 'confirmed' ? 'done' : 'off');
+  const finish = (txt, tone, a) => {
+    acts.remove(); state.textContent = txt; card.classList.add(tone);
+    // Enlace real al resultado (p. ej. el Pull Request del modo desarrollador).
+    const url = a && a.result && (a.result.url || (a.result.commit && a.result.commit.url));
+    if (a && a.status === 'confirmed' && typeof url === 'string' && /^https:\/\/github\.com\//.test(url)) {
+      state.textContent = a.tool === 'dev_open_pr' ? 'Pull Request abierto (sin merge ni deploy): ' : 'Hecho: ';
+      state.append(h('a', { href: url, target: '_blank', rel: 'noopener noreferrer' }, a.tool === 'dev_open_pr' && a.result.number ? `PR #${a.result.number}` : url));
+    }
+    onDone && onDone();
+  };
+  if (action.status && action.status !== 'pending') finish(statusText(action), action.status === 'confirmed' ? 'done' : 'off', action);
   async function decide(decision) {
     ok.disabled = no.disabled = true;
     state.textContent = decision === 'confirm' ? 'Haciéndolo…' : 'Cancelando…';
     try {
       const r = await call(`/api/tools/actions/${action.id}`, { method: 'POST', body: { decision } });
       action.status = r.action.status; action.result = r.action.result;
-      finish(statusText(r.action), r.action.status === 'confirmed' ? 'done' : 'off');
+      finish(statusText(r.action), r.action.status === 'confirmed' ? 'done' : 'off', r.action);
       if (r.action.status === 'confirmed') toast('Listo.', 'ok');
     } catch (e) {
       if (e.code === 'action_already_decided' || e.code === 'action_expired') { action.status = e.code === 'action_expired' ? 'expired' : 'decided'; finish(errorText(e), 'off'); return; }
@@ -76,12 +85,23 @@ export function confirmCard(action, { onDone } = {}) {
   return card;
 }
 
+/** Diff unificado con colores (+ verde, − rojo, @@ en gris); el texto sigue siendo seleccionable y copiable. */
+export function diffView(text) {
+  const pre = h('pre', { class: 'tc-body tc-diff', tabindex: '0', 'aria-label': 'Cambios propuestos (diff)' });
+  for (const line of String(text).split('\n')) {
+    const cls = line.startsWith('+++') || line.startsWith('---') ? 'f' : line.startsWith('@@') ? 'h' : line.startsWith('+') ? 'a' : line.startsWith('-') ? 'd' : '';
+    pre.append(h('span', { class: cls ? `tc-dl tc-dl-${cls}` : 'tc-dl' }, line + '\n'));
+  }
+  return pre;
+}
+
 function statusText(a) {
   if (a.status === 'confirmed') {
     const r = a.result || {};
     const url = r.url || (r.commit && r.commit.url);
     return url ? `Hecho. ${url}` : 'Hecho.';
   }
+  if (a.status === 'failed' && a.tool === 'dev_open_pr') return 'No se pudo abrir el Pull Request. No se cambió nada en GitHub.';
   return ({ cancelled: 'Cancelado: no se hizo nada.', expired: 'Venció sin confirmar: no se hizo nada.', failed: 'No se pudo completar. No se envió ni publicó nada.', decided: 'Ya se decidió antes.' })[a.status] || '';
 }
 
@@ -158,7 +178,7 @@ export function draftsCard(r) {
 const blocks = new WeakMap();
 /** Las tarjetas también pueden aparecer en el chat de la portada: se carga la hoja de estilos si falta. */
 function ensureCss() {
-  if (!document.querySelector('link[href*="account-area.css"]')) document.head.append(h('link', { rel: 'stylesheet', href: '/assets/css/account-area.css?v=1.0.0', 'data-acc-css': '' }));
+  if (!document.querySelector('link[href*="account-area.css"]')) document.head.append(h('link', { rel: 'stylesheet', href: '/assets/css/account-area.css?v=1.4.0', 'data-acc-css': '' }));
 }
 /** Un solo nodo por mensaje (se conserva entre redibujos del chat). */
 export function toolBlock(m) {
@@ -178,9 +198,5 @@ export function toolBlock(m) {
   return el;
 }
 
-/** ¿El pedido es para las herramientas con cuentas (correo, GitHub, Cloudflare, LinkedIn, empleo)? */
-export function wantsTools(text) {
-  // Las direcciones web no cuentan («…workers.dev/…» no es un pedido sobre Cloudflare Workers).
-  const t = String(text || '').replace(/\bhttps?:\/\/\S+/gi, ' ');
-  return /(\bgmail\b|\b(mis|mi|los|el) (e-?mails?|mails?|correos?)\b|\binbox\b|mis correos|mi correo|mail(s)? nuevos|bandeja|borrador de correo|mand[aá](le|me)? (un|el) (correo|mail)|\bgithub\b|\brepo(s|sitorio)?s?\b|\bissue\b|\bcommit\b|\bcloudflare\b|\bworkers?\b|\blinkedin\b|\bgoogle calendar\b|\bcalendario\b|\bmi agenda\b|\bagend[aá](me|r)\b|\bmi drive\b|\bgoogle drive\b|guard[aá]\S* en (mi )?drive|public[aá] en|(busc|encontr)\S*\s[^.?!]{0,40}(trabajo|empleo|ofertas?|vacantes?|laburo)|ofertas? de (trabajo|empleo)|\bpostul)/i.test(t);
-}
+/** ¿El pedido es para las herramientas con cuentas o de empleo? (vive en intent.js, sin DOM, para poder probarla). */
+export { wantsTools } from './intent.js';
