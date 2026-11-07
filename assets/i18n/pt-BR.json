@@ -1972,5 +1972,16 @@
 "Abriendo LinkedIn…": "Abrindo o LinkedIn…",
 "Abriendo Cloudflare…": "Abrindo a Cloudflare…",
 "Cloudflare conectada.": "Cloudflare conectada.",
-"LinkedIn conectada.": "LinkedIn conectado."
+"LinkedIn conectada.": "LinkedIn conectado.",
+"Tu sesión venció. Ingresá de nuevo.": "Sua sessão expirou. Entre novamente.",
+"Tu sesión venció. Ingresá de nuevo para ver y conectar tus cuentas.": "Sua sessão expirou. Entre novamente para ver e conectar suas contas.",
+"Ingresá a tu cuenta para conectar GitHub, Cloudflare, LinkedIn, Gmail y Google Drive. Cada persona conecta sus propias cuentas.": "Entre na sua conta para conectar GitHub, Cloudflare, LinkedIn, Gmail e Google Drive. Cada pessoa conecta as próprias contas.",
+"Ingresar de nuevo": "Entrar novamente",
+"Ingresá a tu cuenta para conectar tus cuentas.": "Entre na sua conta para conectar suas contas.",
+"La conexión con GitHub todavía no está habilitada en AgentiCuántico.": "A conexão com o GitHub ainda não está ativada no AgentiCuántico.",
+"Iniciás sesión en GitHub, autorizás el acceso y volvés acá ya conectado.": "Você entra no GitHub, autoriza o acesso e volta aqui já conectado.",
+"Tu sesión venció. Ingresá de nuevo para ver tus cuentas guardadas.": "Sua sessão expirou. Entre novamente para ver suas contas salvas.",
+"El servidor no responde en este momento.": "O servidor não está respondendo agora.",
+"No hay conexión a internet.": "Sem conexão com a internet.",
+"Tu sesión venció. Ingresá de nuevo para conectar tus cuentas.": "Sua sessão expirou. Entre novamente para conectar suas contas."
 }

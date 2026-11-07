@@ -92,3 +92,15 @@ a.conn-row:hover { border-color: color-mix(in srgb, var(--ink) 25%, var(--line))
 .lg-form .btn > span { display: inline-grid; place-items: center; width: 18px; height: 18px; }
 .lg-form .btn svg { width: 18px; height: 18px; }
 @media (max-width: 520px) { .lg-form .btn { justify-self: stretch; justify-content: center; } }
+/* 1.2.0 · avisos de estado del panel (sin cuenta / sesión vencida / sin servidor / sin internet) con su botón */
+.conn-state-box { grid-column: 1 / -1; align-items: flex-start; }
+.conn-state-box > span { display: inline-grid; place-items: center; width: 20px; height: 20px; flex: 0 0 20px; margin-top: 2px; }
+.conn-state-box > span svg { width: 20px; height: 20px; }
+.conn-state-box .conn-state-body { display: grid; gap: 10px; min-width: 0; }
+.conn-state-box .conn-state-body p { margin: 0; }
+.conn-state-box .conn-actions { margin: 0; }
+.conn-state-box[data-state="login"] { background: var(--surface-2); }
+.lg-list > [data-state] + .btn { margin-top: 8px; }
+/* 1.2.0 · botones largos («Conectar con Google Calendar») ya no ensanchan la tarjeta en 390 px */
+.conn-card { grid-template-columns: minmax(0, 1fr); }
+.conn-actions .btn { max-width: 100%; min-width: 0; white-space: normal; text-align: center; }

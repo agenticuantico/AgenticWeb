@@ -6,7 +6,8 @@
  * Toda acción que crea, modifica o publica algo pide confirmación con una vista previa del servidor.
  */
 import { h, icon, toast, modal, confirmDialog, uid } from '../ui.js';
-import { state as engineState, init as engineInit } from './engine.js';
+import { state as engineState, ensureLive } from './engine.js';
+import { CONFIG } from '../config.js';
 import { getSiteLang } from '../i18n.js';
 import { startConnect } from '../account/oauth-connect.js';
 
@@ -28,7 +29,7 @@ function T(k, vars = {}) {
   return s.replace(/\{(\w+)\}/g, (_, n) => String(vars[n] ?? ''));
 }
 
-const CSS = '/assets/css/connectors.css?v=1.1.0';
+const CSS = '/assets/css/connectors.css?v=1.2.0';
 function ensureCss() {
   if (document.querySelector('link[data-conn-css]')) return;
   document.head.append(h('link', { rel: 'stylesheet', href: CSS, 'data-conn-css': '' }));
@@ -77,20 +78,53 @@ const ERR = {
   gdrive_not_configured: 'La conexión con Google Drive todavía no está habilitada.',
   invalid_return: 'No se pudo preparar la vuelta a AgentiCuántico. Recargá la página y probá de nuevo.',
   offline: 'El servidor no responde en este momento. Probá de nuevo en un rato.',
+  session_expired: 'Tu sesión venció. Ingresá de nuevo para ver y conectar tus cuentas.',
   network: 'No hay conexión. Revisá internet y probá de nuevo.'
 };
 const errText = (code) => ERR[code] || 'No se pudo completar la acción. Probá de nuevo en unos minutos.';
 
+/** Aviso de estado del panel: data-state = login | offline | network | error (para estilos y pruebas). */
+function stateBox(kind, text, action) {
+  return h('div', { class: 'alert ' + (kind === 'login' ? 'info' : 'warn') + ' conn-state-box', 'data-state': kind, role: kind === 'login' ? 'status' : 'alert' },
+    h('span', { html: icon(kind === 'login' ? 'user' : 'info') }),
+    h('div', { class: 'conn-state-body' }, h('p', {}, text), action ? h('div', { class: 'conn-actions' }, action) : null));
+}
+/* Conectores que se muestran sin cuenta (cada uno con «Ingresar para conectar»). */
+const LOGGED_OUT = [
+  ['github', 'GitHub', 'Repositorios: ver, crear y subir archivos.'],
+  ['cloudflare', 'Cloudflare', 'Workers y sitios: ver y publicar.'],
+  ['linkedin', 'LinkedIn', 'Tu perfil: datos básicos y publicaciones con tu aprobación.'],
+  ['google', 'Gmail', 'Tu correo: resumir lo nuevo, preparar borradores y enviar.'],
+  ['gdrive', 'Google Drive', 'Tus documentos: guardar informes en tu Drive y volver a leerlos.'],
+  ['gcalendar', 'Google Calendar', 'Tu agenda: ver lo que viene y crear eventos con tu aprobación.']
+];
+
 class ApiError extends Error { constructor(status, code, body) { super(code); this.status = status; this.code = code; this.body = body; } }
 
+/**
+ * Llamada autenticada. Distingue: sin cuenta (login_required), servidor caído (offline), sin internet (network),
+ * sesión vencida (session_expired: 401 aun después de renovar el token de la cuenta) y errores propios del conector.
+ */
 async function api(chat, path, { method = 'GET', body } = {}) {
-  await engineInit();
-  if (!engineState.base) throw new ApiError(0, 'offline');
   if (!chat.user) throw new ApiError(401, 'login_required');
-  const token = await chat.user.getIdToken();
-  const r = await fetch(engineState.base + path, { method, headers: { Authorization: 'Bearer ' + token, ...(body ? { 'Content-Type': 'application/json' } : {}) }, body: body ? JSON.stringify(body) : undefined, cache: 'no-store' });
+  await ensureLive();
+  const base = engineState.base || String(CONFIG.API_BASE || '').replace(/\/+$/, '');
+  if (!base) throw new ApiError(0, 'offline');
+  const send = async (force) => {
+    let token;
+    try { token = await chat.user.getIdToken(force); } catch { throw new ApiError(401, 'session_expired'); }
+    try {
+      return await fetch(base + path, { method, headers: { Authorization: 'Bearer ' + token, ...(body ? { 'Content-Type': 'application/json' } : {}) }, body: body ? JSON.stringify(body) : undefined, cache: 'no-store' });
+    } catch {
+      throw new ApiError(0, typeof navigator !== 'undefined' && navigator.onLine === false ? 'network' : 'offline');
+    }
+  };
+  let r = await send(false);
+  // 401 con cuenta iniciada = token de la cuenta vencido: se renueva una vez antes de pedir que ingrese de nuevo.
+  if (r.status === 401) r = await send(true);
   const j = await r.json().catch(() => ({}));
-  if (!r.ok) throw new ApiError(r.status, j.error || 'error', j);
+  if (r.status === 401) throw new ApiError(401, 'session_expired', j);
+  if (!r.ok) throw new ApiError(r.status, j.error || (r.status >= 500 ? 'offline' : 'error'), j);
   return j;
 }
 
@@ -133,17 +167,29 @@ export async function renderConnectors(pane, chat, others) {
   pane.append(box);
   const draw = async () => {
     box.innerHTML = '';
-    await engineInit();
-    if (!engineState.live) { box.append(h('div', { class: 'alert warn' }, h('span', { html: icon('info') }), h('div', {}, 'El servidor no está disponible en este momento. Probá de nuevo en unos minutos.'))); return; }
+    // 1) Sin cuenta: no hace falta el servidor para mostrar los conectores; cada uno pide ingresar.
     if (!chat.user) {
-      box.append(card('github', 'GitHub', 'Repositorios: ver, crear y subir archivos.', h('div', { class: 'conn-actions' }, h('button', { class: 'btn btn-primary btn-sm', type: 'button', onclick: () => chat.loginPrompt('Ingresá a tu cuenta para conectar GitHub y Cloudflare.') }, 'Ingresar para conectar'))));
-      box.append(card('cloudflare', 'Cloudflare', 'Workers y sitios: ver y publicar.', h('div', { class: 'conn-actions' }, h('button', { class: 'btn btn-sm', type: 'button', onclick: () => chat.loginPrompt('Ingresá a tu cuenta para conectar GitHub y Cloudflare.') }, 'Ingresar para conectar'))));
-      box.append(card('linkedin', 'LinkedIn', OAUTH_BLURB.linkedin, h('div', { class: 'conn-actions' }, h('button', { class: 'btn btn-sm', type: 'button', onclick: () => chat.loginPrompt('Ingresá a tu cuenta para conectar LinkedIn.') }, 'Ingresar para conectar'))));
+      box.append(stateBox('login', 'Ingresá a tu cuenta para conectar GitHub, Cloudflare, LinkedIn, Gmail y Google Drive. Cada persona conecta sus propias cuentas.', h('button', { class: 'btn btn-primary btn-sm', type: 'button', onclick: () => chat.loginPrompt('Ingresá a tu cuenta para conectar tus cuentas.') }, 'Ingresar')));
+      for (const [id, title, desc] of LOGGED_OUT) {
+        box.append(card(id, title, desc, h('div', { class: 'conn-actions' }, h('button', { class: 'btn btn-sm', type: 'button', onclick: () => chat.loginPrompt(`Ingresá a tu cuenta para conectar ${title}.`) }, 'Ingresar para conectar'))));
+      }
       return;
     }
-    box.append(h('div', { class: 'conn-card skeleton-card' }, h('div', { class: 'skeleton', style: 'height:18px;width:40%' }), h('div', { class: 'skeleton', style: 'height:14px;width:70%;margin-top:10px' })));
+    box.append(h('div', { class: 'conn-card skeleton-card', 'aria-busy': 'true' }, h('div', { class: 'skeleton', style: 'height:18px;width:40%' }), h('div', { class: 'skeleton', style: 'height:14px;width:70%;margin-top:10px' })));
     let st;
-    try { st = await api(chat, '/api/connectors'); } catch (e) { box.innerHTML = ''; box.append(h('div', { class: 'alert warn' }, h('span', { html: icon('info') }), h('div', {}, errText(e.code)))); return; }
+    try { st = await api(chat, '/api/connectors'); } catch (e) {
+      box.innerHTML = '';
+      const code = e && e.code;
+      // 2) Sesión vencida: botón para ingresar de nuevo (no es un problema del servidor).
+      if (code === 'session_expired' || code === 'login_required') {
+        box.append(stateBox('login', errText('session_expired'), h('button', { class: 'btn btn-primary btn-sm', type: 'button', onclick: () => chat.loginPrompt('Tu sesión venció. Ingresá de nuevo para conectar tus cuentas.') }, 'Ingresar de nuevo')));
+        return;
+      }
+      // 3) Sin internet o servidor caído de verdad (ya se reintentó): explicar y ofrecer reintentar.
+      const retry = h('button', { class: 'btn btn-sm', type: 'button', onclick: () => draw() }, 'Reintentar');
+      box.append(stateBox(code === 'network' ? 'network' : code === 'offline' ? 'offline' : 'error', errText(code), retry));
+      return;
+    }
     box.innerHTML = '';
     box.append(githubCard(chat, st, draw), cloudflareCard(chat, st, draw));
     for (const id of OAUTH_CARDS) { const p = (st.providers || []).find((x) => x.id === id); if (p) box.append(oauthCard(chat, p, draw)); }
@@ -180,18 +226,26 @@ function githubCard(chat, st, redraw) {
           try { await api(chat, '/api/connectors/github/disconnect', { method: 'POST', body: {} }); toast('GitHub desconectado'); redraw(); } catch (e) { fail(e); }
         } }, 'Desconectar')));
   }
-  const btn = h('button', { class: 'btn btn-primary btn-sm', type: 'button', disabled: avail ? null : true }, h('span', { class: 'conn-btn-ic', html: LOGO.github }), 'Conectar con GitHub');
+  if (!avail) {
+    return card('github', 'GitHub', 'Repositorios: ver, crear y subir archivos.', h('p', { class: 'muted small conn-note' }, h('span', { class: 'conn-inline-ic', html: icon('info') }), 'La conexión con GitHub todavía no está habilitada en AgentiCuántico.'));
+  }
+  const btn = h('button', { class: 'btn btn-primary btn-sm', type: 'button' }, h('span', { class: 'conn-btn-ic', html: LOGO.github }), 'Conectar con GitHub');
+  let cardEl;
   btn.addEventListener('click', async () => {
-    btn.disabled = true;
+    btn.disabled = true; btn.setAttribute('aria-busy', 'true'); clearErr(cardEl);
     try {
-      const r = await api(chat, '/api/connectors/github/start', { method: 'POST', body: {} });
-      if (r.mode === 'web') { location.href = r.url; return; }
-      deviceDialog(chat, r, redraw);
-    } catch (e) { fail(e); } finally { btn.disabled = false; }
+      // Misma vuelta que los demás conectores: /app/ y de nuevo al Centro de control con el aviso.
+      const r = await startConnect('github', { from: 'hub' });
+      if (r && r.mode === 'redirect') return;
+      if (r && r.mode === 'web' && r.url) { location.assign(r.url); return; }
+      if (r && r.userCode) deviceDialog(chat, r, redraw);
+    } catch (e) { fail(e, cardEl); }
+    btn.disabled = false; btn.removeAttribute('aria-busy');
   });
-  return card('github', 'GitHub', 'Repositorios: ver, crear y subir archivos.',
-    h('ul', { class: 'conn-points' }, h('li', {}, 'Iniciás sesión en GitHub y autorizás el acceso.'), h('li', {}, 'Podés desconectarlo cuando quieras.')),
-    h('div', { class: 'conn-actions' }, btn, avail ? null : h('span', { class: 'chip warn' }, 'Disponible pronto')));
+  cardEl = card('github', 'GitHub', 'Repositorios: ver, crear y subir archivos.',
+    h('ul', { class: 'conn-points' }, h('li', {}, 'Iniciás sesión en GitHub, autorizás el acceso y volvés acá ya conectado.'), h('li', {}, 'Podés desconectarlo cuando quieras.')),
+    h('div', { class: 'conn-actions' }, btn));
+  return cardEl;
 }
 
 function deviceDialog(chat, r, redraw) {

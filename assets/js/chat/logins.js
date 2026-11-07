@@ -5,19 +5,29 @@
  * devuelven las contraseñas ni las ve el agente.
  */
 import { h, icon, toast, confirmDialog } from '../ui.js';
-import { state as engineState, init as engineInit } from './engine.js';
+import { state as engineState, ensureLive } from './engine.js';
+import { CONFIG } from '../config.js';
 
 async function api(chat, path, body) {
-  await engineInit();
-  if (!engineState.base || !chat.user) { const e = new Error('login_required'); e.code = 'login_required'; throw e; }
-  const t = await chat.user.getIdToken();
-  const r = await fetch(engineState.base + path, { method: body ? 'POST' : 'GET', headers: { Authorization: 'Bearer ' + t, ...(body ? { 'Content-Type': 'application/json' } : {}) }, body: body ? JSON.stringify(body) : undefined, cache: 'no-store' });
+  if (!chat.user) throw Object.assign(new Error('login_required'), { code: 'login_required' });
+  await ensureLive();
+  const base = engineState.base || String(CONFIG.API_BASE || '').replace(/\/+$/, '');
+  const send = async (force) => {
+    let t;
+    try { t = await chat.user.getIdToken(force); } catch { throw Object.assign(new Error('session_expired'), { code: 'session_expired' }); }
+    try { return await fetch(base + path, { method: body ? 'POST' : 'GET', headers: { Authorization: 'Bearer ' + t, ...(body ? { 'Content-Type': 'application/json' } : {}) }, body: body ? JSON.stringify(body) : undefined, cache: 'no-store' }); } catch {
+      throw Object.assign(new Error('offline'), { code: navigator.onLine === false ? 'network' : 'offline' });
+    }
+  };
+  let r = await send(false);
+  if (r.status === 401) r = await send(true);
   const j = await r.json().catch(() => ({}));
-  if (!r.ok) { const e = new Error(j.error || 'error'); e.code = j.error; throw e; }
+  if (r.status === 401) throw Object.assign(new Error('session_expired'), { code: 'session_expired' });
+  if (!r.ok) { const e = new Error(j.error || 'error'); e.code = j.error || (r.status >= 500 ? 'offline' : 'error'); throw e; }
   return j;
 }
 
-const ERR = { vault_unavailable: 'La bóveda de cuentas no está disponible en este momento.', invalid_host: 'Escribí un sitio válido, por ejemplo mercadolibre.com.ar.', invalid_credentials: 'Completá el usuario y la contraseña.', login_required: 'Ingresá a tu cuenta para guardar cuentas.' };
+const ERR = { vault_unavailable: 'La bóveda de cuentas no está disponible en este momento.', invalid_host: 'Escribí un sitio válido, por ejemplo mercadolibre.com.ar.', invalid_credentials: 'Completá el usuario y la contraseña.', login_required: 'Ingresá a tu cuenta para guardar cuentas.', session_expired: 'Tu sesión venció. Ingresá de nuevo para ver tus cuentas guardadas.', offline: 'El servidor no responde en este momento.', network: 'No hay conexión a internet.' };
 
 export async function renderLogins(pane, chat) {
   const sec = h('section', { class: 'lg-sec' },
@@ -30,7 +40,13 @@ export async function renderLogins(pane, chat) {
     list.replaceChildren(h('div', { class: 'skeleton', style: 'height:44px;border-radius:12px' }));
     if (!chat.user) { list.replaceChildren(h('button', { class: 'btn btn-sm', type: 'button', onclick: () => chat.loginPrompt('Ingresá para guardar tus cuentas.') }, 'Ingresar')); return; }
     let st;
-    try { st = await api(chat, '/api/agent/logins'); } catch (e) { list.replaceChildren(h('p', { class: 'muted small' }, ERR[e.code] || 'No pude cargar tus cuentas.')); return; }
+    try { st = await api(chat, '/api/agent/logins'); } catch (e) {
+      const again = e.code === 'session_expired'
+        ? h('button', { class: 'btn btn-sm', type: 'button', onclick: () => chat.loginPrompt('Tu sesión venció. Ingresá de nuevo.') }, 'Ingresar de nuevo')
+        : h('button', { class: 'btn btn-sm', type: 'button', onclick: () => draw() }, 'Reintentar');
+      list.replaceChildren(h('p', { class: 'muted small', 'data-state': e.code || 'error' }, ERR[e.code] || 'No pude cargar tus cuentas.'), again);
+      return;
+    }
     const rows = (st.logins || []).map((l) => h('div', { class: 'lg-row' },
       h('span', { class: 'lg-ic', html: icon('globe') }),
       h('div', { class: 'lg-who' }, h('strong', { 'data-no-i18n': '' }, l.host), h('small', { class: 'muted', 'data-no-i18n': '' }, l.label)),
