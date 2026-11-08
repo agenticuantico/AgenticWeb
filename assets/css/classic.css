@@ -385,3 +385,7 @@ html { background: #EDEEF5; }
   .site-header .nav .nav-contact-btn span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   .site-header .nav .nav-link { padding: 8px 7px; }
 }
+
+/* Etiqueta visible para imágenes hechas con IA (antislop 2026-11-08) */
+.ai-made-label { position: absolute; top: 14px; right: 14px; z-index: 3; padding: 4px 10px; border-radius: 999px; background: rgba(24,24,27,.72); color: #fff; font-size: 11px; font-weight: 600; letter-spacing: .02em; line-height: 1.4; pointer-events: none; }
+.flag-example { margin: 0 0 10px; font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #52525b; }
