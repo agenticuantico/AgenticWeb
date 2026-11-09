@@ -18,7 +18,8 @@ import { speak, stop as stopSpeech } from './voice.js';
 import { VoiceRecorder, fmtClock } from './recorder.js';
 import { readFile, fmtSize } from './docs.js';
 // Rendimiento (Fase 3): la computadora del agente y la videollamada se cargan recién cuando se usan.
-import { needsWebAction, isFollowUp, routeWebIntent } from './intent.js';
+import { needsWebAction, isFollowUp } from './intent.js';
+import { decideRoute, OVERRIDES, ROUTE_LABEL } from './router.js';
 import { detectMediaIntent, mediaMessage, mediaCard, isMediaMessage, runMedia as runMediaTask } from './media.js';
 import { cleanArtifact, cleanThought } from './clean.js';
 import { PreviewCard, LiveFrame, previewKind, previewHtml, isPreviewable } from './preview-card.js';
@@ -62,7 +63,11 @@ export class ChatApp {
     this.profile = null;
     this.lang = startLang(prefs.get('ac.lang', null));
     document.addEventListener('site:lang', (e) => { const id = e.detail && e.detail.id; if (id && id !== this.lang.id) { this.lang = getLang(id); prefs.set('ac.lang', id); if (this.$) this.renderLang(); } });
+    /* Un solo chat: cada mensaje decide cómo responder (router.js). this.mode es el modo del turno en curso.
+       El ajuste manual (Ajustes de respuesta) está apagado por defecto: 'smart'. */
     this.mode = 'fast';
+    this.override = OVERRIDES[prefs.get('ac.modeOverride', 'smart')] ? prefs.get('ac.modeOverride', 'smart') : 'smart';
+    this.forceNext = null;
     this.chat = this.newChatObject();
     this.busy = null;
     this.pendingFiles = [];
@@ -143,7 +148,7 @@ export class ChatApp {
             <div class="ace-left" data-popover-host>
               <button class="ace-ib round ace-plus" type="button" data-act="plus" aria-haspopup="menu" aria-expanded="false" aria-label="Cámara, archivos, agentes y conectores">${icon('plus')}</button>
               <button class="ace-ib round ace-web" type="button" data-act="websearch" aria-pressed="false" aria-label="Buscar en la web" title="Buscar en la web">${icon('globe')}</button>
-              <div class="ace-modes" data-role="modeStrip" role="radiogroup" aria-label="Modo de respuesta">${Object.entries(MODES).map(([id, m]) => `<button class="mode-chip" type="button" role="radio" aria-checked="false" data-act="setmode" data-mode="${id}" title="${m.desc}">${icon(m.icon)}<span>${m.short}</span></button>`).join('')}</div>
+              <button class="ace-fixed" type="button" data-act="modeSettings" data-role="fixedMode" hidden></button>
             </div>
             <div class="ace-right">
               <button class="ace-ib round" type="button" data-act="mic" aria-label="Grabar nota de voz" title="Grabar nota de voz">${icon('mic')}</button>
@@ -179,24 +184,24 @@ export class ChatApp {
     this.root.querySelector('[data-act="lang"]').setAttribute('aria-label', `Idioma: ${this.lang.name} (${this.lang.region})`);
   }
   renderMode() {
-    const m = MODES[this.mode];
-    this.root.querySelectorAll('.mode-chip').forEach((b) => {
-      const on = b.dataset.mode === this.mode;
-      b.setAttribute('aria-checked', String(on));
-      b.tabIndex = on ? 0 : -1;
-      // Solo se desplaza la tira de modos (scrollIntoView movía toda la página en el celular al cargar la portada).
-      const strip = b.parentElement;
-      if (on && strip.scrollWidth > strip.clientWidth) { const l = b.getBoundingClientRect().left - strip.getBoundingClientRect().left + strip.scrollLeft; if (l < strip.scrollLeft) strip.scrollLeft = l; else if (l + b.offsetWidth > strip.scrollLeft + strip.clientWidth) strip.scrollLeft = l + b.offsetWidth - strip.clientWidth; }
-    });
-    this.$('modeStrip').dataset.mode = this.mode;
-    this.$('input').placeholder = this.mode === 'auto' ? 'Describí la tarea para el agente' : 'Preguntá lo que quieras';
-    this.$('modeStrip').setAttribute('aria-label', 'Modo de respuesta: ' + m.label);
+    const chip = this.$('fixedMode');
+    const fixed = this.override !== 'smart' ? this.override : this.forceNext;
+    if (chip) {
+      chip.hidden = !fixed;
+      if (fixed) {
+        const label = this.override !== 'smart' ? OVERRIDES[fixed].label : 'Agente para el próximo mensaje';
+        chip.innerHTML = `<span>${esc(label)}</span>${icon('close')}`;
+        chip.setAttribute('aria-label', `${label}. Tocá para volver a automático`);
+        chip.title = 'Volver a automático';
+      }
+    }
+    this.$('input').placeholder = fixed === 'auto' ? 'Describí la tarea para el agente' : 'Preguntá o pedí una tarea';
   }
   renderEmpty() {
     const box = this.$('suggestions');
     box.innerHTML = '';
     for (const s of SUGGESTIONS) {
-      box.append(h('button', { class: 'ace-sug', type: 'button', onclick: () => { if (s.mode) this.setMode(s.mode, true); this.send(s.t); } }, h('span', { html: icon(s.i) }), s.t));
+      box.append(h('button', { class: 'ace-sug', type: 'button', onclick: () => this.send(s.t) }, h('span', { html: icon(s.i) }), s.t));
     }
     this.syncEmpty();
   }
@@ -219,7 +224,7 @@ export class ChatApp {
   updateStatus() {
     const st = this.$('status');
     const demo = engine.state.checked && !engine.state.live;
-    const k = this.busy ? (this.mode === 'auto' ? 'agentRun' : 'thinking') : (this._face === 'speaking' ? 'speaking' : this.recorder ? 'listening' : 'status');
+    const k = this.busy ? (this.mode === 'auto' || this.busy.route === 'browser' ? 'agentRun' : 'thinking') : (this._face === 'speaking' ? 'speaking' : this.recorder ? 'listening' : 'status');
     const label = this.busy ? (this.busy.label || 'Escribiendo…') : k === 'speaking' ? 'Hablando…' : k === 'listening' ? 'Escuchando…' : 'En línea · Lista';
     st.innerHTML = `<span class="ace-led ${k}"></span>${esc(label)}`;
     this.setFace(this.busy ? 'thinking' : this._face || 'idle');
@@ -247,7 +252,6 @@ export class ChatApp {
   /* =================== Eventos =================== */
   bind() {
     const r = this.root;
-    this.bindModeStrip();
     const input = this.$('input');
     const form = this.$('form');
     r.addEventListener('click', (e) => {
@@ -347,6 +351,7 @@ export class ChatApp {
       { label: 'Exportar Markdown', icon: 'download', onClick: () => this.exportMd(), disabled: !this.chat.messages.length },
       { label: 'Exportar PDF', icon: 'print', onClick: () => this.exportPdf(), disabled: !this.chat.messages.length },
       'sep',
+      { label: 'Ajustes de respuesta', sub: OVERRIDES[this.override].label, icon: 'bolt', onClick: () => this.act_modeSettings(btn) },
       { label: 'Atajos de teclado', icon: 'keyboard', onClick: () => this.showShortcuts() }
     ];
     if (this.variant === 'embed') items.splice(2, 0, { label: 'Abrir app completa', icon: 'expand', onClick: () => { location.href = '/app/'; } });
@@ -375,38 +380,33 @@ export class ChatApp {
       { label: 'Herramientas', icon: 'tools', onClick: () => this.openHub('herramientas') },
       { label: 'Habilidades', icon: 'spark', onClick: () => this.openHub('habilidades') },
       { label: 'Automatizaciones', icon: 'clock', onClick: () => this.openHub('automatizaciones') },
-      { label: 'Memoria', icon: 'memory', onClick: () => this.openHub('memoria') }
+      { label: 'Memoria', icon: 'memory', onClick: () => this.openHub('memoria') },
+      'sep',
+      { label: 'Ajustes de respuesta', sub: OVERRIDES[this.override].label, icon: 'settings', onClick: () => this.act_modeSettings(btn) }
     ], { place: 'top' });
   }
-  act_setmode(btn) { this.setMode(btn.dataset.mode, true); }
-  /** Bordes difuminados del selector de modos cuando hay más opciones a los costados. */
-  bindModeStrip() {
-    const strip = this.$('modeStrip'), wrap = this.$('modeWrap');
-    if (!strip || !wrap) return;
-    const upd = () => {
-      wrap.classList.toggle('fade-l', strip.scrollLeft > 2);
-      wrap.classList.toggle('fade-r', strip.scrollLeft + strip.clientWidth < strip.scrollWidth - 2);
-    };
-    strip.addEventListener('scroll', upd, { passive: true });
-    if ('ResizeObserver' in window) new ResizeObserver(upd).observe(strip);
-    strip.addEventListener('keydown', (e) => {
-      if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
-      const ids = Object.keys(MODES); const i = ids.indexOf(this.mode);
-      const next = ids[(i + (e.key === 'ArrowRight' ? 1 : ids.length - 1)) % ids.length];
-      e.preventDefault(); this.setMode(next, true);
-      strip.querySelector(`[data-mode="${next}"]`)?.focus();
-    });
-    upd();
+  /** Ajustes de respuesta (escondido, apagado por defecto): automático o un modo fijo. */
+  act_modeSettings(btn) {
+    if (this.override === 'smart' && this.forceNext) { this.forceNext = null; this.renderMode(); toast('Vuelvo a elegir solo cómo responder.'); return; }
+    if (this.override !== 'smart' && btn && btn.dataset.role === 'fixedMode') { this.setOverride('smart'); return; }
+    popover(btn, [{ heading: 'Cómo respondo' }, ...Object.entries(OVERRIDES).map(([id, o]) => ({
+      label: o.label, sub: o.desc, icon: id === 'smart' ? 'spark' : MODES[id].icon, checked: id === this.override,
+      onClick: () => this.setOverride(id)
+    }))], { place: 'top', align: 'end' });
   }
-  act_mode(btn) {
-    popover(btn, Object.entries(MODES).map(([id, m]) => ({
-      label: m.label, sub: m.desc, icon: m.icon, checked: id === this.mode, badge: m.flagship ? 'Insignia' : null, badgeClass: 'gold',
-      onClick: () => this.setMode(id)
-    })), { place: 'top' });
+  setOverride(id) {
+    if (id === 'auto' && !this.flag('agentMode')) { toast('El modo agente está pausado momentáneamente.'); return; }
+    this.override = OVERRIDES[id] ? id : 'smart';
+    this.forceNext = null;
+    prefs.set('ac.modeOverride', this.override);
+    this.renderMode();
+    toast(this.override === 'smart' ? 'Listo: elijo solo cómo responder cada mensaje.' : `Modo fijo: ${OVERRIDES[this.override].label.toLowerCase()}.`);
   }
+  /** Compatibilidad (?modo=auto, «Hace todo por vos»): el próximo mensaje va al agente; después vuelve a automático. */
   setMode(m, silent) {
     if (m === 'auto' && !this.flag('agentMode')) { toast('El modo agente está pausado momentáneamente.'); return; }
-    this.mode = m; this.renderMode();
+    this.forceNext = this.override === 'smart' && m === 'auto' ? 'auto' : null;
+    this.renderMode();
     if (!silent) this.$('input').focus();
   }
   act_invite(btn, e, fromMention = false) {
@@ -629,7 +629,13 @@ export class ChatApp {
     // Pedidos sobre las cuentas conectadas (correo, GitHub, Cloudflare, LinkedIn) o de empleo: herramientas del servidor
     // (más rápidas y sin gastar minutos de navegador). Cualquier escritura pide «Confirmar» en una tarjeta.
     // Rápido/Profundo: «Buscá en la web: …», «averiguá…», «con fuentes» → búsqueda en vivo (no la computadora del agente).
-    const route = detectMediaIntent(text) ? null : routeWebIntent(text, this.mode);
+    // Un solo chat: el router decide por mensaje (rápido, pensar, búsqueda en vivo, computadora o agente).
+    const forced = this.override !== 'smart' ? this.override : this.forceNext;
+    const decision = decideRoute(text, { override: forced || 'smart', followBrowser: !!follow, hasFiles: files.length > 0 });
+    this.forceNext = null; this.renderMode();
+    this.mode = decision.mode;
+    msg._route = decision.kind;
+    const route = detectMediaIntent(text) ? null : decision.kind;
     if (!detectMediaIntent(text) && this.toolsReady() && wantsTools(text) && !follow) msg._tools = true;
     else if (route === 'search' && !follow) msg._search = true;
     else if (!detectMediaIntent(text) && (route === 'browser' || follow)) {
@@ -769,7 +775,8 @@ export class ChatApp {
       return;
     }
     const ctrl = new AbortController();
-    this.busy = { ctrl, label: this.mode === 'auto' ? 'Trabajando…' : this.mode === 'deep' ? 'Pensando…' : 'Escribiendo…' };
+    const rk = userMsg._route === 'search' || userMsg._search ? 'search' : userMsg._browser ? 'browser' : this.mode === 'auto' ? 'agent' : this.mode === 'deep' ? 'think' : 'fast';
+    this.busy = { ctrl, route: rk, label: ROUTE_LABEL[rk] || 'Escribiendo…' };
     this.updateStatus(); this.syncSend();
     this.avatar && (this.avatar.pulse(1), this.avatar.setState('thinking'));
     const mentioned = this.mentionedAgents(userMsg.content);
@@ -1111,24 +1118,37 @@ export class ChatApp {
     return bubble;
   }
 
-  /** Tarjeta del plan del agente: «Tarea completada · N de N pasos» con checks verdes. */
+  /**
+   * Tarjeta del agente en el chat: mientras trabaja, una línea de estado («Escribiendo index.html…») con ✕ para detener
+   * y la lista de pasos en vivo; al terminar se pliega en un resumen («Listo · 4 pasos · 1 archivo»).
+   */
   timeline(m) {
     const done = m.steps.filter((x) => x.status === 'done').length;
     const total = m.steps.length;
     const running = m.streaming;
     const stopped = !running && done < total;
     const stIcon = (st) => h('span', { class: 'ace-st ' + (st || ''), html: st === 'done' ? icon('check') : st === 'error' ? icon('close') : '' });
-    const card = h('div', { class: 'ace-task' });
+    const cur = m.steps.find((x) => x.status === 'running') || m.steps.find((x) => x.status === 'pending');
+    const files = (m.artifacts || []).length;
+    const writing = (m.artifacts || []).find((x) => x.writing);
+    const live = running ? (writing ? `Escribiendo ${writing.name}…` : cur ? ({ coding: 'Escribiendo', searching: 'Buscando', reading: 'Leyendo', verifying: 'Verificando', thinking: 'Pensando', agent: 'Consultando' }[cur.phase] || 'Trabajando') + ': ' + cur.title : 'Armando el plan…') : '';
+    const meta = [`${done} de ${total} pasos`, files ? `${files} ${files === 1 ? 'archivo' : 'archivos'}` : null].filter(Boolean).join(' · ');
+    const card = h('div', { class: 'ace-task' + (running ? ' is-running' : ' is-folded') });
     const head = h('button', { class: 'ace-task-h', type: 'button', title: 'Ver computadora del agente', onclick: () => this.openAgentPanel(m, 'plan') },
       stIcon(running ? 'running' : stopped ? 'error' : 'done'),
-      h('span', { class: 'ace-task-t' }, h('strong', {}, running ? 'El agente está trabajando' : stopped ? 'Tarea detenida' : 'Tarea completada'), h('small', {}, `${done} de ${total} pasos`)),
+      h('span', { class: 'ace-task-t' }, h('strong', { 'data-no-i18n': running ? '' : null }, running ? live : stopped ? 'Tarea detenida' : 'Listo'), h('small', {}, meta)),
       h('span', { class: 'ace-task-open', html: icon('monitor') }));
-    const prog = h('div', { class: 'ace-prog', role: 'progressbar', 'aria-valuemin': 0, 'aria-valuemax': total, 'aria-valuenow': done }, h('i', { style: `width:${total ? (done / total) * 100 : 0}%` }));
+    const prog = h('div', { class: 'ace-prog', role: 'progressbar', 'aria-label': 'Avance de la tarea', 'aria-valuemin': 0, 'aria-valuemax': total, 'aria-valuenow': done }, h('i', { style: `width:${total ? (done / total) * 100 : 0}%` }));
     const list = h('ul', {});
     for (const st of m.steps) {
       list.append(h('li', { class: st.status || '' }, stIcon(st.status), h('span', { class: 'ace-step-t' }, st.title), h('em', { class: 'p-' + (st.phase || 'thinking') }, PHASES[st.phase] || st.phase || '')));
     }
-    card.append(head, prog, list);
+    if (running) {
+      const x = h('button', { class: 'ace-task-x', type: 'button', 'aria-label': 'Detener al agente', title: 'Detener', html: icon('close'), onclick: (e) => { e.stopPropagation(); this.act_stop(); } });
+      card.append(h('div', { class: 'ace-task-top' }, head, x), prog, list);
+    } else {
+      card.append(head, prog, h('details', { class: 'ace-task-more' }, h('summary', {}, 'Ver los pasos'), list));
+    }
     return card;
   }
 

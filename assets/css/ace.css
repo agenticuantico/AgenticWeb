@@ -277,3 +277,22 @@ body.design-lock { overflow: hidden; }
 .ace-src-t { flex: 1; min-width: 0; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ace-sources small { flex: 0 1 auto; max-width: 40%; font-size: 12px; color: var(--a-faint); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 @media (max-width: 380px) { .chat.ace .ace-web { width: 34px; height: 34px; } }
+/* Un solo chat: aviso pequeño solo cuando hay un modo fijo (Ajustes de respuesta); por defecto no se ve. */
+.chat.ace .ace-fixed { display: inline-flex; align-items: center; gap: 6px; height: 32px; max-width: 190px; padding: 0 8px 0 12px; border-radius: 999px; border: 1px solid rgba(101, 163, 13, .45); background: #f7ffe9; color: var(--a-ink); font-size: 12.5px; font-weight: 650; white-space: nowrap; cursor: pointer; min-width: 0; }
+.chat.ace .ace-fixed[hidden] { display: none; }
+.chat.ace .ace-fixed span { overflow: hidden; text-overflow: ellipsis; }
+.chat.ace .ace-fixed svg { width: 12px; height: 12px; flex: none; color: var(--a-muted); }
+/* Tarjeta del agente v3: en vivo con ✕; plegada en resumen al terminar */
+.ace-task { border-radius: 22px; }
+.ace-task.is-running { box-shadow: 0 10px 30px rgba(18, 22, 33, .07); }
+.ace-task-top { display: flex; align-items: center; }
+.ace-task-top .ace-task-h { flex: 1 1 auto; min-width: 0; }
+.ace-task.is-running .ace-task-t strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14.5px; }
+.ace-task-x { flex: none; width: 36px; height: 36px; margin-right: 10px; border-radius: 999px; border: 1px solid var(--a-border-strong); background: #fff; color: var(--a-ink); display: grid; place-items: center; cursor: pointer; }
+.ace-task-x:hover { background: var(--a-ink); color: #fff; }
+.ace-task-x svg { width: 14px; height: 14px; }
+.ace-task.is-folded { background: linear-gradient(180deg, #fff, #f8f9fc); }
+.ace-task.is-folded .ace-task-h > .ace-st.done { background: var(--a-lime); }
+.ace-task-more { padding: 0 14px 10px; }
+.ace-task-more > summary { cursor: pointer; font-size: 13px; font-weight: 650; color: var(--a-ink); padding: 8px 0 2px; }
+.ace-task-more ul { padding: 8px 0 2px; }

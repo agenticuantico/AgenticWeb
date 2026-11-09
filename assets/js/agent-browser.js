@@ -14,13 +14,14 @@
 import { h, icon } from './ui.js';
 import * as engine from './chat/engine.js';
 import { needsWebAction, isFollowUp } from './chat/intent.js';
+import { statusLine, visitedSites, summaryMeta, workMode, workSteps } from './chat/computer-status.js';
 /** Reexportadas para el código que ya las importaba desde acá (la lógica vive en chat/intent.js, sin DOM). */
 export { needsWebAction, isFollowUp };
 
 (function css() {
   if (typeof document === 'undefined' || document.getElementById('ac-ab2-css')) return;
   const l = document.createElement('link');
-  l.id = 'ac-ab2-css'; l.rel = 'stylesheet'; l.href = '/assets/css/agent-browser.css?v=2.0.1';
+  l.id = 'ac-ab2-css'; l.rel = 'stylesheet'; l.href = '/assets/css/agent-browser.css?v=3.0.0';
   document.head.appendChild(l);
 })();
 
@@ -82,8 +83,7 @@ export class AgentBrowserCard {
   build() {
     this.pill = h('span', { class: 'ab-pill' }, h('span', { class: 'ab-dot' }), h('span', { class: 'ab-pill-text' }, 'Encendiendo la computadora'));
     this.clock = h('span', { class: 'ab-clock', title: 'Tiempo de navegador real', hidden: true }, h('span', { html: icon('clock') }), h('b', { 'data-no-i18n': '' }, ''));
-    this.minBtn = h('button', { class: 'ab-btn', type: 'button', 'aria-label': 'Minimizar', html: icon('chevron'), onclick: () => this.toggleMin() });
-    this.fullBtn = h('button', { class: 'ab-btn', type: 'button', 'aria-label': 'Pantalla completa', html: icon('expand'), onclick: () => this.toggleFull() });
+    this.fullBtn = h('button', { class: 'ab-btn', type: 'button', 'aria-label': 'Achicar', title: 'Achicar', html: icon('collapse'), onclick: () => this.toggleFull(false) });
     this.stopBtn = h('button', { class: 'ab-btn ab-stop', type: 'button', 'aria-label': 'Detener', title: 'Detener', html: icon('stop'), onclick: () => this.stop() });
     this.modeBar = h('div', { class: 'ab-mode', hidden: true });
     this.view = h('div', { class: 'ab-view' }, this.loader());
@@ -105,11 +105,61 @@ export class AgentBrowserCard {
     this.controls = h('div', { class: 'ab-controls', hidden: true }, this.takeBtn, this.toolsBtn,
       h('button', { class: 'ab-tbtn ab-tbtn-stop', type: 'button', onclick: () => this.stop() }, h('span', { html: icon('stop') }), 'Detener'));
     this.kb = this.keyboardBar();
-    this.el = h('section', { class: 'ab-card', 'aria-label': 'Computadora del agente' },
-      h('header', { class: 'ab-head' }, h('span', { class: 'ab-title', html: icon('monitor') + '<span>Computadora del agente</span>' }), this.pill, this.clock, h('span', { class: 'ab-actions' }, this.minBtn, this.fullBtn, this.stopBtn)),
-      this.modeBar, this.addr, this.view, this.kb, this.controls, this.notice, this.asks, this.approvals, this.planBox, this.stepsBox, this.filesBox, this.result);
+    // Pantalla en vivo: tocarla abre la vista completa (con «Tomar el control»). La ✕ detiene al agente.
+    this.badge = h('span', { class: 'cc-badge', 'data-no-i18n': '' }, 'Modo lectura');
+    this.screen = h('div', { class: 'cc-screen', role: 'button', tabindex: '0', 'aria-label': 'Ver la computadora del agente en pantalla completa' },
+      this.view, this.badge, h('span', { class: 'cc-zoom', 'aria-hidden': 'true', html: icon('expand') }));
+    this.screen.addEventListener('click', (e) => { if (!this.el.classList.contains('is-full')) { e.preventDefault(); this.toggleFull(true); } });
+    this.screen.addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && !this.el.classList.contains('is-full') && e.target === this.screen) { e.preventDefault(); this.toggleFull(true); } });
+    this.xBtn = h('button', { class: 'cc-x', type: 'button', 'aria-label': 'Detener al agente', title: 'Detener', html: icon('close'), onclick: (e) => { e.stopPropagation(); this.stop(); } });
+    this.lineText = h('span', { class: 'cc-text', 'data-no-i18n': '' }, 'Encendiendo la computadora…');
+    this.line = h('div', { class: 'cc-line', role: 'status', 'aria-live': 'polite' }, h('span', { class: 'cc-dot', 'aria-hidden': 'true' }), this.lineText, this.clock);
+    this.modeNote = h('p', { class: 'cc-note', hidden: true });
+    this.sum = h('div', { class: 'cc-sum', hidden: true });
+    this.head = h('header', { class: 'ab-head' }, h('span', { class: 'ab-title', html: icon('monitor') + '<span>Computadora del agente</span>' }), this.pill, h('span', { class: 'ab-actions' }, this.fullBtn, this.stopBtn));
+    this.el = h('section', { class: 'ab-card cc', 'aria-label': 'Computadora del agente', 'data-status': 'starting' },
+      this.head,
+      h('div', { class: 'cc-frame' }, this.screen, this.xBtn),
+      this.line, this.modeNote, this.sum,
+      this.modeBar, this.addr, this.kb, this.controls, this.notice, this.asks, this.approvals, this.planBox, this.stepsBox, this.filesBox, this.result);
     this.o.thread.append(this.el);
     this.o.onScroll && this.o.onScroll();
+  }
+
+  /** Línea única de estado y nota del modo (navegador real / modo lectura). */
+  renderLine(s) {
+    const st = statusLine(s);
+    this.lineText.textContent = st.text;
+    this.line.dataset.kind = st.kind;
+    const wm = workMode(s);
+    this.badge.textContent = wm.label;
+    this.badge.classList.toggle('is-browser', s && s.mode === 'browser');
+    const showNote = !!wm.note && s && s.mode !== 'browser' && !['done', 'ended'].includes(s.status) && /Sin minutos/.test(wm.note);
+    this.modeNote.hidden = !showNote;
+    if (showNote) this.modeNote.textContent = wm.note;
+  }
+
+  /** Al terminar, la tarjeta se pliega en un resumen: qué hizo (pasos) y dónde (sitios). */
+  renderSummary(s, ended = false) {
+    const sites = visitedSites(s);
+    const steps = workSteps(s);
+    const meta = summaryMeta(s);
+    this.el.classList.toggle('is-done', !ended);
+    this.el.classList.toggle('is-ended', ended);
+    const resume = ended && s.canResume !== false ? h('button', { class: 'cc-act', type: 'button', onclick: () => this.resume() }, h('span', { html: icon('refresh') }), 'Retomar') : null;
+    const again = h('button', { class: 'cc-act', type: 'button', onclick: () => this.toggleFull(true) }, h('span', { html: icon('monitor') }), 'Ver la pantalla');
+    this.sum.hidden = false;
+    this.sum.replaceChildren(...[
+      h('div', { class: 'cc-sum-h' },
+        h('span', { class: 'cc-sum-ic' + (ended ? ' off' : ''), html: icon(ended ? 'power' : 'check') }),
+        h('span', { class: 'cc-sum-t' }, h('strong', {}, ended ? (s.endedReason === 'idle' ? 'La archivé por inactividad' : s.endedReason === 'detached' ? 'Pasé a tu nuevo pedido' : 'Detuviste al agente') : 'Listo'), h('small', { 'data-no-i18n': '' }, meta + (s.mode === 'browser' || (s.browserMs || 0) > 0 ? ' · navegador real' : ' · modo lectura')))),
+      !ended && s.summary ? h('p', { class: 'cc-sum-p', 'data-no-i18n': '' }, s.summary) : null,
+      sites.length ? h('div', { class: 'cc-sites', 'aria-label': 'Sitios visitados' }, ...sites.map((x) => h('span', { class: 'cc-site', 'data-no-i18n': '' }, h('i', { 'aria-hidden': 'true' }, x.charAt(0).toUpperCase()), x))) : null,
+      steps.length ? h('details', { class: 'cc-sum-steps' }, h('summary', {}, steps.length === 1 ? 'Ver el paso' : `Ver los ${steps.length} pasos`),
+        h('ol', {}, ...steps.slice(-20).map((x) => h('li', { class: 'st-' + x.status, 'data-no-i18n': '' }, x.label)))) : null,
+      (s.sources || []).length && !ended ? h('div', { class: 'cc-srcs' }, h('small', { class: 'muted' }, 'Fuentes'), ...(s.sources || []).slice(0, 6).map((x, i) => h('a', { href: x.url, target: '_blank', rel: 'noopener noreferrer', 'data-no-i18n': '' }, `${i + 1}. ${x.title || host(x.url)}`))) : null,
+      h('div', { class: 'cc-sum-acts' }, resume, this.state && (this.img && this.img.src || this.state.reader) ? again : null),
+      !ended ? h('small', { class: 'cc-hint muted' }, 'Podés seguir acá: por ejemplo «ahora compará…» o «pasalo a una tabla».') : null].filter(Boolean));
   }
 
   loader(text = 'Encendiendo la computadora') {
@@ -147,7 +197,9 @@ export class AgentBrowserCard {
   /** Estado honesto cuando no se puede usar: sin pasos ni capturas simuladas. */
   unavailable(title, text, action) {
     this.setPill('No disponible', 'off');
-    this.fullBtn.hidden = true; this.stopBtn.hidden = true; this.controls.hidden = true; this.clock.hidden = true;
+    this.el.dataset.status = 'error'; this.el.classList.add('is-off');
+    this.lineText.textContent = title; this.line.dataset.kind = 'off';
+    this.xBtn.hidden = true; this.stopBtn.hidden = true; this.controls.hidden = true; this.clock.hidden = true;
     this.view.replaceChildren(h('div', { class: 'ab-off' }, h('span', { class: 'ab-off-ic', html: icon('monitor') }), h('strong', {}, title), h('p', {}, text), action || null));
   }
 
@@ -173,6 +225,7 @@ export class AgentBrowserCard {
       this.reader = h('div', { class: 'ab-reader' });
       this.view.replaceChildren(this.reader, this.img, h('div', { class: 'ab-scan', 'aria-hidden': 'true' }));
       this.view.classList.add('is-live');
+      this.img.alt = 'Pantalla en vivo de la computadora del agente';
       this.view.dataset.device = s.device || this.device;
       this.controls.hidden = false; this.stepsBox.hidden = false;
       this.apply(s);
@@ -219,6 +272,7 @@ export class AgentBrowserCard {
     const label = s.status === 'queued' && s.queue ? `En fila · puesto ${s.queue.position}` : (s.status === 'acting' || s.status === 'ready') && !browser ? 'Leyendo' : STATUS_TEXT[s.status] || s.status;
     this.setPill(label, kind);
     this.el.dataset.status = s.status;
+    this.renderLine(s);
     this.renderClock();
     this.renderPlan(s);
     this.renderSteps(s.steps || []);
@@ -235,10 +289,13 @@ export class AgentBrowserCard {
     else { this.asks.replaceChildren(); this.askKey = ''; }
     // Avisos
     if (s.status === 'queued') this.showNotice(`Todos los navegadores están ocupados: estás en el puesto ${s.queue ? s.queue.position : 1}. Sigo apenas se libere uno.`, 'info');
-    else if (s.notice === 'light_fallback' && !browser && s.status !== 'done') this.showNotice('Sigo en modo lectura: hoy ya se usaron los minutos de navegador real. Solo freno si un paso exige hacer clic.', 'info');
+    // Sin minutos: lo dice la nota corta bajo la línea de estado (cc-note); el aviso largo queda para pantalla completa.
+    else if (s.notice === 'light_fallback' && !browser && s.status !== 'done' && this.el.classList.contains('is-full')) this.showNotice('Sigo en modo lectura: hoy ya se usaron los minutos de navegador real. Solo freno si un paso exige hacer clic.', 'info');
     else if (!this.noticeSticky) this.notice.hidden = true;
     this.renderFiles(s.files || []);
     // Resultado
+    if (s.status === 'done') this.renderSummary(s);
+    else if (s.status !== 'ended') { this.sum.hidden = true; this.el.classList.remove('is-done', 'is-ended'); }
     if (s.status === 'done' && s.summary) {
       this.result.hidden = false;
       this.result.replaceChildren(h('div', { class: 'ab-res-h' }, h('span', { html: icon('check') }), h('strong', {}, 'Resultado')), h('p', { class: 'ab-res-t', 'data-no-i18n': '' }, s.summary),
@@ -481,11 +538,17 @@ export class AgentBrowserCard {
     catch (e) { if (e.status === 404 || e.code === 'no_session') { this.ended(); return; } }
     const st = this.state && this.state.status;
     const fast = st === 'takeover' || st === 'acting' || st === 'thinking' || this.stepping;
-    this.timer = setTimeout(() => this.poll(), document.hidden ? 6000 : fast ? 900 : st === 'queued' ? 4000 : 2500);
+    // Pantalla en vivo: cada ~1,2 s mientras trabaja (el servidor saca una captura nueva cada 1,5 s); 2 s en espera.
+    this.timer = setTimeout(() => this.poll(), document.hidden ? 6000 : fast ? 1200 : st === 'queued' ? 4000 : st === 'done' ? 8000 : 2000);
   }
 
   /** Otra tarjeta toma la conversación: esta deja de consultar (la sesión del servidor sigue). */
-  detach() { this.stopped = true; clearTimeout(this.timer); clearInterval(this.tick); this.el.classList.add('is-min', 'is-detached'); this.controls.hidden = true; this.stopBtn.hidden = true; }
+  detach() {
+    this.stopped = true; clearTimeout(this.timer); clearInterval(this.tick);
+    if (this.el.classList.contains('is-full')) this.toggleFull(false);
+    this.el.classList.add('is-detached'); this.controls.hidden = true; this.stopBtn.hidden = true; this.xBtn.hidden = true;
+    if (this.state && !['done', 'ended'].includes(this.state.status)) this.renderSummary({ ...this.state, status: 'ended', endedReason: 'detached', canResume: false }, true);
+  }
 
   ended(s) {
     if (this.stopped && this._endedShown) return;
@@ -500,13 +563,17 @@ export class AgentBrowserCard {
     const resume = (st.canResume !== false) ? h('button', { class: 'btn btn-sm', type: 'button', onclick: () => this.resume() }, h('span', { html: icon('refresh') }), 'Retomar') : null;
     this.result.hidden = false;
     this.result.replaceChildren(h('div', { class: 'ab-res-h' }, h('span', { html: icon('power') }), h('strong', {}, 'Detenida')), h('p', {}, txt), resume);
+    this.el.dataset.status = 'ended'; this.xBtn.hidden = true;
+    this.renderLine({ ...st, status: 'ended' });
+    this.renderSummary({ ...st, status: 'ended' }, true);
+    this.o.onScroll && this.o.onScroll();
   }
 
   async resume() {
     try {
       const s = await this.api('/api/agent/browser/resume', { body: {} });
       this.stopped = false; this._endedShown = false;
-      this.controls.hidden = false; this.stopBtn.hidden = false; this.result.hidden = true;
+      this.controls.hidden = false; this.stopBtn.hidden = false; this.result.hidden = true; this.xBtn.hidden = false;
       this.apply(s);
       this.tick = setInterval(() => this.renderClock(), 1000);
       this.poll(); this.loop();
@@ -519,13 +586,16 @@ export class AgentBrowserCard {
     try { const s = await this.api('/api/agent/browser/stop'); this.ended(s); } catch { this.ended(); }
   }
 
-  toggleMin() { const m = this.el.classList.toggle('is-min'); this.minBtn.setAttribute('aria-label', m ? 'Expandir' : 'Minimizar'); }
-  toggleFull() {
-    const f = this.el.classList.toggle('is-full');
-    this.fullBtn.setAttribute('aria-label', f ? 'Salir de pantalla completa' : 'Pantalla completa');
-    this.fullBtn.innerHTML = icon(f ? 'collapse' : 'expand');
+  /** Pantalla completa: pantalla grande, «Tomar el control», guardar, plan y pasos. Escape o «Achicar» vuelven al chat. */
+  toggleFull(force) {
+    const f = typeof force === 'boolean' ? force : !this.el.classList.contains('is-full');
+    if (f === this.el.classList.contains('is-full')) return;
+    this.el.classList.toggle('is-full', f);
+    this.el.setAttribute('role', f ? 'dialog' : 'region');
+    if (f) this.el.setAttribute('aria-modal', 'true'); else this.el.removeAttribute('aria-modal');
+    this.screen.setAttribute('tabindex', f ? '-1' : '0');
     document.body.classList.toggle('ab-lock', f);
-    if (f) { this._esc = (e) => { if (e.key === 'Escape') this.toggleFull(); }; document.addEventListener('keydown', this._esc); }
-    else document.removeEventListener('keydown', this._esc);
+    if (f) { this._esc = (e) => { if (e.key === 'Escape') this.toggleFull(false); }; document.addEventListener('keydown', this._esc); setTimeout(() => this.fullBtn.focus({ preventScroll: true }), 30); }
+    else { document.removeEventListener('keydown', this._esc); this.screen.focus({ preventScroll: true }); this.o.onScroll && this.o.onScroll(); }
   }
 }
