@@ -21,7 +21,10 @@ export const ERR = {
   cannot_manage_self: 'No podés cambiarte el rol a vos mismo.', area_required: 'Elegí el área del supervisor.', owner_email: 'Ese es el correo del dueño.',
   forbidden_role: 'Tu rol no permite esta acción.', session_expired: 'Tu sesión venció: entrá de nuevo.', login_required: 'Entrá con tu clave.',
   staff_full: 'Llegaste al máximo de personas.', too_many_invites: 'Hay demasiadas invitaciones abiertas.', rate_limited: 'Demasiados pedidos seguidos; esperá un minuto.',
-  forbidden_origin: 'El pedido vino de un sitio no permitido.', panel_not_configured: 'El panel no está configurado en el servidor.'
+  forbidden_origin: 'El pedido vino de un sitio no permitido.', owner_only: 'Solo el dueño puede hacer esto.',
+  api_key_required: 'Pegá la API key de Brevo.', api_key_invalid: 'Esa key no parece válida (sin espacios, 20 a 256 caracteres; las de Brevo empiezan con «xkeysib-»).',
+  api_key_is_smtp: 'Esa es la clave SMTP de Brevo («xsmtpsib-»). Hace falta una API key («xkeysib-»): Brevo → SMTP y API → API keys.',
+  encryption_not_ready: 'El servidor no tiene el secreto para cifrar la key.', storage_not_configured: 'El servidor no tiene almacenamiento configurado.', panel_not_configured: 'El panel no está configurado en el servidor.'
 };
 const msg = (e) => ERR[e && e.code] || (e && e.message) || 'No se pudo completar.';
 
@@ -158,7 +161,7 @@ const PERM_TXT = {
   'neurons.view': 'Ver cupo de IA', 'billing.view': 'Ingresos y pagos', 'staff.view': 'Ver equipo humano', 'staff.invite': 'Invitar personas', 'staff.manage': 'Cambiar rol / suspender / revocar',
   'staff.grant_coceo': 'Dar rol Co-CEO', 'audit.view': 'Ver bitácora', 'owner.settings': 'Ajustes del dueño'
 };
-const ACTION_TXT = { login: 'Entró', login_failed: 'Intento fallido de ingreso', logout: 'Salió', password_changed: 'Cambió su clave', password_change_failed: 'Falló el cambio de clave', reset_requested: 'Pidió restablecer la clave', reset_done: 'Restableció la clave', invite_created: 'Invitó', invite_accepted: 'Aceptó la invitación', invite_revoked: 'Revocó una invitación', role_changed: 'Cambió el rol de', suspended: 'Suspendió a', reactivated: 'Reactivó a', access_revoked: 'Quitó el acceso a', member_reset_link: 'Mandó enlace de clave a', owner_key_set: 'Se fijó la clave del dueño', denied: 'Intentó sin permiso', admin_post: 'Acción', admin_patch: 'Edición', admin_delete: 'Borrado' };
+const ACTION_TXT = { mail_key_set: 'Guardó la key de envío de mails', mail_key_deleted: 'Borró la key de envío de mails', mail_test: 'Probó el envío de mails', login: 'Entró', login_failed: 'Intento fallido de ingreso', logout: 'Salió', password_changed: 'Cambió su clave', password_change_failed: 'Falló el cambio de clave', reset_requested: 'Pidió restablecer la clave', reset_done: 'Restableció la clave', invite_created: 'Invitó', invite_accepted: 'Aceptó la invitación', invite_revoked: 'Revocó una invitación', role_changed: 'Cambió el rol de', suspended: 'Suspendió a', reactivated: 'Reactivó a', access_revoked: 'Quitó el acceso a', member_reset_link: 'Mandó enlace de clave a', owner_key_set: 'Se fijó la clave del dueño', denied: 'Intentó sin permiso', admin_post: 'Acción', admin_patch: 'Edición', admin_delete: 'Borrado' };
 
 /** Sección «Equipo humano»: personas, invitaciones abiertas, invitar y matriz de permisos. */
 export async function renderStaff(box, token, me) {
@@ -265,4 +268,69 @@ export async function renderAudit(box, token) {
   for (const e of d.entries) ul.append(h('li', {}, h('span', { class: 'tiny muted audit-at' }, fmtDate(new Date(e.at), { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })),
     h('span', { class: 'audit-txt' }, h('strong', {}, e.actor_email || 'Alguien'), ' ', (ACTION_TXT[e.action] || e.action).toLowerCase(), e.target ? ' ' + e.target : '', e.detail && !/^admin_/.test(e.action) ? h('span', { class: 'muted' }, ' · ' + e.detail) : '')));
   sec.append(ul); box.replaceChildren(sec);
+}
+
+/* =================== Configuración (solo el dueño) =================== */
+const SRC_TXT = { worker: 'secreto del servidor', panel: 'guardada en este panel (cifrada)', setup: 'cargada por la terminal (/api/setup)' };
+/** «Envío de mails (Brevo)»: guardar la API key (nunca se muestra de vuelta) y probar el envío a la cuenta dueña. */
+export async function renderSettings(box, token) {
+  const sec = h('section', { class: 'card panel mailcfg', id: 'mailcfg', 'aria-labelledby': 'mailcfg-h' });
+  box.replaceChildren(sec);
+  sec.append(h('div', { class: 'skeleton', style: 'height:180px' }));
+  let st;
+  try { st = (await api('/api/panel/settings/mail', { token })).mail; }
+  catch (ex) { sec.replaceChildren(h('div', { class: 'alert warn' }, h('span', { html: icon('warn') }), h('div', {}, msg(ex)))); return; }
+  draw(st);
+  function draw(st) {
+    const status = h('p', { class: 'mailcfg-status', id: 'mailcfg-status', role: 'status' },
+      st.configured ? h('span', { class: 'chip ok' }, `Configurada · termina en ${st.last4}`) : h('span', { class: 'chip warn' }, 'Sin configurar'),
+      st.configured ? h('span', { class: 'tiny muted' }, ' ' + (SRC_TXT[st.source] || '')) : null);
+    const keyIn = h('input', { class: 'input', type: 'password', id: 'brevo-api-key', name: 'brevoApiKey', autocomplete: 'off', autocapitalize: 'none', autocorrect: 'off', spellcheck: 'false', maxlength: '256', placeholder: st.configured ? 'Pegá una key nueva para reemplazarla' : 'xkeysib-…', 'aria-describedby': 'brevo-key-help' });
+    const emailIn = h('input', { class: 'input', type: 'email', id: 'brevo-sender-email', autocomplete: 'off', autocapitalize: 'none', spellcheck: 'false', value: st.sender.email });
+    const nameIn = h('input', { class: 'input', type: 'text', id: 'brevo-sender-name', autocomplete: 'off', maxlength: '60', value: st.sender.name });
+    const err = errBox(); const out = h('div', { class: 'mailcfg-result', id: 'mailcfg-result', role: 'status', 'aria-live': 'polite', hidden: true });
+    const save = h('button', { class: 'btn btn-primary', type: 'submit', id: 'brevo-save' }, 'Guardar');
+    const test = h('button', { class: 'btn', type: 'button', id: 'brevo-test', disabled: !st.configured, html: icon('mail') + 'Probar envío' });
+    const del = st.stored ? h('button', { class: 'btn btn-ghost btn-sm', type: 'button', id: 'brevo-delete' }, 'Borrar la key guardada') : null;
+    const form = h('form', { class: 'stack', id: 'brevo-form', novalidate: true },
+      h('label', { class: 'label', for: 'brevo-api-key' }, 'API key de Brevo'), keyIn,
+      h('p', { class: 'tiny muted', id: 'brevo-key-help' }, 'Se guarda cifrada y nunca se vuelve a mostrar. Brevo → SMTP y API → API keys → «Generate a new API key».'),
+      h('div', { class: 'mailcfg-grid' },
+        h('div', { class: 'stack' }, h('label', { class: 'label', for: 'brevo-sender-email' }, 'Correo remitente'), emailIn),
+        h('div', { class: 'stack' }, h('label', { class: 'label', for: 'brevo-sender-name' }, 'Nombre remitente'), nameIn)),
+      h('p', { class: 'tiny muted' }, 'El remitente tiene que estar verificado en Brevo (Remitentes). Al ser un Gmail, algunos correos pueden ir a Spam.'),
+      err, h('div', { class: 'row mailcfg-acts' }, save, test, del));
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault(); err.hidden = true; out.hidden = true;
+      const k = keyIn.value.trim();
+      if (!k && !st.stored) { showErr(err, 'Pegá la API key de Brevo.'); keyIn.focus(); return; }
+      save.disabled = true; save.textContent = 'Guardando…';
+      try {
+        const r = await api('/api/panel/settings/mail', { method: 'POST', token, body: { ...(k ? { apiKey: k } : {}), senderEmail: emailIn.value.trim(), senderName: nameIn.value.trim() } });
+        keyIn.value = ''; toast('Guardado.', 'success'); draw(r.mail);
+      } catch (ex) { showErr(err, ex); }
+      finally { save.disabled = false; save.textContent = 'Guardar'; }
+    });
+    test.onclick = async () => {
+      err.hidden = true; test.disabled = true; out.hidden = false; out.className = 'mailcfg-result'; out.textContent = 'Enviando correo de prueba…';
+      try {
+        const r = await api('/api/panel/settings/mail/test', { method: 'POST', token, body: {} });
+        const x = r.result || {};
+        out.className = 'mailcfg-result ' + (x.sent ? 'ok' : 'bad');
+        out.replaceChildren(
+          h('p', {}, h('strong', {}, x.sent ? `Enviado a ${r.to}. Revisá la bandeja y Spam.` : 'Brevo no lo envió.')),
+          h('p', { class: 'small', id: 'mailcfg-brevo' }, `Respuesta de ${x.provider === 'none' ? 'servidor' : 'Brevo'}: ${x.status ?? '—'}${x.code ? ' · ' + x.code : ''}${x.message ? ' · ' + x.message : ''}${x.messageId ? ' · id ' + x.messageId : ''}`),
+          !x.sent && /ip/i.test(x.message || '') ? h('p', { class: 'tiny' }, 'Brevo bloquea IPs desconocidas: en Brevo → Seguridad → IPs autorizadas, desactivá el bloqueo (los servidores de Cloudflare cambian de IP).') : null,
+          !x.sent && /sender/i.test((x.message || '') + (x.code || '')) ? h('p', { class: 'tiny' }, 'Verificá el remitente en Brevo → Remitentes, dominios e IPs.') : null);
+      } catch (ex) { out.className = 'mailcfg-result bad'; out.textContent = msg(ex); }
+      finally { test.disabled = false; }
+    };
+    if (del) del.onclick = async () => {
+      if (!(await confirmDialog({ title: 'Borrar la key de Brevo', text: 'Los correos del panel dejan de salir hasta que cargues otra.', ok: 'Borrar', danger: true }))) return;
+      try { const r = await api('/api/panel/settings/mail', { method: 'DELETE', token }); toast('Key borrada.'); draw(r.mail); } catch (ex) { showErr(err, ex); }
+    };
+    sec.replaceChildren(h('div', { class: 'panel-head' }, h('h2', { id: 'mailcfg-h' }, 'Envío de mails (Brevo)')),
+      h('p', { class: 'small muted' }, 'Con esto salen los correos de invitación y de «¿Olvidaste la clave?». La prueba se manda solo a la cuenta dueña.'),
+      status, form, out);
+  }
 }
