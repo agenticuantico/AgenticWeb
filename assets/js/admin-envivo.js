@@ -51,7 +51,7 @@ export async function renderLive(box, token) {
     status.replaceChildren(h('strong', {}, st), ` · próximo turno en ${ov.nextInMin} min (${hhmm(ov.nextTick).slice(0, 5)})`, ov.lastTick ? ` · último turno ${when(ov.lastTick.at)}` : ' · todavía no hubo turnos', ` · actualizado ${hhmm(Date.now())}`, ...(fresh ? [h('span', { class: 'chip ok live-new' }, `${fresh} nuevo(s)`)] : []));
   }
   const evItem = (e, isNew) => h('li', { class: 'live-ev' + (isNew ? ' is-new' : '') },
-    h('div', { class: 'live-ev-head' }, h('span', { class: 'chip ' + (TCLS[e.type] || '') }, TYPE[e.type] || e.type), h('strong', {}, e.agentName), h('span', { class: 'muted tiny' }, `${e.teamLabel} · ${when(e.at)}`), isNew ? h('span', { class: 'tchip won' }, 'nuevo') : null),
+    h('div', { class: 'live-ev-head' }, h('span', { class: 'chip ' + (TCLS[e.type] || '') }, TYPE[e.type] || e.type), h('strong', {}, e.agentName), h('span', { class: 'tn-badge ' + (e.holder === 'humano' ? 'is-human' : 'is-agent') }, e.holder === 'humano' ? 'Humano' : 'Agente'), h('span', { class: 'muted tiny' }, `${e.teamLabel} · ${when(e.at)}`), isNew ? h('span', { class: 'tchip won' }, 'nuevo') : null),
     h('p', { class: 'small live-action' }, e.action),
     e.ref ? h('p', { class: 'tiny muted' }, `${e.ref.kind === 'propuesta' ? 'Propuesta' : e.ref.kind === 'entrenamiento' ? 'Entrenamiento' : e.ref.kind === 'puesto' ? 'Puesto' : e.ref.kind === 'ascenso' ? 'Ascenso' : 'Orden'} ${e.ref.id}${e.status ? ' · ' + (OST[e.status] || e.status) : ''}`) : null);
 
@@ -65,7 +65,7 @@ export async function renderLive(box, token) {
       body.replaceChildren(h('ul', { class: 'live-teams' }, ...ov.teams.map((t) => h('li', { class: 'card panel live-team' },
         h('div', { class: 'panel-head' }, h('h2', {}, t.label), h('span', { class: 'muted tiny' }, `${t.active} de ${t.members} activos`)),
         h('div', {}, h('small', { class: 'label' }, 'Orden en curso'), t.current ? h('p', { class: 'small' }, h('strong', {}, t.current.agent + ': '), t.current.text, h('span', { class: 'muted tiny' }, ` · ${OST[t.current.status] || t.current.status} desde ${when(t.current.since)}`)) : h('p', { class: 'muted small' }, 'Ninguna en este momento.')),
-        h('div', {}, h('small', { class: 'label' }, `Trabajando ahora (último turno de 30 min)`), t.working.length ? h('div', { class: 'team-chips' }, ...t.working.map((w) => h('span', { class: 'tchip won' }, w.name))) : h('p', { class: 'muted small' }, 'Nadie: esperan el próximo turno.')),
+        h('div', {}, h('small', { class: 'label' }, `Trabajando ahora (último turno de 30 min)`), t.working.length ? h('div', { class: 'team-chips' }, ...t.working.map((w) => h('span', { class: 'tchip won' }, w.name + (w.holder === 'humano' ? ' · Humano' : '')))) : h('p', { class: 'muted small' }, 'Nadie: esperan el próximo turno.')),
         h('div', {}, h('small', { class: 'label' }, 'Última salida'), t.lastOutput ? h('p', { class: 'small' }, h('strong', {}, t.lastOutput.agent + ': '), t.lastOutput.summary, h('span', { class: 'muted tiny' }, ` · ${when(t.lastOutput.at)}`)) : h('p', { class: 'muted small' }, 'Todavía sin resultados.'))))));
     } else if (view === 'conversaciones') drawThreads();
     else drawHistory();

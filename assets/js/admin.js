@@ -7,13 +7,13 @@ import { CONFIG } from './config.js';
 import * as auth from './auth.js';
 import { getStore, getRtdb, friendlyError } from './firebase.js';
 import { DEFAULT_SYSTEM, clearSystemCache } from './sysconfig.js';
-import { renderLeads, renderAgentsControl } from './admin-control.js?v=7.11.1';
+import { renderLeads, renderAgentsControl } from './admin-control.js?v=7.11.2';
 import { revenueKpis, renderRevenueCard } from './admin-revenue.js';
 import { renderGovernance } from './admin-governance.js';
-import { renderTeam } from './admin-team.js?v=7.11.1';
-import * as staffUi from './admin-staff.js?v=7.11.1';
-import { renderWorkspace, renderPerf } from './admin-espacio.js?v=7.11.1';
-import { renderKpis } from './admin-indicadores.js?v=7.11.1';
+import { renderTeam } from './admin-team.js?v=7.11.2';
+import * as staffUi from './admin-staff.js?v=7.11.2';
+import { renderWorkspace, renderPerf } from './admin-espacio.js?v=7.11.2';
+import { renderKpis } from './admin-indicadores.js?v=7.11.2';
 
 /** Roles con canales en el Espacio de trabajo (el servidor vuelve a controlar cada canal). */
 const WS_ROLES = new Set(['ceo', 'coceo', 'supervisor']);
@@ -125,9 +125,9 @@ function renderPanel(token, me) {
     history.replaceState(null, '', '#' + id);
     if (loaded[id]) return; loaded[id] = 1;
     if (id === 'equipo') renderTeam(boxes.equipo, null, { extraHeaders: hdr, owner: u.role === 'ceo' });
-    if (id === 'agentes') import('./admin-agents.js?v=7.11.1').then((m) => m.renderAutonomy(boxes.agentes, null, { extraHeaders: hdr }));
+    if (id === 'agentes') import('./admin-agents.js?v=7.11.2').then((m) => m.renderAutonomy(boxes.agentes, null, { extraHeaders: hdr }));
     if (id === 'espacio') renderWorkspace(boxes.espacio, token, me);
-    if (id === 'envivo') import('./admin-envivo.js?v=7.11.1').then((m) => m.renderLive(boxes.envivo, token, me));
+    if (id === 'envivo') import('./admin-envivo.js?v=7.11.2').then((m) => m.renderLive(boxes.envivo, token, me));
     if (id === 'rendimiento') renderPerf(boxes.rendimiento, token, me);
     if (id === 'indicadores') renderKpis(boxes.indicadores, token, me);
     if (id === 'humano') staffUi.renderStaff(boxes.humano, token, me);
@@ -278,7 +278,7 @@ async function renderDashboard(user) {
     if (extra[id] && !loaded[id]) {
       loaded[id] = 1;
       if (id === 'espacio') withPanel(extra[id], renderWorkspace);
-      if (id === 'envivo') withPanel(extra[id], (b, t, me) => import('./admin-envivo.js?v=7.11.1').then((m) => m.renderLive(b, t, me)));
+      if (id === 'envivo') withPanel(extra[id], (b, t, me) => import('./admin-envivo.js?v=7.11.2').then((m) => m.renderLive(b, t, me)));
       if (id === 'rendimiento') withPanel(extra[id], renderPerf);
       if (id === 'indicadores') withPanel(extra[id], renderKpis);
       if (id === 'humano') withPanel(extra[id], (b, t, me) => staffUi.renderStaff(b, t, me));

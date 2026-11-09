@@ -11,6 +11,10 @@ const ST = { activo: ['Activo', 'ok'], pausado: ['En pausa', 'warn'], desactivad
 const OST = { pendiente: ['En cola', ''], en_curso: ['Trabajando', 'gold'], hecha: ['Hecha', 'ok'], propuesta: ['Espera tu OK', 'gold'], aprobada: ['Aprobada', 'ok'], rechazada: ['Rechazada', ''], fallida: ['Con error', 'danger'], cancelada: ['Cancelada', ''], delegada: ['Delegada', 'info'] };
 const PRIO = [null, 'baja', 'media', 'alta', 'urgente'];
 const KIND = { ceo: 'CEO', coceo: 'Co-CEO agéntico', lead: 'Líder', worker: 'Trabajador' };
+/** Personas y agentes en el mismo organigrama: insignia «Humano» / «Agente». */
+const isHum = (m) => !!m && m.holder === 'humano';
+const kindLabel = (m) => (isHum(m) && m.kind === 'coceo' ? 'Co-CEO humano' : KIND[m.kind]);
+const holderBadge = (m, cls = 'tn-badge') => h('span', { class: `${cls} ${isHum(m) ? 'is-human' : 'is-agent'}`, title: isHum(m) ? 'Persona del equipo humano' : 'Agente de IA' }, isHum(m) ? 'Humano' : 'Agente');
 const REC = { aprobar: ['Recomienda aprobar', 'ok'], rechazar: ['Recomienda rechazar', 'danger'], revisar: ['Recomienda revisar', 'warn'] };
 const GSTATE = { activo: ['Equipo activo', 'ok'], pausado: ['Equipo en pausa', 'warn'], detenido: ['Parada de emergencia', 'danger'] };
 const ERR = {
@@ -20,7 +24,7 @@ const ERR = {
   github_not_configured: 'Falta tu cuenta de GitHub conectada para enviar el cambio.', queue_full: 'La cola está llena.', rate_limited: 'Demasiados pedidos seguidos; esperá un minuto.',
   login_required: 'Tu sesión venció: ingresá de nuevo.', owner_only: 'Solo la cuenta dueña.',
   forbidden_role: 'Tu rol no permite esta acción.', outside_area: 'Solo podés actuar sobre los agentes de tu área.', owner_decides_this: 'Esto lo decide el dueño o un Co-CEO.', not_your_order: 'Solo podés cancelar las órdenes que diste vos.', session_expired: 'Tu sesión venció: entrá de nuevo.',
-  ceo_protected: 'Al CEO lo modifica solo el dueño.', invalid_parent: 'Ese jefe no sirve (el Co-CEO agéntico no tiene personas a cargo).', not_undoable: 'Ese puesto ya no se puede deshacer.', team_full: 'El equipo llegó al tope de 40 agentes.', not_decided: 'Esa orden todavía no tiene una decisión para revertir.', already_rejected: 'Ya estaba rechazada.', already_approved: 'Ya estaba aprobada.'
+  ceo_protected: 'Al CEO lo modifica solo el dueño.', invalid_parent: 'Ese jefe no sirve (el Co-CEO agéntico no tiene personas a cargo).', not_undoable: 'Ese puesto ya no se puede deshacer.', team_full: 'El equipo llegó al tope de 40 agentes.', not_decided: 'Esa orden todavía no tiene una decisión para revertir.', already_assigned: 'Esa persona ya ocupa un puesto: quitala de ese puesto o movela.', post_has_human: 'Ese puesto ya lo ocupa una persona.', no_room_rank: 'No hay lugar: el equipo de ese puesto ya llega al rango 5.', staff_inactive: 'Esa persona está suspendida.', coceo_post_needs_coceo_role: 'El puesto de Co-CEO lo puede ocupar solo una persona con rol Co-CEO.', slot_taken: 'Ese puesto ya está ocupado.', parent_missing: 'Falta el jefe de ese puesto.', not_your_post: 'Solo la persona de ese puesto (o el dueño) la puede marcar hecha.', not_open: 'Esa orden ya no está abierta.', use_unassign: 'A una persona se la quita con «Quitar del puesto».', invalid_mode: 'Elegí agente o humano.', training_is_for_agents: 'El entrenamiento es solo para agentes.', already_rejected: 'Ya estaba rechazada.', already_approved: 'Ya estaba aprobada.'
 };
 const ago = (t) => (t ? timeAgo(new Date(typeof t === 'number' ? t : Date.parse(t))) : 'todavía no');
 const hhmm = (t) => new Date(t).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Argentina/Buenos_Aires' });
@@ -63,7 +67,7 @@ export async function renderTeam(box, user, { base = String(CONFIG.API_BASE || '
   }
 
   function draw() {
-    root.replaceChildren(head(), channel(), quota(), proposals(), board(), slots(), ranking(), activity());
+    root.replaceChildren(head(), coceoPanel(), myInbox(), channel(), quota(), proposals(), board(), slots(), ranking(), activity());
   }
 
   /* ---------- Cabecera: estado global + controles ---------- */
@@ -177,13 +181,76 @@ export async function renderTeam(box, user, { base = String(CONFIG.API_BASE || '
       list.childElementCount ? list : h('p', { class: 'muted small' }, 'Todos los puestos están ocupados.'));
   }
 
+  /* ---------- Co-CEO principal (solo el dueño lo cambia) ---------- */
+  function coceoPanel() {
+    const cv = d.coceo; if (!cv) return null;
+    const agent = d.members.find((m) => m.kind === 'coceo' && !isHum(m));
+    const txt = cv.principal === 'agente'
+      ? `Co-CEO principal: ${agent ? agent.name : 'Co-CEO agéntico'} (agente). La persona con rol Co-CEO conserva sus permisos y figura como «Co-CEO humano». El agente solo recomienda, coordina y escribe notas: nunca aprueba ni publica.`
+      : `Co-CEO principal: la persona con rol Co-CEO.${cv.humanActive ? ' El agente figura como «Asistente del Co-CEO».' : ' Hoy no hay ninguna persona Co-CEO activa.'} Los permisos del agente no cambian.`;
+    const sec = h('section', { class: 'card panel team-coceo', 'aria-labelledby': 'team-co-h' }, h('div', { class: 'panel-head' }, h('h2', { id: 'team-co-h' }, 'Co-CEO principal')), h('p', { class: 'small' }, txt));
+    if (owner) {
+      const seg = h('div', { class: 'seg seg-sm seg-2', role: 'radiogroup', 'aria-label': 'Quién es el Co-CEO principal' });
+      for (const [v, l] of [['agente', 'Agente'], ['humano', 'Persona']]) seg.append(h('button', { type: 'button', role: 'radio', 'aria-checked': String(cv.principal === v), 'aria-selected': String(cv.principal === v), onclick: async () => { if (cv.principal === v) return; try { await call('/api/admin/team/coceo-principal', { method: 'POST', body: { mode: v } }); toast('Guardado (queda en la Bitácora)'); load(); } catch (e) { fail(e); } } }, l));
+      sec.append(seg, h('p', { class: 'muted tiny' }, 'Solo cambia quién figura como principal. Ningún permiso cambia: ni el de la persona Co-CEO ni el del agente.'));
+    }
+    return sec;
+  }
+
+  /* ---------- Tu puesto (persona que ocupa un puesto del organigrama) ---------- */
+  function myInbox() {
+    const mine = d.members.filter((m) => m.mine);
+    if (!mine.length) return null;
+    const ids = new Set(mine.map((m) => m.id));
+    const open = d.orders.filter((o) => ids.has(o.member_id) && ['pendiente', 'en_curso'].includes(o.status));
+    const below = d.members.filter((m) => mine.some((x) => m.parent_id === x.id));
+    return h('section', { class: 'card panel', 'aria-labelledby': 'team-mine-h' },
+      h('div', { class: 'panel-head' }, h('h2', { id: 'team-mine-h' }, 'Tu puesto'), ...mine.map((m) => h('span', { class: 'chip' }, m.role))),
+      h('p', { class: 'muted small' }, 'Trabajás en el organigrama junto a los agentes. Tus permisos son los de tu rol; el puesto no suma permisos. Las órdenes que recibís esperan a que las marques hechas (no las hace ningún agente).'),
+      open.length ? h('ul', { class: 'team-orders' }, ...open.map(orderRow)) : h('p', { class: 'muted small' }, 'No tenés órdenes abiertas.'),
+      below.length ? h('div', { class: 'team-below' }, h('small', { class: 'label' }, 'A tu cargo'), h('div', { class: 'team-chips' }, ...below.map((b) => h('button', { type: 'button', class: 'tchip', onclick: () => detail(b.id) }, `${b.name} · ${isHum(b) ? 'Humano' : 'Agente'}`)))) : null);
+  }
+
+  /** Solo el dueño: poner a una persona del equipo humano en un puesto (tomarlo, uno vacante o uno nuevo). */
+  function assignDialog(preset = {}) {
+    const free = (d.staff || []).filter((s) => !s.node);
+    if (!free.length) { toast((d.staff || []).length ? 'Todas las personas activas ya tienen puesto. Quitá a alguien de su puesto o invitá a otra persona en «Equipo humano».' : 'Todavía no hay personas en el equipo humano: invitalas en «Equipo humano».', 'info', 6000); return; }
+    const who = h('select', { class: 'select', 'aria-label': 'Persona' }, ...free.map((s) => h('option', { value: s.id }, `${s.name} · ${s.roleLabel}${s.area ? ' (' + s.area + ')' : ''}`)));
+    const how = h('select', { class: 'select', 'aria-label': 'Cómo' }, h('option', { value: 'post' }, 'Tomar el puesto de un agente (queda como su asistente)'), h('option', { value: 'slot' }, 'Ocupar un puesto vacante o cerrado'), h('option', { value: 'parent' }, 'Puesto nuevo debajo de alguien'));
+    const posts = d.members.filter((m) => m.kind !== 'ceo' && !isHum(m));
+    const post = h('select', { class: 'select', 'aria-label': 'Puesto' }, ...posts.map((m) => h('option', { value: m.id, selected: m.id === preset.post }, `${m.role !== m.name ? m.role + ' · ' : ''}${m.name} (rango ${m.rank})`)));
+    const vac = ((d.vacancies && d.vacancies.slots) || []).filter((x) => x.state !== 'ocupado');
+    const slot = h('select', { class: 'select', 'aria-label': 'Puesto vacante' }, ...(vac.length ? vac.map((x) => h('option', { value: x.id }, `${x.name} (${x.state})`)) : [h('option', { value: '' }, 'No hay puestos vacantes')]));
+    const par = h('select', { class: 'select', 'aria-label': 'Debajo de' }, ...d.members.filter((m) => m.kind !== 'coceo' && m.rank < 5).map((m) => h('option', { value: m.id }, `${m.name} (rango ${m.rank})`)));
+    const role = h('input', { class: 'input', maxlength: '80', placeholder: 'Ej.: Diseñadora, Analista comercial', 'aria-label': 'Nombre del puesto' });
+    const L = (t, el) => h('label', { class: 'label' }, t, el);
+    const fPost = L('Puesto', post), fSlot = L('Puesto vacante', slot), fPar = L('Debajo de', par), fRole = L('Nombre del puesto', role);
+    const err = h('p', { class: 'error-text', hidden: true });
+    const sync = () => { fPost.hidden = how.value !== 'post'; fSlot.hidden = how.value !== 'slot'; fPar.hidden = fRole.hidden = how.value !== 'parent'; };
+    how.onchange = sync; if (preset.how) how.value = preset.how; sync();
+    modal({
+      title: 'Poner una persona en un puesto', wide: true,
+      body: h('div', { class: 'team-form' }, L('Persona', who), L('Cómo', how), fPost, fSlot, fPar, fRole,
+        h('p', { class: 'muted small span-all' }, 'Personas y agentes trabajan juntos en el mismo organigrama. La persona conserva los permisos de su rol (los controla el servidor): el puesto no le da permisos nuevos. Sus órdenes no las hace ningún agente: esperan a que ella las marque hechas. Un puesto con persona no se cubre con un agente nuevo.'), err),
+      actions: [{ label: 'Cancelar', class: 'btn-ghost', value: false }, { label: 'Asignar', class: 'btn-primary', onClick: async () => {
+        const body = { staff_id: who.value };
+        if (how.value === 'post') body.post = post.value; else if (how.value === 'slot') { if (!slot.value) { err.textContent = 'No hay puestos vacantes.'; err.hidden = false; return false; } body.slot = slot.value; } else { body.parent_id = par.value; body.role = role.value.trim(); }
+        try { await call('/api/admin/team/humans', { method: 'POST', body }); toast('Persona asignada (queda en la Bitácora)'); load(); }
+        catch (e) { err.textContent = e.message; err.hidden = false; return false; }
+      } }]
+    });
+  }
+
   /* ---------- Lienzo ---------- */
   function board() {
     const sec = h('section', { class: 'card panel team-board', 'aria-labelledby': 'team-b' });
     const seg = h('div', { class: 'seg seg-sm seg-2', role: 'tablist', 'aria-label': 'Vista del equipo' });
     for (const [v, l] of [['mapa', 'Mapa'], ['lista', 'Lista']]) seg.append(h('button', { type: 'button', role: 'tab', 'aria-selected': String(view === v), onclick: () => { view = v; sessionStorage.setItem('team-view', v); draw(); } }, l));
     const addBtn = h('button', { class: 'btn btn-sm', type: 'button', html: icon('plus') + 'Agregar agente', onclick: () => editDialog(null) });
-    sec.append(h('div', { class: 'panel-head' }, h('h2', { id: 'team-b' }, 'Organigrama'), seg, addBtn));
+    const humBtn = owner ? h('button', { class: 'btn btn-sm', type: 'button', html: icon('plus') + 'Asignar persona', onclick: () => assignDialog() }) : null;
+    const nH = d.members.filter(isHum).length;
+    sec.append(h('div', { class: 'panel-head' }, h('h2', { id: 'team-b' }, 'Organigrama'), seg, addBtn, humBtn),
+      h('p', { class: 'muted tiny team-mix' }, holderBadge({ holder: 'humano' }), ' persona del equipo · ', holderBadge({ holder: 'agente' }), ` agente de IA · ${nH} persona(s) y ${d.members.length - nH} agentes trabajando juntos.`));
     if (view === 'lista') { sec.append(listView()); return sec; }
     sec.append(canvas());
     return sec;
@@ -195,7 +262,7 @@ export async function renderTeam(box, user, { base = String(CONFIG.API_BASE || '
     const item = (m, depth) => {
       const [sl, sc] = ST[m.status] || ST.activo;
       ul.append(h('li', { style: `--depth:${depth}` }, h('button', { type: 'button', class: 'team-li', onclick: () => detail(m.id) },
-        h('span', { class: 'tn-dot ' + sc, 'aria-hidden': 'true' }), h('span', { class: 'team-li-name' }, m.name), h('span', { class: 'chip' }, 'Rango ' + m.rank), h('span', { class: 'chip ' + sc }, sl),
+        h('span', { class: 'tn-dot ' + sc, 'aria-hidden': 'true' }), h('span', { class: 'team-li-name' }, m.name), holderBadge(m), m.principal ? h('span', { class: 'tn-badge is-principal' }, 'Principal') : null, h('span', { class: 'chip' }, 'Rango ' + m.rank), h('span', { class: 'chip ' + sc }, sl),
         h('span', { class: 'muted tiny' }, `${m.tasks_done} tareas · ${m.queue} en cola`))));
       for (const k of kids(m.id)) item(k, depth + 1);
     };
@@ -247,13 +314,14 @@ export async function renderTeam(box, user, { base = String(CONFIG.API_BASE || '
       const order = h('button', { type: 'button', class: 'tn-order', html: icon('send') + '<span>Dar orden</span>' });
       order.onclick = (e) => { e.stopPropagation(); orderDialog(m); };
       const port = h('span', { class: 'tn-port', title: 'Arrastrá hasta otro nodo para cambiar a quién reporta', 'aria-hidden': 'true' });
-      const n = h('div', { class: `tn tn-${m.kind} st-${m.status}`, tabindex: '0', role: 'button', 'aria-label': `${m.name}, ${KIND[m.kind]}, rango ${m.rank}, ${sl}. Abrir detalle.`, dataset: { id: m.id } },
-        m.kind !== 'ceo' && m.kind !== 'coceo' ? port : null,
-        h('div', { class: 'tn-top' }, h('span', { class: 'tn-dot ' + sc, 'aria-hidden': 'true' }), h('strong', { class: 'tn-name' }, m.name), h('span', { class: 'tn-rank', title: 'Rango' }, 'R' + m.rank)),
-        h('div', { class: 'tn-role' }, m.role !== m.name ? m.role : m.kind === 'lead' && m.rank >= 3 ? 'Supervisor' : KIND[m.kind]),
+      const hum = isHum(m);
+      const n = h('div', { class: `tn tn-${m.kind} st-${m.status}${hum ? ' tn-human' : ''}${m.principal ? ' tn-principal' : ''}`, tabindex: '0', role: 'button', 'aria-label': `${m.name}, ${hum ? 'Humano' : 'Agente'}, ${kindLabel(m)}${m.principal ? ' principal' : ''}, rango ${m.rank}, ${sl}. Abrir detalle.`, dataset: { id: m.id } },
+        m.kind !== 'ceo' && m.kind !== 'coceo' && (!hum || owner) ? port : null,
+        h('div', { class: 'tn-top' }, h('span', { class: 'tn-dot ' + sc, 'aria-hidden': 'true' }), h('strong', { class: 'tn-name' }, m.name), holderBadge(m), h('span', { class: 'tn-rank', title: 'Rango' }, 'R' + m.rank)),
+        h('div', { class: 'tn-role' }, m.principal ? h('span', { class: 'tn-badge is-principal' }, 'Principal') : null, m.role !== m.name ? m.role : m.kind === 'lead' && m.rank >= 3 ? 'Supervisor' : kindLabel(m), hum && m.human && m.kind !== 'coceo' ? h('span', { class: 'muted' }, ' · ' + m.human.roleLabel) : null),
         earned(m, 3),
         h('div', { class: 'tn-meta' }, m.progress && m.progress.isNew ? h('span', { class: 'tn-new', title: 'Agente nuevo: arranca en 0 XP' }, 'Nuevo') : null, m.progress && m.progress.rest ? h('span', { class: 'tn-rest', title: 'Sala de descanso (metáfora): ' + m.progress.rest }, 'Descansa') : null, `Nv ${m.progress ? m.progress.level : 1} · ${m.progress ? m.progress.xp : 0} XP · ${m.queue} en cola · ${m.last_run_at ? ago(m.last_run_at) : 'sin turnos'}`),
-        h('div', { class: 'tn-foot' }, sw, order));
+        h('div', { class: 'tn-foot' }, hum && !owner ? h('span', { class: 'muted tiny' }, 'Persona') : sw, order));
       n.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); detail(m.id); } });
       nodes[m.id] = n; stage.append(n); place(m.id);
     }
@@ -332,12 +400,12 @@ export async function renderTeam(box, user, { base = String(CONFIG.API_BASE || '
   function orderDialog(m, first = false) {
     const ta = h('textarea', { class: 'input', rows: '4', maxlength: '1200', required: true, placeholder: m.kind === 'ceo' ? 'Ej.: Mejorá la velocidad de la portada en celulares.' : 'Ej.: Revisá los textos de la página de planes.', 'aria-label': 'Orden' });
     const pr = h('select', { class: 'select', 'aria-label': 'Prioridad' }, ...[2, 3, 4, 1].map((p) => h('option', { value: String(p) }, p === 2 ? 'Prioridad media' : 'Prioridad ' + PRIO[p])));
-    const hint = m.kind === 'ceo' ? 'El CEO arma un plan con las tareas y a quién se las da (con el motivo). El plan llega acá para tu OK.' : m.kind === 'lead' ? 'El líder la pasa a la persona de su equipo cuyas habilidades mejor encajan.' : 'Responde con un informe o una propuesta de cambio. Nada se publica sin las reglas de siempre.';
+    const hint = isHum(m) ? `${m.name} es una persona: la orden le queda en «Tu puesto» y la marca hecha cuando la termina. Ningún agente la hace por ella.` : m.kind === 'ceo' ? 'El CEO arma un plan con las tareas y a quién se las da (con el motivo). El plan llega acá para tu OK.' : m.kind === 'lead' ? 'El líder la pasa a la persona de su equipo cuyas habilidades mejor encajan.' : 'Responde con un informe o una propuesta de cambio. Nada se publica sin las reglas de siempre.';
     const err = h('p', { class: 'error-text', hidden: true });
     modal({
       title: first ? `Primera tarea para ${m.name}` : `Dar orden a ${m.name}`, label: `Dar orden a ${m.name}`,
       body: h('div', { class: 'stack team-order' }, h('p', { class: 'muted small' }, hint), h('label', { class: 'label' }, 'Qué tiene que hacer'), ta, pr, err,
-        h('p', { class: 'muted tiny' }, m.status !== 'activo' ? `Ahora está ${ST[m.status][0].toLowerCase()}: la orden espera en la cola hasta que lo actives.` : `Se toma en el próximo turno (cada ${d.schedule.everyMin} min) o con «Hacer trabajar ahora».`)),
+        h('p', { class: 'muted tiny' }, isHum(m) ? 'Le aparece en su panel en cuanto entra.' : m.status !== 'activo' ? `Ahora está ${ST[m.status][0].toLowerCase()}: la orden espera en la cola hasta que lo actives.` : `Se toma en el próximo turno (cada ${d.schedule.everyMin} min) o con «Hacer trabajar ahora».`)),
       actions: [{ label: 'Cancelar', class: 'btn-ghost', value: false }, { label: 'Enviar orden', class: 'btn-primary', onClick: async () => {
         if (ta.value.trim().length < 4) { err.textContent = 'Escribí la orden (al menos 4 letras).'; err.hidden = false; return false; }
         try { await call('/api/admin/team/orders', { method: 'POST', body: { member_id: m.id, text: ta.value.trim(), priority: Number(pr.value) } }); toast('Orden en la cola'); load(); }
@@ -352,13 +420,14 @@ export async function renderTeam(box, user, { base = String(CONFIG.API_BASE || '
     const hist = h('div', { class: 'team-hist' }, h('div', { class: 'skeleton', style: 'height:60px' }));
     const seg = h('div', { class: 'seg seg-sm', role: 'radiogroup', 'aria-label': 'Estado' });
     for (const s of ['activo', 'pausado', 'desactivado']) seg.append(h('button', { type: 'button', role: 'radio', 'aria-checked': String(m.status === s), 'aria-selected': String(m.status === s), onclick: async () => { try { await call(`/api/admin/team/members/${m.id}`, { method: 'PATCH', body: { status: s } }); dlg.close(); load(); } catch (e) { fail(e); } } }, ST[s][0]));
-    const runOne = h('button', { class: 'btn btn-sm', type: 'button', html: icon('play') + 'Hacer trabajar ahora', disabled: m.status !== 'activo' || d.state !== 'activo' });
-    runOne.onclick = async () => { runOne.disabled = true; try { const r = await call('/api/admin/team/tick', { method: 'POST', body: { member: m.id } }); toast(r.did && r.did.length ? r.did.join(' · ') : 'Sin tareas para hacer ahora'); dlg.close(); load(); } catch (e) { fail(e); runOne.disabled = false; } };
+    const hum = isHum(m);
+    const runOne = hum ? null : h('button', { class: 'btn btn-sm', type: 'button', html: icon('play') + 'Hacer trabajar ahora', disabled: m.status !== 'activo' || d.state !== 'activo' });
+    if (runOne) runOne.onclick = async () => { runOne.disabled = true; try { const r = await call('/api/admin/team/tick', { method: 'POST', body: { member: m.id } }); toast(r.did && r.did.length ? r.did.join(' · ') : 'Sin tareas para hacer ahora'); dlg.close(); load(); } catch (e) { fail(e); runOne.disabled = false; } };
     const parent = d.members.find((x) => x.id === m.parent_id);
     const dlg = modal({
       title: m.name, wide: true,
       body: h('div', { class: 'stack team-detail' },
-        h('div', { class: 'team-detail-top' }, h('span', { class: 'chip' }, KIND[m.kind]), h('span', { class: 'chip' }, 'Rango ' + m.rank), parent ? h('span', { class: 'muted small' }, 'Reporta a ' + parent.name) : null, m.agent_id ? h('span', { class: 'chip info' }, 'Agente de GitHub: ' + m.agent_id) : null),
+        h('div', { class: 'team-detail-top' }, holderBadge(m), m.principal ? h('span', { class: 'tn-badge is-principal' }, 'Co-CEO principal') : null, h('span', { class: 'chip' }, kindLabel(m)), hum && m.human ? h('span', { class: 'chip' }, 'Rol: ' + m.human.roleLabel) : null, hum && m.human && m.human.status !== 'activo' ? h('span', { class: 'chip warn' }, 'Cuenta ' + m.human.status) : null, h('span', { class: 'chip' }, 'Rango ' + m.rank), parent ? h('span', { class: 'muted small' }, 'Reporta a ' + parent.name) : null, m.agent_id ? h('span', { class: 'chip info' }, 'Agente de GitHub: ' + m.agent_id) : null),
         h('p', {}, m.duties),
         h('div', { class: 'team-profile' },
           h('div', {}, h('small', { class: 'label' }, 'Habilidades'), chips(m.tags, 12) || h('span', { class: 'muted small' }, '—')),
@@ -372,9 +441,11 @@ export async function renderTeam(box, user, { base = String(CONFIG.API_BASE || '
           (m.progress.skills || []).length ? earned(m, 12) : h('p', { class: 'muted small' }, m.progress.isNew ? 'Nuevo: todavía no ganó habilidades.' : 'Todavía ninguna.'),
           h('small', { class: 'label' }, `Lecciones aprendidas (${m.progress.lessonCount}) · las 5 más nuevas entran (recortadas) en sus próximos pedidos al modelo`),
           m.progress.lessons.length ? h('ul', { class: 'team-lessons' }, ...m.progress.lessons.map((l) => h('li', {}, l))) : h('p', { class: 'muted small' }, 'Todavía ninguna.')) : null,
-        h('div', { class: 'team-detail-actions' }, seg, runOne,
+        h('div', { class: 'team-detail-actions' }, !hum || owner ? seg : null, runOne,
           h('button', { class: 'btn btn-sm btn-primary', type: 'button', html: icon('send') + 'Dar orden', onclick: () => { dlg.close(); orderDialog(m); } }),
-          h('button', { class: 'btn btn-sm btn-ghost', type: 'button', html: icon('edit') + 'Editar', onclick: () => { dlg.close(); editDialog(m); } })),
+          hum ? null : h('button', { class: 'btn btn-sm btn-ghost', type: 'button', html: icon('edit') + 'Editar', onclick: () => { dlg.close(); editDialog(m); } }),
+          owner && !hum && m.kind !== 'ceo' ? h('button', { class: 'btn btn-sm btn-ghost', type: 'button', html: icon('plus') + 'Poner una persona en este puesto', onclick: () => { dlg.close(); assignDialog({ how: 'post', post: m.id }); } }) : null,
+          owner && hum ? h('button', { class: 'btn btn-sm btn-ghost danger-text', type: 'button', onclick: async () => { if (!(await confirmDialog({ title: 'Quitar del puesto', text: `${m.name} deja el puesto «${m.role}». Su cuenta y su rol no cambian. Si tenía un agente asistente del mismo puesto, vuelve a ocuparlo; si no, el puesto queda vacante.`, ok: 'Quitar', danger: true }))) return; try { const r = await call(`/api/admin/team/humans/${m.id}`, { method: 'DELETE' }); toast(r.restored ? 'Listo: el agente vuelve a ocupar el puesto' : 'Listo'); dlg.close(); load(); } catch (e) { fail(e); } } }, 'Quitar del puesto') : null),
         h('h3', { class: 'team-sub' }, 'Bandeja: órdenes recibidas, resultados y reportes'), hist)
     });
     try {
@@ -391,8 +462,19 @@ export async function renderTeam(box, user, { base = String(CONFIG.API_BASE || '
       h('div', { class: 'team-order-head' }, h('span', { class: 'chip ' + c }, l), h('strong', {}, o.text.slice(0, 120)), h('span', { class: 'muted tiny' }, `${src} · ${PRIO[o.priority] || ''} · ${ago(o.created_at)}`)),
       o.reason ? h('p', { class: 'muted tiny team-why' }, 'Por qué: ' + o.reason) : null,
       o.result && o.result.summary ? h('p', { class: 'small' }, o.result.summary) : null,
-      o.link ? h('a', { class: 'small', href: o.link, target: '_blank', rel: 'noopener' }, 'Ver en GitHub') : null, cancel,
+      o.link ? h('a', { class: 'small', href: o.link, target: '_blank', rel: 'noopener' }, 'Ver en GitHub') : null, cancel, doneBtn(o),
       o.status === 'propuesta' ? decideBtns(o) : null, overrideRow(o));
+  }
+
+  /** Persona del puesto (o el dueño): marcar hecha una orden que recibió. Suma +5 XP real. */
+  function doneBtn(o) {
+    const m = d.members.find((x) => x.id === o.member_id);
+    if (!isHum(m) || !['pendiente', 'en_curso'].includes(o.status) || !(m.mine || owner)) return null;
+    return h('button', { class: 'btn btn-sm', type: 'button', html: icon('check') + 'Marcar hecha', onclick: () => {
+      const ta = h('textarea', { class: 'input', rows: '3', maxlength: '400', placeholder: 'Qué hiciste (opcional)', 'aria-label': 'Resumen' });
+      modal({ title: 'Marcar hecha', label: 'Marcar hecha', body: h('div', { class: 'stack' }, h('p', { class: 'small' }, o.text), ta),
+        actions: [{ label: 'Cancelar', class: 'btn-ghost', value: false }, { label: 'Marcar hecha', class: 'btn-primary', onClick: async () => { try { await call(`/api/admin/team/orders/${o.id}/done`, { method: 'POST', body: { summary: ta.value.trim() } }); toast('Hecha (+5 XP)'); load(); } catch (e) { toast(e.message, 'danger'); return false; } } }], onOpen: () => ta.focus() });
+    } });
   }
 
   /** Solo el CEO (dueño): revertir lo que decidió otra persona (por ejemplo, el Co-CEO). El servidor lo vuelve a controlar. */
@@ -479,8 +561,8 @@ export async function renderTeam(box, user, { base = String(CONFIG.API_BASE || '
     const paint = () => {
       const rows = d.members.filter((m) => m.kind === 'worker' && (!area || m.parent_id === area)).map((m) => ({ m, p: m.progress || {} }))
         .map((r) => ({ ...r, score: period === 'hoy' ? r.p.todayDone || 0 : r.p.xp || 0 })).sort((a, b) => b.score - a.score);
-      body.replaceChildren(h('table', { class: 'table' }, h('thead', {}, h('tr', {}, ...['#', 'Agente', period === 'hoy' ? 'Tareas hoy' : 'XP', 'Hechas', 'Aprobadas', 'Errores', 'Nivel'].map((t) => h('th', {}, t)))),
-        h('tbody', {}, ...rows.map((r, i) => h('tr', {}, h('td', {}, String(i + 1)), h('td', {}, h('button', { class: 'linklike', type: 'button', onclick: () => detail(r.m.id) }, r.m.name)), h('td', {}, String(r.score)), h('td', {}, String(r.p.done || 0)), h('td', {}, String(r.p.approved || 0)), h('td', {}, String(r.p.failed || 0)), h('td', {}, String(r.p.level || 1)))))));
+      body.replaceChildren(h('table', { class: 'table' }, h('thead', {}, h('tr', {}, ...['#', 'Persona o agente', period === 'hoy' ? 'Tareas hoy' : 'XP', 'Hechas', 'Aprobadas', 'Errores', 'Nivel'].map((t) => h('th', {}, t)))),
+        h('tbody', {}, ...rows.map((r, i) => h('tr', {}, h('td', {}, String(i + 1)), h('td', {}, h('button', { class: 'linklike', type: 'button', onclick: () => detail(r.m.id) }, r.m.name), ' ', holderBadge(r.m)), h('td', {}, String(r.score)), h('td', {}, String(r.p.done || 0)), h('td', {}, String(r.p.approved || 0)), h('td', {}, String(r.p.failed || 0)), h('td', {}, String(r.p.level || 1)))))));
     };
     areaSel.onchange = () => { area = areaSel.value; sessionStorage.setItem('team-rk-a', area); paint(); };
     perSel.onchange = () => { period = perSel.value; sessionStorage.setItem('team-rk-p', period); paint(); };

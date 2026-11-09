@@ -274,3 +274,18 @@
 @media (max-width: 480px) { .live-teams { grid-template-columns: 1fr; } .live-views { max-width: 100%; } }
 .gate-denied .btn { white-space: normal; max-width: 100%; text-align: center; }
 @media (max-width: 480px) { .live-views { grid-template-columns: repeat(2, 1fr); overflow: visible; } }
+
+/* Personas y agentes en el mismo organigrama (insignia Humano / Agente) y Co-CEO principal */
+.tn-badge { display: inline-block; flex: none; font-size: 10.5px; font-weight: 700; line-height: 1.5; padding: 0 6px; border-radius: 999px; border: 1px solid; vertical-align: middle; white-space: nowrap; }
+.tn-badge.is-human { background: #fff1e6; color: #8a3b05; border-color: #f6c79f; }
+.tn-badge.is-agent { background: #eef2ff; color: #3730a3; border-color: #c7d2fe; }
+.tn-badge.is-principal { background: #f6f2ff; color: #4c1d95; border-color: #c7b8f5; margin-right: 4px; }
+.tn-human { border-style: solid; border-color: #f6c79f; background: linear-gradient(180deg, #fffaf5, #fff); }
+.tn-principal { box-shadow: 0 0 0 2px #c7b8f5, var(--shadow, 0 1px 2px rgba(0,0,0,.06)); }
+.team-mix { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin: 0 0 8px; }
+.team-coceo .seg { max-width: 360px; margin-top: 4px; }
+.team-below { margin-top: 10px; }
+.team-below .tchip { cursor: pointer; border: 1px solid var(--line); background: var(--card, #fff); }
+.team-li .tn-badge { margin-left: 2px; }
+.ws-people { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 10px; }
+.ws-people .ws-person { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; padding: 2px 8px; border: 1px solid var(--line); border-radius: 999px; background: var(--card, #fff); }
