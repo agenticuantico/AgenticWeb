@@ -6,8 +6,15 @@ import { watchUser, getProfile } from './auth.js';
 import { setIdTokenProvider } from './chat/engine.js';
 import { esc } from './ui.js';
 
-/* Sin avatar 3D: un objeto liviano recibe los estados del chat y los refleja en el hero neuronal. */
-const avatar = { state: 'idle', setState(st) { this.state = st; }, pulse() {}, setVisemes() {}, load() { return Promise.resolve(); } };
+import { AvatarStage } from './chat/avatar.js';
+
+/* Portada: personaje en vivo, liviano: sigue el cursor (o el último toque), respira y parpadea. Nada más.
+   Los gestos completos (poses, manos, cejas) y los labios sincronizados con la voz van en la videollamada
+   del chat (ventana minimizada), que recibe los estados del chat: escuchando → pensando → hablando. */
+const heroEl = document.getElementById('heroChar');
+if (heroEl) new AvatarStage(heroEl, { label: 'AgentiCuántico, asistente de inteligencia artificial', fit: 'contain', track: true, lite: true });
+/* El chat de la portada no tiene avatar propio: este objeto solo refleja el estado en el cartel del hero. */
+const avatar = { state: 'idle', setState(st) { this.state = st; }, pulse() {}, setVisemes() {}, setLevel() {}, load() { return Promise.resolve(); } };
 const store = new ChatStore();
 const chat = new ChatApp(document.getElementById('homeChat'), { variant: 'embed', avatar, store });
 document.addEventListener('keydown', (e) => { if (document.activeElement && document.getElementById('homeChat').contains(document.activeElement)) chat.handleShortcut(e); });
@@ -25,12 +32,26 @@ watchUser(async (u) => {
   if (pm) mountPlans(pm, { user: u, profile });
 });
 
-/* Hero neuronal (diseño clásico): estados sincronizados con el avatar del chat */
-import('./neural-hero.js').then((m) => {
-  m.initNeuralHero();
+/* Cartel del hero: estado del chat (mismos textos que antes, ya traducidos) */
+{
+  const HUD = {
+    idle: ['Vías neuronales activas · En espera', 'Conectado al chat', '#9fff00'],
+    listening: ['Vías neuronales activas · En espera', 'Conectado al chat', '#9fff00'],
+    thinking: ['Razonamiento en proceso…', 'Análisis multi-agente', '#a855f7'],
+    talking: ['Respondiendo', 'Texto y voz femenina', '#22c55e']
+  };
+  const st = document.getElementById('heroHudStatus'), dt = document.getElementById('heroHudDetail'), dot = document.getElementById('heroHudDot');
   const orig = avatar.setState.bind(avatar);
-  avatar.setState = (st) => { orig(st); m.setNeuralState(st === 'thinking' ? 'thinking' : st === 'talking' ? 'speaking' : 'idle'); };
-}).catch(() => {});
+  avatar.setState = (s) => {
+    orig(s);
+    const h = HUD[s] || HUD.idle;
+    if (st && st.textContent !== h[0]) st.textContent = h[0];
+    if (dt && dt.textContent !== h[1]) dt.textContent = h[1];
+    if (dot) dot.style.background = h[2];
+  };
+  const stage = document.getElementById('heroVisualWrapper');
+  if (stage) stage.addEventListener('click', () => { const c = document.getElementById('chat'); c && c.scrollIntoView({ behavior: 'smooth' }); setTimeout(() => { const i = document.querySelector('#homeChat textarea'); i && i.focus({ preventScroll: true }); }, 500); });
+}
 
 /* Cerebro neuronal 3D (forma anatómica, red dorada; se enciende cuando el chat procesa o habla) */
 let brainCtl = null;

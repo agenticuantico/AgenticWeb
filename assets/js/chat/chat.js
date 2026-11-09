@@ -32,7 +32,7 @@ const MODES = {
 };
 
 const PHASES = { thinking: 'Pensando', searching: 'Buscando', coding: 'Escribiendo código', verifying: 'Verificando', reading: 'Leyendo', agent: 'Especialista', confirm: 'Confirmación' };
-const FACE = '/media/agenticuantico-avatar.webp?v=2';
+const FACE = '/media/agenticuantico-avatar.webp?v=3';
 
 const SUGGESTIONS = [
   { t: '¿Qué es AgentiCuántico?', i: 'info' },
@@ -133,7 +133,7 @@ export class ChatApp {
         </div>
         <div class="ace-empty" data-role="empty">
           <span class="ace-hello-face" aria-hidden="true"><img src="${FACE}" alt="" width="96" height="96"></span>
-          <h3 class="ace-greeting" data-role="greeting"></h3>
+          <h2 class="ace-greeting" data-role="greeting"></h2>
           <p class="ace-hello-sub" data-role="greetingSub"></p>
           <div class="ace-sugg" data-role="suggestions"></div>
         </div>

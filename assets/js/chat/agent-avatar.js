@@ -35,7 +35,9 @@ export class AgentAvatar {
     el._agentAvatar = this;
   }
 
+  /* El personaje animado (2.5D) ya está listo: el modelo 3D anterior quedó fuera de uso (otro personaje). */
   load() {
+    if (!this._allow3d) return Promise.resolve(null);
     if (this._p) return this._p;
     if (!canUse3D()) { this.el.classList.add('no-3d'); this._p = Promise.resolve(null); return this._p; }
     this.loadEl.hidden = false; this.loadEl.textContent = 'Cargando avatar…';

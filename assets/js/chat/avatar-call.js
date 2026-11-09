@@ -19,7 +19,6 @@ class AvatarCall {
       <div class="agent-pip-bar" data-drag>
         <span class="agent-pip-title"><span class="agent-pip-led"></span><strong>AgentiCuántico</strong><small data-role="pipStatus">En llamada</small></span>
         <span class="agent-pip-actions">
-          <button type="button" class="agent-pip-btn" data-act="framing" aria-pressed="false" aria-label="Ver cuerpo entero" title="Ver cuerpo entero">${icon('body')}</button>
           <button type="button" class="agent-pip-btn" data-act="expand" aria-label="Ampliar" title="Ampliar">${icon('expand')}</button>
           <button type="button" class="agent-pip-btn" data-act="close" aria-label="Cerrar videollamada" title="Cerrar">${icon('close')}</button>
         </span>

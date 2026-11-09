@@ -11,7 +11,7 @@ export const SITE_LANGS = [
   { id: 'pt-BR', short: 'PT', name: 'Português', region: 'Brasil', flag: 'br' },
 ];
 const KEY = 'ac.siteLang';
-const VERSION = '7.4.0';
+const VERSION = '7.6.0';
 const ATTRS = ['placeholder', 'alt', 'aria-label', 'title'];
 const SKIP = new Set(['SCRIPT', 'STYLE', 'NOSCRIPT', 'CODE', 'PRE', 'TEXTAREA', 'SVG', 'svg']);
 const NO = '[data-no-i18n], .msg .md, .msg-body .md, .bubble .md, .ace-bubble .md, .canvas-code, .cm-editor, .transcript p';
@@ -118,7 +118,7 @@ function observe() {
 
 async function loadDict(id) {
   if (id === 'es-AR') return null;
-  const r = await fetch(`/assets/i18n/${id}.json?v=${VERSION}`, { cache: 'force-cache' });
+  const r = await fetch(`/assets/i18n/${id}.json?v=${VERSION}`, { cache: 'no-cache' } /* siempre revalida (304 si no cambió): las traducciones nuevas llegan a todos los dispositivos */);
   if (!r.ok) throw new Error('i18n ' + r.status);
   return r.json();
 }

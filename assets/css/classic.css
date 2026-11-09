@@ -231,7 +231,7 @@ h3, h4 { font-weight: 700; letter-spacing: -.01em; }
 .steps-3 .card::before { color: #65a30d; }
 .flag-steps li.wait .n { background: #9fff00; color: #18181b; }
 .trust svg { color: #65a30d; }
-.prose a, .card a:not(.btn) { color: #1d4ed8; }
+.prose a:not(.btn), .card a:not(.btn) { color: #1d4ed8; }
 .site-header a, .site-footer a { text-decoration: none; }
 dialog.modal { border-radius: 28px; }
 .consent { border-radius: 22px; }
@@ -385,3 +385,15 @@ html { background: #EDEEF5; }
   .site-header .nav .nav-contact-btn span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   .site-header .nav .nav-link { padding: 8px 7px; }
 }
+
+/* Auditoría 2026-11-09: reservar el lugar del contenido que dibuja JavaScript (evita saltos de la página al cargar). */
+#plansFull { min-height: 1500px; }
+@media (min-width: 700px) { #plansFull { min-height: 1340px; } }
+@media (min-width: 1000px) { #plansFull { min-height: 500px; } }
+#main:has(#accountRoot), #main:has(.container-wide) { min-height: calc(100vh - 72px); }
+/* Portada: personaje en vivo (entero, sigue el cursor); reemplaza la imagen del cerebro y el lienzo neuronal */
+.hero-char { position: absolute; inset: 0; }
+.hero-char.char-stage { background: radial-gradient(70% 95% at 50% 58%, #d3d6e1 0%, #c7cbd8 55%, #b8bccb 100%); }
+.hero-char .ch-figure { -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 7%, #000 93%, transparent 100%); mask-image: linear-gradient(90deg, transparent 0, #000 7%, #000 93%, transparent 100%); }
+.hero-char .avatar-status { display: none; }
+.cyborg-hero-stage .hero-neural-canvas { display: none; }

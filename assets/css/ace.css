@@ -296,3 +296,4 @@ body.design-lock { overflow: hidden; }
 .ace-task-more { padding: 0 14px 10px; }
 .ace-task-more > summary { cursor: pointer; font-size: 13px; font-weight: 650; color: var(--a-ink); padding: 8px 0 2px; }
 .ace-task-more ul { padding: 8px 0 2px; }
+.ace-mouth, .ace-ava.speaking .ace-mouth { display: none !important; }

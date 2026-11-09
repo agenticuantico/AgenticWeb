@@ -122,8 +122,8 @@ export async function localSite(task, lang = 'es', base = '/assets/tpl/') {
   const id = pickTemplate(task);
   const file = id === 'coffee' ? 'coffee' : 'immersive';
   const [tpl, data] = await Promise.all([
-    fetch(base + file + '.html', { cache: 'force-cache' }).then((r) => { if (!r.ok) throw new Error('tpl'); return r.text(); }),
-    fetch(base + id + '.json', { cache: 'force-cache' }).then((r) => { if (!r.ok) throw new Error('tpl'); return r.json(); })
+    fetch(base + file + '.html', { cache: 'no-cache' }).then((r) => { if (!r.ok) throw new Error('tpl'); return r.text(); }),
+    fetch(base + id + '.json', { cache: 'no-cache' }).then((r) => { if (!r.ok) throw new Error('tpl'); return r.json(); })
   ]);
   const brand = brandFromTask(task);
   if (brand) {
