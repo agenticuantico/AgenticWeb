@@ -626,7 +626,7 @@ export async function main() {
         const rec = await runRole(role, base);
         log(`${role.id}: ${rec.status}${rec.pr ? ' → ' + rec.pr : ''} · ${String(rec.summary).slice(0, 200)}`);
         result.roles.push(rec);
-        if (['no-change', 'skipped', 'rejected', 'invalid', 'dry-run'].includes(rec.status)) await report({ kind: rec.status === 'no-change' ? 'no-change' : 'skip', role: role.id, title: rec.title, detail: String(rec.summary).slice(0, 280) });
+        if (['no-change', 'skipped', 'rejected', 'invalid', 'dry-run'].includes(rec.status)) await report({ kind: rec.status === 'no-change' ? 'no-change' : rec.status === 'dry-run' ? 'dry-run' : 'skip', role: role.id, title: rec.title, detail: String(rec.summary).slice(0, 280) });
       } catch (e) {
         const st = e instanceof ModelError ? (e.status === 423 ? 'paused' : e.status === 429 ? 'rate-limited' : 'model-unavailable') : 'error';
         log(`${role.id}: ${st} ${e.message}`);

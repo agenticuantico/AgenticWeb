@@ -9,7 +9,7 @@ import { CONFIG } from './config.js';
 
 const KIND_LABEL = {
   'auto-publish': ['Publicó solo', 'ok'], 'smoke-ok': ['Verificado en vivo', 'ok'], revert: ['Se deshizo solo', 'danger'], pr: ['Propuesta', 'gold'],
-  'no-change': ['Sin cambios', ''], skip: ['Salteado', ''], error: ['Error', 'danger'], 'manual-run': ['Pedido manual', 'gold'],
+  'no-change': ['Sin cambios', ''], skip: ['Descartado', ''], 'dry-run': ['Ensayo', ''], error: ['Error', 'danger'], 'manual-run': ['Pedido manual', 'gold'],
   approve: ['Aprobada', 'ok'], reject: ['Rechazada', ''], state: ['Estado', 'warn'], run: ['Ronda', '']
 };
 const STATE = { activo: ['Activos', 'ok', 'Trabajan solos según su horario.'], pausado: ['En pausa', 'warn', 'No empiezan trabajos nuevos.'], detenido: ['Detenidos', 'danger', 'Parada de emergencia: no corre nada.'] };
@@ -82,7 +82,7 @@ export async function renderAutonomy(box, user, { base = String(CONFIG.API_BASE 
         d.state === 'activo' ? h('button', { class: 'btn', type: 'button', html: icon('pause') + 'Pausar', onclick: () => setState('pausado') })
           : h('button', { class: 'btn btn-gold', type: 'button', html: icon('play') + 'Reanudar', onclick: () => setState('activo') }),
         h('button', { class: 'btn btn-danger', type: 'button', disabled: d.state === 'detenido' || null, html: icon('stop') + 'Parada de emergencia', onclick: () => setState('detenido') }))));
-    section.append(h('p', { class: 'small muted' }, `Solos se publican solo arreglos chicos que pasan todas las pruebas (tipeo, enlaces rotos, accesibilidad, carga de imágenes): hasta ${d.limits.autoMaxFiles} archivos y ${d.limits.autoMaxLines} líneas, ${d.limits.autoPerDay} por día. Después se revisa el sitio en vivo y, si algo falla, se deshace solo. Todo lo demás llega como propuesta para tu OK.`));
+    section.append(h('p', { class: 'small muted' }, `Se publican solos únicamente los arreglos chicos que pasan todas las pruebas (errores de tipeo, enlaces rotos, accesibilidad y carga de imágenes): hasta ${d.limits.autoMaxFiles} archivos y ${d.limits.autoMaxLines} líneas por cambio, y ${d.limits.autoPerDay} por día. Después se revisa el sitio en vivo y, si algo falla, se deshace solo. Todo lo demás llega como propuesta para tu OK.`));
     // Agentes
     const list = h('div', { class: 'agx-agents' });
     for (const a of d.agents) {
@@ -129,23 +129,24 @@ export async function renderAutonomy(box, user, { base = String(CONFIG.API_BASE 
         detail, h('div', { class: 'row' }, view, ok, no)));
     }
     section.append(h('h3', {}, 'Propuestas pendientes'), pend);
-    // Bitácora
+    // Bitácora (lista: se lee bien en el teléfono)
     const rows = d.log.slice(0, 25);
     section.append(h('h3', {}, 'Qué hizo cada agente'));
     if (!rows.length) section.append(h('p', { class: 'muted small' }, 'Todavía no hay actividad registrada.'));
-    else section.append(h('div', { class: 'table-wrap' }, h('table', { class: 'table' },
-      h('thead', {}, h('tr', {}, ...['Cuándo', 'Agente', 'Qué pasó', 'Detalle', ''].map((t) => h('th', {}, t)))),
-      h('tbody', {}, ...rows.map((e) => {
-        const [kl, kc] = KIND_LABEL[e.kind] || [e.kind, ''];
-        const name = (d.agents.find((a) => a.id === e.role) || {}).name || (e.role === 'equipo' ? 'Equipo' : e.role);
-        return h('tr', {}, h('td', { class: 'tiny' }, ago(e.at)), h('td', {}, name), h('td', {}, h('span', { class: 'chip ' + kc }, kl)),
-          h('td', { class: 'small' }, [e.title, e.detail].filter(Boolean).join(' · ')),
-          h('td', {}, e.url ? h('a', { href: e.url, target: '_blank', rel: 'noopener' }, e.url.includes('/pull/') ? 'PR' : 'commit') : ''));
-      })))));
+    else section.append(h('ul', { class: 'agx-log' }, ...rows.map((e) => {
+      const [kl, kc] = KIND_LABEL[e.kind] || [e.kind, ''];
+      const name = (d.agents.find((a) => a.id === e.role) || {}).name || (e.role === 'equipo' ? 'Equipo' : e.role);
+      return h('li', {}, h('div', { class: 'agx-log-head' }, h('span', { class: 'chip ' + kc }, kl), h('strong', {}, name), h('span', { class: 'tiny muted' }, ago(e.at)),
+        e.url ? h('a', { class: 'tiny', href: e.url, target: '_blank', rel: 'noopener' }, e.url.includes('/pull/') ? 'Ver PR' : 'Ver commit') : null),
+        [e.title, e.detail].some(Boolean) ? h('p', { class: 'small' }, [e.title, e.detail].filter(Boolean).join(' · ')) : null);
+    })));
     // Rondas recientes
-    if (d.runs.length) section.append(h('h3', {}, 'Rondas recientes'), h('div', { class: 'table-wrap' }, h('table', { class: 'table' },
-      h('thead', {}, h('tr', {}, ...['Cuándo', 'Dónde', 'Cómo empezó', 'Estado', ''].map((t) => h('th', {}, t)))),
-      h('tbody', {}, ...d.runs.map((r) => { const [l, c] = RUN_STATUS(r); return h('tr', {}, h('td', { class: 'tiny' }, ago(r.createdAt)), h('td', {}, r.repo === 'AgenticWeb' ? 'Sitio' : 'Código privado'), h('td', { class: 'small' }, r.event === 'schedule' ? 'Horario' : r.event === 'workflow_dispatch' ? 'Pedido manual' : r.event), h('td', {}, h('span', { class: 'chip ' + c }, l)), h('td', {}, h('a', { href: r.url, target: '_blank', rel: 'noopener' }, 'ver'))); })))));
+    if (d.runs.length) section.append(h('h3', {}, 'Rondas recientes'), h('ul', { class: 'agx-log' }, ...d.runs.map((r) => {
+      const [l, c] = RUN_STATUS(r);
+      return h('li', {}, h('div', { class: 'agx-log-head' }, h('span', { class: 'chip ' + c }, l), h('strong', {}, r.repo === 'AgenticWeb' ? 'Sitio' : 'Código privado'),
+        h('span', { class: 'tiny muted' }, `${r.event === 'schedule' ? 'por horario' : r.event === 'workflow_dispatch' ? 'pedido manual' : r.event} · ${ago(r.createdAt)}`),
+        h('a', { class: 'tiny', href: r.url, target: '_blank', rel: 'noopener' }, 'Ver ronda')));
+    })));
   };
   await draw();
   return { refresh: draw };
