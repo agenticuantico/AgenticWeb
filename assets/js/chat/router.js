@@ -59,6 +59,9 @@ export function isBrowserAction(text) {
 /** Seguimiento corto de una tarea del agente («seguí», «ahora compará…»). */
 const FOLLOW = /^\s*(segu[ií]|continu[aá]|dale|sigue|retom[aá]|ahora (compar[aá]|busc[aá]|hac[eé]|arm[aá]|export[aá]|guard[aá]|pas[aá]|resum[ií]|agreg[aá])|tambi[eé]n (busc[aá]|compar[aá]|agreg[aá])|export[aá](lo)? a|pas[aá](lo)? a (csv|tabla|pdf))/i;
 
+/** Confirmación corta de una acción que quedó pendiente («está todo en el CV, podés hacerlo», «dale», «hacelo»). */
+export const CONFIRM = /^\s*(s[ií]|dale|ok|okey|hacelo|hazlo|hac[eé]lo vos|pod[eé]s hacerlo|segu[ií]|adelante|av[aá]nz[aá]|confirmo|de una|go ahead|do it|yes|pode fazer|fa[cç]a|est[aá] todo en (el|mi) (cv|curr[ií]culum)|todo est[aá] en (el|mi) (cv|curr[ií]culum)|us[aá] (el|mi) (cv|curr[ií]culum)|con (el|mi) (cv|curr[ií]culum))(?![\wáéíóúñ])/i;
+
 export const OVERRIDES = {
   smart: { label: 'Automático', desc: 'Elijo solo cómo responder (recomendado)' },
   fast: { label: 'Siempre rápido', desc: 'Respuestas al instante' },
@@ -74,14 +77,17 @@ export const ROUTE_LABEL = {
 
 /**
  * @param {string} text
- * @param {{ override?: 'smart'|'fast'|'deep'|'auto', followBrowser?: boolean, hasFiles?: boolean }} [o]
- * @returns {{ kind: 'fast'|'think'|'search'|'browser'|'agent', mode: 'fast'|'deep'|'auto', why: string }}
+ * @param {{ override?: 'smart'|'fast'|'deep'|'auto', followBrowser?: boolean, hasFiles?: boolean, pending?: { route: 'apply'|'browser', text: string } | null }} [o]
+ * @returns {{ kind: 'fast'|'think'|'search'|'browser'|'agent'|'tools', mode: 'fast'|'deep'|'auto', why: string, resume?: string }}
  */
 export function decideRoute(text, o = {}) {
   const t = String(text || '').trim();
   const ov = o.override && o.override !== 'smart' && OVERRIDES[o.override] ? o.override : 'smart';
   if (!t) return { kind: 'fast', mode: 'fast', why: 'empty' };
   if (o.followBrowser && FOLLOW.test(t)) return { kind: 'browser', mode: ov === 'smart' ? 'fast' : ov, why: 'follow' };
+  // Acción pendiente (faltaba el CV o un dato, o el chat derivó a la computadora): la confirmación la retoma con el
+  // pedido original, en vez de ir al chat rápido (que podría «decir que lo hizo»).
+  if (o.pending && o.pending.text && CONFIRM.test(t) && t.length <= 160) return { kind: o.pending.route === 'apply' ? 'tools' : 'browser', mode: 'fast', why: 'resume', resume: o.pending.text };
   // Modo fijo elegido a mano: mismo comportamiento que tenían Rápido / Pensar / Agente.
   if (ov !== 'smart') {
     // «Buscá en la web: …» es siempre la búsqueda en vivo (antes, en Agente, abría la computadora: error conocido).

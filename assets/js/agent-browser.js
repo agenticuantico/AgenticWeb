@@ -315,7 +315,10 @@ export class AgentBrowserCard {
     this.modeBar.replaceChildren(
       h('span', { class: 'ab-mode-chip' + (browser ? ' is-browser' : '') }, h('span', { html: icon(browser ? 'monitor' : 'file') }), browser ? 'Navegador real' : 'Modo lectura'),
       h('span', { class: 'ab-mode-meta muted' }, browser ? '' : `${Math.round((s.browserMs || 0) / 1000)} s de navegador`),
-      h('span', { class: 'ab-mode-left muted' }, left > 0 ? `Te quedan ${human(left)} de navegador hoy` : 'Sin minutos de navegador hoy'));
+      h('span', { class: 'ab-mode-left muted' }, left > 0 ? `Te quedan ${human(left)} de navegador hoy` : 'Sin minutos de navegador hoy'),
+      // Tareas que actúan en sitios: cuánto entra hoy con los minutos reales y aviso honesto sobre verificaciones.
+      s.budget ? h('span', { class: 'ab-mode-budget', 'data-no-i18n': '' }, s.budget) : null,
+      s.task && s.task !== 'read' ? h('span', { class: 'ab-mode-note muted' }, 'Algunos sitios no permiten automatizar o piden verificación: ahí te paso el control. Nunca salteo captchas.') : null);
   }
 
   renderReader(s) {
@@ -347,7 +350,8 @@ export class AgentBrowserCard {
     const plan = s.plan || [];
     if (!plan.length) { this.planBox.hidden = true; return; }
     this.planBox.hidden = false;
-    const done = s.status === 'done' ? plan.length : Math.min(s.planDone || 0, s.status === 'awaiting_approval' ? plan.length - 1 : plan.length);
+    // Tarea de empleo: el servidor marca el plan con hechos (no se completa solo por terminar si no se postuló).
+    const done = s.status === 'done' && s.task !== 'job' ? plan.length : Math.min(s.planDone || 0, s.status === 'awaiting_approval' ? plan.length - 1 : plan.length);
     this.planBox.replaceChildren(
       h('div', { class: 'ab-plan-h' }, h('strong', {}, 'Plan'), h('span', { class: 'muted', 'data-no-i18n': '' }, `${Math.min(done, plan.length)}/${plan.length}`)),
       h('ul', {}, ...plan.map((p, i) => h('li', { class: i < done ? 'ok' : i === done && LIVE.has(s.status) && s.status !== 'done' ? 'cur' : '' },

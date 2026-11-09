@@ -146,17 +146,22 @@ export async function chat(o) {
     const res = await api('/api/chat', { method: 'POST', signal: o.signal, body: { messages: o.messages, agent: o.agent ? 'custom' : 'general', agentId: o.agent?.id, agentName: o.agent?.name, system: [o.agent?.system, o.system].filter(Boolean).join('\n\n').slice(0, 4000), lang: o.lang, mode: o.mode === 'deep' ? 'deep' : 'fast', ...(typeof o.search === 'boolean' ? { search: o.search } : {}) } });
     if (!res.ok || !res.body) { const r = await localChat(o); r.notice = noticeFor(res.status); return r; }
     let done = false;
+    let guarded = false;
     try {
       await readSSE(res, (d) => {
         if (d === '[DONE]') done = true;
-        else if (d && typeof d.delta === 'string') { text += d.delta; o.onDelta(d.delta); }
+        // Guardia de honestidad del servidor: la respuesta afirmaba una acción que no se hizo → se reemplaza entera.
+        else if (d && d.type === 'guard' && typeof d.replace === 'string') { guarded = true; text = d.replace; if (o.onEvent) { try { o.onEvent(d); } catch {} } }
+        // Pedido de acción: la app abre la computadora del agente (o la tanda de postulaciones) con el pedido original.
+        else if (d && d.type === 'handoff') { if (o.onEvent) { try { o.onEvent(d); } catch {} } }
+        else if (d && typeof d.delta === 'string') { if (guarded) return; text += d.delta; o.onDelta(d.delta); }
         // Búsqueda web en vivo: search_start / search_sources / search_limit / search_done
         else if (d && typeof d.type === 'string' && /^search_/.test(d.type) && o.onEvent) { try { o.onEvent(d); } catch {} }
       }, o.signal);
     } catch (e) { if (e.name === 'AbortError') throw e; }
     if (!text) { const r = await localChat(o); r.notice = 'fallback'; return r; }
     // Respuesta cortada (red o servidor): se pide la continuación una vez, sin repetir lo ya mostrado.
-    if (!done) text = await continueCut(o, text);
+    if (!done && !guarded) text = await continueCut(o, text);
     return { text, local: false };
   } catch (e) {
     if (e.name === 'AbortError') throw e;
