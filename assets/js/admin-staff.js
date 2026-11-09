@@ -58,7 +58,7 @@ const showErr = (el, e) => { el.textContent = typeof e === 'string' ? e : msg(e)
 const card = (title, sub, ...kids) => h('div', { class: 'card gate gate-login panel-gate' }, h('span', { class: 'gate-ic', html: icon('lock') }), h('h1', {}, title), sub ? h('p', { class: 'muted' }, sub) : null, ...kids);
 
 /** Pantalla de ingreso. `onIn(token, me)` cuando entra. */
-export function loginGate(root, onIn, note = '') {
+export function loginGate(root, onIn, note = '', prefill = '') {
   root.replaceChildren();
   const email = h('input', { class: 'input', type: 'email', autocomplete: 'username', autocapitalize: 'none', spellcheck: 'false', 'aria-label': 'Correo', placeholder: 'tu@correo.com' });
   const emailRow = h('div', { class: 'stack', hidden: true }, h('label', { class: 'label' }, 'Correo'), email);
@@ -98,6 +98,7 @@ export function loginGate(root, onIn, note = '') {
   };
   root.append(card('Panel de control', note || 'Entrá con tu clave.', form, h('div', { class: 'gate-links' }, forgot, who), info,
     h('p', { class: 'tiny muted', style: 'margin-top:10px' }, 'Por seguridad: 5 intentos cada 15 minutos.')));
+  if (prefill) { email.value = prefill; emailRow.hidden = false; who.textContent = 'Soy el dueño: entrar solo con la clave'; setTimeout(() => pw.input.focus(), 0); }
   setTimeout(() => pw.input.focus(), 50);
 }
 

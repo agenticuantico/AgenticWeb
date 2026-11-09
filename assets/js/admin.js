@@ -7,13 +7,13 @@ import { CONFIG } from './config.js';
 import * as auth from './auth.js';
 import { getStore, getRtdb, friendlyError } from './firebase.js';
 import { DEFAULT_SYSTEM, clearSystemCache } from './sysconfig.js';
-import { renderLeads, renderAgentsControl } from './admin-control.js?v=7.11.0';
+import { renderLeads, renderAgentsControl } from './admin-control.js?v=7.11.1';
 import { revenueKpis, renderRevenueCard } from './admin-revenue.js';
 import { renderGovernance } from './admin-governance.js';
-import { renderTeam } from './admin-team.js?v=7.11.0';
-import * as staffUi from './admin-staff.js?v=7.11.0';
-import { renderWorkspace, renderPerf } from './admin-espacio.js?v=7.11.0';
-import { renderKpis } from './admin-indicadores.js?v=7.11.0';
+import { renderTeam } from './admin-team.js?v=7.11.1';
+import * as staffUi from './admin-staff.js?v=7.11.1';
+import { renderWorkspace, renderPerf } from './admin-espacio.js?v=7.11.1';
+import { renderKpis } from './admin-indicadores.js?v=7.11.1';
 
 /** Roles con canales en el Espacio de trabajo (el servidor vuelve a controlar cada canal). */
 const WS_ROLES = new Set(['ceo', 'coceo', 'supervisor']);
@@ -124,7 +124,7 @@ function renderPanel(token, me) {
     history.replaceState(null, '', '#' + id);
     if (loaded[id]) return; loaded[id] = 1;
     if (id === 'equipo') renderTeam(boxes.equipo, null, { extraHeaders: hdr, owner: u.role === 'ceo' });
-    if (id === 'agentes') import('./admin-agents.js?v=7.11.0').then((m) => m.renderAutonomy(boxes.agentes, null, { extraHeaders: hdr }));
+    if (id === 'agentes') import('./admin-agents.js?v=7.11.1').then((m) => m.renderAutonomy(boxes.agentes, null, { extraHeaders: hdr }));
     if (id === 'espacio') renderWorkspace(boxes.espacio, token, me);
     if (id === 'rendimiento') renderPerf(boxes.rendimiento, token, me);
     if (id === 'indicadores') renderKpis(boxes.indicadores, token, me);
@@ -157,10 +157,27 @@ auth.watchUser(async (user) => {
     return;
   }
   if (!ok) {
+    // 1) ¿Ya hay una sesión del equipo en este navegador? Entra con su rol (el servidor la valida).
+    const s0 = staffUi.session.get();
+    if (s0) { try { const me = await staffUi.api('/api/panel/me', { token: s0.t }); return renderPanel(s0.t, me); } catch (e) { if (e.code !== 'network') staffUi.session.clear(); } }
+    // 2) ¿Esta cuenta de Google es de una persona activa del equipo? El servidor verifica el token y el correo, y da SU rol.
+    if (user.emailVerified) {
+      try {
+        const idt = await user.getIdToken();
+        const r = await fetch(String(CONFIG.API_BASE || '').replace(/\/+$/, '') + '/api/panel/login/google', { method: 'POST', headers: { Authorization: 'Bearer ' + idt, 'Content-Type': 'application/json' }, body: '{}', cache: 'no-store' });
+        if (r.ok) { const j = await r.json(); staffUi.session.set(j.token, j.expiresAt); return renderPanel(j.token, { user: j.user, perms: j.perms }); }
+      } catch { /* sigue: ingreso con correo y clave */ }
+    }
     logEvent(user, 'admin_denied', location.pathname);
     root.innerHTML = '';
-    root.append(h('div', { class: 'card gate' }, h('span', { class: 'gate-ic', html: icon('shield') }), h('h1', {}, 'Acceso denegado'), h('p', { class: 'muted' }, 'Esta cuenta no tiene permisos de administración. El intento quedó registrado.'),
-      h('div', { class: 'row', style: 'justify-content:center' }, h('a', { class: 'btn', href: '/' }, 'Volver al inicio'), h('button', { class: 'btn btn-ghost', type: 'button', onclick: async () => { await auth.signOutUser(); location.reload(); } }, 'Cambiar de cuenta'))));
+    // 3) Cuenta desconocida: «Acceso denegado», pero sin callejón sin salida: entrar como equipo con correo y clave.
+    const teamIn = h('button', { class: 'btn btn-primary', type: 'button' }, 'Soy del equipo: entrar con mi correo y clave');
+    teamIn.onclick = () => { sessionStorage.setItem('ac.panelMode', 'equipo'); staffUi.loginGate(root, renderPanel, 'Entrá con el correo y la clave que elegiste al aceptar la invitación.', (user.email || '').toLowerCase()); };
+    root.append(h('div', { class: 'card gate gate-denied' }, h('span', { class: 'gate-ic', html: icon('shield') }), h('h1', {}, 'Acceso denegado'), h('p', { class: 'muted' }, `La cuenta de Google ${user.email || ''} no es la dueña ni una persona activa del equipo. El intento quedó registrado.`),
+      h('p', { class: 'small' }, 'Si te invitaron al equipo (Co-CEO, supervisor…), entrá con tu correo y clave:'),
+      h('div', { class: 'row', style: 'justify-content:center;flex-wrap:wrap' }, teamIn,
+        h('button', { class: 'btn', type: 'button', onclick: async () => { await auth.signOutUser(); location.reload(); } }, 'Salir de Google y cambiar de cuenta'),
+        h('a', { class: 'btn btn-ghost', href: '/' }, 'Volver al inicio'))));
     return;
   }
   if (!sessionStorage.getItem('ac.adminLogged')) { sessionStorage.setItem('ac.adminLogged', '1'); logEvent(user, 'admin_login'); }

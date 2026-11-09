@@ -233,7 +233,7 @@
 .ws-files { margin-top: 6px; gap: 6px; }
 @media (max-width: 760px) { .kpi-spend-form { grid-template-columns: 1fr 1fr; } .kpi-spend-form .btn { grid-column: 1 / -1; } .kpi-grid { grid-template-columns: 1fr 1fr; } }
 
-/* Co-CEO agéntico, habilidades ganadas, puestos y entrenamiento (7.11.0) */
+/* Co-CEO agéntico, habilidades ganadas, puestos y entrenamiento (7.11.1) */
 .tn-coceo { border-color: #c7b8f5; background: linear-gradient(180deg, #f6f2ff, #fff); }
 .tchip.won { background: #e8f1ff; color: #1e3a8a; border-color: #c9dbff; }
 .tchip.won.trained { background: #fff4dc; color: #7a4b00; border-color: #f3d79a; }
