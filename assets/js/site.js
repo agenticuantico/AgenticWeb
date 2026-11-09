@@ -112,7 +112,7 @@ function showMaintenance(sys) {
   ov.className = 'maintenance';
   ov.setAttribute('role', 'alertdialog');
   ov.setAttribute('aria-labelledby', 'mtTitle');
-  ov.innerHTML = `<div class="card"><img src="/media/avatar/face-256.webp?v=7.8.0" alt="" width="72" height="72" style="border-radius:50%;margin:0 auto 16px">
+  ov.innerHTML = `<div class="card"><img src="/media/avatar/face-256.webp?v=7.9.0" alt="" width="72" height="72" style="border-radius:50%;margin:0 auto 16px">
     <h1 id="mtTitle" style="font-size:1.6rem">Estamos haciendo mantenimiento</h1>
     <p class="muted">${esc(sys.maintenanceMessage || 'AgentiCuántico vuelve en breve. Gracias por la paciencia.')}</p>
     <p class="small muted">Consultas: <a href="mailto:agenticuantico@gmail.com">agenticuantico@gmail.com</a></p></div>`;

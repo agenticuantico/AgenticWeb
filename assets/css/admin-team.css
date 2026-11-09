@@ -166,3 +166,51 @@
 .mailcfg-result.bad { border-color: #c2410c; }
 .mailcfg-result p { margin: 0 0 4px; }
 @media (max-width: 560px) { .mailcfg-grid { grid-template-columns: 1fr; } .mailcfg-acts .btn { flex: 1 1 auto; } }
+
+/* Espacio de trabajo (canales) */
+.ws-layout { display: grid; grid-template-columns: minmax(220px, 280px) minmax(0, 1fr); gap: 16px; align-items: start; }
+.ws-side { padding: 14px; }
+.ws-title { font-size: 1rem; margin: 0 0 8px; }
+.ws-channels { display: grid; gap: 6px; }
+.ws-ch { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; text-align: left; width: 100%; padding: 10px 12px; border-radius: var(--r-md); border: 1px solid var(--line); background: var(--surface); color: inherit; font: inherit; cursor: pointer; min-height: 44px; }
+.ws-ch:hover { border-color: #9aa3b8; }
+.ws-ch:focus-visible { outline: 3px solid #65a30d; outline-offset: 2px; }
+.ws-ch.on { border-color: #65a30d; background: #f4fbe6; }
+.ws-ch-name { font-weight: 600; }
+.ws-ch-last { grid-column: 1 / -1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ws-badge { background: #16151a; color: #fff; border-radius: 999px; font-size: 12px; padding: 1px 8px; align-self: center; }
+.ws-pane { display: flex; flex-direction: column; min-height: 520px; }
+.ws-head h2 { margin: 0; font-size: 1.1rem; }
+.ws-head p { margin: 4px 0 10px; }
+.ws-feed { list-style: none; margin: 0; padding: 10px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; max-height: 56vh; min-height: 260px; background: #f7f8fc; border: 1px solid var(--line); border-radius: var(--r-md); }
+.ws-msg { max-width: min(560px, 92%); padding: 8px 12px; border-radius: 14px; background: #fff; border: 1px solid var(--line); align-self: flex-start; }
+.ws-msg.me { align-self: flex-end; background: #eef7d9; border-color: #d9efb0; }
+.ws-msg.agent { border-left: 3px solid #65a30d; }
+.ws-msg.system { background: var(--surface-3); }
+.ws-meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 2px; }
+.ws-body { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.ws-empty { align-self: center; padding: 20px 0; }
+.ws-form { margin-top: 10px; display: grid; gap: 8px; }
+.ws-input { resize: vertical; min-height: 64px; }
+.ws-form-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
+.ws-opt { display: inline-flex; gap: 6px; align-items: center; min-height: 44px; }
+.ws-opt input { width: 18px; height: 18px; }
+.ws-quota { margin: 0; }
+.empty-state { text-align: center; padding: 28px 18px; }
+@media (max-width: 760px) {
+  .ws-layout { grid-template-columns: 1fr; }
+  .ws-channels { grid-auto-flow: column; grid-auto-columns: minmax(170px, 72%); overflow-x: auto; padding-bottom: 4px; scroll-snap-type: x mandatory; }
+  .ws-ch { scroll-snap-align: start; }
+  .ws-feed { max-height: 50vh; }
+  .ws-form-row .row { width: 100%; }
+  .ws-form-row .row .btn { flex: 1 1 0; justify-content: center; }
+}
+
+/* Rendimiento */
+.perf-rules summary { cursor: pointer; font-weight: 600; min-height: 32px; }
+.perf-rules ul { margin: 8px 0 0; padding-left: 18px; display: grid; gap: 4px; }
+.perf-score { display: inline-flex; align-items: center; gap: 8px; }
+.perf-bar { width: 72px; height: 8px; border-radius: 99px; background: var(--surface-3); overflow: hidden; display: inline-block; }
+.perf-bar i { display: block; height: 100%; background: #65a30d; }
+.perf-table td, .perf-table th { vertical-align: top; }
+.perf-table td:last-child { min-width: 220px; }

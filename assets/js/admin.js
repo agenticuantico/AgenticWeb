@@ -7,11 +7,15 @@ import { CONFIG } from './config.js';
 import * as auth from './auth.js';
 import { getStore, getRtdb, friendlyError } from './firebase.js';
 import { DEFAULT_SYSTEM, clearSystemCache } from './sysconfig.js';
-import { renderLeads, renderAgentsControl } from './admin-control.js?v=7.8.0';
+import { renderLeads, renderAgentsControl } from './admin-control.js?v=7.9.0';
 import { revenueKpis, renderRevenueCard } from './admin-revenue.js';
 import { renderGovernance } from './admin-governance.js';
-import { renderTeam } from './admin-team.js?v=7.8.1';
-import * as staffUi from './admin-staff.js?v=7.8.2';
+import { renderTeam } from './admin-team.js?v=7.9.0';
+import * as staffUi from './admin-staff.js?v=7.9.0';
+import { renderWorkspace, renderPerf } from './admin-espacio.js?v=7.9.0';
+
+/** Roles con canales en el Espacio de trabajo (el servidor vuelve a controlar cada canal). */
+const WS_ROLES = new Set(['ceo', 'coceo', 'supervisor']);
 
 const root = document.getElementById('adminRoot');
 const CC_NAMES = new Intl.DisplayNames(['es'], { type: 'region' });
@@ -60,9 +64,11 @@ function loginGate(msg) {
     try { if (await isOwner(v)) await auth.resetPassword(v); } catch {}
     info.textContent = 'Si el correo corresponde a una cuenta con acceso, te llegará un enlace para crear o cambiar la contraseña.'; info.hidden = false;
   };
+  const team = h('button', { class: 'linklike small', type: 'button' }, 'Soy del equipo (Co-CEO, supervisor…): entrar con mi correo y clave');
+  team.onclick = () => { sessionStorage.setItem('ac.panelMode', 'equipo'); panelGate(); };
   root.append(h('div', { class: 'card gate gate-login' }, h('span', { class: 'gate-ic', html: icon('lock') }), h('h1', {}, 'Panel de control'),
     h('p', { class: 'muted' }, msg || 'Acceso exclusivo de la cuenta dueña de AgentiCuántico.'),
-    google, h('div', { class: 'or' }, h('span', {}, 'o con correo y contraseña')), form, reset, info,
+    google, h('div', { class: 'or' }, h('span', {}, 'o con correo y contraseña')), form, reset, h('div', { class: 'gate-links' }, team), info,
     h('p', { class: 'tiny muted', style: 'margin-top:12px' }, 'Recomendado: verificación en dos pasos activada en la cuenta de Google.')));
 }
 
@@ -82,6 +88,11 @@ async function panelGate() {
     catch (e) { if (e.code !== 'network') staffUi.session.clear(); else return staffUi.loginGate(root, renderPanel, e.message); }
   }
   staffUi.loginGate(root, renderPanel);
+  if (CONFIG.PREVIEW_KEY_LOGIN !== true) {   // producción: el dueño sigue entrando con Google
+    const g = h('button', { class: 'linklike small', type: 'button' }, 'Soy el dueño: entrar con Google');
+    g.onclick = () => { sessionStorage.removeItem('ac.panelMode'); location.reload(); };
+    root.querySelector('.gate-links')?.append(g);
+  }
 }
 function renderPanel(token, me) {
   root.innerHTML = '';
@@ -96,6 +107,8 @@ function renderPanel(token, me) {
   if (!perms.has('team.order')) root.append(h('div', { class: 'alert' }, h('span', { html: icon('info') }), h('div', {}, 'Tu rol es de solo lectura en el equipo de agentes: podés mirar, pero no dar órdenes ni aprobar.')));
   const tabBar = h('nav', { class: 'admin-tabs', role: 'tablist', 'aria-label': 'Secciones del panel' });
   const TABS = [['equipo', 'Equipo', 'users'], ['agentes', 'Agentes', 'spark']];
+  if (WS_ROLES.has(u.role)) TABS.push(['espacio', 'Espacio de trabajo', 'send']);
+  TABS.push(['rendimiento', 'Rendimiento', 'chart']);
   if (perms.has('staff.view')) TABS.push(['humano', 'Equipo humano', 'user']);
   if (perms.has('audit.view')) TABS.push(['bitacora', 'Bitácora', 'clock']);
   if (perms.has('owner.settings') && u.owner) TABS.push(['configuracion', 'Configuración', 'settings']);
@@ -108,8 +121,10 @@ function renderPanel(token, me) {
     tabBar.querySelectorAll('[role=tab]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === id)));
     history.replaceState(null, '', '#' + id);
     if (loaded[id]) return; loaded[id] = 1;
-    if (id === 'equipo') renderTeam(boxes.equipo, null, { extraHeaders: hdr });
-    if (id === 'agentes') import('./admin-agents.js?v=7.8.1').then((m) => m.renderAutonomy(boxes.agentes, null, { extraHeaders: hdr }));
+    if (id === 'equipo') renderTeam(boxes.equipo, null, { extraHeaders: hdr, owner: u.role === 'ceo' });
+    if (id === 'agentes') import('./admin-agents.js?v=7.9.0').then((m) => m.renderAutonomy(boxes.agentes, null, { extraHeaders: hdr }));
+    if (id === 'espacio') renderWorkspace(boxes.espacio, token, me);
+    if (id === 'rendimiento') renderPerf(boxes.rendimiento, token, me);
     if (id === 'humano') staffUi.renderStaff(boxes.humano, token, me);
     if (id === 'bitacora') staffUi.renderAudit(boxes.bitacora, token);
     if (id === 'configuracion') staffUi.renderSettings(boxes.configuracion, token);
@@ -119,7 +134,8 @@ function renderPanel(token, me) {
   show(location.hash.slice(1) || 'equipo');
 }
 
-if (CONFIG.PREVIEW_KEY_LOGIN === true || CONFIG.PANEL_LOGIN === true) panelGate();
+const wantsPanel = () => { const hs = new URLSearchParams(location.hash.slice(1)); return !!(hs.get('restablecer') || hs.get('invitacion') || staffUi.session.get() || sessionStorage.getItem('ac.panelMode') === 'equipo'); };
+if (CONFIG.PREVIEW_KEY_LOGIN === true || CONFIG.PANEL_LOGIN === true || wantsPanel()) panelGate();
 else {
 auth.completeGoogleRedirect?.().catch(() => {});
 auth.watchUser(async (user) => {
@@ -200,7 +216,7 @@ async function renderDashboard(user) {
       h('button', { class: 'btn', type: 'button', onclick: () => renderDashboard(user), html: icon('refresh') + 'Actualizar' }),
       h('button', { class: 'btn btn-danger', type: 'button', id: 'killBtn', html: icon('power') + 'Parada de emergencia' })));
   root.append(head);
-  const TABS = [['analitica', 'Analítica', 'chart'], ['equipo', 'Equipo', 'users'], ['leads', 'Leads', 'users'], ['agentes', 'Agentes', 'spark'], ['gobernanza', 'Gobernanza IA', 'flag'], ['operacion', 'Operación', 'shield']];
+  const TABS = [['analitica', 'Analítica', 'chart'], ['equipo', 'Equipo', 'users'], ['espacio', 'Espacio de trabajo', 'send'], ['rendimiento', 'Rendimiento', 'bolt'], ['leads', 'Leads', 'users'], ['agentes', 'Agentes', 'spark'], ['humano', 'Equipo humano', 'user'], ['bitacora', 'Bitácora', 'clock'], ['gobernanza', 'Gobernanza IA', 'flag'], ['operacion', 'Operación', 'shield'], ['configuracion', 'Configuración', 'settings']];
   const tabBar = h('nav', { class: 'admin-tabs', role: 'tablist', 'aria-label': 'Secciones del panel' });
   const panes = {};
   const kpis = h('div', { class: 'kpis' });
@@ -216,12 +232,35 @@ async function renderDashboard(user) {
   panes.agentes = h('div', { role: 'tabpanel', hidden: true }, agentsBox);
   panes.gobernanza = h('div', { role: 'tabpanel', hidden: true }, govBox);
   panes.operacion = h('div', { role: 'tabpanel', hidden: true }, opsGrid);
+  const extra = {};
+  for (const id of ['espacio', 'rendimiento', 'humano', 'bitacora', 'configuracion']) { extra[id] = h('div', { class: 'stack-lg' }); panes[id] = h('div', { role: 'tabpanel', hidden: true }, extra[id]); }
+  // Secciones del equipo humano: la cuenta Google del dueño se cambia por una sesión del panel (el servidor verifica el token).
+  let panelP = null;
+  const panelSession = () => (panelP ||= (async () => {
+    const s0 = staffUi.session.get();
+    if (s0) { try { const me = await staffUi.api('/api/panel/me', { token: s0.t }); if (me.user && me.user.owner) return { token: s0.t, me }; } catch {} }
+    const idt = await user.getIdToken();
+    const r = await fetch(String(CONFIG.API_BASE || '').replace(/\/+$/, '') + '/api/panel/login/google', { method: 'POST', headers: { Authorization: 'Bearer ' + idt, 'Content-Type': 'application/json' }, body: '{}', cache: 'no-store' });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(staffUi.ERR[j.error] || j.error || 'error_' + r.status);
+    staffUi.session.set(j.token, j.expiresAt);
+    return { token: j.token, me: { user: j.user, perms: j.perms } };
+  })().catch((e) => { panelP = null; throw e; }));
+  const withPanel = (box, fn) => { box.replaceChildren(h('div', { class: 'skeleton', style: 'height:120px' })); panelSession().then(({ token, me }) => fn(box, token, me)).catch((e) => box.replaceChildren(h('div', { class: 'alert warn' }, h('span', { html: icon('warn') }), h('div', {}, 'No se pudo abrir esta sección: ' + e.message)))); };
   const loaded = {};
   const showTab = (id) => {
     for (const [k, el] of Object.entries(panes)) el.hidden = k !== id;
     tabBar.querySelectorAll('[role=tab]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === id)));
     history.replaceState(null, '', '#' + id);
-    if (id === 'equipo' && !loaded.equipo) { loaded.equipo = 1; renderTeam(teamBox, user); }
+    if (id === 'equipo' && !loaded.equipo) { loaded.equipo = 1; renderTeam(teamBox, user, { owner: true }); }
+    if (extra[id] && !loaded[id]) {
+      loaded[id] = 1;
+      if (id === 'espacio') withPanel(extra[id], renderWorkspace);
+      if (id === 'rendimiento') withPanel(extra[id], renderPerf);
+      if (id === 'humano') withPanel(extra[id], (b, t, me) => staffUi.renderStaff(b, t, me));
+      if (id === 'bitacora') withPanel(extra[id], (b, t) => staffUi.renderAudit(b, t));
+      if (id === 'configuracion') withPanel(extra[id], (b, t) => staffUi.renderSettings(b, t));
+    }
     if (id === 'leads' && !loaded.leads) { loaded.leads = 1; renderLeads(leadsBox, user); }
     if (id === 'agentes' && !loaded.agentes) { loaded.agentes = 1; renderAgentsControl(agentsBox, user); }
     if (id === 'gobernanza' && !loaded.gobernanza) { loaded.gobernanza = 1; renderGovernance(govBox, user); }

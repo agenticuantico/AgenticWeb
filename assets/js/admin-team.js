@@ -18,7 +18,8 @@ const ERR = {
   has_reports: 'Primero mové a las personas que tiene a cargo.', cannot_delete_ceo: 'El CEO no se puede borrar.', manual_limit: 'Llegaste al máximo de turnos manuales de hoy.',
   github_not_configured: 'Falta tu cuenta de GitHub conectada para enviar el cambio.', queue_full: 'La cola está llena.', rate_limited: 'Demasiados pedidos seguidos; esperá un minuto.',
   login_required: 'Tu sesión venció: ingresá de nuevo.', owner_only: 'Solo la cuenta dueña.',
-  forbidden_role: 'Tu rol no permite esta acción.', outside_area: 'Solo podés actuar sobre los agentes de tu área.', owner_decides_this: 'Esto lo decide el dueño o un Co-CEO.', not_your_order: 'Solo podés cancelar las órdenes que diste vos.', session_expired: 'Tu sesión venció: entrá de nuevo.'
+  forbidden_role: 'Tu rol no permite esta acción.', outside_area: 'Solo podés actuar sobre los agentes de tu área.', owner_decides_this: 'Esto lo decide el dueño o un Co-CEO.', not_your_order: 'Solo podés cancelar las órdenes que diste vos.', session_expired: 'Tu sesión venció: entrá de nuevo.',
+  ceo_protected: 'Al CEO lo modifica solo el dueño.', not_decided: 'Esa orden todavía no tiene una decisión para revertir.', already_rejected: 'Ya estaba rechazada.', already_approved: 'Ya estaba aprobada.'
 };
 const ago = (t) => (t ? timeAgo(new Date(typeof t === 'number' ? t : Date.parse(t))) : 'todavía no');
 const hhmm = (t) => new Date(t).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Argentina/Buenos_Aires' });
@@ -39,7 +40,7 @@ export function defaultLayout(members) {
   return pos;
 }
 
-export async function renderTeam(box, user, { base = String(CONFIG.API_BASE || '').replace(/\/+$/, ''), extraHeaders = null } = {}) {
+export async function renderTeam(box, user, { base = String(CONFIG.API_BASE || '').replace(/\/+$/, ''), extraHeaders = null, owner = false } = {}) {
   const call = async (path, { method = 'GET', body } = {}) => {
     const headers = extraHeaders ? { ...extraHeaders } : { Authorization: 'Bearer ' + (await user.getIdToken()) };
     if (body) headers['Content-Type'] = 'application/json';
@@ -354,7 +355,24 @@ export async function renderTeam(box, user, { base = String(CONFIG.API_BASE || '
       o.reason ? h('p', { class: 'muted tiny team-why' }, 'Por qué: ' + o.reason) : null,
       o.result && o.result.summary ? h('p', { class: 'small' }, o.result.summary) : null,
       o.link ? h('a', { class: 'small', href: o.link, target: '_blank', rel: 'noopener' }, 'Ver en GitHub') : null, cancel,
-      o.status === 'propuesta' ? decideBtns(o) : null);
+      o.status === 'propuesta' ? decideBtns(o) : null, overrideRow(o));
+  }
+
+  /** Solo el CEO (dueño): revertir lo que decidió otra persona (por ejemplo, el Co-CEO). El servidor lo vuelve a controlar. */
+  function overrideRow(o) {
+    if (!o.decided_by || !['aprobada', 'rechazada', 'cancelada'].includes(o.status)) return null;
+    const who = h('span', { class: 'muted tiny' }, `Decidió: ${o.decided_by}`);
+    const mine = /^(agenticuantico@gmail\.com|clave de setup|CEO \(plan aprobado\))$/.test(o.decided_by);
+    if (!owner || mine) return h('div', { class: 'row-actions' }, who);
+    const action = o.status === 'aprobada' ? 'reject' : 'approve';
+    const b = h('button', { class: 'btn btn-sm btn-ghost', type: 'button' }, action === 'reject' ? 'Revertir (CEO)' : 'Aprobar igual (CEO)');
+    b.onclick = async () => {
+      if (!(await confirmDialog({ title: action === 'reject' ? 'Revertir la aprobación' : 'Aprobar igual', text: action === 'reject' ? 'Queda rechazada. Si era un plan, se cancelan sus tareas sin terminar; si era una contratación, el agente queda desactivado. Lo que ya se mandó a GitHub no se puede «desenviar»: te dejamos el enlace.' : 'Se aprueba con tus permisos de CEO, como si la hubieras aprobado vos.', ok: action === 'reject' ? 'Revertir' : 'Aprobar' }))) return;
+      b.disabled = true;
+      try { const r = await call(`/api/admin/team/orders/${o.id}/override`, { method: 'POST', body: { action } }); toast(action === 'reject' ? 'Revertida' + (r.notes && r.notes.length ? ': ' + r.notes.join(' ') : '') : 'Aprobada', 'success', 6000); load(); }
+      catch (e) { fail(e); b.disabled = false; }
+    };
+    return h('div', { class: 'row-actions' }, who, b);
   }
 
   function editDialog(m) {
