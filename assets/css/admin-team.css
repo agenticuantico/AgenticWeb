@@ -33,14 +33,15 @@
 .tc-viewport:active { cursor: grabbing; }
 .tc-viewport:focus-visible { outline: 3px solid #9fff00; outline-offset: 2px; }
 .tc-stage { position: absolute; left: 0; top: 0; transform-origin: 0 0; will-change: transform; }
-.tc-edges { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; color: #65a30d; }
+.tc-edges { position: absolute; left: 0; top: 0; overflow: visible; max-width: none; max-height: none; pointer-events: none; color: #65a30d; }
 .tc-edge { fill: none; stroke: #9aa3b8; stroke-width: 2; }
 .tc-edge.off { stroke-dasharray: 4 5; opacity: .55; }
 .tc-assign { fill: none; stroke: #65a30d; stroke-width: 2; stroke-dasharray: 6 5; opacity: .85; }
 .tc-temp { fill: none; stroke: #65a30d; stroke-width: 2.5; stroke-dasharray: 5 4; }
 .tc-tools { position: absolute; top: 10px; right: 10px; display: flex; gap: 6px; align-items: center; background: rgba(255,255,255,.92); border: 1px solid var(--line); border-radius: 999px; padding: 4px 6px; box-shadow: var(--shadow-1); }
 .tc-tools .icon-btn { width: 34px; height: 34px; font-size: 20px; font-weight: 700; line-height: 1; }
-.tc-legend { margin: 8px 2px 0; }
+.tc-legend { margin: 0 2px 8px; }
+.tc-box { position: relative; }
 
 /* Nodos */
 .tn { position: absolute; left: 0; top: 0; width: 228px; height: 150px; overflow: hidden; box-sizing: border-box; padding: 10px 12px 10px; border-radius: 16px;
@@ -95,7 +96,8 @@
   .team-actions .btn { flex: 1 1 auto; }
 }
 @media (prefers-reduced-motion: reduce) { .tn-switch i { transition: none; } }
-.tn-rest { font-size: 11px; color: #8a6a1f; background: var(--gold-soft); border-radius: 6px; padding: 2px 6px; align-self: flex-start; }
+.tn-rest { font-size: 10px; color: #7a5c14; background: var(--gold-soft); border-radius: 6px; padding: 2px 5px; flex: none; }
+.tn .team-chips { flex-wrap: nowrap; overflow: hidden; }
 .team-progress { border: 1px solid var(--line); border-radius: var(--r-md); padding: 12px; }
 .team-pgrid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; margin: 6px 0 10px; }
 .team-pgrid div { display: grid; } .team-pgrid small { color: var(--muted); font-size: 11px; } .team-pgrid strong { font-size: 1.05rem; }
