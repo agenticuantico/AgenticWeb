@@ -7,12 +7,13 @@ import { CONFIG } from './config.js';
 import * as auth from './auth.js';
 import { getStore, getRtdb, friendlyError } from './firebase.js';
 import { DEFAULT_SYSTEM, clearSystemCache } from './sysconfig.js';
-import { renderLeads, renderAgentsControl } from './admin-control.js?v=7.9.0';
+import { renderLeads, renderAgentsControl } from './admin-control.js?v=7.10.0';
 import { revenueKpis, renderRevenueCard } from './admin-revenue.js';
 import { renderGovernance } from './admin-governance.js';
-import { renderTeam } from './admin-team.js?v=7.9.0';
-import * as staffUi from './admin-staff.js?v=7.9.0';
-import { renderWorkspace, renderPerf } from './admin-espacio.js?v=7.9.0';
+import { renderTeam } from './admin-team.js?v=7.10.0';
+import * as staffUi from './admin-staff.js?v=7.10.0';
+import { renderWorkspace, renderPerf } from './admin-espacio.js?v=7.10.0';
+import { renderKpis } from './admin-indicadores.js?v=7.10.0';
 
 /** Roles con canales en el Espacio de trabajo (el servidor vuelve a controlar cada canal). */
 const WS_ROLES = new Set(['ceo', 'coceo', 'supervisor']);
@@ -108,7 +109,8 @@ function renderPanel(token, me) {
   const tabBar = h('nav', { class: 'admin-tabs', role: 'tablist', 'aria-label': 'Secciones del panel' });
   const TABS = [['equipo', 'Equipo', 'users'], ['agentes', 'Agentes', 'spark']];
   if (WS_ROLES.has(u.role)) TABS.push(['espacio', 'Espacio de trabajo', 'send']);
-  TABS.push(['rendimiento', 'Rendimiento', 'chart']);
+  if (perms.has('audit.view')) TABS.push(['indicadores', 'Indicadores', 'chart']);
+  TABS.push(['rendimiento', 'Rendimiento', 'bolt']);
   if (perms.has('staff.view')) TABS.push(['humano', 'Equipo humano', 'user']);
   if (perms.has('audit.view')) TABS.push(['bitacora', 'Bitácora', 'clock']);
   if (perms.has('owner.settings') && u.owner) TABS.push(['configuracion', 'Configuración', 'settings']);
@@ -122,9 +124,10 @@ function renderPanel(token, me) {
     history.replaceState(null, '', '#' + id);
     if (loaded[id]) return; loaded[id] = 1;
     if (id === 'equipo') renderTeam(boxes.equipo, null, { extraHeaders: hdr, owner: u.role === 'ceo' });
-    if (id === 'agentes') import('./admin-agents.js?v=7.9.0').then((m) => m.renderAutonomy(boxes.agentes, null, { extraHeaders: hdr }));
+    if (id === 'agentes') import('./admin-agents.js?v=7.10.0').then((m) => m.renderAutonomy(boxes.agentes, null, { extraHeaders: hdr }));
     if (id === 'espacio') renderWorkspace(boxes.espacio, token, me);
     if (id === 'rendimiento') renderPerf(boxes.rendimiento, token, me);
+    if (id === 'indicadores') renderKpis(boxes.indicadores, token, me);
     if (id === 'humano') staffUi.renderStaff(boxes.humano, token, me);
     if (id === 'bitacora') staffUi.renderAudit(boxes.bitacora, token);
     if (id === 'configuracion') staffUi.renderSettings(boxes.configuracion, token);
@@ -216,7 +219,7 @@ async function renderDashboard(user) {
       h('button', { class: 'btn', type: 'button', onclick: () => renderDashboard(user), html: icon('refresh') + 'Actualizar' }),
       h('button', { class: 'btn btn-danger', type: 'button', id: 'killBtn', html: icon('power') + 'Parada de emergencia' })));
   root.append(head);
-  const TABS = [['analitica', 'Analítica', 'chart'], ['equipo', 'Equipo', 'users'], ['espacio', 'Espacio de trabajo', 'send'], ['rendimiento', 'Rendimiento', 'bolt'], ['leads', 'Leads', 'users'], ['agentes', 'Agentes', 'spark'], ['humano', 'Equipo humano', 'user'], ['bitacora', 'Bitácora', 'clock'], ['gobernanza', 'Gobernanza IA', 'flag'], ['operacion', 'Operación', 'shield'], ['configuracion', 'Configuración', 'settings']];
+  const TABS = [['analitica', 'Analítica', 'chart'], ['equipo', 'Equipo', 'users'], ['espacio', 'Espacio de trabajo', 'send'], ['indicadores', 'Indicadores', 'chart'], ['rendimiento', 'Rendimiento', 'bolt'], ['leads', 'Leads', 'users'], ['agentes', 'Agentes', 'spark'], ['humano', 'Equipo humano', 'user'], ['bitacora', 'Bitácora', 'clock'], ['gobernanza', 'Gobernanza IA', 'flag'], ['operacion', 'Operación', 'shield'], ['configuracion', 'Configuración', 'settings']];
   const tabBar = h('nav', { class: 'admin-tabs', role: 'tablist', 'aria-label': 'Secciones del panel' });
   const panes = {};
   const kpis = h('div', { class: 'kpis' });
@@ -233,7 +236,7 @@ async function renderDashboard(user) {
   panes.gobernanza = h('div', { role: 'tabpanel', hidden: true }, govBox);
   panes.operacion = h('div', { role: 'tabpanel', hidden: true }, opsGrid);
   const extra = {};
-  for (const id of ['espacio', 'rendimiento', 'humano', 'bitacora', 'configuracion']) { extra[id] = h('div', { class: 'stack-lg' }); panes[id] = h('div', { role: 'tabpanel', hidden: true }, extra[id]); }
+  for (const id of ['espacio', 'indicadores', 'rendimiento', 'humano', 'bitacora', 'configuracion']) { extra[id] = h('div', { class: 'stack-lg' }); panes[id] = h('div', { role: 'tabpanel', hidden: true }, extra[id]); }
   // Secciones del equipo humano: la cuenta Google del dueño se cambia por una sesión del panel (el servidor verifica el token).
   let panelP = null;
   const panelSession = () => (panelP ||= (async () => {
@@ -257,6 +260,7 @@ async function renderDashboard(user) {
       loaded[id] = 1;
       if (id === 'espacio') withPanel(extra[id], renderWorkspace);
       if (id === 'rendimiento') withPanel(extra[id], renderPerf);
+      if (id === 'indicadores') withPanel(extra[id], renderKpis);
       if (id === 'humano') withPanel(extra[id], (b, t, me) => staffUi.renderStaff(b, t, me));
       if (id === 'bitacora') withPanel(extra[id], (b, t) => staffUi.renderAudit(b, t));
       if (id === 'configuracion') withPanel(extra[id], (b, t) => staffUi.renderSettings(b, t));

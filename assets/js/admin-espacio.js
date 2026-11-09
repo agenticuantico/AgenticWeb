@@ -5,6 +5,7 @@
  */
 import { h, icon, toast, confirmDialog, modal } from './ui.js';
 import { api } from './admin-staff.js';
+import { download } from './admin-indicadores.js?v=7.10.0';
 
 const ERRW = {
   forbidden_channel: 'Tu rol no tiene acceso a este canal.', empty_message: 'Escribí algo antes de mandar.', rate_limited: 'Vas muy rápido: esperá un minuto.',
@@ -18,6 +19,7 @@ const when = (t) => new Date(t).toLocaleString('es-AR', { day: '2-digit', month:
 
 /* =================== Espacio de trabajo =================== */
 export async function renderWorkspace(box, token, me) {
+  const canDl = new Set(me.perms || []).has('audit.view');
   const root = h('div', { class: 'ws stack-lg' }); box.replaceChildren(root);
   let ov = null; let cur = null; let timer = null;
   const list = h('nav', { class: 'ws-channels', 'aria-label': 'Canales' });
@@ -57,7 +59,8 @@ export async function renderWorkspace(box, token, me) {
     const cls = m.author_kind === 'human' ? (m.mine ? 'me' : 'human') : m.author_kind;
     return h('li', { class: 'ws-msg ' + cls },
       h('div', { class: 'ws-meta tiny' }, h('strong', {}, m.author_name), m.author_kind === 'agent' ? h('span', { class: 'tchip' }, 'agente') : m.author_kind === 'system' ? h('span', { class: 'tchip more' }, 'aviso') : null, h('span', { class: 'muted' }, when(m.created_at)), m.order_id ? h('span', { class: 'muted' }, 'orden ' + m.order_id) : null),
-      h('p', { class: 'ws-body' }, m.body));   // texto plano (h() usa textContent)
+      h('p', { class: 'ws-body' }, m.body),   // texto plano (h() usa textContent)
+      m.report_id && canDl ? h('div', { class: 'row ws-files' }, ...['xlsx', 'csv'].map((x) => h('button', { class: 'btn btn-sm', type: 'button', html: icon('download') + `<span>Descargar ${x.toUpperCase()}</span>`, onclick: () => download(`/api/panel/kpi/reports/${m.report_id}.${x}${x === 'csv' ? '?table=resumen' : ''}`, token, `reporte-${m.report_id}.${x}`) }))) : null);
   }
   async function open(id, quiet = false) {
     const c = ov.channels.find((x) => x.id === id) || ov.channels[0];

@@ -32,9 +32,9 @@ const MODES = {
 };
 
 const PHASES = { thinking: 'Pensando', searching: 'Buscando', coding: 'Escribiendo código', verifying: 'Verificando', reading: 'Leyendo', agent: 'Especialista', confirm: 'Confirmación' };
-const FACE = '/media/avatar/face-256.webp?v=7.9.0';
-const FACE_SET = '/media/avatar/face-128.webp?v=7.9.0 128w, /media/avatar/face-256.webp?v=7.9.0 256w, /media/avatar/face-512.webp?v=7.9.0 512w';
-const FACE_PNG = '/media/avatar/face-256.png?v=7.9.0';
+const FACE = '/media/avatar/face-256.webp?v=7.10.0';
+const FACE_SET = '/media/avatar/face-128.webp?v=7.10.0 128w, /media/avatar/face-256.webp?v=7.10.0 256w, /media/avatar/face-512.webp?v=7.10.0 512w';
+const FACE_PNG = '/media/avatar/face-256.png?v=7.10.0';
 
 const SUGGESTIONS = [
   { t: '¿Qué es AgentiCuántico?', i: 'info' },
