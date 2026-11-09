@@ -139,13 +139,13 @@ export async function renderPerf(box, token, me) {
       : h('p', { class: 'muted small' }, who === 'agent' ? 'Sin agentes.' : 'Todavía no hay personas invitadas (aparte del dueño).');
     const anyAgentData = d.agents.some((a) => a.score != null);
     const evalBtn = d.canEvaluate ? h('button', { class: 'btn btn-sm', type: 'button', html: icon('refresh') + '<span>Evaluar ascensos ahora</span>', onclick: async (ev) => { ev.currentTarget.disabled = true; try { const r = await api('/api/panel/perf/evaluate', { method: 'POST', token, body: {} }); toast(r.applied.length ? `Ascensos aplicados: ${r.applied.length}` : 'Nadie cumple la regla todavía.', r.applied.length ? 'success' : 'info'); load(); } catch (e) { fail(e); } } }) : null;
-    root.replaceChildren(
+    root.replaceChildren(...[
       h('section', { class: 'card panel' }, h('div', { class: 'panel-head' }, h('h2', {}, 'Rendimiento'), evalBtn), h('p', { class: 'small muted' }, 'Puntajes con datos reales de los últimos 30 días. Sin datos, no se inventa nada.'), rules),
       pending.length ? h('section', { class: 'card panel' }, h('h2', {}, 'Ascensos sugeridos (personas)'), h('p', { class: 'small muted' }, 'El sistema solo sugiere: el rol cambia cuando alguien con permiso lo confirma.'), h('ul', { class: 'team-props' }, ...pending.map(promoRow))) : null,
       h('section', { class: 'card panel' }, h('h2', {}, 'Agentes'), anyAgentData ? null : h('p', { class: 'small muted' }, 'Todavía no hay datos suficientes de ningún agente: el puntaje aparece cuando cada uno junta al menos 3 eventos (tareas, aprobaciones, pruebas).'), table(d.agents, 'agent')),
       d.humans && (me.perms || []).includes('staff.view') ? h('section', { class: 'card panel' }, h('h2', {}, 'Personas'), table(d.humans, 'human')) : null,
       h('section', { class: 'card panel' }, h('h2', {}, 'Historial de ascensos'), promos.filter((p) => p.status !== 'sugerida').length ? h('ul', { class: 'team-props' }, ...promos.filter((p) => p.status !== 'sugerida').map(promoRow)) : h('p', { class: 'muted small' }, 'Todavía no hubo ascensos ni cambios de puesto.'))
-    );
+    ].filter(Boolean));
   }
   await load();
 }
