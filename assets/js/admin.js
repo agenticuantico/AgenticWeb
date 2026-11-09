@@ -108,6 +108,7 @@ function renderPanel(token, me) {
   if (!perms.has('team.order')) root.append(h('div', { class: 'alert' }, h('span', { html: icon('info') }), h('div', {}, 'Tu rol es de solo lectura en el equipo de agentes: podés mirar, pero no dar órdenes ni aprobar.')));
   const tabBar = h('nav', { class: 'admin-tabs', role: 'tablist', 'aria-label': 'Secciones del panel' });
   const TABS = [['equipo', 'Equipo', 'users'], ['agentes', 'Agentes', 'spark']];
+  TABS.push(['envivo', 'En vivo', 'clock']);   // solo lectura, todos los roles (panel.view)
   if (WS_ROLES.has(u.role)) TABS.push(['espacio', 'Espacio de trabajo', 'send']);
   if (perms.has('audit.view')) TABS.push(['indicadores', 'Indicadores', 'chart']);
   TABS.push(['rendimiento', 'Rendimiento', 'bolt']);
@@ -126,6 +127,7 @@ function renderPanel(token, me) {
     if (id === 'equipo') renderTeam(boxes.equipo, null, { extraHeaders: hdr, owner: u.role === 'ceo' });
     if (id === 'agentes') import('./admin-agents.js?v=7.11.1').then((m) => m.renderAutonomy(boxes.agentes, null, { extraHeaders: hdr }));
     if (id === 'espacio') renderWorkspace(boxes.espacio, token, me);
+    if (id === 'envivo') import('./admin-envivo.js?v=7.11.1').then((m) => m.renderLive(boxes.envivo, token, me));
     if (id === 'rendimiento') renderPerf(boxes.rendimiento, token, me);
     if (id === 'indicadores') renderKpis(boxes.indicadores, token, me);
     if (id === 'humano') staffUi.renderStaff(boxes.humano, token, me);
@@ -236,7 +238,7 @@ async function renderDashboard(user) {
       h('button', { class: 'btn', type: 'button', onclick: () => renderDashboard(user), html: icon('refresh') + 'Actualizar' }),
       h('button', { class: 'btn btn-danger', type: 'button', id: 'killBtn', html: icon('power') + 'Parada de emergencia' })));
   root.append(head);
-  const TABS = [['analitica', 'Analítica', 'chart'], ['equipo', 'Equipo', 'users'], ['espacio', 'Espacio de trabajo', 'send'], ['indicadores', 'Indicadores', 'chart'], ['rendimiento', 'Rendimiento', 'bolt'], ['leads', 'Leads', 'users'], ['agentes', 'Agentes', 'spark'], ['humano', 'Equipo humano', 'user'], ['bitacora', 'Bitácora', 'clock'], ['gobernanza', 'Gobernanza IA', 'flag'], ['operacion', 'Operación', 'shield'], ['configuracion', 'Configuración', 'settings']];
+  const TABS = [['analitica', 'Analítica', 'chart'], ['equipo', 'Equipo', 'users'], ['espacio', 'Espacio de trabajo', 'send'], ['envivo', 'En vivo', 'clock'], ['indicadores', 'Indicadores', 'chart'], ['rendimiento', 'Rendimiento', 'bolt'], ['leads', 'Leads', 'users'], ['agentes', 'Agentes', 'spark'], ['humano', 'Equipo humano', 'user'], ['bitacora', 'Bitácora', 'clock'], ['gobernanza', 'Gobernanza IA', 'flag'], ['operacion', 'Operación', 'shield'], ['configuracion', 'Configuración', 'settings']];
   const tabBar = h('nav', { class: 'admin-tabs', role: 'tablist', 'aria-label': 'Secciones del panel' });
   const panes = {};
   const kpis = h('div', { class: 'kpis' });
@@ -253,7 +255,7 @@ async function renderDashboard(user) {
   panes.gobernanza = h('div', { role: 'tabpanel', hidden: true }, govBox);
   panes.operacion = h('div', { role: 'tabpanel', hidden: true }, opsGrid);
   const extra = {};
-  for (const id of ['espacio', 'indicadores', 'rendimiento', 'humano', 'bitacora', 'configuracion']) { extra[id] = h('div', { class: 'stack-lg' }); panes[id] = h('div', { role: 'tabpanel', hidden: true }, extra[id]); }
+  for (const id of ['espacio', 'envivo', 'indicadores', 'rendimiento', 'humano', 'bitacora', 'configuracion']) { extra[id] = h('div', { class: 'stack-lg' }); panes[id] = h('div', { role: 'tabpanel', hidden: true }, extra[id]); }
   // Secciones del equipo humano: la cuenta Google del dueño se cambia por una sesión del panel (el servidor verifica el token).
   let panelP = null;
   const panelSession = () => (panelP ||= (async () => {
@@ -276,6 +278,7 @@ async function renderDashboard(user) {
     if (extra[id] && !loaded[id]) {
       loaded[id] = 1;
       if (id === 'espacio') withPanel(extra[id], renderWorkspace);
+      if (id === 'envivo') withPanel(extra[id], (b, t, me) => import('./admin-envivo.js?v=7.11.1').then((m) => m.renderLive(b, t, me)));
       if (id === 'rendimiento') withPanel(extra[id], renderPerf);
       if (id === 'indicadores') withPanel(extra[id], renderKpis);
       if (id === 'humano') withPanel(extra[id], (b, t, me) => staffUi.renderStaff(b, t, me));

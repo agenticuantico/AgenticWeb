@@ -253,3 +253,22 @@
 .train-pre { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 220px; overflow: auto; font-size: 12px; background: var(--surface-3, #f4f5f8); padding: 8px; border-radius: 8px; }
 .perf-growth .team-chips { margin-top: 4px; }
 @media (max-width: 480px) { .team-slot .row-actions { margin-left: 0; width: 100%; } .train-areas { grid-template-columns: 1fr; } }
+
+/* En vivo (7.11.1) */
+.live-status { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; }
+.live-views { max-width: 560px; grid-template-columns: repeat(4, auto); overflow-x: auto; }
+.live-feed, .live-teams, .live-threads, .live-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.live-ev { border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; min-width: 0; }
+.live-ev.is-new { border-color: #9fd36b; background: #f6fbec; }
+.live-ev-head { display: flex; flex-wrap: wrap; gap: 6px; align-items: baseline; }
+.live-action { margin: 4px 0 0; overflow-wrap: anywhere; }
+.live-teams { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+.live-team { display: flex; flex-direction: column; gap: 8px; min-width: 0; overflow-wrap: anywhere; }
+.live-thread details { border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; }
+.live-thread summary { cursor: pointer; overflow-wrap: anywhere; }
+.live-steps { margin: 8px 0; padding-left: 4px; border-left: 2px solid var(--line); }
+.live-steps > li { padding-left: 8px; }
+.live-msgs { max-height: none; }
+.live-filters { display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); align-items: end; margin-bottom: 10px; }
+.live-filters label { display: flex; flex-direction: column; gap: 2px; }
+@media (max-width: 480px) { .live-teams { grid-template-columns: 1fr; } .live-views { max-width: 100%; } }
