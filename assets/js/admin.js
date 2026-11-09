@@ -10,7 +10,8 @@ import { DEFAULT_SYSTEM, clearSystemCache } from './sysconfig.js';
 import { renderLeads, renderAgentsControl } from './admin-control.js?v=7.8.0';
 import { revenueKpis, renderRevenueCard } from './admin-revenue.js';
 import { renderGovernance } from './admin-governance.js';
-import { renderTeam } from './admin-team.js?v=7.8.0';
+import { renderTeam } from './admin-team.js?v=7.8.1';
+import * as staffUi from './admin-staff.js?v=7.8.1';
 
 const root = document.getElementById('adminRoot');
 const CC_NAMES = new Intl.DisplayNames(['es'], { type: 'region' });
@@ -66,44 +67,57 @@ function loginGate(msg) {
 }
 
 /**
- * SOLO en la copia de prueba: el sitio de prueba inyecta PREVIEW_KEY_LOGIN en config.js (producción nunca lo tiene) y el
- * panel entra con la clave de setup de ESA copia (X-Setup-Key; el servidor de prueba la verifica). Muestra Equipo y Agentes.
+ * Acceso con clave (dueño y equipo humano). En la copia de prueba es el único acceso (PREVIEW_KEY_LOGIN);
+ * en producción se activa con PANEL_LOGIN. Los permisos de cada rol los aplica el servidor en cada pedido.
  */
-function previewGate() {
-  root.innerHTML = '';
-  const key = h('input', { class: 'input', type: 'password', autocomplete: 'off', 'aria-label': 'Clave de prueba', placeholder: 'Clave de la copia de prueba' });
-  const err = h('p', { class: 'error-text', hidden: true });
-  const go = async (k) => {
-    const r = await fetch(String(CONFIG.API_BASE).replace(/\/+$/, '') + '/api/admin/team', { headers: { 'X-Setup-Key': k }, cache: 'no-store' }).catch(() => null);
-    if (!r || !r.ok) { sessionStorage.removeItem('ac.previewKey'); err.textContent = 'Clave incorrecta.'; err.hidden = false; return; }
-    sessionStorage.setItem('ac.previewKey', k); renderPreview(k);
-  };
-  const form = h('form', { class: 'stack' }, h('label', { class: 'label' }, 'Clave'), key, err, h('button', { class: 'btn btn-primary full', type: 'submit' }, 'Entrar'));
-  form.addEventListener('submit', (e) => { e.preventDefault(); if (key.value) go(key.value.trim()); });
-  root.append(h('div', { class: 'card gate' }, h('span', { class: 'gate-ic', html: icon('lock') }), h('h1', {}, 'Panel · copia de prueba'), h('p', { class: 'muted' }, 'Esta copia no usa tu cuenta: entrá con la clave de prueba.'), form));
-  const saved = sessionStorage.getItem('ac.previewKey'); if (saved) go(saved);
+async function panelGate() {
+  sessionStorage.removeItem('ac.previewKey');   // clave vieja de la copia de prueba: ya no se usa
+  const hash = new URLSearchParams(location.hash.slice(1));
+  const start = () => panelGate();
+  if (hash.get('restablecer')) return staffUi.resetGate(root, hash.get('restablecer'), () => { history.replaceState(null, '', location.pathname); start(); });
+  if (hash.get('invitacion')) return staffUi.inviteGate(root, hash.get('invitacion'), (t, me) => renderPanel(t, me));
+  const s = staffUi.session.get();
+  if (s) {
+    try { const me = await staffUi.api('/api/panel/me', { token: s.t }); return renderPanel(s.t, me); }
+    catch (e) { if (e.code !== 'network') staffUi.session.clear(); else return staffUi.loginGate(root, renderPanel, e.message); }
+  }
+  staffUi.loginGate(root, renderPanel);
 }
-function renderPreview(k) {
+function renderPanel(token, me) {
   root.innerHTML = '';
-  const hdr = { 'X-Setup-Key': k };
-  root.append(h('div', { class: 'admin-head' }, h('div', {}, h('p', { class: 'eyebrow' }, 'Panel del CEO · copia de prueba'), h('h1', {}, 'AgentiCuántico · Control'))));
+  const perms = new Set(me.perms || []);
+  const hdr = { 'X-Panel-Session': token };
+  const u = me.user || {};
+  const out = async () => { try { await staffUi.api('/api/panel/logout', { method: 'POST', token, body: {} }); } catch {} staffUi.session.clear(); panelGate(); };
+  root.append(h('div', { class: 'admin-head' },
+    h('div', {}, h('p', { class: 'eyebrow' }, (u.owner ? 'Panel del CEO' : 'Panel del equipo') + (CONFIG.PREVIEW_KEY_LOGIN === true ? ' · copia de prueba' : '')), h('h1', {}, 'AgentiCuántico · Control'),
+      h('p', { class: 'small muted panel-who' }, (u.name || u.email || '') + ' · ' + (u.roleLabel || u.role || ''))),
+    h('div', { class: 'row' }, h('button', { class: 'btn', type: 'button', html: icon('lock') + 'Cambiar clave', onclick: () => staffUi.changeKeyDialog(token) }), h('button', { class: 'btn btn-ghost', type: 'button', html: icon('logout') + 'Salir', onclick: out }))));
+  if (!perms.has('team.order')) root.append(h('div', { class: 'alert' }, h('span', { html: icon('info') }), h('div', {}, 'Tu rol es de solo lectura en el equipo de agentes: podés mirar, pero no dar órdenes ni aprobar.')));
   const tabBar = h('nav', { class: 'admin-tabs', role: 'tablist', 'aria-label': 'Secciones del panel' });
-  const teamBox = h('div', { class: 'stack-lg' }); const agBox = h('div', { class: 'stack-lg' });
-  const panes = { equipo: h('div', { role: 'tabpanel' }, teamBox), agentes: h('div', { role: 'tabpanel', hidden: true }, agBox) };
+  const TABS = [['equipo', 'Equipo', 'users'], ['agentes', 'Agentes', 'spark']];
+  if (perms.has('staff.view')) TABS.push(['humano', 'Equipo humano', 'user']);
+  if (perms.has('audit.view')) TABS.push(['bitacora', 'Bitácora', 'clock']);
+  const panes = {}; const boxes = {};
+  for (const [id] of TABS) { boxes[id] = h('div', { class: 'stack-lg' }); panes[id] = h('div', { role: 'tabpanel', hidden: true }, boxes[id]); }
   const loaded = {};
   const show = (id) => {
+    if (!panes[id]) id = 'equipo';
     for (const [kk, el] of Object.entries(panes)) el.hidden = kk !== id;
     tabBar.querySelectorAll('[role=tab]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === id)));
     history.replaceState(null, '', '#' + id);
-    if (id === 'equipo' && !loaded.equipo) { loaded.equipo = 1; renderTeam(teamBox, null, { extraHeaders: hdr }); }
-    if (id === 'agentes' && !loaded.agentes) { loaded.agentes = 1; import('./admin-agents.js?v=7.8.0').then((m) => m.renderAutonomy(agBox, null, { extraHeaders: hdr })); }
+    if (loaded[id]) return; loaded[id] = 1;
+    if (id === 'equipo') renderTeam(boxes.equipo, null, { extraHeaders: hdr });
+    if (id === 'agentes') import('./admin-agents.js?v=7.8.1').then((m) => m.renderAutonomy(boxes.agentes, null, { extraHeaders: hdr }));
+    if (id === 'humano') staffUi.renderStaff(boxes.humano, token, me);
+    if (id === 'bitacora') staffUi.renderAudit(boxes.bitacora, token);
   };
-  for (const [id, label, ic] of [['equipo', 'Equipo', 'users'], ['agentes', 'Agentes', 'spark']]) tabBar.append(h('button', { type: 'button', role: 'tab', 'data-tab': id, html: icon(ic) + `<span>${label}</span>`, onclick: () => show(id) }));
+  for (const [id, label, ic] of TABS) tabBar.append(h('button', { type: 'button', role: 'tab', 'data-tab': id, html: icon(ic) + `<span>${label}</span>`, onclick: () => show(id) }));
   root.append(tabBar, ...Object.values(panes));
-  show(location.hash === '#agentes' ? 'agentes' : 'equipo');
+  show(location.hash.slice(1) || 'equipo');
 }
 
-if (CONFIG.PREVIEW_KEY_LOGIN === true) previewGate();
+if (CONFIG.PREVIEW_KEY_LOGIN === true || CONFIG.PANEL_LOGIN === true) panelGate();
 else {
 auth.completeGoogleRedirect?.().catch(() => {});
 auth.watchUser(async (user) => {

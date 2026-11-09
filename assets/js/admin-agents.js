@@ -23,7 +23,7 @@ export async function renderAutonomy(box, user, { base = String(CONFIG.API_BASE 
     if (body) headers['Content-Type'] = 'application/json';
     const r = await fetch(base + path, { method, headers, body: body ? JSON.stringify(body) : undefined, cache: 'no-store' });
     const j = await r.json().catch(() => ({}));
-    if (!r.ok) { const e = new Error(j.error || 'error_' + r.status); e.code = j.error; throw e; }
+    if (!r.ok) { const e = new Error(({ forbidden_role: 'Tu rol no permite esta acción.', outside_area: 'Solo podés actuar sobre los agentes de tu área.', session_expired: 'Tu sesión venció: entrá de nuevo.' })[j.error] || j.error || 'error_' + r.status); e.code = j.error; throw e; }
     return j;
   };
   const section = h('section', { class: 'card panel wide agx', 'aria-labelledby': 'agx-title' });

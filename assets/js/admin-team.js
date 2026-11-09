@@ -17,7 +17,8 @@ const ERR = {
   reports_rank_must_be_lower: 'Hay personas a cargo con un rango igual o más alto.', ceo_has_no_parent: 'El CEO no reporta a nadie.', only_ceo_rank_1: 'El rango 1 es solo del CEO.',
   has_reports: 'Primero mové a las personas que tiene a cargo.', cannot_delete_ceo: 'El CEO no se puede borrar.', manual_limit: 'Llegaste al máximo de turnos manuales de hoy.',
   github_not_configured: 'Falta tu cuenta de GitHub conectada para enviar el cambio.', queue_full: 'La cola está llena.', rate_limited: 'Demasiados pedidos seguidos; esperá un minuto.',
-  login_required: 'Tu sesión venció: ingresá de nuevo.', owner_only: 'Solo la cuenta dueña.'
+  login_required: 'Tu sesión venció: ingresá de nuevo.', owner_only: 'Solo la cuenta dueña.',
+  forbidden_role: 'Tu rol no permite esta acción.', outside_area: 'Solo podés actuar sobre los agentes de tu área.', owner_decides_this: 'Esto lo decide el dueño o un Co-CEO.', not_your_order: 'Solo podés cancelar las órdenes que diste vos.', session_expired: 'Tu sesión venció: entrá de nuevo.'
 };
 const ago = (t) => (t ? timeAgo(new Date(typeof t === 'number' ? t : Date.parse(t))) : 'todavía no');
 const hhmm = (t) => new Date(t).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Argentina/Buenos_Aires' });
