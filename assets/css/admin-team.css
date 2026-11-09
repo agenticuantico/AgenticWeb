@@ -154,3 +154,15 @@
   .audit-list li { grid-template-columns: 1fr; gap: 2px; }
   .admin-head .row { flex-wrap: wrap; }
 }
+
+/* Configuración → Envío de mails (Brevo) */
+.mailcfg .mailcfg-status { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 6px 0 4px; }
+.mailcfg .chip.ok { background: color-mix(in srgb, #1f9d55 14%, transparent); color: #146c3a; }
+.mailcfg .chip.warn { background: color-mix(in srgb, #d97706 16%, transparent); color: #8a4b05; }
+.mailcfg-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
+.mailcfg-acts { flex-wrap: wrap; gap: 8px; }
+.mailcfg-result { margin-top: 12px; padding: 12px 14px; border-radius: var(--r-md); border: 1px solid var(--line); background: var(--surface); overflow-wrap: anywhere; }
+.mailcfg-result.ok { border-color: #1f9d55; }
+.mailcfg-result.bad { border-color: #c2410c; }
+.mailcfg-result p { margin: 0 0 4px; }
+@media (max-width: 560px) { .mailcfg-grid { grid-template-columns: 1fr; } .mailcfg-acts .btn { flex: 1 1 auto; } }

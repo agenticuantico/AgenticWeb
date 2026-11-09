@@ -11,7 +11,7 @@ import { renderLeads, renderAgentsControl } from './admin-control.js?v=7.8.0';
 import { revenueKpis, renderRevenueCard } from './admin-revenue.js';
 import { renderGovernance } from './admin-governance.js';
 import { renderTeam } from './admin-team.js?v=7.8.1';
-import * as staffUi from './admin-staff.js?v=7.8.1';
+import * as staffUi from './admin-staff.js?v=7.8.2';
 
 const root = document.getElementById('adminRoot');
 const CC_NAMES = new Intl.DisplayNames(['es'], { type: 'region' });
@@ -98,6 +98,7 @@ function renderPanel(token, me) {
   const TABS = [['equipo', 'Equipo', 'users'], ['agentes', 'Agentes', 'spark']];
   if (perms.has('staff.view')) TABS.push(['humano', 'Equipo humano', 'user']);
   if (perms.has('audit.view')) TABS.push(['bitacora', 'Bitácora', 'clock']);
+  if (perms.has('owner.settings') && u.owner) TABS.push(['configuracion', 'Configuración', 'settings']);
   const panes = {}; const boxes = {};
   for (const [id] of TABS) { boxes[id] = h('div', { class: 'stack-lg' }); panes[id] = h('div', { role: 'tabpanel', hidden: true }, boxes[id]); }
   const loaded = {};
@@ -111,6 +112,7 @@ function renderPanel(token, me) {
     if (id === 'agentes') import('./admin-agents.js?v=7.8.1').then((m) => m.renderAutonomy(boxes.agentes, null, { extraHeaders: hdr }));
     if (id === 'humano') staffUi.renderStaff(boxes.humano, token, me);
     if (id === 'bitacora') staffUi.renderAudit(boxes.bitacora, token);
+    if (id === 'configuracion') staffUi.renderSettings(boxes.configuracion, token);
   };
   for (const [id, label, ic] of TABS) tabBar.append(h('button', { type: 'button', role: 'tab', 'data-tab': id, html: icon(ic) + `<span>${label}</span>`, onclick: () => show(id) }));
   root.append(tabBar, ...Object.values(panes));
