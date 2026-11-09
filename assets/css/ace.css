@@ -64,8 +64,9 @@
 .chat.ace .chat-body { background: linear-gradient(#fff, #fafafa); }
 .chat.ace .chat-thread { padding: 20px 22px 8px; }
 .chat.ace .thread-inner { gap: 16px; max-width: 860px; }
-.ace-empty { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 16px 16px 18px; }
+.ace-empty { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; text-align: center; padding: 22px 16px 18px; }
 .ace-empty[hidden] { display: none; }
+.ace-empty > :first-child { margin-top: auto; } .ace-empty > :last-child { margin-bottom: auto; } /* centrado sin recortar arriba cuando no entra (antes la cara quedaba cortada) */
 .ace-hello-face { display: block; width: 84px; height: 84px; border-radius: 50%; padding: 3px; background: var(--a-lime); box-shadow: 0 0 26px rgba(159, 255, 0, .5); flex: none; }
 .ace-hello-face img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 2px solid #fff; display: block; }
 .ace-greeting { font: 700 clamp(1.3rem, 1.1rem + 1vw, 1.75rem)/1.2 Outfit, Inter, sans-serif; margin: 14px 0 6px; letter-spacing: -.015em; color: var(--a-ink); }
@@ -297,3 +298,4 @@ body.design-lock { overflow: hidden; }
 .ace-task-more > summary { cursor: pointer; font-size: 13px; font-weight: 650; color: var(--a-ink); padding: 8px 0 2px; }
 .ace-task-more ul { padding: 8px 0 2px; }
 .ace-mouth, .ace-ava.speaking .ace-mouth { display: none !important; }
+.ace-ava picture, .ace-hello-face picture { display: contents; }

@@ -167,20 +167,6 @@ h3, h4 { font-weight: 700; letter-spacing: -.01em; }
 .sec-tag { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: #52525b; background: rgba(255,255,255,.85); border: 1px solid var(--line); padding: 6px 14px; border-radius: 999px; margin-bottom: 16px; }
 .sec-title { font-family: var(--font); font-weight: 400; font-size: clamp(32px, 4.6vw, 58px); line-height: 1.02; letter-spacing: -.03em; margin: 0 0 14px; }
 .sec-lead { font-size: 16px; line-height: 1.6; color: #52525b; margin: 0 0 18px; max-width: 560px; }
-.brain-section { padding: 30px 0 80px; position: relative; z-index: 10; }
-.brain-grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 36px; align-items: center; }
-.brain-points { list-style: none; padding: 0; margin: 0 0 14px; display: flex; flex-wrap: wrap; gap: 8px; }
-.brain-points li { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 8px 12px; font-size: 13px; color: #3f3f46; }
-.brain-points strong { font-size: 18px; color: #18181b; margin-right: 4px; }
-.brain-hint { font-size: 12.5px; color: #5f5f69; margin: 0; }
-.brain-stage { position: relative; height: clamp(360px, 46vw, 560px); border-radius: 32px; overflow: hidden; background: radial-gradient(ellipse at 50% 45%, #1d2a12 0%, #0b1020 55%, #05070d 100%); box-shadow: 0 35px 95px rgba(24,24,27,.18); isolation: isolate; }
-.brain-fallback, .brain-fallback img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 30%; transition: opacity .6s; max-width: none; }
-.brain-stage.is-3d .brain-fallback { opacity: 0; pointer-events: none; }
-.brain-glow { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(circle at 50% 50%, rgba(159,255,0,calc(.10 + var(--ac-voice-level, 0) * .25)), transparent 60%); z-index: 1; }
-.brain3d-canvas { position: absolute; inset: 0; width: 100% !important; height: 100% !important; display: block; z-index: 2; cursor: grab; }
-.brain3d-canvas:active { cursor: grabbing; }
-.brain-badge { position: absolute; left: 16px; bottom: 16px; z-index: 3; display: inline-flex; align-items: center; gap: 8px; background: rgba(15,23,42,.82); color: #fff; backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,.16); border-radius: 999px; padding: 7px 14px; font: 600 12.5px var(--font); max-width: calc(100% - 32px); }
-.brain-load { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 3; background: #9fff00; color: #18181b; border: 0; border-radius: 999px; padding: 12px 22px; font-weight: 700; cursor: pointer; box-shadow: 0 10px 30px rgba(159,255,0,.35); }
 .team-section { padding: 20px 0 90px; position: relative; z-index: 10; }
 .team-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; margin-bottom: 22px; }
 .team-updated { display: inline-flex; align-items: center; gap: 8px; background: #fff; border: 1px solid var(--line); border-radius: 999px; padding: 7px 14px; font-size: 12.5px; font-weight: 600; color: #3f3f46; white-space: nowrap; }
@@ -204,8 +190,6 @@ h3, h4 { font-weight: 700; letter-spacing: -.01em; }
 @media (max-width: 860px) {
   .hero-actions { flex-direction: column; width: 100%; max-width: 320px; margin: 0 auto 36px; }
   .hero-btn-primary, .hero-btn-secondary { width: 100%; text-align: center; }
-  .brain-grid { grid-template-columns: 1fr; gap: 20px; }
-  .brain-stage { height: clamp(320px, 92vw, 460px); border-radius: 24px; }
   .team-head { flex-direction: column; align-items: flex-start; }
 }
 @media (max-width: 560px) { .hero-neural-hud { left: 22px; bottom: 22px; max-width: calc(100% - 44px); } }
@@ -393,7 +377,9 @@ html { background: #EDEEF5; }
 #main:has(#accountRoot), #main:has(.container-wide) { min-height: calc(100vh - 72px); }
 /* Portada: personaje en vivo (entero, sigue el cursor); reemplaza la imagen del cerebro y el lienzo neuronal */
 .hero-char { position: absolute; inset: 0; }
-.hero-char.char-stage { background: radial-gradient(70% 95% at 50% 58%, #d3d6e1 0%, #c7cbd8 55%, #b8bccb 100%); }
-.hero-char .ch-figure { -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 7%, #000 93%, transparent 100%); mask-image: linear-gradient(90deg, transparent 0, #000 7%, #000 93%, transparent 100%); }
+/* Fondo = mismo degradé vertical que los bordes de la imagen del personaje: sin banda más clara detrás */
+.hero-char.char-stage { background: linear-gradient(180deg, #b7bbcd 0%, #bac1cc 10%, #c1c7d3 20%, #caccd9 30%, #ced1de 40%, #d0d2df 50%, #d0d3e0 60%, #cdd0dc 70%, #c8cad7 80%, #bec4d0 90%, #b8bccb 100%); }
+.hero-char .ch-figure { -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 16%, #000 84%, transparent 100%); mask-image: linear-gradient(90deg, transparent 0, #000 16%, #000 84%, transparent 100%); }
 .hero-char .avatar-status { display: none; }
 .cyborg-hero-stage .hero-neural-canvas { display: none; }
+#heroVisualWrapper { background: linear-gradient(180deg, #b7bbcd 0%, #c1c7d3 20%, #ced1de 40%, #d0d3e0 60%, #c8cad7 80%, #b8bccb 100%); }

@@ -53,35 +53,6 @@ watchUser(async (u) => {
   if (stage) stage.addEventListener('click', () => { const c = document.getElementById('chat'); c && c.scrollIntoView({ behavior: 'smooth' }); setTimeout(() => { const i = document.querySelector('#homeChat textarea'); i && i.focus({ preventScroll: true }); }, 500); });
 }
 
-/* Cerebro neuronal 3D (forma anatómica, red dorada; se enciende cuando el chat procesa o habla) */
-let brainCtl = null;
-{
-  const prev = avatar.setState.bind(avatar);
-  avatar.setState = (st) => { prev(st); brainCtl && brainCtl.setState(st); };
-}
-(function initBrain() {
-  const stage = document.getElementById('brainStage');
-  if (!stage) return;
-  const badge = document.getElementById('brainBadgeText');
-  const btn = document.getElementById('brainLoad');
-  let started = false;
-  const fail = (msg) => { badge.textContent = msg; stage.classList.add('no-3d'); stage.setAttribute('data-state', 'fallback'); };
-  const load = () => {
-    if (started) return; started = true; btn.hidden = true; badge.textContent = 'Cargando cerebro 3D…';
-    import('../vendor/a3d/brain-stage.js?v=7.0.0')
-      .then((m) => m.mountBrain(stage, { label: 'Cerebro neuronal 3D de AgentiCuántico: arrastrá para girar' }))
-      .then((b) => { brainCtl = b; b.setState(avatar.state); badge.textContent = 'Cerebro neuronal 3D'; stage.setAttribute('data-state', 'ready'); })
-      .catch(() => { started = false; fail('Vista 3D no disponible en este dispositivo'); });
-  };
-  let gl = false;
-  try { const c = document.createElement('canvas'); gl = !!(window.WebGLRenderingContext && (c.getContext('webgl2') || c.getContext('webgl'))); } catch (e) { gl = false; }
-  if (!gl) { fail('Tu navegador no soporta 3D · mostrando imagen'); return; }
-  if (navigator.connection && navigator.connection.saveData) { badge.textContent = 'Ahorro de datos activo'; btn.hidden = false; btn.onclick = load; return; }
-  if (!('IntersectionObserver' in window)) { load(); return; }
-  const io = new IntersectionObserver((es) => { if (es[0].isIntersecting) { io.disconnect(); load(); } }, { threshold: 0.3 });
-  io.observe(stage);
-})();
-
 /* Equipo de agentes 24/7 (tarjetas clásicas) */
 function ago(iso) {
   const t = Date.parse(iso); if (!t) return '';

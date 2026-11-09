@@ -32,7 +32,9 @@ const MODES = {
 };
 
 const PHASES = { thinking: 'Pensando', searching: 'Buscando', coding: 'Escribiendo código', verifying: 'Verificando', reading: 'Leyendo', agent: 'Especialista', confirm: 'Confirmación' };
-const FACE = '/media/agenticuantico-avatar.webp?v=3';
+const FACE = '/media/avatar/face-256.webp?v=7.7.0';
+const FACE_SET = '/media/avatar/face-128.webp?v=7.7.0 128w, /media/avatar/face-256.webp?v=7.7.0 256w, /media/avatar/face-512.webp?v=7.7.0 512w';
+const FACE_PNG = '/media/avatar/face-256.png?v=7.7.0';
 
 const SUGGESTIONS = [
   { t: '¿Qué es AgentiCuántico?', i: 'info' },
@@ -108,7 +110,7 @@ export class ChatApp {
       <header class="chat-head ace-head">
         ${full ? `<button class="ace-ib only-narrow" type="button" data-act="sidebar" aria-label="Abrir historial">${icon('sidebar')}</button>` : ''}
         <div class="ace-id">
-          <span class="ace-ava" data-role="face"><img src="${FACE}" alt="" width="42" height="42"><span class="ace-mouth" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span></span>
+          <span class="ace-ava" data-role="face"><picture><source type="image/webp" srcset="${FACE_SET}" sizes="42px"><img src="${FACE_PNG}" alt="" width="42" height="42" decoding="async"></picture><span class="ace-mouth" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span></span>
           <span class="ace-txt"><strong>AgentiCuántico</strong><small data-role="status" role="status" aria-live="polite"><span class="ace-led"></span>En línea · Lista</small></span>
         </div>
         <div class="chat-participants" data-role="participants" aria-label="Agentes en la conversación"></div>
@@ -132,7 +134,7 @@ export class ChatApp {
           <div class="thread-inner" data-role="inner"></div>
         </div>
         <div class="ace-empty" data-role="empty">
-          <span class="ace-hello-face" aria-hidden="true"><img src="${FACE}" alt="" width="96" height="96"></span>
+          <span class="ace-hello-face" aria-hidden="true"><picture><source type="image/webp" srcset="${FACE_SET}" sizes="96px"><img src="${FACE_PNG}" alt="" width="96" height="96" decoding="async"></picture></span>
           <h2 class="ace-greeting" data-role="greeting"></h2>
           <p class="ace-hello-sub" data-role="greetingSub"></p>
           <div class="ace-sugg" data-role="suggestions"></div>
@@ -1054,7 +1056,7 @@ export class ChatApp {
     }
     const ag = m.agent;
     const el = h('div', { class: 'msg assistant ace-msg' + (m.streaming ? ' streaming' : '') + (ag ? ' by-agent' : ''), 'data-msg': m.id, style: ag ? `--c:${ag.color}` : null });
-    const face = ag ? h('span', { class: 'p-badge ace-mava-badge' }, initials(ag.name)) : h('img', { class: 'ace-mava', src: FACE, alt: '', width: 30, height: 30 });
+    const face = ag ? h('span', { class: 'p-badge ace-mava-badge' }, initials(ag.name)) : h('img', { class: 'ace-mava', src: FACE, srcset: FACE_SET, sizes: '30px', alt: '', width: 30, height: 30 });
     const body = h('div', { class: 'msg-body ace-body' });
     if (ag) body.append(h('div', { class: 'msg-who' }, h('strong', {}, ag.name), h('span', { class: 'chip' }, 'agente')));
     if (isMediaMessage(m)) { body.append(mediaCard(m, this)); el.append(face, body); return el; }
