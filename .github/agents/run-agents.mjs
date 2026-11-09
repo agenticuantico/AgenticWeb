@@ -53,7 +53,7 @@ export const ROLES_BY_KIND = {
     { id: 'accesibilidad', name: 'Accesibilidad', emoji: '♿', auto: 'a11y', focus: 'textos alternativos y nombres accesibles' },
     { id: 'rendimiento', name: 'Rendimiento', emoji: '⚡', auto: 'perf', focus: 'carga diferida de imágenes' },
     { id: 'ux-textos', name: 'UX y textos', emoji: '🧭', auto: null, focus: 'claridad de textos y microcopy (sin inventar datos)' },
-    { id: 'diseno-web', name: 'Diseño web', emoji: '🌐', auto: null, focus: 'CSS responsive (390 px y 1440 px) sin cambiar el diseño clásico' },
+    { id: 'diseno-web', name: 'Diseño web', emoji: '🌐', auto: null, focus: 'CSS responsive (390 px, 768 px y 1440 px) sin cambiar el diseño clásico' },
     { id: 'seo', name: 'SEO técnico', emoji: '🔎', auto: null, focus: 'títulos y descripciones meta precisos' }
   ],
   dev: [
@@ -232,7 +232,8 @@ const RULES = [
   '- Nunca agregues <script>, iframes, manejadores on*=, URLs javascript:, estilos externos ni enlaces a otros sitios.',
   '- Nunca escribas claves, tokens, teléfonos ni datos personales. No nombres herramientas ni proveedores externos.',
   '- No cambies el diseño visual (colores, tipografías, disposición) salvo que tu rol lo pida y aun así como propuesta.',
-  '- Textos en el idioma de la página; en español, rioplatense (voseo es correcto: «tenés», «podés», «pedile»).'
+  '- Textos en el idioma de la página; en español, rioplatense (voseo es correcto: «tenés», «podés», «pedile»).',
+  '- Todo cambio tiene que verse bien en TODOS los dispositivos a la vez: teléfono 390 px, tablet 768 px y escritorio 1440 px. Nada de anchos fijos mayores a 360 px fuera de una consulta @media; usá max-width, %, min() o clamp().'
 ].join('\n');
 const orderLine = () => (ORDER ? `\nOrden del dueño (cumplila solo si entra en tu rol y en las reglas): ${ORDER}` : '');
 
@@ -340,11 +341,26 @@ export function runChecks(before, after, { root = '.', strictValidator = true } 
     const ax = (src) => html.reduce((n, f) => n + a11yIssues(src[f] || '').length, 0);
     add('Accesibilidad básica (alt, nombres, idioma)', ax(after) <= ax(before), `${ax(before)} → ${ax(after)}`);
   }
-  // 5) Rendimiento básico: no suma recursos ni peso
+  // 5) Responsive: las líneas nuevas no agregan anchos fijos que rompan 390 px / 768 px (fuera de @media)
+  const fixed = responsiveIssues(added);
+  add('Responsive (390 px, 768 px y 1440 px: sin anchos fijos nuevos)', fixed.length === 0, fixed.slice(0, 3).join(' · '));
+  // 6) Rendimiento básico: no suma recursos ni peso
   const size = (src) => files.reduce((n, f) => n + Buffer.byteLength(src[f] || ''), 0);
   const res = (src) => files.reduce((n, f) => n + ((src[f] || '').match(/<script\b|<link\b[^>]*stylesheet|<iframe\b/gi) || []).length, 0);
   add('Rendimiento (sin recursos nuevos ni peso de más)', res(after) <= res(before) && size(after) <= size(before) * 1.02 + 600, `${size(before)} → ${size(after)} bytes`);
   return { ok: results.every((r) => r.ok), results };
+}
+/** Anchos fijos (> 360 px) en líneas nuevas que romperían el teléfono (390 px) o la tablet (768 px). Se ignoran @media y max-width. */
+export function responsiveIssues(added) {
+  const out = [];
+  for (const line of String(added).split('\n')) {
+    if (/@media|@container/i.test(line)) continue;
+    const re = /(?:^|[;{\s"'])((?:min-)?width)\s*:\s*(\d+(?:\.\d+)?)px/gi; let m;
+    while ((m = re.exec(line))) if (parseFloat(m[2]) > 360) out.push(`${m[1]}: ${m[2]}px`);
+    const wa = line.match(/<(?:div|section|table|img|iframe|video)\b[^>]*\swidth="(\d+)"/i);
+    if (wa && parseInt(wa[1], 10) > 360 && !/max-width|height:\s*auto|class=/i.test(line)) out.push(`width="${wa[1]}"`);
+  }
+  return out;
 }
 function diffAdded(a, b) { const s = new Set(String(a).split('\n')); return String(b).split('\n').filter((l) => !s.has(l)).join('\n'); }
 export function countLines(before, after) {

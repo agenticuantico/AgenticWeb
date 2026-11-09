@@ -6,7 +6,7 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import {
   pathAllowed, autoPathAllowed, hasSecret, unsafeWebContent, isTypoFix, onlyAttrChange, onlyHrefChange,
-  brokenLinks, a11yIssues, typoVerdict, lazyCandidates, addLazy, applyEdits, countLines, pickRoles, ROLES_BY_KIND, runChecks, parseJson, visibleText, pageUrl
+  brokenLinks, a11yIssues, typoVerdict, lazyCandidates, addLazy, applyEdits, countLines, pickRoles, ROLES_BY_KIND, runChecks, responsiveIssues, parseJson, visibleText, pageUrl
 } from './run-agents.mjs';
 import { describe as describeStatus, merge } from './update-status.mjs';
 
@@ -124,4 +124,14 @@ test('ortografía: el modelo no decide solo (palabras propias del sitio y diccio
   assert.equal(typoVerdict('inteligencia artifical', 'inteligencia artificial', counts, speller), 'auto');
   assert.equal(typoVerdict('inteligencia artifical', 'inteligencia artificial', counts, null), 'propuesta');
   assert.equal(typoVerdict('la artificial', 'la artificiales', counts, speller), 'no');
+});
+
+test('responsive: anchos fijos nuevos > 360 px se marcan; @media, max-width y anchos chicos no', () => {
+  assert.deepEqual(responsiveIssues('.x { width: 320px; max-width: 900px; }'), []);
+  assert.deepEqual(responsiveIssues('@media (min-width: 768px) { .x { width: 700px } }'), []);
+  assert.equal(responsiveIssues('.card { width: 600px; }').length, 1);
+  assert.equal(responsiveIssues('.card{min-width:480px}').length, 1);
+  const r = runChecks({ 'assets/css/site.css': '.a{color:red}' }, { 'assets/css/site.css': '.a{color:red}\n.b{width:900px}' });
+  assert.equal(r.results.find((x) => x.name.startsWith('Responsive')).ok, false);
+  assert.equal(r.ok, false);
 });

@@ -197,6 +197,9 @@
 .ab-card.cc .ab-off p { color: var(--cc-muted); }
 .ab-card.cc .ab-off-ic svg { color: #4d7c0f; }
 .ab-card.cc .ab-off .btn { --b-bg: var(--cc-ink); --b-fg: #fff; --b-line: var(--cc-ink); border-radius: 999px; }
+/* classic.css pinta .btn con fondo blanco fijo: el botón «Ingresar» quedaba blanco sobre blanco */
+.ab-card.cc .ab-off .btn { background: var(--cc-ink); color: #fff; border-color: var(--cc-ink); }
+.ab-card.cc .ab-off .btn:hover, .ab-card.cc .ab-off .btn:focus-visible { background: #000; color: #fff; }
 .ab-card.cc.is-off .cc-zoom, .ab-card.cc.is-off .cc-badge { display: none; }
 .ab-card.cc.is-off .cc-screen { cursor: default; }
 /* Pantalla completa (tocar la pantalla): grande, con «Tomar el control» */
