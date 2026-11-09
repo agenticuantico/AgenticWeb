@@ -118,3 +118,39 @@
 .team-reps { margin: 6px 0 10px; } .team-reps summary { cursor: pointer; font-weight: 600; font-size: var(--fs-sm); } .team-reps ul { padding-left: 18px; display: grid; gap: 6px; }
 @media (max-width: 640px) { .tc-tools { top: auto; bottom: 10px; right: 10px; } }
 .team-profile > div { display: grid; gap: 4px; align-content: start; }
+
+/* ===== Acceso con clave + Equipo humano + Bitácora ===== */
+.panel-gate { max-width: 440px; }
+.pass-wrap { display: flex; gap: 8px; align-items: stretch; }
+.pass-wrap .input { flex: 1; min-width: 0; font-size: 1.05rem; letter-spacing: .02em; }
+.pass-toggle { flex: none; min-width: 84px; min-height: 44px; }
+.gate-links { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 16px; margin-top: 12px; }
+.gate-links .linklike { min-height: 40px; padding: 6px 0; }
+.panel-gate .error-text { margin: 2px 0 0; }
+.panel-who { margin: 2px 0 0; }
+.staff-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.staff-row { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 12px; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface); }
+.staff-row.is-off { opacity: .7; }
+.staff-av { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: var(--gold-soft); color: var(--ink); font-weight: 700; }
+.staff-av svg { width: 18px; height: 18px; }
+.staff-main p { margin: 0; }
+.staff-name { font-weight: 600; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.staff-mail { overflow-wrap: anywhere; }
+.staff-acts { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+.btn-sm { min-height: 36px; padding: 6px 12px; font-size: var(--fs-xs); }
+.perm-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--line); border-radius: var(--r-md); }
+.perm-table { border-collapse: collapse; width: 100%; min-width: 640px; font-size: var(--fs-xs); }
+.perm-table th, .perm-table td { padding: 8px 10px; border-bottom: 1px solid var(--line); text-align: center; }
+.perm-table thead th { position: sticky; top: 0; background: var(--surface); font-weight: 600; }
+.perm-table tbody th { text-align: left; font-weight: 500; position: sticky; left: 0; background: var(--surface); min-width: 170px; }
+.perm-table td.yes { color: #1f7a3a; font-weight: 700; }
+.perm-table td.no { color: var(--muted); }
+.audit-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+.audit-list li { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: var(--fs-sm); }
+.audit-txt { overflow-wrap: anywhere; }
+@media (max-width: 600px) {
+  .staff-row { grid-template-columns: 40px minmax(0, 1fr); }
+  .staff-acts { grid-column: 1 / -1; justify-content: flex-start; }
+  .audit-list li { grid-template-columns: 1fr; gap: 2px; }
+  .admin-head .row { flex-wrap: wrap; }
+}
