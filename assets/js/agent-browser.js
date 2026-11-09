@@ -202,7 +202,7 @@ export class AgentBrowserCard {
     this.el.dataset.status = 'error'; this.el.classList.add('is-off');
     this.lineText.textContent = title; this.line.dataset.kind = 'off';
     this.xBtn.hidden = true; this.stopBtn.hidden = true; this.controls.hidden = true; this.clock.hidden = true;
-    this.view.replaceChildren(h('div', { class: 'ab-off' }, h('span', { class: 'ab-off-ic', html: icon('monitor') }), h('strong', {}, title), h('p', {}, text), action || null));
+    this.view.replaceChildren(h('div', { class: 'ab-off' }, h('span', { class: 'ab-off-ic', html: icon('monitor') }), h('strong', {}, title), h('p', {}, text), ...(action ? [action] : [])));
   }
 
   explain(e) {
@@ -300,9 +300,9 @@ export class AgentBrowserCard {
     else if (s.status !== 'ended') { this.sum.hidden = true; this.el.classList.remove('is-done', 'is-ended'); }
     if (s.status === 'done' && s.summary) {
       this.result.hidden = false;
-      this.result.replaceChildren(h('div', { class: 'ab-res-h' }, h('span', { html: icon('check') }), h('strong', {}, 'Resultado')), h('p', { class: 'ab-res-t', 'data-no-i18n': '' }, s.summary),
+      this.result.replaceChildren(...[h('div', { class: 'ab-res-h' }, h('span', { html: icon('check') }), h('strong', {}, 'Resultado')), h('p', { class: 'ab-res-t', 'data-no-i18n': '' }, s.summary),
         (s.sources || []).length ? h('div', { class: 'ab-srcs' }, h('small', { class: 'muted' }, 'Fuentes'), ...(s.sources || []).slice(0, 8).map((x, i) => h('a', { href: x.url, target: '_blank', rel: 'noopener noreferrer', 'data-no-i18n': '' }, `${i + 1}. ${x.title || host(x.url)}`))) : null,
-        h('small', { class: 'muted' }, 'Podés seguir en esta conversación: por ejemplo «ahora compará…» o «pasalo a una tabla».'));
+        h('small', { class: 'muted' }, 'Podés seguir en esta conversación: por ejemplo «ahora compará…» o «pasalo a una tabla».')].filter(Boolean));
     } else if (s.status !== 'ended') this.result.hidden = true;
     if (s.status === 'ended') this.ended(s);
     this.o.onScroll && this.o.onScroll();
@@ -325,10 +325,10 @@ export class AgentBrowserCard {
       this.reader.replaceChildren(h('div', { class: 'abr-head' }, h('span', { html: icon('search') }), h('strong', { 'data-no-i18n': '' }, `«${r.query}»`)),
         h('ol', { class: 'abr-results' }, ...(r.results || []).map((x) => h('li', {}, h('a', { href: x.url, target: '_blank', rel: 'noopener noreferrer', 'data-no-i18n': '' }, x.title), h('small', { 'data-no-i18n': '' }, x.host), h('p', { 'data-no-i18n': '' }, x.snippet)))));
     } else if (r.kind === 'page') {
-      this.reader.replaceChildren(h('div', { class: 'abr-head' }, h('span', { html: icon('globe') }), h('div', { class: 'abr-t' }, h('strong', { 'data-no-i18n': '' }, r.title), h('a', { href: r.url, target: '_blank', rel: 'noopener noreferrer', 'data-no-i18n': '' }, r.host))),
+      this.reader.replaceChildren(...[h('div', { class: 'abr-head' }, h('span', { html: icon('globe') }), h('div', { class: 'abr-t' }, h('strong', { 'data-no-i18n': '' }, r.title), h('a', { href: r.url, target: '_blank', rel: 'noopener noreferrer', 'data-no-i18n': '' }, r.host))),
         readable(r.description) ? h('p', { class: 'abr-desc', 'data-no-i18n': '' }, readable(r.description)) : null,
         h('div', { class: 'abr-text', 'data-no-i18n': '' }, readable(r.excerpt).slice(0, 1400)),
-        h('small', { class: 'abr-foot muted' }, `Parte ${r.part} de ${r.parts}${r.tables ? ` · ${r.tables} tablas` : ''}`));
+        h('small', { class: 'abr-foot muted' }, `Parte ${r.part} de ${r.parts}${r.tables ? ` · ${r.tables} tablas` : ''}`)].filter(Boolean));
     } else {
       this.reader.replaceChildren(h('div', { class: 'ab-loader' }, h('div', { class: 'ab-orbit', 'aria-hidden': 'true' }, h('i'), h('i'), h('i')), h('p', {}, WORKING.has(s.status) ? 'Armando el plan' : 'Lista')));
     }
@@ -564,7 +564,7 @@ export class AgentBrowserCard {
     const txt = reason === 'idle' ? 'La archivé por inactividad.' : 'Detuviste la computadora del agente.';
     const resume = (st.canResume !== false) ? h('button', { class: 'btn btn-sm', type: 'button', onclick: () => this.resume() }, h('span', { html: icon('refresh') }), 'Retomar') : null;
     this.result.hidden = false;
-    this.result.replaceChildren(h('div', { class: 'ab-res-h' }, h('span', { html: icon('power') }), h('strong', {}, 'Detenida')), h('p', {}, txt), resume);
+    this.result.replaceChildren(h('div', { class: 'ab-res-h' }, h('span', { html: icon('power') }), h('strong', {}, 'Detenida')), h('p', {}, txt), ...(resume ? [resume] : []));
     this.el.dataset.status = 'ended'; this.xBtn.hidden = true;
     this.renderLine({ ...st, status: 'ended' });
     this.renderSummary({ ...st, status: 'ended' }, true);
