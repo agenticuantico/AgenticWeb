@@ -12,6 +12,7 @@
  *  'smart' (automático) | 'fast' | 'deep' | 'auto' (agente). Con un modo fijo se respeta el comportamiento anterior.
  */
 import { EXPLICIT_SEARCH, BROWSER_ACTION, RESEARCH, routeWebIntent, needsWebAction } from './intent.js';
+import { isIterateOrder } from './iterate.js?v=7.12.0';
 
 const W = '(?![\\wáéíóúñ])';
 
@@ -74,7 +75,7 @@ export const ROUTE_LABEL = {
 
 /**
  * @param {string} text
- * @param {{ override?: 'smart'|'fast'|'deep'|'auto', followBrowser?: boolean, hasFiles?: boolean }} [o]
+ * @param {{ override?: 'smart'|'fast'|'deep'|'auto', followBrowser?: boolean, hasFiles?: boolean, hasArtifact?: boolean }} [o]
  * @returns {{ kind: 'fast'|'think'|'search'|'browser'|'agent', mode: 'fast'|'deep'|'auto', why: string }}
  */
 export function decideRoute(text, o = {}) {
@@ -82,6 +83,9 @@ export function decideRoute(text, o = {}) {
   const ov = o.override && o.override !== 'smart' && OVERRIDES[o.override] ? o.override : 'smart';
   if (!t) return { kind: 'fast', mode: 'fast', why: 'empty' };
   if (o.followBrowser && FOLLOW.test(t)) return { kind: 'browser', mode: ov === 'smart' ? 'fast' : ov, why: 'follow' };
+  // Orden sobre el diseño que ya está en la conversación («implementalo y mejoralo», «agregá panel admin 3D»):
+  // la ejecuta el agente con ese archivo como base (nunca una respuesta solo en texto).
+  if (o.hasArtifact && !EXPLICIT_SEARCH.test(t) && !isBrowserAction(t) && isIterateOrder(t)) return { kind: 'agent', mode: 'auto', why: 'iterate' };
   // Modo fijo elegido a mano: mismo comportamiento que tenían Rápido / Pensar / Agente.
   if (ov !== 'smart') {
     // «Buscá en la web: …» es siempre la búsqueda en vivo (antes, en Agente, abría la computadora: error conocido).

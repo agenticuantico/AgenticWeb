@@ -19,7 +19,9 @@ import { VoiceRecorder, fmtClock } from './recorder.js';
 import { readFile, fmtSize } from './docs.js';
 // Rendimiento (Fase 3): la computadora del agente y la videollamada se cargan recién cuando se usan.
 import { needsWebAction, isFollowUp } from './intent.js';
-import { decideRoute, OVERRIDES, ROUTE_LABEL } from './router.js';
+import { decideRoute, OVERRIDES, ROUTE_LABEL } from './router.js?v=7.12.0';
+import { workScreen, fmtElapsed } from './work-screen.js?v=7.12.0';
+import { lastWebArtifact } from './iterate.js?v=7.12.0';
 import { detectMediaIntent, mediaMessage, mediaCard, isMediaMessage, runMedia as runMediaTask } from './media.js';
 import { cleanArtifact, cleanThought } from './clean.js';
 import { PreviewCard, LiveFrame, previewKind, previewHtml, isPreviewable } from './preview-card.js';
@@ -633,7 +635,7 @@ export class ChatApp {
     // Rápido/Profundo: «Buscá en la web: …», «averiguá…», «con fuentes» → búsqueda en vivo (no la computadora del agente).
     // Un solo chat: el router decide por mensaje (rápido, pensar, búsqueda en vivo, computadora o agente).
     const forced = this.override !== 'smart' ? this.override : this.forceNext;
-    const decision = decideRoute(text, { override: forced || 'smart', followBrowser: !!follow, hasFiles: files.length > 0 });
+    const decision = decideRoute(text, { override: forced || 'smart', followBrowser: !!follow, hasFiles: files.length > 0, hasArtifact: !!lastWebArtifact(this.chat.messages) });
     this.forceNext = null; this.renderMode();
     this.mode = decision.mode;
     msg._route = decision.kind;
@@ -861,13 +863,22 @@ export class ChatApp {
   }
 
   async runAuto(userMsg, agents, docs, ctrl) {
-    const a = { id: uid('m'), role: 'assistant', content: '', at: Date.now(), streaming: true, steps: [], logs: {}, artifacts: [], auto: true };
+    // Diseño que ya está en la conversación: el agente lo toma como base y entrega la versión siguiente.
+    const prev = lastWebArtifact(this.chat.messages);
+    const history = this.history().slice(-10, -1).map((m) => ({ role: m.role, content: String(m.content || '').slice(0, 2000) }));
+    const a = { id: uid('m'), role: 'assistant', content: '', at: Date.now(), streaming: true, steps: [], logs: {}, artifacts: [], auto: true, startedAt: Date.now() };
     this.pushMessage(a);
+    // Reloj de la pantalla de trabajo (solo el texto del tiempo; el resto se redibuja con cada evento).
+    clearInterval(this._wsTick);
+    this._wsTick = setInterval(() => this.root.querySelectorAll('.ws-time.is-live').forEach((el) => { const st = Number(el.dataset.start); if (st) el.textContent = fmtElapsed(Date.now() - st); }), 1000);
+    try {
     await engine.autoRun({
       task: userMsg.content, lang: this.lang.code, agents, docs, signal: ctrl.signal,
+      messages: history, artifact: prev || undefined,
       confirm: (q) => this.inlineConfirm(a, q),
       onEvent: (ev) => {
-        if (ev.type === 'plan') a.steps = ev.steps.map((s) => ({ ...s, status: 'pending' }));
+        if (ev.type === 'plan') { a.steps = ev.steps.map((s) => ({ ...s, status: 'pending' })); if (ev.version) a.version = ev.version; }
+        else if (ev.type === 'action') { a.action = String(ev.text || '').slice(0, 160); this.busy && (this.busy.label = a.action, this.updateStatus()); }
         else if (ev.type === 'step') { const s = a.steps.find((x) => x.id === ev.id); if (s) s.status = ev.status; else a.steps.push({ id: ev.id, title: ev.title, phase: ev.phase, status: ev.status }); this.busy && (this.busy.label = ev.title + '…', this.updateStatus()); this.avatar && this.avatar.pulse(0.4); }
         else if (ev.type === 'log') { (a.logs[ev.id] = a.logs[ev.id] || []).push(ev.text); }
         else if (ev.type === 'agent') { (a.logs[ev.id] = a.logs[ev.id] || []).push(`${ev.agent.name}: listo.`); this.pushMessage({ id: uid('m'), role: 'assistant', content: ev.text, at: Date.now(), agent: ev.agent }); }
@@ -877,6 +888,11 @@ export class ChatApp {
         this.updateMessage(a);
       }
     });
+    } catch (e) {
+      if (e && e.name === 'AbortError') { a.stopped = true; a.action = ''; a.endedAt = Date.now(); (a.steps || []).forEach((s) => { if (s.status === 'running') s.status = 'stopped'; }); }
+      throw e;
+    } finally { clearInterval(this._wsTick); this._wsTick = 0; }
+    a.endedAt = Date.now(); a.action = '';
     a.streaming = false;
     (a.artifacts || []).forEach((x) => { delete x.writing; });
     this.updateMessage(a);
@@ -897,7 +913,8 @@ export class ChatApp {
     let art = a.artifacts.find((x) => x.name === name);
     if (!art) { art = { name, mime: ev.mime, content: '' }; a.artifacts.push(art); }
     if (ev.mime) art.mime = ev.mime;
-    if (ev.type === 'artifact_delta') { art.content += String(ev.delta || ''); art.writing = true; }
+    if (ev.version) art.version = ev.version;
+    if (ev.type === 'artifact_delta') { if (ev.reset) art.content = ''; art.content += String(ev.delta || ''); art.writing = true; }
     else if (ev.partial) { art.content = String(ev.content || ''); art.writing = true; }
     else { art.content = cleanArtifact(ev.content, name); delete art.writing; }
     if (this._panel && this._panel.m === a && isPreviewable(art) && !this._panel.ui.userPicked) this._panel.showFiles(a.artifacts.indexOf(art));
@@ -1060,7 +1077,10 @@ export class ChatApp {
     const body = h('div', { class: 'msg-body ace-body' });
     if (ag) body.append(h('div', { class: 'msg-who' }, h('strong', {}, ag.name), h('span', { class: 'chip' }, 'agente')));
     if (isMediaMessage(m)) { body.append(mediaCard(m, this)); el.append(face, body); return el; }
-    if (m.steps && m.steps.length) body.append(this.timeline(m));
+    if ((m.steps && m.steps.length) || (m.auto && m.streaming)) {
+      // Pantalla de trabajo: actividad real paso a paso, tiempo, Detener, plegar y pantalla completa.
+      body.append(workScreen(m, { h, icon, onExpand: () => this.openAgentPanel(m, 'plan'), onStop: () => this.act_stop(), onToggle: (v) => { m._wsOpen = v; this.updateMessage(m, { now: true }); } }));
+    }
     if (m.artifacts && m.artifacts.length) {
       // Vista previa automática de cada entregable previsualizable (también al reabrir la conversación).
       for (const card of this.previewCards(m)) {
@@ -1071,7 +1091,7 @@ export class ChatApp {
     }
     if (m.search) body.append(this.searchCard(m));
     const md = h('div', { class: 'md' });
-    md.innerHTML = m.content ? renderMarkdown(m.content) : (m.streaming && !(m.steps && m.steps.length) && !m.search ? '<span class="typing" aria-label="Escribiendo"><i></i><i></i><i></i></span>' : '');
+    md.innerHTML = m.content ? renderMarkdown(m.content) : (m.streaming && !(m.steps && m.steps.length) && !m.search && !m.auto ? '<span class="typing" aria-label="Escribiendo"><i></i><i></i><i></i></span>' : '');
     body.append(md);
     if (m.search && m.search.sources && m.search.sources.length && (!m.streaming || m.search.state === 'writing')) body.append(this.sourcesList(m));
     if (m.tools) {
@@ -1221,7 +1241,7 @@ export class ChatApp {
       for (const n of [...body.childNodes]) if (n !== viewHost) n.remove();
       const put = (n) => { if (n) body.insertBefore(n, viewHost.parentNode === body ? viewHost : null); };
       if (task) put(h('div', { class: 'ap-task' }, h('strong', {}, cleanThought(task).trim().slice(0, 220))));
-      put(h('div', { class: 'ap-status' }, h('span', {}, running ? 'El agente está trabajando…' : done < steps.length ? 'Tarea detenida' : 'Tarea completada'), h('span', {}, steps.length ? `${done} de ${steps.length} pasos` : '')));
+      put(h('div', { class: 'ap-status' }, h('span', { 'data-no-i18n': running && m.action ? '' : null }, running ? (m.action || 'El agente está trabajando…') : done < steps.length ? 'Tarea detenida' : 'Tarea completada'), h('span', {}, steps.length ? `${done} de ${steps.length} pasos` : '')));
       put(h('div', { class: 'progress' }, h('i', { style: `width:${steps.length ? Math.round(done / steps.length * 100) : 0}%` })));
       const tabs = h('div', { class: 'ace-tabs', role: 'tablist' });
       [['plan', 'Plan'], ['computer', 'Computadora'], ['files', 'Archivos' + (arts.length ? ` (${arts.length})` : '')]].forEach(([id, label]) => {

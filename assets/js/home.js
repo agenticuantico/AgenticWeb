@@ -1,5 +1,5 @@
 /** Portada: chat embebido (con el hero neuronal sincronizado), planes y estado del equipo de agentes. */
-import { ChatApp } from './chat/chat.js';
+import { ChatApp } from './chat/chat.js?v=7.12.0';
 import { ChatStore } from './chat/store.js';
 import { mountPlans } from './plans.js';
 import { watchUser, getProfile } from './auth.js';

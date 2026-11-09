@@ -246,7 +246,7 @@ export async function autoRun(o) {
   if (state.live) {
     let got = false;
     try {
-      const res = await api('/api/agent/run', { method: 'POST', signal: o.signal, body: { task: o.task, lang: o.lang, agents: (o.agents || []).map((a) => ({ id: a.id, name: a.name, system: a.system })) } });
+      const res = await api('/api/agent/run', { method: 'POST', signal: o.signal, body: { task: o.task, lang: o.lang, agents: (o.agents || []).map((a) => ({ id: a.id, name: a.name, system: a.system })), ...(o.messages ? { messages: o.messages } : {}), ...(o.artifact ? { artifact: o.artifact } : {}) } });
       if (res.ok && res.body) {
         await readSSE(res, (d) => { if (d !== '[DONE]') { got = true; o.onEvent(d); } }, o.signal);
         return { local: false };

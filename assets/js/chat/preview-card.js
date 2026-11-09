@@ -78,7 +78,7 @@ export class PreviewCard {
     this.opts = opts; this.art = art;
     this.kind = previewKind(art);
     this.frame = new LiveFrame('pvc-frame', art.name);
-    this.nameEl = h('strong', { class: 'pvc-name', 'data-no-i18n': '' }, art.name || '');
+    this.nameEl = h('strong', { class: 'pvc-name', 'data-no-i18n': '' }, art.version ? `${art.name} · versión ${art.version}` : art.name || '');
     this.stateEl = h('span', { class: 'pvc-state' });
     const expand = () => this.opts.onExpand && this.opts.onExpand({ name: this.art.name, mime: 'text/html', content: previewHtml(this.art) });
     const stage = h('div', { class: 'pvc-stage', role: 'button', tabindex: '0', title: 'Expandir', 'aria-label': 'Expandir vista previa', onclick: expand,
@@ -98,7 +98,7 @@ export class PreviewCard {
   /** Nuevo contenido (o el mismo); mientras se escribe, re-render con debounce. */
   update(art, { writing = false } = {}) {
     this.art = art;
-    this.nameEl.textContent = art.name || '';
+    this.nameEl.textContent = art.version ? `${art.name} · versión ${art.version}` : art.name || '';
     this.el.classList.toggle('is-writing', !!writing);
     this.stateEl.textContent = writing ? 'Escribiendo el archivo…' : '';
     this.acts.hidden = !!writing;
