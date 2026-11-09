@@ -317,11 +317,11 @@ export async function renderSettings(box, token) {
         const r = await api('/api/panel/settings/mail/test', { method: 'POST', token, body: {} });
         const x = r.result || {};
         out.className = 'mailcfg-result ' + (x.sent ? 'ok' : 'bad');
-        out.replaceChildren(
+        out.replaceChildren(...[
           h('p', {}, h('strong', {}, x.sent ? `Enviado a ${r.to}. Revisá la bandeja y Spam.` : 'Brevo no lo envió.')),
           h('p', { class: 'small', id: 'mailcfg-brevo' }, `Respuesta de ${x.provider === 'none' ? 'servidor' : 'Brevo'}: ${x.status ?? '—'}${x.code ? ' · ' + x.code : ''}${x.message ? ' · ' + x.message : ''}${x.messageId ? ' · id ' + x.messageId : ''}`),
           !x.sent && /ip/i.test(x.message || '') ? h('p', { class: 'tiny' }, 'Brevo bloquea IPs desconocidas: en Brevo → Seguridad → IPs autorizadas, desactivá el bloqueo (los servidores de Cloudflare cambian de IP).') : null,
-          !x.sent && /sender/i.test((x.message || '') + (x.code || '')) ? h('p', { class: 'tiny' }, 'Verificá el remitente en Brevo → Remitentes, dominios e IPs.') : null);
+          !x.sent && /sender/i.test((x.message || '') + (x.code || '')) ? h('p', { class: 'tiny' }, 'Verificá el remitente en Brevo → Remitentes, dominios e IPs.') : null].filter(Boolean));
       } catch (ex) { out.className = 'mailcfg-result bad'; out.textContent = msg(ex); }
       finally { test.disabled = false; }
     };
