@@ -11,7 +11,7 @@ export const SITE_LANGS = [
   { id: 'pt-BR', short: 'PT', name: 'Português', region: 'Brasil', flag: 'br' },
 ];
 const KEY = 'ac.siteLang';
-const VERSION = '7.10.0';
+const VERSION = '7.10.1';
 const ATTRS = ['placeholder', 'alt', 'aria-label', 'title'];
 const SKIP = new Set(['SCRIPT', 'STYLE', 'NOSCRIPT', 'CODE', 'PRE', 'TEXTAREA', 'SVG', 'svg']);
 const NO = '[data-no-i18n], .msg .md, .msg-body .md, .bubble .md, .ace-bubble .md, .canvas-code, .cm-editor, .transcript p';

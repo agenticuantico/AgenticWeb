@@ -50,7 +50,7 @@ export async function renderKpis(box, token, me) {
     const sel = h('select', { class: 'select', 'aria-label': 'Período', style: 'width:auto' }, ...[['1', 'Hoy'], ['7', 'Últimos 7 días'], ['30', 'Últimos 30 días'], ['90', 'Últimos 90 días'], ['365', 'Último año']].map(([v, l]) => h('option', { value: v, selected: v === period }, l)));
     sel.onchange = () => { period = sel.value; sessionStorage.setItem('kpi-days', period); load(); };
     const q = `days=${encodeURIComponent(period)}`;
-    const dl = (fmtx, table) => h('button', { class: 'btn btn-sm', type: 'button', html: icon('download') + `<span>${fmtx.toUpperCase()}${table ? '' : ' (todo)'}</span>`, onclick: () => download(`/api/panel/kpi/export.${fmtx}?${q}${table ? '&table=' + table : ''}`, token, `indicadores-${d.period.from}-a-${d.period.to}${table ? '-' + table : ''}.${fmtx}`) });
+    const dl = (fmtx, table) => h('button', { class: 'btn btn-sm', type: 'button', html: icon('download') + `<span>${fmtx.toUpperCase()} ${table ? ({ resumen: 'resumen', diario: 'por día', gasto: 'gasto' }[table] || table) : '(todo)'}</span>`, onclick: () => download(`/api/panel/kpi/export.${fmtx}?${q}${table ? '&table=' + table : ''}`, token, `indicadores-${d.period.from}-a-${d.period.to}${table ? '-' + table : ''}.${fmtx}`) });
     const head = h('section', { class: 'card panel' },
       h('div', { class: 'panel-head' }, h('h2', {}, 'Indicadores'), h('div', { class: 'row' }, sel, dl('xlsx'))),
       h('p', { class: 'small muted' }, `Del ${d.period.from} al ${d.period.to} (hora de Argentina). Solo datos reales: si un dato falta, se muestra «—» con el motivo.`),
@@ -63,7 +63,7 @@ export async function renderKpis(box, token, me) {
       h('div', { class: 'kpi-charts' }, barChart(d.daily, 'tareas_hechas', 'Tareas de agentes hechas'), barChart(d.daily, 'gemini_equipo', 'Consultas a Gemini del equipo', '#16151a'),
         barChart(d.daily, 'visitantes', 'Visitantes', '#2f5fd0'), barChart(d.daily, 'leads', 'Leads', '#b8892f'), d.owner ? barChart(d.daily, 'ingresos_ars', 'Ingresos (ARS)', '#157a42') : null));
     const parts = [head, ...groups, charts];
-    parts.push(h('section', { class: 'card panel' }, h('h2', {}, 'Descargas para Excel o Power BI'), h('p', { class: 'small muted' }, 'Cada tabla en CSV (Power BI: Obtener datos → Texto/CSV) o todo junto en XLSX (Obtener datos → Excel).'),
+    parts.push(h('section', { class: 'card panel' }, h('div', { class: 'panel-head' }, h('h2', {}, 'Descargas para Excel o Power BI')), h('p', { class: 'small muted' }, 'Cada tabla en CSV (Power BI: Obtener datos → Texto/CSV) o todo junto en XLSX (Obtener datos → Excel).'),
       h('div', { class: 'row' }, dl('csv', 'resumen'), dl('csv', 'diario'), d.owner ? dl('csv', 'gasto') : null, dl('xlsx'))));
     if (d.owner) parts.push(spendCard(d), feedCard(d));
     root.replaceChildren(...parts.filter(Boolean));
@@ -77,7 +77,7 @@ export async function renderKpis(box, token, me) {
     const form = h('form', { class: 'kpi-spend-form', novalidate: true }, h('label', { class: 'label' }, 'Mes', month), h('label', { class: 'label' }, 'Monto', amount), h('label', { class: 'label' }, 'Moneda', cur), h('label', { class: 'label' }, 'Canal', channel), save);
     form.addEventListener('submit', async (e) => { e.preventDefault(); save.disabled = true; try { await api('/api/panel/kpi/spend', { method: 'POST', token, body: { month: month.value, amount: Number(amount.value), currency: cur.value, channel: channel.value } }); toast('Gasto guardado', 'success'); load(); } catch (ex) { fail(ex); save.disabled = false; } });
     const rows = (d.business && d.business.spend) || [];
-    return h('section', { class: 'card panel' }, h('h2', {}, 'Gasto de marketing (para el CAC)'), h('p', { class: 'small muted' }, 'Lo cargás vos a mano, por mes. Sin gasto cargado, el CAC muestra «falta dato de gasto».'), form,
+    return h('section', { class: 'card panel' }, h('div', { class: 'panel-head' }, h('h2', {}, 'Gasto de marketing (para el CAC)')), h('p', { class: 'small muted' }, 'Lo cargás vos a mano, por mes. Sin gasto cargado, el CAC muestra «falta dato de gasto».'), form,
       rows.length ? h('ul', { class: 'team-props' }, ...rows.map((s) => h('li', { class: 'team-prop done' }, `${s.mes} · ${s.moneda} ${Number(s.monto).toLocaleString('es-AR')}${s.canal ? ' · ' + s.canal : ''} `,
         h('button', { class: 'linklike tiny', type: 'button', onclick: async () => { if (!(await confirmDialog({ title: 'Borrar gasto', text: `¿Borrar ${s.mes} · ${s.moneda} ${s.monto}?`, ok: 'Borrar', danger: true }))) return; try { await api('/api/panel/kpi/spend/' + s.id, { method: 'DELETE', token }); load(); } catch (e) { fail(e); } } }, 'Borrar')))) : h('p', { class: 'muted small' }, 'Todavía no cargaste gasto.'));
   }
@@ -95,7 +95,7 @@ export async function renderKpis(box, token, me) {
       } catch (e) { fail(e); }
     };
     const revoke = d.token ? h('button', { class: 'btn btn-ghost btn-sm', type: 'button', onclick: async () => { if (!(await confirmDialog({ title: 'Revocar token', text: 'Power BI deja de poder leer los datos.', ok: 'Revocar', danger: true }))) return; try { await api('/api/panel/kpi/token', { method: 'DELETE', token }); toast('Revocado'); load(); } catch (e) { fail(e); } } }, 'Revocar') : null;
-    return h('section', { class: 'card panel' }, h('h2', {}, 'Conexión con Power BI (solo lectura)'),
+    return h('section', { class: 'card panel' }, h('div', { class: 'panel-head' }, h('h2', {}, 'Conexión con Power BI (solo lectura)')),
       h('p', { class: 'small muted' }, 'Power BI se conecta a estas direcciones con un token tuyo (Obtener datos → Web → Avanzado → encabezado Authorization: Bearer <token>). Máximo 60 lecturas por hora. Incluye ingresos: no lo compartas.'),
       h('p', { class: 'small' }, d.token ? `Token activo desde ${new Date(d.token.created_at).toLocaleString('es-AR')}${d.token.last_used_at ? ' · último uso ' + new Date(d.token.last_used_at).toLocaleString('es-AR') : ' · sin usar todavía'}.` : 'No hay token activo.'),
       urls, h('div', { class: 'row' }, create, revoke), out);
