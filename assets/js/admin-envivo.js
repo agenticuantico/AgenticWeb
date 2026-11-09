@@ -11,8 +11,8 @@ import { download } from './admin-indicadores.js?v=7.11.1';
 const TYPE = { orden: 'Orden', delegacion: 'Delegación', resultado: 'Resultado', propuesta: 'Propuesta', decision: 'Decisión', recomendacion: 'Recomendación', entrenamiento: 'Entrenamiento', puesto: 'Puesto', ascenso: 'Ascenso' };
 const TCLS = { orden: 'info', delegacion: 'info', resultado: 'ok', propuesta: 'gold', decision: 'ok', recomendacion: 'warn', entrenamiento: '', puesto: '', ascenso: '' };
 const OST = { pendiente: 'En cola', en_curso: 'Trabajando', hecha: 'Hecha', propuesta: 'Espera OK', aprobada: 'Aprobada', rechazada: 'Rechazada', fallida: 'Con error', cancelada: 'Cancelada', delegada: 'Delegada' };
-const when = (t) => new Date(t).toLocaleString('es-AR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'America/Argentina/Buenos_Aires' });
-const hhmm = (t) => new Date(t).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'America/Argentina/Buenos_Aires' });
+const when = (t) => new Date(t).toLocaleString('es-AR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'America/Argentina/Buenos_Aires' });
+const hhmm = (t) => new Date(t).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false, timeZone: 'America/Argentina/Buenos_Aires' });
 const ref = (r) => (r ? `${r.kind} ${r.id}` : '');
 const todayAR = (d = 0) => new Date(Date.now() - 3 * 3600e3 + d * 86400e3).toISOString().slice(0, 10);
 
@@ -48,7 +48,7 @@ export async function renderLive(box, token) {
   const key = (e) => `${e.at}|${e.type}|${e.agent}|${ref(e.ref)}`;
   function drawStatus(fresh) {
     const st = { activo: 'Equipo activo', pausado: 'Equipo en pausa', detenido: 'Parada de emergencia' }[ov.state] || ov.state;
-    status.replaceChildren(h('strong', {}, st), ` · próximo turno en ${ov.nextInMin} min (${hhmm(ov.nextTick).slice(0, 5)})`, ov.lastTick ? ` · último turno ${when(ov.lastTick.at)}` : ' · todavía no hubo turnos', ` · actualizado ${hhmm(Date.now())}`, fresh ? h('span', { class: 'chip ok live-new' }, `${fresh} nuevo(s)`) : null);
+    status.replaceChildren(h('strong', {}, st), ` · próximo turno en ${ov.nextInMin} min (${hhmm(ov.nextTick).slice(0, 5)})`, ov.lastTick ? ` · último turno ${when(ov.lastTick.at)}` : ' · todavía no hubo turnos', ` · actualizado ${hhmm(Date.now())}`, ...(fresh ? [h('span', { class: 'chip ok live-new' }, `${fresh} nuevo(s)`)] : []));
   }
   const evItem = (e, isNew) => h('li', { class: 'live-ev' + (isNew ? ' is-new' : '') },
     h('div', { class: 'live-ev-head' }, h('span', { class: 'chip ' + (TCLS[e.type] || '') }, TYPE[e.type] || e.type), h('strong', {}, e.agentName), h('span', { class: 'muted tiny' }, `${e.teamLabel} · ${when(e.at)}`), isNew ? h('span', { class: 'tchip won' }, 'nuevo') : null),
