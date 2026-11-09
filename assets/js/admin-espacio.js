@@ -113,7 +113,7 @@ async function renderChannels(box, token, me) {
 /* =================== Entrenamiento =================== */
 const TST = { pendiente: ['En espera', ''], aprobada: ['Aprobado', 'ok'], desaprobada: ['A repasar', 'warn'], sin_modelo: ['Sin modelo', ''], cancelada: ['Cancelado', ''] };
 export async function renderTraining(box, token, me) {
-  const owner = me.role === 'ceo';
+  const owner = (me.perms || []).includes('owner.settings') || me.role === 'ceo' || (me.user && me.user.role === 'ceo');
   const root = h('div', { class: 'train stack-lg' }); box.replaceChildren(root);
   const load = async () => {
     root.replaceChildren(h('div', { class: 'card panel' }, h('div', { class: 'skeleton', style: 'height:180px' })));
@@ -136,18 +136,18 @@ export async function renderTraining(box, token, me) {
         h('div', { class: 'kpi' }, h('span', { class: 'kpi-ic', html: icon('clock') }), h('div', {}, h('small', {}, 'Automáticas hoy'), h('strong', {}, `${d.budget.auto} de ${d.budget.autoMax}`), h('span', { class: 'muted tiny' }, 'el turno elige al que menos entrenó')))),
       !d.llm ? h('div', { class: 'alert info' }, h('span', { html: icon('info') }), h('div', {}, 'Este servidor no tiene el modelo configurado: se pueden asignar sesiones, pero no se corren.')) : null,
       owner ? h('div', { class: 'train-assign' }, h('label', { class: 'label' }, 'Asignar a un agente'), h('div', { class: 'row' }, memberSel, h('button', { class: 'btn btn-sm btn-primary', type: 'button', onclick: () => assign({ member: memberSel.value }) }, 'Asignar'), run)) : h('p', { class: 'small muted' }, 'Asignar entrenamientos lo hace el dueño.'));
-    const areas = h('section', { class: 'card panel' }, h('h2', {}, 'Módulos por área'), h('ul', { class: 'train-areas' }, ...d.areas.map((a) => h('li', { class: 'train-area' },
+    const areas = h('section', { class: 'card panel' }, h('div', { class: 'panel-head' }, h('h2', {}, 'Módulos por área')), h('ul', { class: 'train-areas' }, ...d.areas.map((a) => h('li', { class: 'train-area' },
       h('div', { class: 'train-area-head' }, h('strong', {}, a.label), h('span', { class: 'muted tiny' }, `${a.agents.length} agente(s) · ${a.sessions} sesión(es) · ${a.passed} aprobada(s)`)),
       h('ul', { class: 'small train-mods' }, ...a.modules.map((m) => h('li', {}, h('strong', {}, m.label + ': '), m.material))),
       h('p', { class: 'tiny muted' }, 'Al aprobar gana: ' + a.skill),
       owner && a.agents.length ? h('button', { class: 'btn btn-sm', type: 'button', onclick: () => assign({ area: a.id }) }, `Entrenar el área (${Math.min(a.agents.length, 8)})`) : null))));
     const rows = d.members.filter((m) => m.sessions).sort((a, b) => b.passed - a.passed || (b.avg || 0) - (a.avg || 0));
-    const table = h('section', { class: 'card panel' }, h('h2', {}, 'Puntajes por agente'),
+    const table = h('section', { class: 'card panel' }, h('div', { class: 'panel-head' }, h('h2', {}, 'Puntajes por agente')),
       rows.length ? h('div', { class: 'table-wrap' }, h('table', { class: 'table' }, h('caption', { class: 'sr-only' }, 'Puntajes de entrenamiento por agente'),
         h('thead', {}, h('tr', {}, ...['Agente', 'Área', 'Sesiones', 'Aprobadas', 'Promedio', 'Nivel interno'].map((t) => h('th', { scope: 'col' }, t)))),
         h('tbody', {}, ...rows.map((m) => h('tr', {}, h('td', {}, h('strong', {}, m.name)), h('td', { class: 'small' }, (d.areas.find((a) => a.id === m.area) || {}).label || m.area), h('td', {}, String(m.sessions)), h('td', {}, String(m.passed)), h('td', {}, m.avg == null ? '—' : m.avg + '/100'), h('td', { class: 'small' }, `Nv ${m.level} · ${m.title} · ${m.xp} XP`))))))
         : h('p', { class: 'muted small' }, 'Todavía nadie entrenó. Las primeras sesiones aparecen acá con su puntaje real.'));
-    const hist = h('section', { class: 'card panel' }, h('h2', {}, 'Historial'),
+    const hist = h('section', { class: 'card panel train-hist' }, h('div', { class: 'panel-head' }, h('h2', {}, 'Historial de entrenamiento')),
       d.sessions.length ? h('ul', { class: 'team-props' }, ...d.sessions.map((x) => {
         const [l, c] = TST[x.status] || [x.status, ''];
         const ans = x.answer && typeof x.answer === 'object' ? JSON.stringify(x.answer).slice(0, 400) : x.answer ? String(x.answer).slice(0, 400) : '';
