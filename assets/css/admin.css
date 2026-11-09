@@ -127,3 +127,19 @@
   .rev-combined .rev-rate { justify-self: start; text-align: left; }
   .rev-card .panel-head h2 { flex-basis: 100%; }
 }
+
+/* Agentes autónomos (panel del dueño) */
+.agx { display: grid; gap: 14px; }
+.agx h3 { margin: 10px 0 0; }
+.agx .alert { margin: 0; }
+.agx-kpis { margin: 0; }
+.agx-controls { display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center; }
+.agx-controls .row { flex-wrap: wrap; gap: 8px; }
+.agx-controls .select { width: auto; min-width: 200px; max-width: 100%; }
+.agx-agents { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+.agx-agent { border: 1px solid var(--line); border-radius: var(--r-lg); padding: 12px 14px; background: var(--surface); display: grid; gap: 6px; min-width: 0; }
+.agx-agent p { margin: 0; }
+.agx-agent-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+.agx-agent-top strong { display: block; margin-bottom: 4px; }
+.agx-agent .chip { vertical-align: middle; }
+@media (max-width: 520px) { .agx-controls { flex-direction: column; align-items: stretch; } .agx-controls .row > * { flex: 1 1 100%; } .agx-controls .select { min-width: 0; width: 100%; } }

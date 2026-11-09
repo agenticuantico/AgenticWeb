@@ -7,13 +7,11 @@
 import { h, icon, esc, toast, confirmDialog, fmtDate, timeAgo } from './ui.js';
 import { CONFIG } from './config.js';
 import { getStore, friendlyError } from './firebase.js';
-import { clearSystemCache } from './sysconfig.js';
+import { renderAutonomy } from './admin-agents.js?v=7.2.1';
 
 const STAGES = [['nuevo', 'Nuevo'], ['contactado', 'Contactado'], ['reunion', 'Reunión'], ['negociacion', 'Negociación'], ['cerrado', 'Cerrado'], ['descartado', 'Descartado']];
 const TYPES = { inversion: 'Inversión', asociacion: 'Asociación', whitelabel: 'White-label', piloto: 'Piloto enterprise', reunion: 'Reunión', consulta: 'Consulta', empresa: 'Plan Empresa' };
 const ORDER_STATUS = { en_cola: ['En cola', ''], trabajando: ['Trabajando', 'gold'], pr_listo: ['PR listo', 'ok'], aprobado: ['Aprobado', 'ok'], rechazado: ['Rechazado', 'danger'], cancelado: ['Cancelado', ''] };
-const AGENTS = [['programador-fullstack', 'Programador full stack'], ['frontend', 'Frontend'], ['backend', 'Backend'], ['ux-ui', 'UX/UI'], ['disenador-grafico', 'Diseño gráfico'], ['disenador-web', 'Diseño web'], ['ilustrador', 'Ilustración'], ['disenador-3d', 'Diseño 3D'], ['investigador', 'Investigación'], ['ciberseguridad', 'Ciberseguridad']];
-const STATE_LABEL = { activo: ['Activo', 'ok', 'Los agentes trabajan según su calendario y las órdenes.'], pausado: ['En pausa', 'warn', 'No toman tareas nuevas; la que está en curso termina.'], detenido: ['Detenido', 'danger', 'Todo detenido: no corre ninguna ejecución nueva.'] };
 
 const CC = new Intl.DisplayNames(['es'], { type: 'region' });
 const ccName = (c) => { try { return c === 'XX' ? 'Otro' : CC.of(c); } catch { return c; } };
@@ -128,69 +126,14 @@ export async function renderLeads(box, user) {
 export async function renderAgentsControl(box, user, onStateChange) {
   box.innerHTML = '';
   const { fs, db } = await getStore();
-  const w = await workerStatus();
-  let sys = {};
-  try { const s = await fs.getDoc(fs.doc(db, 'config', 'system')); sys = s.exists() ? s.data() : {}; } catch (e) { box.append(h('div', { class: 'alert warn' }, 'Configuración no disponible: ', friendlyError(e))); }
-  const agents = Object.assign({ state: 'activo', perAgent: {} }, sys.agents || {});
-  const state = sys.killSwitch ? 'detenido' : agents.state;
-  const [lbl, cls, desc] = STATE_LABEL[state] || STATE_LABEL.activo;
 
-  // Banner de estado
-  box.append(h('div', { class: `state-banner ${cls}`, role: 'status' }, h('span', { class: 'dot' }), h('div', {}, h('strong', {}, `Agentes: ${lbl}`), h('span', {}, ' · ' + desc + (sys.killSwitch ? ' Parada de emergencia del sitio activa.' : ''))),
-    agents.updatedAt ? h('span', { class: 'tiny', style: 'margin-left:auto' }, `${agents.updatedBy || ''} · ${agents.updatedAt.toDate ? timeAgo(agents.updatedAt.toDate()) : ''}`) : null));
-  if (!w.live || !w.control) {
-    box.append(h('div', { class: 'alert info' }, h('span', { html: icon('info') }), h('div', {},
-      h('strong', {}, 'Sincronización con GitHub pendiente de conectar el servidor. '),
-      'Las órdenes y el estado se guardan acá y los workflows leen el estado publicado en Firestore en su primer paso. Crear Issues, aprobar PR y cancelar ejecuciones en curso se habilita al desplegar worker-v2 con el secreto GITHUB_TOKEN. ',
-      'Mientras tanto, para frenar todo al instante: GitHub → cada repositorio → Actions → elegí el workflow → «⋯» → Disable workflow (y «Cancel run» en las ejecuciones en curso).',
-      h('div', { class: 'row', style: 'margin-top:8px' }, h('a', { class: 'btn btn-sm', href: CONFIG.GITHUB.ACTIONS_DEV, target: '_blank', rel: 'noopener', html: icon('external') + 'Actions AgenticDev' }), h('a', { class: 'btn btn-sm', href: CONFIG.GITHUB.ACTIONS_WEB, target: '_blank', rel: 'noopener', html: icon('external') + 'Actions AgenticWeb' })))));
-  }
+  // Agentes autónomos: estado en vivo, «Hacer trabajar ahora», pausa/parada, bitácora y propuestas (worker-v2).
+  const autoBox = h('div', { class: 'admin-grid' });
+  box.append(autoBox);
+  renderAutonomy(autoBox, user).catch((e) => console.warn('[agentes]', e && e.message));
 
   const grid = h('div', { class: 'admin-grid' });
   box.append(grid);
-
-  // Interruptor maestro
-  const setState = async (next, label) => {
-    if (next === 'detenido') {
-      if (!(await confirmDialog({ title: 'Detener todos los agentes', text: 'Cancela las ejecuciones en curso y bloquea las nuevas hasta que los reanudes. ¿Continuar?', ok: 'Continuar', danger: true }))) return;
-      if (!(await confirmDialog({ title: 'Confirmación final', text: 'Confirmá DETENER. Se puede revertir con «Despertar / Reanudar».', ok: 'Detener ahora', danger: true }))) return;
-    }
-    try {
-      await fs.setDoc(fs.doc(db, 'config', 'system'), { agents: { ...agents, state: next, updatedAt: fs.serverTimestamp(), updatedBy: user.email }, updatedAt: fs.serverTimestamp(), updatedBy: user.email }, { merge: true });
-      clearSystemCache();
-      let extra = '';
-      try { const r = await workerCall(user, '/api/admin/agents/state', { body: { state: next, agents: agents.perAgent || {} } }); extra = r.canceled ? ` · ${r.canceled} ejecuciones canceladas` : ' · archivo de control actualizado en GitHub'; }
-      catch (e) { extra = e.code === 'worker_unavailable' ? ' · guardado; GitHub se sincroniza al conectar el servidor' : ` · GitHub: ${e.message}`; }
-      await audit(user, 'agents_state', `${label}${extra}`);
-      toast(`Agentes: ${label}${extra}`, 'ok', 7000);
-      renderAgentsControl(box, user, onStateChange);
-      onStateChange && onStateChange();
-    } catch (e) { toast(friendlyError(e), 'error', 6000); }
-  };
-  const sw = h('section', { class: 'card panel span-2' }, h('div', { class: 'panel-head' }, h('h2', {}, 'Interruptor maestro')),
-    h('div', { class: 'master-switch' },
-      h('button', { class: 'btn' + (state === 'activo' ? ' btn-primary' : ''), type: 'button', disabled: state === 'activo' || null, onclick: () => setState('activo', 'habilitados'), html: icon('power') + 'Habilitar' }),
-      h('button', { class: 'btn' + (state === 'pausado' ? ' btn-primary' : ''), type: 'button', disabled: state === 'pausado' || null, onclick: () => setState('pausado', 'en pausa'), html: icon('pause') + 'Pausar' }),
-      h('button', { class: 'btn btn-danger', type: 'button', disabled: state === 'detenido' || null, onclick: () => setState('detenido', 'detenidos'), html: icon('stop') + 'Detener' }),
-      h('button', { class: 'btn btn-gold', type: 'button', disabled: state === 'activo' || null, onclick: () => setState('activo', 'reanudados'), html: icon('refresh') + 'Despertar / Reanudar' })),
-    h('p', { class: 'small muted', style: 'margin-top:10px' }, 'Pausar: no toman tareas nuevas y la actual termina. Detener: cancela lo que esté corriendo (requiere el servidor) y bloquea todo. La parada de emergencia del sitio también detiene a los agentes.'));
-  // Agentes individuales
-  const per = h('div', { class: 'flags' });
-  for (const [id, label] of AGENTS) {
-    const on = (agents.perAgent || {})[id] !== false;
-    const input = h('input', { type: 'checkbox', checked: on || null, 'aria-label': label });
-    input.onchange = async () => {
-      agents.perAgent = { ...(agents.perAgent || {}), [id]: input.checked };
-      try {
-        await fs.setDoc(fs.doc(db, 'config', 'system'), { agents: { ...agents, updatedAt: fs.serverTimestamp(), updatedBy: user.email } }, { merge: true });
-        workerCall(user, '/api/admin/agents/state', { body: { state: agents.state, agents: agents.perAgent } }).catch(() => {});
-        audit(user, 'agent_toggle', `${id}: ${input.checked ? 'encendido' : 'apagado'}`);
-        toast(`${label}: ${input.checked ? 'encendido' : 'apagado'}`, 'ok');
-      } catch (e) { input.checked = !input.checked; toast(friendlyError(e), 'error'); }
-    };
-    per.append(h('label', { class: 'flag-row' }, h('span', {}, label), h('span', { class: 'switch' }, input, h('span'))));
-  }
-  grid.append(sw, h('section', { class: 'card panel span-2' }, h('div', { class: 'panel-head' }, h('h2', {}, 'Agentes')), per));
 
   // Órdenes
   const text = h('textarea', { class: 'input', rows: 3, maxlength: 4000, placeholder: 'Ej.: Mejorá la portada en móvil; arreglá el chat a 320 px; mejorá el cerebro 3D.', 'aria-label': 'Orden para los agentes' });

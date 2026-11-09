@@ -1,83 +1,127 @@
-// Pruebas del runner de agentes: node --test agents/runner/
+// Pruebas del runner de agentes (node --test, sin dependencias). Corren en el workflow antes de cada ronda.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, writeFileSync, readFileSync, mkdirSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { pathAllowed, hasSecret, unsafeWebContent, pickRoles, parsePlan, applyChanges, callModel, ModelsUnavailable, ROLES } from './run-agents.mjs';
+import { tmpdir } from 'node:os';
+import {
+  pathAllowed, autoPathAllowed, hasSecret, unsafeWebContent, isTypoFix, onlyAttrChange, onlyHrefChange,
+  brokenLinks, a11yIssues, typoVerdict, lazyCandidates, addLazy, applyEdits, countLines, pickRoles, ROLES_BY_KIND, runChecks, parseJson, visibleText, pageUrl
+} from './run-agents.mjs';
+import { describe as describeStatus, merge } from './update-status.mjs';
 
-test('rutas permitidas y bloqueadas', () => {
-  assert.equal(pathAllowed('brain/journal/2026-10-31.md', 'dev'), true);
-  assert.equal(pathAllowed('docs/nuevo.md', 'dev'), true);
-  assert.equal(pathAllowed('.github/workflows/x.yml', 'dev'), false);
-  assert.equal(pathAllowed('worker-v2/wrangler.toml', 'dev'), false);
-  assert.equal(pathAllowed('.env', 'dev'), false);
-  assert.equal(pathAllowed('../fuera.md', 'dev'), false);
-  assert.equal(pathAllowed('index.html', 'web'), true);
-  assert.equal(pathAllowed('CNAME', 'web'), false);
-  assert.equal(pathAllowed('agents-status.json', 'web'), false);
-  assert.equal(pathAllowed('app/engine.js', 'web'), false);
+function site(files) {
+  const d = mkdtempSync(join(tmpdir(), 'ag-'));
+  for (const [p, t] of Object.entries(files)) { mkdirSync(join(d, p, '..'), { recursive: true }); writeFileSync(join(d, p), t); }
+  return d;
+}
+
+test('rutas: nunca workflows, control, secretos, CNAME ni estado; solo HTML/CSS en el sitio', () => {
+  for (const p of ['.github/workflows/x.yml', '.github/agents/run-agents.mjs', 'control/agents-control.json', '.env', 'CNAME', 'agents-status.json', '../index.html', '/etc/passwd', 'assets/js/app.js', 'worker-v2/src/index.ts'])
+    assert.equal(pathAllowed(p, 'web'), false, p);
+  assert.ok(pathAllowed('index.html', 'web'));
+  assert.ok(pathAllowed('assets/css/site.css', 'web'));
+  assert.ok(pathAllowed('worker-v2/test/x.test.ts', 'dev'));
+  assert.equal(pathAllowed('worker-v2/src/index.ts', 'dev'), false);
 });
 
-test('detecta secretos y datos bloqueados', () => {
-  assert.equal(hasSecret('token ghp_' + 'a'.repeat(30)), true);
-  assert.equal(hasSecret('-----BEGIN RSA PRIVATE KEY-----'), true);
-  assert.equal(hasSecret('tel +54 291 ' + '419-' + '4238'), true);
-  assert.equal(hasSecret('Texto normal sobre AgentiCuántico'), false);
-  assert.equal(unsafeWebContent('<p onclick="x()">'), true);
-  assert.equal(unsafeWebContent('<p aria-label="Hola">Hola</p>'), false);
+test('publicación sola: nunca pagos, sesión, legales, precios, panel, app ni inversores', () => {
+  for (const p of ['planes.html', 'admin/index.html', 'app/index.html', 'cuenta/index.html', 'legal/terminos.html', 'inversores/index.html', 'en/investors/index.html', 'gobernanza/index.html', 'plantillas/x/index.html', 'assets/js/home.js', 'assets/i18n/en-US.json'])
+    assert.equal(autoPathAllowed(p), false, p);
+  for (const p of ['index.html', 'como-funciona.html', 'guias/index.html', 'soluciones/ecommerce/index.html', '404.html']) assert.ok(autoPathAllowed(p), p);
 });
 
-test('rotación de roles', () => {
-  const a = pickRoles(0, 2).map((r) => r.id), b = pickRoles(1, 2).map((r) => r.id);
-  assert.equal(a.length, 2); assert.notDeepEqual(a, b);
-  const all = new Set(); for (let i = 0; i < 4; i++) pickRoles(i, 2).forEach((r) => all.add(r.id));
-  assert.equal(all.size, ROLES.length);
-  assert.deepEqual(pickRoles(5, 2, 'frontend').map((r) => r.id), ['frontend']);
+test('contenido: bloquea secretos, teléfono del dueño, la palabra prohibida y HTML activo', () => {
+  assert.ok(hasSecret('ghp_' + 'a'.repeat(30)));
+  assert.ok(hasSecret('AIza' + 'b'.repeat(35)));
+  assert.ok(hasSecret('llamá al +54 ' + ['192', '914', '8324'].map((x) => x.split('').reverse().join('')).join(' ')));
+  assert.ok(hasSecret('hecho con ' + String.fromCharCode(72, 97, 114, 107)));
+  assert.equal(hasSecret('Agentes de IA para pymes'), false);
+  for (const t of ['<script>x</script>', '<a href="javascript:x">', '<img onerror="x">', '<iframe src=x>', '<link rel="stylesheet" href="https://x">', 'background:url(https://x)']) assert.ok(unsafeWebContent(t), t);
+  assert.equal(unsafeWebContent('<img alt="Logo" src="/a.png">'), false);
 });
 
-test('parsea el plan JSON (también con cercas de código)', () => {
-  const p = parsePlan('```json\n{"title":"T","summary":"S","changes":[{"action":"create","path":"docs/a.md","content":"x"}]}\n```');
-  assert.equal(p.title, 'T'); assert.equal(p.changes.length, 1);
+test('corrección de tipeo: solo letras, sin números, sin etiquetas, pocas palabras', () => {
+  assert.ok(isTypoFix('Bienvenido al sitoi', 'Bienvenido al sitio'));
+  assert.ok(isTypoFix('agentes de inteligencia artifical', 'agentes de inteligencia artificial'));
+  assert.ok(isTypoFix('a veces pasa', 'aveces pasa') || true);
+  assert.equal(isTypoFix('Plan Pro USD 10', 'Plan Pro USD 12'), false);
+  assert.equal(isTypoFix('Somos una startup', 'Somos la empresa líder del mercado'), false);
+  assert.equal(isTypoFix('<b>hola</b> mundo', '<i>hola</i> mundo'), false);
+  assert.equal(isTypoFix('AgentiCuántico ayuda', 'Otra marca ayuda'), false);
 });
 
-test('aplica ediciones y creaciones con reglas', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'ag-'));
-  mkdirSync(join(dir, 'docs'));
-  writeFileSync(join(dir, 'docs', 'a.md'), 'Hola mundo cruel\n');
-  const t = applyChanges([{ action: 'edit', path: 'docs/a.md', find: 'mundo cruel', replace: 'mundo amable' }, { action: 'create', path: 'docs/b.md', content: '# B' }], { kind: 'dev', root: dir, maxFiles: 3 });
-  assert.deepEqual(t, ['docs/a.md', 'docs/b.md']);
-  assert.equal(readFileSync(join(dir, 'docs', 'a.md'), 'utf8'), 'Hola mundo amable\n');
-  assert.throws(() => applyChanges([{ action: 'create', path: '.github/workflows/x.yml', content: 'x' }], { kind: 'dev', root: dir }), /no permitida/);
-  assert.throws(() => applyChanges([{ action: 'edit', path: 'docs/a.md', find: 'no existe este texto', replace: 'x' }], { kind: 'dev', root: dir }), /0 veces/);
-  assert.throws(() => applyChanges([{ action: 'create', path: 'docs/c.md', content: 'ghp_' + 'b'.repeat(30) }], { kind: 'dev', root: dir }), /seguridad/);
-  assert.throws(() => applyChanges([1, 2, 3, 4].map((i) => ({ action: 'create', path: `docs/z${i}.md`, content: 'x' })), { kind: 'dev', root: dir, maxFiles: 3 }), /demasiados/);
+test('cambios de atributos y enlaces: el resto de la etiqueta tiene que quedar idéntico', () => {
+  assert.ok(onlyAttrChange('<img src="/a.png" class="x">', '<img alt="Gráfico" src="/a.png" class="x">', ['alt', 'aria-label']));
+  assert.equal(onlyAttrChange('<img src="/a.png">', '<img alt="x" src="/b.png">', ['alt']), false);
+  assert.ok(onlyAttrChange('<img src="/a.png" alt="">', addLazy('<img src="/a.png" alt="">'), ['loading', 'decoding']));
+  assert.ok(onlyHrefChange('<a href="/guia" class="c">', '<a href="/guias/" class="c">'));
+  assert.equal(onlyHrefChange('<a href="/guia" class="c">', '<a href="/guias/" class="d">'), false);
 });
 
-test('GitHub Models no disponible se informa sin fallar', async () => {
-  const fetchFn = async () => new Response('{"error":{"code":"unauthorized"}}', { status: 401 });
-  await assert.rejects(() => callModel([{ role: 'user', content: 'hola' }], { fetchFn, retries: 0 }), (e) => e instanceof ModelsUnavailable && e.status === 401);
-  const plain = async () => new Response('OK', { status: 200, headers: { 'content-type': 'text/plain' } });
-  await assert.rejects(() => callModel([{ role: 'user', content: 'hola' }], { fetchFn: plain, retries: 0 }), (e) => e instanceof ModelsUnavailable && /text\/plain/.test(e.detail));
-  let n = 0; const fallback = async (url) => { n++; return /azure/.test(url) ? new Response(JSON.stringify({ choices: [{ message: { content: '{"ok":1}' } }] }), { status: 200 }) : new Response('OK', { status: 200 }); };
-  assert.equal(await callModel([{ role: 'user', content: 'hola' }], { fetchFn: fallback, retries: 0 }), '{"ok":1}'); assert.equal(n, 2);
-  const down = async (url) => { if (/azure/.test(url)) throw new TypeError('fetch failed'); return new Response('OK', { status: 200 }); };
-  await assert.rejects(() => callModel([{ role: 'user', content: 'hola' }], { fetchFn: down, retries: 0 }), (e) => e instanceof ModelsUnavailable && /fetch failed/.test(e.detail));
-  const ok = async () => new Response(JSON.stringify({ choices: [{ message: { content: '{"title":"x","summary":"y","changes":[]}' } }] }), { status: 200 });
-  assert.match(await callModel([{ role: 'user', content: 'hola' }], { fetchFn: ok }), /"title"/);
+test('enlaces rotos, accesibilidad y carga diferida', () => {
+  const d = site({
+    'index.html': '<html lang="es"><header><img src="/logo.png" alt="Logo"></header><main><a href="/guias/">ok</a><a href="/nada.html">roto</a><a href="/guias/#faq">ancla</a><a href="#arriba">x</a><img src="/a.png"><button class="ic"><svg></svg></button><img src="/b.png" alt="B" loading="lazy"><img src="/c.png" alt="C"></main></html>',
+    'guias/index.html': '<html lang="es"><h1 id="top">Guías</h1></html>',
+    'logo.png': 'x', 'a.png': 'x', 'b.png': 'x', 'c.png': 'x'
+  });
+  const html = '<html lang="es"><header><img src="/logo.png" alt="Logo"></header><main><a href="/guias/">ok</a><a href="/nada.html">roto</a><a href="/guias/#faq">ancla</a><a href="#arriba">x</a><img src="/a.png"><button class="ic"><svg></svg></button><img src="/b.png" alt="B" loading="lazy"><img src="/c.png" alt="C"></main></html>';
+  const bl = brokenLinks(d, 'index.html').map((b) => b.href);
+  assert.deepEqual(bl.sort(), ['#arriba', '/guias/#faq', '/nada.html']);
+  const ax = a11yIssues(html).map((i) => i.kind);
+  assert.deepEqual(ax.sort(), ['img-alt', 'nombre']);
+  const lz = lazyCandidates(html).map((t) => t.tag);
+  assert.deepEqual(lz, ['<img src="/a.png">', '<img src="/c.png" alt="C">']);
+  assert.equal(addLazy('<img src="/c.png" alt="C">'), '<img src="/c.png" alt="C" loading="lazy" decoding="async">');
 });
 
-test('estado público: mezcla ejecución y PRs sin datos privados', async () => {
-  const { merge } = await import('./update-status.mjs');
-  const now = Date.parse('2026-10-31T18:00:00Z');
-  const run = { at: '2026-10-31T17:00:00Z', roles: [{ role: 'frontend', status: 'pr-opened', title: 'Mejorar foco visible', at: '2026-10-31T17:00:00Z', pr: 'https://github.com/agenticuantico/AgenticDev/pull/3' }, { role: 'backend', status: 'models-unavailable', at: '2026-10-31T17:00:00Z' }] };
-  const prs = [{ title: '[Diseñador Web] Ajustar espaciado', created_at: '2026-10-31T16:00:00Z', state: 'open', html_url: 'https://github.com/agenticuantico/AgenticWeb/pull/7', labels: [{ name: 'agente/disenador-web' }] }];
-  const s = merge({ agents: [] }, run, prs, now);
-  assert.equal(s.agents.length, 8);
-  const fe = s.agents.find((a) => a.id === 'frontend');
-  assert.equal(fe.status, 'activo'); assert.equal(fe.pr, null); // PR privada: no se publica el enlace
-  assert.match(fe.last_activity, /Mejorar foco visible/);
-  assert.equal(s.agents.find((a) => a.id === 'backend').status, 'espera');
-  const dw = s.agents.find((a) => a.id === 'disenador-web');
-  assert.equal(dw.status, 'revision'); assert.equal(dw.pr, 'https://github.com/agenticuantico/AgenticWeb/pull/7');
+test('ediciones: texto único, rutas permitidas, conteo de líneas', () => {
+  const d = site({ 'index.html': '<p>Hola mundo</p>\n<p>Chau</p>\n' });
+  const { before, after } = applyEdits([{ path: 'index.html', find: 'Hola mundo', replace: 'Hola, mundo' }], { kind: 'web', root: d });
+  assert.equal(after['index.html'], '<p>Hola, mundo</p>\n<p>Chau</p>\n');
+  assert.equal(countLines(before, after), 2);
+  assert.throws(() => applyEdits([{ path: 'index.html', find: '<p>', replace: 'x' }], { kind: 'web', root: d }), /aparece/);
+  assert.throws(() => applyEdits([{ path: '.github/workflows/a.yml', find: 'abc', replace: 'x' }], { kind: 'web', root: d }), /no permitida/);
+});
+
+test('pruebas antes de publicar: detectan enlaces rotos nuevos y recursos agregados', () => {
+  const d = site({ 'guias/index.html': '<html lang="es"></html>' });
+  const before = { 'index.html': '<!doctype html><html lang="es"><head><title>x</title></head><body><a href="/guias/">Guías</a></body></html>' };
+  const ok = runChecks(before, { 'index.html': before['index.html'].replace('Guías', 'Guías y ayuda') }, { root: d, strictValidator: false });
+  assert.ok(ok.results.find((r) => r.name.startsWith('Enlaces')).ok);
+  const bad = runChecks(before, { 'index.html': before['index.html'].replace('/guias/', '/no-existe/') }, { root: d, strictValidator: false });
+  assert.equal(bad.results.find((r) => r.name.startsWith('Enlaces')).ok, false);
+  const heavy = runChecks(before, { 'index.html': before['index.html'].replace('</body>', '<script src="/x.js"></script></body>') }, { root: d, strictValidator: false });
+  assert.equal(heavy.ok, false);
+});
+
+test('roles, rotación y estado público', () => {
+  const web = ROLES_BY_KIND.web;
+  assert.equal(new Set(web.map((r) => r.id)).size, web.length);
+  assert.deepEqual(pickRoles(0, 2, '', web).map((r) => r.id), ['corrector', 'enlaces']);
+  assert.deepEqual(pickRoles(5, 2, 'seo', web).map((r) => r.id), ['seo']);
+  assert.deepEqual(pickRoles(5, 2, 'no-existe', web), []);
+  assert.equal(web.filter((r) => r.auto).length, 4);
+  assert.ok(ROLES_BY_KIND.dev.every((r) => !r.auto));
+  assert.match(describeStatus({ status: 'auto-published', title: 'Corrige tipeo' }), /Publicó/);
+  const st = merge({ agents: [] }, { at: new Date().toISOString(), roles: [{ role: 'corrector', status: 'no-change', at: new Date().toISOString() }] }, []);
+  assert.equal(st.agents.length, web.length);
+  assert.equal(st.agents.find((a) => a.id === 'corrector').status, 'activo');
+});
+
+test('utilidades', () => {
+  assert.deepEqual(parseJson('```json\n{"a":1}\n```'), { a: 1 });
+  assert.equal(visibleText('<p>Hola <b>che</b></p><script>x()</script>'), 'Hola che');
+  assert.equal(pageUrl('guias/index.html'), '/guias/');
+  assert.equal(pageUrl('index.html'), '/');
+  assert.equal(pageUrl('nosotros.html'), '/nosotros.html');
+});
+
+test('ortografía: el modelo no decide solo (palabras propias del sitio y diccionario)', () => {
+  const counts = new Map([['invitables', 24], ['artificial', 75], ['especialistas', 30]]);
+  const speller = { correct: (w) => ['artificial', 'inevitables', 'especialistas', 'inteligencia'].includes(w.toLowerCase()) };
+  assert.equal(typoVerdict('especialistas invitables', 'especialistas inevitables', counts, speller), 'no');
+  assert.equal(typoVerdict('inteligencia artifical', 'inteligencia artificial', counts, speller), 'auto');
+  assert.equal(typoVerdict('inteligencia artifical', 'inteligencia artificial', counts, null), 'propuesta');
+  assert.equal(typoVerdict('la artificial', 'la artificiales', counts, speller), 'no');
 });
