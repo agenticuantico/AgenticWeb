@@ -7,9 +7,10 @@ import { CONFIG } from './config.js';
 import * as auth from './auth.js';
 import { getStore, getRtdb, friendlyError } from './firebase.js';
 import { DEFAULT_SYSTEM, clearSystemCache } from './sysconfig.js';
-import { renderLeads, renderAgentsControl } from './admin-control.js?v=7.7.0';
+import { renderLeads, renderAgentsControl } from './admin-control.js?v=7.8.0';
 import { revenueKpis, renderRevenueCard } from './admin-revenue.js';
 import { renderGovernance } from './admin-governance.js';
+import { renderTeam } from './admin-team.js?v=7.8.0';
 
 const root = document.getElementById('adminRoot');
 const CC_NAMES = new Intl.DisplayNames(['es'], { type: 'region' });
@@ -64,6 +65,46 @@ function loginGate(msg) {
     h('p', { class: 'tiny muted', style: 'margin-top:12px' }, 'Recomendado: verificación en dos pasos activada en la cuenta de Google.')));
 }
 
+/**
+ * SOLO en la copia de prueba: el sitio de prueba inyecta PREVIEW_KEY_LOGIN en config.js (producción nunca lo tiene) y el
+ * panel entra con la clave de setup de ESA copia (X-Setup-Key; el servidor de prueba la verifica). Muestra Equipo y Agentes.
+ */
+function previewGate() {
+  root.innerHTML = '';
+  const key = h('input', { class: 'input', type: 'password', autocomplete: 'off', 'aria-label': 'Clave de prueba', placeholder: 'Clave de la copia de prueba' });
+  const err = h('p', { class: 'error-text', hidden: true });
+  const go = async (k) => {
+    const r = await fetch(String(CONFIG.API_BASE).replace(/\/+$/, '') + '/api/admin/team', { headers: { 'X-Setup-Key': k }, cache: 'no-store' }).catch(() => null);
+    if (!r || !r.ok) { sessionStorage.removeItem('ac.previewKey'); err.textContent = 'Clave incorrecta.'; err.hidden = false; return; }
+    sessionStorage.setItem('ac.previewKey', k); renderPreview(k);
+  };
+  const form = h('form', { class: 'stack' }, h('label', { class: 'label' }, 'Clave'), key, err, h('button', { class: 'btn btn-primary full', type: 'submit' }, 'Entrar'));
+  form.addEventListener('submit', (e) => { e.preventDefault(); if (key.value) go(key.value.trim()); });
+  root.append(h('div', { class: 'card gate' }, h('span', { class: 'gate-ic', html: icon('lock') }), h('h1', {}, 'Panel · copia de prueba'), h('p', { class: 'muted' }, 'Esta copia no usa tu cuenta: entrá con la clave de prueba.'), form));
+  const saved = sessionStorage.getItem('ac.previewKey'); if (saved) go(saved);
+}
+function renderPreview(k) {
+  root.innerHTML = '';
+  const hdr = { 'X-Setup-Key': k };
+  root.append(h('div', { class: 'admin-head' }, h('div', {}, h('p', { class: 'eyebrow' }, 'Panel del CEO · copia de prueba'), h('h1', {}, 'AgentiCuántico · Control'))));
+  const tabBar = h('nav', { class: 'admin-tabs', role: 'tablist', 'aria-label': 'Secciones del panel' });
+  const teamBox = h('div', { class: 'stack-lg' }); const agBox = h('div', { class: 'stack-lg' });
+  const panes = { equipo: h('div', { role: 'tabpanel' }, teamBox), agentes: h('div', { role: 'tabpanel', hidden: true }, agBox) };
+  const loaded = {};
+  const show = (id) => {
+    for (const [kk, el] of Object.entries(panes)) el.hidden = kk !== id;
+    tabBar.querySelectorAll('[role=tab]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === id)));
+    history.replaceState(null, '', '#' + id);
+    if (id === 'equipo' && !loaded.equipo) { loaded.equipo = 1; renderTeam(teamBox, null, { extraHeaders: hdr }); }
+    if (id === 'agentes' && !loaded.agentes) { loaded.agentes = 1; import('./admin-agents.js?v=7.8.0').then((m) => m.renderAutonomy(agBox, null, { extraHeaders: hdr })); }
+  };
+  for (const [id, label, ic] of [['equipo', 'Equipo', 'users'], ['agentes', 'Agentes', 'spark']]) tabBar.append(h('button', { type: 'button', role: 'tab', 'data-tab': id, html: icon(ic) + `<span>${label}</span>`, onclick: () => show(id) }));
+  root.append(tabBar, ...Object.values(panes));
+  show(location.hash === '#agentes' ? 'agentes' : 'equipo');
+}
+
+if (CONFIG.PREVIEW_KEY_LOGIN === true) previewGate();
+else {
 auth.completeGoogleRedirect?.().catch(() => {});
 auth.watchUser(async (user) => {
   if (!user) { loginGate(); return; }
@@ -90,6 +131,7 @@ auth.watchUser(async (user) => {
   if (!sessionStorage.getItem('ac.adminLogged')) { sessionStorage.setItem('ac.adminLogged', '1'); logEvent(user, 'admin_login'); }
   renderDashboard(user);
 }, { force: true });
+}
 
 /* =================== Gráficos SVG livianos =================== */
 function areaChart(points, { height = 180 } = {}) {
@@ -142,7 +184,7 @@ async function renderDashboard(user) {
       h('button', { class: 'btn', type: 'button', onclick: () => renderDashboard(user), html: icon('refresh') + 'Actualizar' }),
       h('button', { class: 'btn btn-danger', type: 'button', id: 'killBtn', html: icon('power') + 'Parada de emergencia' })));
   root.append(head);
-  const TABS = [['analitica', 'Analítica', 'chart'], ['leads', 'Leads', 'users'], ['agentes', 'Agentes', 'spark'], ['gobernanza', 'Gobernanza IA', 'flag'], ['operacion', 'Operación', 'shield']];
+  const TABS = [['analitica', 'Analítica', 'chart'], ['equipo', 'Equipo', 'users'], ['leads', 'Leads', 'users'], ['agentes', 'Agentes', 'spark'], ['gobernanza', 'Gobernanza IA', 'flag'], ['operacion', 'Operación', 'shield']];
   const tabBar = h('nav', { class: 'admin-tabs', role: 'tablist', 'aria-label': 'Secciones del panel' });
   const panes = {};
   const kpis = h('div', { class: 'kpis' });
@@ -151,7 +193,9 @@ async function renderDashboard(user) {
   const leadsBox = h('div', { class: 'stack-lg' });
   const agentsBox = h('div', { class: 'stack-lg' });
   const govBox = h('div', { class: 'stack-lg gov-admin' });
+  const teamBox = h('div', { class: 'stack-lg' });
   panes.analitica = h('div', { role: 'tabpanel' }, kpis, grid);
+  panes.equipo = h('div', { role: 'tabpanel', hidden: true }, teamBox);
   panes.leads = h('div', { role: 'tabpanel', hidden: true }, leadsBox);
   panes.agentes = h('div', { role: 'tabpanel', hidden: true }, agentsBox);
   panes.gobernanza = h('div', { role: 'tabpanel', hidden: true }, govBox);
@@ -161,6 +205,7 @@ async function renderDashboard(user) {
     for (const [k, el] of Object.entries(panes)) el.hidden = k !== id;
     tabBar.querySelectorAll('[role=tab]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === id)));
     history.replaceState(null, '', '#' + id);
+    if (id === 'equipo' && !loaded.equipo) { loaded.equipo = 1; renderTeam(teamBox, user); }
     if (id === 'leads' && !loaded.leads) { loaded.leads = 1; renderLeads(leadsBox, user); }
     if (id === 'agentes' && !loaded.agentes) { loaded.agentes = 1; renderAgentsControl(agentsBox, user); }
     if (id === 'gobernanza' && !loaded.gobernanza) { loaded.gobernanza = 1; renderGovernance(govBox, user); }
