@@ -37,6 +37,8 @@ export function guessUrl(text) {
   for (const [re, url] of SITES) if (re.test(text)) return url;
   return null;
 }
+/** Texto del modo lectura sin restos de formato (marcas de títulos, «null» de páginas sin título). */
+export const readable = (t) => String(t || '').replace(/^\s*(null|undefined)\s*/i, '').replace(/^#{1,6}\s*/gm, '').replace(/\n{3,}/g, '\n\n').trim();
 const host = (u) => { try { return new URL(u).hostname.replace(/^www\./, ''); } catch { return ''; } };
 const mmss = (ms) => { const s = Math.max(0, Math.round(ms / 1000)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
 const human = (ms) => { const m = Math.round(ms / 60000); return ms >= 3_600_000 ? `${Math.floor(m / 60)} h ${String(m % 60).padStart(2, '0')} min` : mmss(ms); };
@@ -325,7 +327,7 @@ export class AgentBrowserCard {
     } else if (r.kind === 'page') {
       this.reader.replaceChildren(h('div', { class: 'abr-head' }, h('span', { html: icon('globe') }), h('div', { class: 'abr-t' }, h('strong', { 'data-no-i18n': '' }, r.title), h('a', { href: r.url, target: '_blank', rel: 'noopener noreferrer', 'data-no-i18n': '' }, r.host))),
         r.description ? h('p', { class: 'abr-desc', 'data-no-i18n': '' }, r.description) : null,
-        h('div', { class: 'abr-text', 'data-no-i18n': '' }, (r.excerpt || '').slice(0, 1400)),
+        h('div', { class: 'abr-text', 'data-no-i18n': '' }, readable(r.excerpt).slice(0, 1400)),
         h('small', { class: 'abr-foot muted' }, `Parte ${r.part} de ${r.parts}${r.tables ? ` · ${r.tables} tablas` : ''}`));
     } else {
       this.reader.replaceChildren(h('div', { class: 'ab-loader' }, h('div', { class: 'ab-orbit', 'aria-hidden': 'true' }, h('i'), h('i'), h('i')), h('p', {}, WORKING.has(s.status) ? 'Armando el plan' : 'Lista')));
