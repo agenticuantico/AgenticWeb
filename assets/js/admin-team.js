@@ -6,7 +6,7 @@
 import { h, icon, esc, toast, confirmDialog, modal, timeAgo } from './ui.js';
 import { CONFIG } from './config.js';
 
-const NODE_W = 228, NODE_H = 124;
+const NODE_W = 228, NODE_H = 150;
 const ST = { activo: ['Activo', 'ok'], pausado: ['En pausa', 'warn'], desactivado: ['Apagado', ''] };
 const OST = { pendiente: ['En cola', ''], en_curso: ['Trabajando', 'gold'], hecha: ['Hecha', 'ok'], propuesta: ['Espera tu OK', 'gold'], aprobada: ['Aprobada', 'ok'], rechazada: ['Rechazada', ''], fallida: ['Con error', 'danger'], cancelada: ['Cancelada', ''], delegada: ['Delegada', 'info'] };
 const PRIO = [null, 'baja', 'media', 'alta', 'urgente'];
@@ -185,7 +185,8 @@ export async function renderTeam(box, user, { base = String(CONFIG.API_BASE || '
         if (!m.parent_id || !pos[m.parent_id]) continue;
         const a = pos[m.parent_id], b = pos[m.id];
         const x1 = a.x + NODE_W / 2, y1 = a.y + NODE_H, x2 = b.x + NODE_W / 2, y2 = b.y; const my = (y1 + y2) / 2;
-        out += `<path class="tc-edge${m.status !== 'activo' ? ' off' : ''}" d="M${x1},${y1} C${x1},${my} ${x2},${my} ${x2},${y2}"/>`;
+        const flowing = (d.assignments || []).some((a) => a.member_id === m.id && Date.now() - a.created_at < 24 * 3600e3);
+        out += `<path class="tc-edge${m.status !== 'activo' ? ' off' : ''}${flowing ? ' flow' : ''}" d="M${x1},${y1} C${x1},${my} ${x2},${my} ${x2},${y2}"/>`;
       }
       // Asignaciones del CEO (últimas 24 h): flechas punteadas del CEO al agente.
       const ceo = d.members.find((m) => m.kind === 'ceo');
@@ -211,7 +212,7 @@ export async function renderTeam(box, user, { base = String(CONFIG.API_BASE || '
       const n = h('div', { class: `tn tn-${m.kind} st-${m.status}`, tabindex: '0', role: 'button', 'aria-label': `${m.name}, ${KIND[m.kind]}, rango ${m.rank}, ${sl}. Abrir detalle.`, dataset: { id: m.id } },
         m.kind !== 'ceo' ? port : null,
         h('div', { class: 'tn-top' }, h('span', { class: 'tn-dot ' + sc, 'aria-hidden': 'true' }), h('strong', { class: 'tn-name' }, m.name), h('span', { class: 'tn-rank', title: 'Rango' }, 'R' + m.rank)),
-        h('div', { class: 'tn-role' }, m.role !== m.name ? m.role : KIND[m.kind]),
+        h('div', { class: 'tn-role' }, m.role !== m.name ? m.role : m.kind === 'lead' && m.rank >= 3 ? 'Supervisor' : KIND[m.kind]),
         chips(m.tags, 3),
         h('div', { class: 'tn-meta' }, `Nv ${m.progress ? m.progress.level : 1} · ${m.tasks_done} tareas · ${m.queue} en cola · ${m.last_run_at ? ago(m.last_run_at) : 'sin turnos'}`),
         m.progress && m.progress.rest ? h('div', { class: 'tn-rest', title: 'Sala de descanso (metáfora): no toma tareas por ahora' }, 'Descansa: ' + m.progress.rest.toLowerCase()) : null,
@@ -269,20 +270,24 @@ export async function renderTeam(box, user, { base = String(CONFIG.API_BASE || '
       const r = vp.getBoundingClientRect(); const mx = (cx ?? r.left + r.width / 2) - r.left, my = (cy ?? r.top + r.height / 2) - r.top;
       const k = Math.min(2, Math.max(0.3, T.k * f)); T.x = mx - ((mx - T.x) * k) / T.k; T.y = my - ((my - T.y) * k) / T.k; T.k = k; apply();
     }
-    function fit() {
+    function fit(all) {
       const r = vp.getBoundingClientRect(); if (!r.width) return;
       let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
       for (const p of Object.values(pos)) { x0 = Math.min(x0, p.x); y0 = Math.min(y0, p.y); x1 = Math.max(x1, p.x + NODE_W); y1 = Math.max(y1, p.y + NODE_H); }
-      const pad = 24; const k = Math.min(1.1, Math.max(0.3, Math.min((r.width - pad * 2) / (x1 - x0), (r.height - pad * 2) / (y1 - y0))));
-      T.k = k; T.x = (r.width - (x1 - x0) * k) / 2 - x0 * k; T.y = pad - y0 * k; apply();
+      const pad = 24; let k = Math.min(1.1, Math.max(0.3, Math.min((r.width - pad * 2) / (x1 - x0), (r.height - pad * 2) / (y1 - y0))));
+      if (r.width < 700 && !all) { // celular/tablet chica: legible primero (CEO y líderes); «Ajustar» muestra todo
+        k = Math.max(k, 0.62); const ceo = d.members.find((m) => m.kind === 'ceo'); const c = ceo ? pos[ceo.id] : { x: x0, y: y0 };
+        T.k = k; T.x = r.width / 2 - (c.x + NODE_W / 2) * k; T.y = pad + 40 - c.y * k; apply(); return;
+      }
+      T.k = k; T.x = (r.width - (x1 - x0) * k) / 2 - x0 * k; T.y = pad + (r.width < 700 ? 40 : 0) - y0 * k; apply();
     }
     const tools = h('div', { class: 'tc-tools' },
       h('button', { type: 'button', class: 'icon-btn', 'aria-label': 'Alejar', onclick: () => zoomAt(1 / 1.2) }, '−'),
       h('button', { type: 'button', class: 'icon-btn', 'aria-label': 'Acercar', onclick: () => zoomAt(1.2) }, '+'),
-      h('button', { type: 'button', class: 'btn btn-sm btn-ghost', onclick: fit }, 'Ajustar'),
+      h('button', { type: 'button', class: 'btn btn-sm btn-ghost', onclick: () => fit(true) }, 'Ajustar'),
       h('button', { type: 'button', class: 'btn btn-sm btn-ghost', onclick: async () => { if (!(await confirmDialog({ title: 'Ordenar', text: 'Vuelve a acomodar todos los nodos en su lugar automático.', ok: 'Ordenar' }))) return; try { await call('/api/admin/team/layout', { method: 'POST', body: { reset: true } }); load(); } catch (e) { fail(e); } } }, 'Ordenar'));
-    const legend = h('p', { class: 'muted tiny tc-legend' }, 'Arrastrá un nodo para moverlo · arrastrá el punto de arriba de un nodo hasta otro para cambiar a quién reporta · línea punteada = tarea asignada por el CEO en las últimas 24 h.');
-    requestAnimationFrame(fit);
+    const legend = h('p', { class: 'muted tiny tc-legend' }, 'Arrastrá un nodo para moverlo · arrastrá el punto de arriba de un nodo hasta otro para cambiar a quién reporta · línea animada = orden que bajó por esa conexión en las últimas 24 h · línea punteada = tarea asignada por el CEO.');
+    requestAnimationFrame(() => fit(false));
     return h('div', { class: 'tc-wrap' }, vp, tools, legend);
   }
 
@@ -331,7 +336,7 @@ export async function renderTeam(box, user, { base = String(CONFIG.API_BASE || '
         h('div', { class: 'team-detail-actions' }, seg, runOne,
           h('button', { class: 'btn btn-sm btn-primary', type: 'button', html: icon('send') + 'Dar orden', onclick: () => { dlg.close(); orderDialog(m); } }),
           h('button', { class: 'btn btn-sm btn-ghost', type: 'button', html: icon('edit') + 'Editar', onclick: () => { dlg.close(); editDialog(m); } })),
-        h('h3', { class: 'team-sub' }, 'Órdenes y resultados'), hist)
+        h('h3', { class: 'team-sub' }, 'Bandeja: órdenes recibidas, resultados y reportes'), hist)
     });
     try {
       const r = await call(`/api/admin/team/orders?member=${encodeURIComponent(m.id)}&limit=30`);
@@ -385,8 +390,10 @@ export async function renderTeam(box, user, { base = String(CONFIG.API_BASE || '
   /* ---------- Canal CEO agéntico ↔ Demian ---------- */
   function channel() {
     const ceo = d.members.find((m) => m.kind === 'ceo');
-    const msgs = d.orders.filter((o) => o.member_id === (ceo && ceo.id) && (o.source === 'admin' || ['informe', 'plan', 'senal'].includes(o.kind) || (o.result && /^Resumen|^Plan de mejora/.test(o.result.summary || ''))))
+    const msgs = d.orders.filter((o) => o.member_id === (ceo && ceo.id) && (o.source === 'admin' || ['informe', 'plan', 'senal'].includes(o.kind) || (o.result && /^Resumen|^Reporte diario|^Plan de mejora/.test(o.result.summary || ''))))
       .slice(0, 8).reverse();
+    // Reportes de líderes del día (de abajo hacia arriba) como contexto plegado.
+    const reps = d.orders.filter((o) => o.kind === 'reporte' && (d.members.find((m) => m.id === o.member_id) || {}).rank === 2).slice(0, 4);
     const list = h('ol', { class: 'team-chat', 'aria-label': 'Mensajes con el CEO' });
     for (const o of msgs) {
       if (o.source === 'admin') list.append(h('li', { class: 'me' }, h('small', {}, 'Vos · ' + ago(o.created_at)), h('p', {}, o.text)));
@@ -397,8 +404,12 @@ export async function renderTeam(box, user, { base = String(CONFIG.API_BASE || '
     const send = h('button', { class: 'btn btn-primary btn-sm', type: 'submit', html: icon('send') + 'Enviar' });
     const form = h('form', { class: 'team-chat-form' }, ta, send);
     form.addEventListener('submit', async (e) => { e.preventDefault(); if (ta.value.trim().length < 4 || !ceo) return; send.disabled = true; try { await call('/api/admin/team/orders', { method: 'POST', body: { member_id: ceo.id, text: ta.value.trim(), priority: 3 } }); toast('Enviado al CEO'); load(); } catch (er) { fail(er); send.disabled = false; } });
-    return h('section', { class: 'card panel', 'aria-labelledby': 'team-c' }, h('div', { class: 'panel-head' }, h('h2', { id: 'team-c' }, 'CEO agéntico ↔ Demian')),
-      h('p', { class: 'muted small' }, 'El CEO agéntico recomienda; vos decidís. Avisos solo dentro del panel: no se manda nada afuera.'), list, form);
+    const tab = document.querySelector('[role=tab][data-tab=equipo]');
+    if (tab) { tab.querySelector('.tab-badge')?.remove(); if (d.unreadReport) tab.append(h('span', { class: 'tab-badge', 'aria-label': 'Reporte nuevo' }, '1')); }
+    const seenBtn = d.unreadReport ? h('button', { class: 'btn btn-sm btn-ghost', type: 'button', onclick: async () => { try { await call('/api/admin/team/seen', { method: 'POST', body: {} }); load(); } catch (e) { fail(e); } } }, 'Marcar como leído') : null;
+    return h('section', { class: 'card panel', 'aria-labelledby': 'team-c' }, h('div', { class: 'panel-head' }, h('h2', { id: 'team-c' }, 'CEO agéntico ↔ Demian'), d.unreadReport ? h('span', { class: 'chip gold', role: 'status' }, 'Reporte nuevo') : null, seenBtn),
+      h('p', { class: 'muted small' }, 'El CEO agéntico recomienda; vos decidís. Cada día, desde las 20, los trabajadores reportan a su supervisor, los supervisores a su líder y los líderes al CEO; desde las 21 llega acá un solo reporte. Avisos solo dentro del panel: no se manda nada afuera.'), list,
+      reps.length ? h('details', { class: 'team-reps' }, h('summary', {}, `Reportes de los líderes (${reps.length})`), h('ul', {}, ...reps.map((o) => h('li', { class: 'small' }, o.result && o.result.summary)))) : null, form);
   }
 
   /* ---------- Ranking ---------- */
