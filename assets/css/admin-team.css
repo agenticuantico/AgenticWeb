@@ -232,3 +232,24 @@
 .kpi-urls code { overflow-wrap: anywhere; font-size: 12px; }
 .ws-files { margin-top: 6px; gap: 6px; }
 @media (max-width: 760px) { .kpi-spend-form { grid-template-columns: 1fr 1fr; } .kpi-spend-form .btn { grid-column: 1 / -1; } .kpi-grid { grid-template-columns: 1fr 1fr; } }
+
+/* Co-CEO agéntico, habilidades ganadas, puestos y entrenamiento (7.11.0) */
+.tn-coceo { border-color: #c7b8f5; background: linear-gradient(180deg, #f6f2ff, #fff); }
+.tchip.won { background: #e8f1ff; color: #1e3a8a; border-color: #c9dbff; }
+.tchip.won.trained { background: #fff4dc; color: #7a4b00; border-color: #f3d79a; }
+.tn-new { display: inline-block; font-size: 10.5px; font-weight: 700; padding: 1px 6px; margin-right: 4px; border-radius: 999px; background: #e0f2fe; color: #075985; border: 1px solid #bae6fd; }
+.team-rec { display: flex; flex-wrap: wrap; gap: 4px; align-items: baseline; margin: 6px 0; overflow-wrap: anywhere; }
+.team-slots { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.team-slot { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface, #fff); }
+.team-slot .row-actions { margin-left: auto; }
+.ws-views { max-width: 360px; }
+.train-areas { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+.train-area { border: 1px solid var(--line); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.train-area-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px; }
+.train-mods { margin: 0; padding-left: 18px; overflow-wrap: anywhere; }
+.train-assign .row { flex-wrap: wrap; gap: 8px; align-items: center; }
+.train-assign .select { min-width: 0; max-width: 100%; flex: 1 1 220px; }
+.train-score { font-weight: 700; }
+.train-pre { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 220px; overflow: auto; font-size: 12px; background: var(--surface-3, #f4f5f8); padding: 8px; border-radius: 8px; }
+.perf-growth .team-chips { margin-top: 4px; }
+@media (max-width: 480px) { .team-slot .row-actions { margin-left: 0; width: 100%; } .train-areas { grid-template-columns: 1fr; } }

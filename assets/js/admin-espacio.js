@@ -5,11 +5,12 @@
  */
 import { h, icon, toast, confirmDialog, modal } from './ui.js';
 import { api } from './admin-staff.js';
-import { download } from './admin-indicadores.js?v=7.10.1';
+import { download } from './admin-indicadores.js?v=7.11.0';
 
 const ERRW = {
   forbidden_channel: 'Tu rol no tiene acceso a este canal.', empty_message: 'Escribí algo antes de mandar.', rate_limited: 'Vas muy rápido: esperá un minuto.',
   daily_limit: 'Llegaste al máximo de mensajes de hoy.', no_agent_in_channel: 'En este canal no hay un agente que tome órdenes.', outside_area: 'Ese agente no es de tu área.',
+  invalid_area: 'Elegí un área.', no_agents_in_area: 'No hay agentes activos en esa área.', training_queue_full: 'Ya hay muchas sesiones en espera.', member_not_active: 'Ese agente no está activo.', manual_limit: 'Llegaste al máximo de entrenamientos manuales de hoy.',
   member_not_in_channel: 'Ese agente no es de este canal.', owner_only: 'Solo el CEO (dueño) puede hacer esto.', not_undoable: 'Ese cambio ya no se puede deshacer.',
   not_pending: 'Esa sugerencia ya se resolvió.', area_required: 'Elegí el área del supervisor.', only_owner_grants_coceo: 'Solo el dueño puede dar el rol Co-CEO.', cannot_grant_role: 'Tu rol no puede dar ese rol.'
 };
@@ -19,6 +20,19 @@ const when = (t) => new Date(t).toLocaleString('es-AR', { day: '2-digit', month:
 
 /* =================== Espacio de trabajo =================== */
 export async function renderWorkspace(box, token, me) {
+  // Dos vistas: Canales (chat) y Entrenamiento (sesiones de práctica de los agentes con material real).
+  const top = h('div', { class: 'stack-lg' }); box.replaceChildren(top);
+  const chBox = h('div'); const trBox = h('div', { hidden: true });
+  let view = sessionStorage.getItem('ws-view') === 'entrenamiento' ? 'entrenamiento' : 'canales';
+  const seg = h('div', { class: 'seg seg-sm seg-2 ws-views', role: 'tablist', 'aria-label': 'Vista del espacio de trabajo' });
+  const paint = () => { for (const b of seg.children) b.setAttribute('aria-selected', String(b.dataset.v === view)); chBox.hidden = view !== 'canales'; trBox.hidden = view !== 'entrenamiento'; };
+  for (const [v, l] of [['canales', 'Canales'], ['entrenamiento', 'Entrenamiento']]) seg.append(h('button', { type: 'button', role: 'tab', dataset: { v }, onclick: () => { view = v; sessionStorage.setItem('ws-view', v); paint(); if (v === 'entrenamiento' && !trBox.dataset.loaded) { trBox.dataset.loaded = '1'; renderTraining(trBox, token, me); } } }, l));
+  top.append(seg, chBox, trBox); paint();
+  if (view === 'entrenamiento') { trBox.dataset.loaded = '1'; renderTraining(trBox, token, me); }
+  return renderChannels(chBox, token, me);
+}
+
+async function renderChannels(box, token, me) {
   const canDl = new Set(me.perms || []).has('audit.view');
   const root = h('div', { class: 'ws stack-lg' }); box.replaceChildren(root);
   let ov = null; let cur = null; let timer = null;
@@ -96,6 +110,58 @@ export async function renderWorkspace(box, token, me) {
   }
 }
 
+/* =================== Entrenamiento =================== */
+const TST = { pendiente: ['En espera', ''], aprobada: ['Aprobado', 'ok'], desaprobada: ['A repasar', 'warn'], sin_modelo: ['Sin modelo', ''], cancelada: ['Cancelado', ''] };
+export async function renderTraining(box, token, me) {
+  const owner = me.role === 'ceo';
+  const root = h('div', { class: 'train stack-lg' }); box.replaceChildren(root);
+  const load = async () => {
+    root.replaceChildren(h('div', { class: 'card panel' }, h('div', { class: 'skeleton', style: 'height:180px' })));
+    let d;
+    try { d = await api('/api/admin/team/training', { token }); }
+    catch (e) { root.replaceChildren(h('div', { class: 'alert warn' }, h('span', { html: icon('warn') }), h('div', {}, 'No se pudo abrir el entrenamiento: ' + (ERRW[e.code] || e.message)))); return; }
+    draw(d);
+  };
+  const assign = async (body) => { try { const r = await api('/api/admin/team/training/assign', { method: 'POST', token, body }); toast(`Asignado: ${r.created.length} sesión(es). Se hacen en los próximos turnos.`, 'success'); load(); } catch (e) { fail(e); } };
+  function draw(d) {
+    const memberSel = h('select', { class: 'select', 'aria-label': 'Agente' }, ...d.members.map((m) => h('option', { value: m.id }, `${m.name} · ${(d.areas.find((a) => a.id === m.area) || {}).label || m.area}`)));
+    const run = h('button', { class: 'btn btn-sm', type: 'button', html: icon('play') + '<span>Entrenar ahora (1 sesión)</span>', disabled: !d.llm });
+    run.onclick = async () => { run.disabled = true; try { const r = await api('/api/admin/team/training/run', { method: 'POST', token, body: {} }); toast(r.ran ? r.line : r.reason === 'sin_modelo' ? 'El modelo no está configurado en este servidor.' : 'No hay sesiones en espera o ya se usó el cupo de hoy.', r.ran ? 'success' : 'info'); load(); } catch (e) { fail(e); run.disabled = false; } };
+    const head = h('section', { class: 'card panel' },
+      h('div', { class: 'panel-head' }, h('h2', {}, 'Entrenamiento'), h('button', { class: 'btn btn-sm btn-ghost', type: 'button', html: icon('refresh') + '<span>Actualizar</span>', onclick: load })),
+      h('p', { class: 'small' }, `Cada sesión es un ejercicio con material real del sitio y del equipo. El agente contesta con el modelo y se corrige con chequeos fijos (sin modelo). Con ${d.passScore}/100 o más aprueba: suma ${d.xpPass} XP y la habilidad del área. Si no, le queda una lección con la devolución.`),
+      h('p', { class: 'tiny muted' }, d.note),
+      h('div', { class: 'kpis team-kpis' },
+        h('div', { class: 'kpi' }, h('span', { class: 'kpi-ic', html: icon('spark') }), h('div', {}, h('small', {}, 'Consultas de entrenamiento hoy'), h('strong', {}, `${d.budget.used} de ${d.budget.max}`), h('span', { class: 'muted tiny' }, `dentro de las ${d.budget.team.max} del equipo (usadas ${d.budget.team.used})`))),
+        h('div', { class: 'kpi' }, h('span', { class: 'kpi-ic', html: icon('clock') }), h('div', {}, h('small', {}, 'Automáticas hoy'), h('strong', {}, `${d.budget.auto} de ${d.budget.autoMax}`), h('span', { class: 'muted tiny' }, 'el turno elige al que menos entrenó')))),
+      !d.llm ? h('div', { class: 'alert info' }, h('span', { html: icon('info') }), h('div', {}, 'Este servidor no tiene el modelo configurado: se pueden asignar sesiones, pero no se corren.')) : null,
+      owner ? h('div', { class: 'train-assign' }, h('label', { class: 'label' }, 'Asignar a un agente'), h('div', { class: 'row' }, memberSel, h('button', { class: 'btn btn-sm btn-primary', type: 'button', onclick: () => assign({ member: memberSel.value }) }, 'Asignar'), run)) : h('p', { class: 'small muted' }, 'Asignar entrenamientos lo hace el dueño.'));
+    const areas = h('section', { class: 'card panel' }, h('h2', {}, 'Módulos por área'), h('ul', { class: 'train-areas' }, ...d.areas.map((a) => h('li', { class: 'train-area' },
+      h('div', { class: 'train-area-head' }, h('strong', {}, a.label), h('span', { class: 'muted tiny' }, `${a.agents.length} agente(s) · ${a.sessions} sesión(es) · ${a.passed} aprobada(s)`)),
+      h('ul', { class: 'small train-mods' }, ...a.modules.map((m) => h('li', {}, h('strong', {}, m.label + ': '), m.material))),
+      h('p', { class: 'tiny muted' }, 'Al aprobar gana: ' + a.skill),
+      owner && a.agents.length ? h('button', { class: 'btn btn-sm', type: 'button', onclick: () => assign({ area: a.id }) }, `Entrenar el área (${Math.min(a.agents.length, 8)})`) : null))));
+    const rows = d.members.filter((m) => m.sessions).sort((a, b) => b.passed - a.passed || (b.avg || 0) - (a.avg || 0));
+    const table = h('section', { class: 'card panel' }, h('h2', {}, 'Puntajes por agente'),
+      rows.length ? h('div', { class: 'table-wrap' }, h('table', { class: 'table' }, h('caption', { class: 'sr-only' }, 'Puntajes de entrenamiento por agente'),
+        h('thead', {}, h('tr', {}, ...['Agente', 'Área', 'Sesiones', 'Aprobadas', 'Promedio', 'Nivel interno'].map((t) => h('th', { scope: 'col' }, t)))),
+        h('tbody', {}, ...rows.map((m) => h('tr', {}, h('td', {}, h('strong', {}, m.name)), h('td', { class: 'small' }, (d.areas.find((a) => a.id === m.area) || {}).label || m.area), h('td', {}, String(m.sessions)), h('td', {}, String(m.passed)), h('td', {}, m.avg == null ? '—' : m.avg + '/100'), h('td', { class: 'small' }, `Nv ${m.level} · ${m.title} · ${m.xp} XP`))))))
+        : h('p', { class: 'muted small' }, 'Todavía nadie entrenó. Las primeras sesiones aparecen acá con su puntaje real.'));
+    const hist = h('section', { class: 'card panel' }, h('h2', {}, 'Historial'),
+      d.sessions.length ? h('ul', { class: 'team-props' }, ...d.sessions.map((x) => {
+        const [l, c] = TST[x.status] || [x.status, ''];
+        const ans = x.answer && typeof x.answer === 'object' ? JSON.stringify(x.answer).slice(0, 400) : x.answer ? String(x.answer).slice(0, 400) : '';
+        return h('li', { class: 'team-prop' },
+          h('div', { class: 'team-prop-head' }, h('span', { class: 'chip ' + c }, l), h('strong', {}, `${x.memberName} · ${x.areaLabel}`), x.score != null ? h('span', { class: 'train-score' }, `${x.score}/100`) : null, h('span', { class: 'muted tiny' }, when(x.created_at) + ' · ' + x.assigned_by)),
+          x.exercise ? h('details', { class: 'small' }, h('summary', {}, `${x.module} · fuente: ${x.exercise.source}`), h('p', {}, x.exercise.prompt), h('pre', { class: 'train-pre' }, x.exercise.material), ans ? h('p', { class: 'tiny muted' }, 'Respuesta: ' + ans) : null) : h('p', { class: 'tiny muted' }, x.module === 'auto' ? 'El ejercicio se arma con material real cuando le toca el turno.' : x.module),
+          x.feedback ? h('p', { class: 'small' }, x.feedback) : null,
+          owner && x.status === 'pendiente' ? h('div', { class: 'row-actions' }, h('button', { class: 'btn btn-sm btn-ghost', type: 'button', onclick: async () => { try { await api(`/api/admin/team/training/${x.id}/cancel`, { method: 'POST', token, body: {} }); load(); } catch (e) { fail(e); } } }, 'Cancelar')) : null);
+      })) : h('p', { class: 'muted small' }, 'Sin sesiones todavía.'));
+    root.replaceChildren(head, areas, table, hist);
+  }
+  await load();
+}
+
 /* =================== Rendimiento =================== */
 export async function renderPerf(box, token, me) {
   const root = h('div', { class: 'perf stack-lg' }); box.replaceChildren(root);
@@ -137,13 +203,13 @@ export async function renderPerf(box, token, me) {
     };
     const table = (rows, who) => rows.length ? h('div', { class: 'table-wrap' }, h('table', { class: 'table perf-table' },
       h('caption', { class: 'sr-only' }, who === 'agent' ? 'Puntaje de los agentes' : 'Puntaje de las personas'),
-      h('thead', {}, h('tr', {}, h('th', { scope: 'col' }, '#'), h('th', { scope: 'col' }, who === 'agent' ? 'Agente' : 'Persona'), h('th', { scope: 'col' }, 'Puesto'), h('th', { scope: 'col' }, 'Puntaje'), h('th', { scope: 'col' }, 'Datos (30 días)'))),
-      h('tbody', {}, ...rows.map((x, i) => h('tr', {}, h('td', {}, String(i + 1)), h('td', {}, h('strong', {}, x.name)), h('td', { class: 'small' }, who === 'agent' ? x.role : x.roleLabel + (x.area ? ` (${(AREAS.find((a) => a[0] === x.area) || [, x.area])[1]})` : '')), h('td', {}, scoreCell(x)), h('td', { class: 'tiny muted' }, counts(x.counts)))))))
+      h('thead', {}, h('tr', {}, h('th', { scope: 'col' }, '#'), h('th', { scope: 'col' }, who === 'agent' ? 'Agente' : 'Persona'), h('th', { scope: 'col' }, 'Puesto'), h('th', { scope: 'col' }, 'Puntaje'), who === 'agent' ? h('th', { scope: 'col' }, 'Experiencia y habilidades') : null, h('th', { scope: 'col' }, 'Datos (30 días)'))),
+      h('tbody', {}, ...rows.map((x, i) => h('tr', {}, h('td', {}, String(i + 1)), h('td', {}, h('strong', {}, x.name)), h('td', { class: 'small' }, who === 'agent' ? x.role : x.roleLabel + (x.area ? ` (${(AREAS.find((a) => a[0] === x.area) || [, x.area])[1]})` : '')), h('td', {}, scoreCell(x)), who === 'agent' ? h('td', { class: 'small perf-growth' }, x.isNew ? h('span', { class: 'tn-new' }, 'Nuevo') : null, ` Nv ${x.level} · ${x.title} · ${x.xp} XP`, (x.skills || []).length ? h('div', { class: 'team-chips' }, ...x.skills.map((s) => h('span', { class: 'tchip won' + (s.source === 'entrenamiento' ? ' trained' : '') }, `${s.tag} ×${s.n}`))) : null) : null, h('td', { class: 'tiny muted' }, counts(x.counts)))))))
       : h('p', { class: 'muted small' }, who === 'agent' ? 'Sin agentes.' : 'Todavía no hay personas invitadas (aparte del dueño).');
     const anyAgentData = d.agents.some((a) => a.score != null);
     const evalBtn = d.canEvaluate ? h('button', { class: 'btn btn-sm', type: 'button', html: icon('refresh') + '<span>Evaluar ascensos ahora</span>', onclick: async (ev) => { ev.currentTarget.disabled = true; try { const r = await api('/api/panel/perf/evaluate', { method: 'POST', token, body: {} }); toast(r.applied.length ? `Ascensos aplicados: ${r.applied.length}` : 'Nadie cumple la regla todavía.', r.applied.length ? 'success' : 'info'); load(); } catch (e) { fail(e); } } }) : null;
     root.replaceChildren(...[
-      h('section', { class: 'card panel' }, h('div', { class: 'panel-head' }, h('h2', {}, 'Rendimiento'), evalBtn), h('p', { class: 'small muted' }, 'Puntajes con datos reales de los últimos 30 días. Sin datos, no se inventa nada.'), rules),
+      h('section', { class: 'card panel' }, h('div', { class: 'panel-head' }, h('h2', {}, 'Rendimiento'), evalBtn), h('p', { class: 'small muted' }, 'Puntajes con datos reales de los últimos 30 días. Sin datos, no se inventa nada.'), d.levelNote ? h('p', { class: 'tiny muted' }, d.levelNote) : null, rules),
       pending.length ? h('section', { class: 'card panel' }, h('h2', {}, 'Ascensos sugeridos (personas)'), h('p', { class: 'small muted' }, 'El sistema solo sugiere: el rol cambia cuando alguien con permiso lo confirma.'), h('ul', { class: 'team-props' }, ...pending.map(promoRow))) : null,
       h('section', { class: 'card panel' }, h('h2', {}, 'Agentes'), anyAgentData ? null : h('p', { class: 'small muted' }, 'Todavía no hay datos suficientes de ningún agente: el puntaje aparece cuando cada uno junta al menos 3 eventos (tareas, aprobaciones, pruebas).'), table(d.agents, 'agent')),
       d.humans && (me.perms || []).includes('staff.view') ? h('section', { class: 'card panel' }, h('h2', {}, 'Personas'), table(d.humans, 'human')) : null,

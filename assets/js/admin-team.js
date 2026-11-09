@@ -10,7 +10,8 @@ const NODE_W = 228, NODE_H = 150;
 const ST = { activo: ['Activo', 'ok'], pausado: ['En pausa', 'warn'], desactivado: ['Apagado', ''] };
 const OST = { pendiente: ['En cola', ''], en_curso: ['Trabajando', 'gold'], hecha: ['Hecha', 'ok'], propuesta: ['Espera tu OK', 'gold'], aprobada: ['Aprobada', 'ok'], rechazada: ['Rechazada', ''], fallida: ['Con error', 'danger'], cancelada: ['Cancelada', ''], delegada: ['Delegada', 'info'] };
 const PRIO = [null, 'baja', 'media', 'alta', 'urgente'];
-const KIND = { ceo: 'CEO', lead: 'Líder', worker: 'Trabajador' };
+const KIND = { ceo: 'CEO', coceo: 'Co-CEO agéntico', lead: 'Líder', worker: 'Trabajador' };
+const REC = { aprobar: ['Recomienda aprobar', 'ok'], rechazar: ['Recomienda rechazar', 'danger'], revisar: ['Recomienda revisar', 'warn'] };
 const GSTATE = { activo: ['Equipo activo', 'ok'], pausado: ['Equipo en pausa', 'warn'], detenido: ['Parada de emergencia', 'danger'] };
 const ERR = {
   cycle: 'Esa conexión haría un círculo (alguien terminaría siendo jefe de su jefe).', parent_rank_must_be_higher: 'El jefe tiene que tener un rango más alto (número menor).',
@@ -19,7 +20,7 @@ const ERR = {
   github_not_configured: 'Falta tu cuenta de GitHub conectada para enviar el cambio.', queue_full: 'La cola está llena.', rate_limited: 'Demasiados pedidos seguidos; esperá un minuto.',
   login_required: 'Tu sesión venció: ingresá de nuevo.', owner_only: 'Solo la cuenta dueña.',
   forbidden_role: 'Tu rol no permite esta acción.', outside_area: 'Solo podés actuar sobre los agentes de tu área.', owner_decides_this: 'Esto lo decide el dueño o un Co-CEO.', not_your_order: 'Solo podés cancelar las órdenes que diste vos.', session_expired: 'Tu sesión venció: entrá de nuevo.',
-  ceo_protected: 'Al CEO lo modifica solo el dueño.', not_decided: 'Esa orden todavía no tiene una decisión para revertir.', already_rejected: 'Ya estaba rechazada.', already_approved: 'Ya estaba aprobada.'
+  ceo_protected: 'Al CEO lo modifica solo el dueño.', invalid_parent: 'Ese jefe no sirve (el Co-CEO agéntico no tiene personas a cargo).', not_undoable: 'Ese puesto ya no se puede deshacer.', team_full: 'El equipo llegó al tope de 40 agentes.', not_decided: 'Esa orden todavía no tiene una decisión para revertir.', already_rejected: 'Ya estaba rechazada.', already_approved: 'Ya estaba aprobada.'
 };
 const ago = (t) => (t ? timeAgo(new Date(typeof t === 'number' ? t : Date.parse(t))) : 'todavía no');
 const hhmm = (t) => new Date(t).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Argentina/Buenos_Aires' });
@@ -30,6 +31,7 @@ export function defaultLayout(members) {
   const ceo = members.find((m) => m.kind === 'ceo') || members[0]; if (!ceo) return pos;
   const top = kids(ceo.id); const gap = NODE_W + 44;
   pos[ceo.id] = { x: ((top.length - 1) * gap) / 2, y: 0 };
+  const co = members.find((m) => m.kind === 'coceo'); if (co) pos[co.id] = { x: pos[ceo.id].x + gap, y: 0 }; // co-lidera al lado del CEO
   top.forEach((l, i) => {
     pos[l.id] = { x: i * gap, y: NODE_H + 70 };
     let row = 0;
@@ -61,7 +63,7 @@ export async function renderTeam(box, user, { base = String(CONFIG.API_BASE || '
   }
 
   function draw() {
-    root.replaceChildren(head(), channel(), quota(), proposals(), board(), ranking(), activity());
+    root.replaceChildren(head(), channel(), quota(), proposals(), board(), slots(), ranking(), activity());
   }
 
   /* ---------- Cabecera: estado global + controles ---------- */
@@ -106,9 +108,15 @@ export async function renderTeam(box, user, { base = String(CONFIG.API_BASE || '
   function decideBtns(o) {
     const act = async (a, btn) => {
       if (a === 'approve' && !(await confirmDialog({ title: 'Aprobar', text: o.kind === 'contratacion' ? 'Se crea el agente nuevo (solo puede proponer, nunca publicar) y queda activo.' : o.kind === 'plan' ? 'Se crean las tareas del plan para cada agente.' : 'Se envía a los agentes de GitHub, que abren un PR (o publican solo si es un arreglo chico que pasa las pruebas).', ok: 'Aprobar' }))) return;
+      let body = {};
+      if (a === 'reject') {
+        const why = h('textarea', { class: 'input', rows: '2', maxlength: '200', 'aria-label': 'Motivo del rechazo (opcional)', placeholder: 'Ej.: rompe el estilo clásico del sitio.' });
+        const v = await modal({ title: 'Rechazar', body: h('div', { class: 'stack' }, h('p', { class: 'small' }, 'El motivo (opcional) le queda al agente como lección para la próxima.'), why), actions: [{ label: 'Cancelar', value: null, class: 'btn-ghost' }, { label: 'Rechazar', value: 'ok', class: 'btn-primary' }] }).done;
+        if (v !== 'ok') return; body = { reason: why.value.trim() };
+      }
       btn.disabled = true;
       try {
-        const r = await call(`/api/admin/team/orders/${o.id}/${a}`, { method: 'POST', body: {} }); toast(a === 'approve' ? (r.note || 'Aprobada') : 'Rechazada');
+        const r = await call(`/api/admin/team/orders/${o.id}/${a}`, { method: 'POST', body }); toast(a === 'approve' ? (r.note || 'Aprobada') : 'Rechazada');
         await load();
         if (a === 'approve' && r.member) { const nm = d.members.find((x) => x.id === r.member); if (nm) orderDialog(nm, true); } // contratado: primera tarea con un toque
       } catch (e) { fail(e); btn.disabled = false; }
@@ -126,6 +134,7 @@ export async function renderTeam(box, user, { base = String(CONFIG.API_BASE || '
       h('p', {}, r.summary),
       r.tasks ? h('ul', { class: 'team-tasks' }, ...r.tasks.map((t) => h('li', {}, h('strong', {}, nameOf(t.member) + ': '), t.text, t.reason ? h('span', { class: 'muted tiny team-why' }, ' · por qué: ' + t.reason) : null))) : null,
       r.change ? h('p', { class: 'small' }, h('strong', {}, r.change.title + ' · '), r.change.detail) : null,
+      o.rec ? h('div', { class: 'team-rec small' }, h('span', { class: 'chip ' + (REC[o.rec.rec] || ['', ''])[1] }, (REC[o.rec.rec] || [o.rec.rec])[0]), h('span', { class: 'muted' }, ' · Co-CEO agéntico (solo recomienda, decidís vos): '), (o.rec.reasons || []).join(' ')) : null,
       r.hire ? h('div', { class: 'small team-hire' }, h('p', {}, h('strong', {}, `${r.hire.name} (${r.hire.role})`), ` · reporta a ${nameOf(r.hire.parent)}`), h('p', {}, r.hire.why), r.hire.expected ? h('p', { class: 'muted' }, 'Tareas esperadas: ' + r.hire.expected) : null, chips(r.hire.tags)) : null,
       decideBtns(o));
   }
@@ -141,6 +150,31 @@ export async function renderTeam(box, user, { base = String(CONFIG.API_BASE || '
   }
 
   const chips = (tags, max = 6) => { const t = String(tags || '').split(',').map((x) => x.trim()).filter(Boolean); return t.length ? h('div', { class: 'team-chips' }, ...t.slice(0, max).map((x) => h('span', { class: 'tchip' }, x)), t.length > max ? h('span', { class: 'tchip more' }, '+' + (t.length - max)) : null) : null; };
+
+  /** Habilidades GANADAS (con tareas o entrenamientos reales); si todavía no tiene, sus habilidades de perfil en gris. */
+  const earned = (m, max = 6) => {
+    const sk = (m.progress && m.progress.skills) || [];
+    if (!sk.length) return chips(m.tags, max);
+    return h('div', { class: 'team-chips', 'aria-label': 'Habilidades ganadas' }, ...sk.slice(0, max).map((s) => h('span', { class: 'tchip won' + (s.source === 'entrenamiento' ? ' trained' : ''), title: `${s.n} vez/veces · ${s.source === 'entrenamiento' ? 'entrenamiento' : 'tareas reales'}` }, `${s.tag} ×${s.n}`)), sk.length > max ? h('span', { class: 'tchip more' }, '+' + (sk.length - max)) : null);
+  };
+
+  /* ---------- Puestos del organigrama (vacantes) ---------- */
+  function slots() {
+    const v = d.vacancies; if (!v) return null;
+    const STL = { ocupado: ['Ocupado', 'ok'], vacante: ['Vacante: se cubre en el próximo turno', 'warn'], cerrado: ['Cerrado por el dueño', ''] };
+    const fills = (v.fills || []).filter((f) => f.status === 'cubierta');
+    const list = h('ul', { class: 'team-slots' }, ...v.slots.filter((s) => s.isNew || s.state !== 'ocupado').map((s) => {
+      const f = fills.find((x) => x.slot_id === s.id && x.member_id === s.member);
+      const acts = h('div', { class: 'row-actions' });
+      if (owner && f) acts.append(h('button', { class: 'btn btn-sm btn-ghost', type: 'button', onclick: async (ev) => { if (!(await confirmDialog({ title: 'Deshacer el puesto', text: `Se quita «${s.memberName}» (agente nuevo) y el puesto queda cerrado hasta que lo reabras.`, ok: 'Deshacer', danger: true }))) return; ev.currentTarget.disabled = true; try { await call(`/api/admin/team/vacancies/${f.id}/undo`, { method: 'POST', body: {} }); toast('Puesto deshecho'); load(); } catch (e) { fail(e); } } }, 'Deshacer'));
+      if (owner && s.state === 'cerrado') acts.append(h('button', { class: 'btn btn-sm', type: 'button', onclick: async () => { try { await call(`/api/admin/team/slots/${s.id}/reopen`, { method: 'POST', body: {} }); toast('Puesto reabierto: se cubre en el próximo turno'); load(); } catch (e) { fail(e); } } }, 'Reabrir'));
+      return h('li', { class: 'team-slot' }, h('span', { class: 'chip ' + STL[s.state][1] }, STL[s.state][0]), h('strong', {}, s.name), h('span', { class: 'muted tiny' }, s.parent ? ' · reporta a ' + nameOf(s.parent) : ' · reporta al dueño'), s.memberName && s.memberName !== s.name ? h('span', { class: 'small' }, ' · ' + s.memberName) : null, acts.childElementCount ? acts : null);
+    }));
+    return h('section', { class: 'card panel', 'aria-labelledby': 'team-slots-h' },
+      h('div', { class: 'panel-head' }, h('h2', { id: 'team-slots-h' }, `Puestos del organigrama (${v.count} de ${v.max} agentes)`)),
+      h('p', { class: 'muted small' }, 'Si un puesto queda vacío, el turno lo cubre con un agente nuevo (0 XP, «Nuevo», solo propone) y lo anota en la Bitácora y en Dirección. Si quitás un nodo, su puesto queda cerrado hasta que lo reabras. Las consultas al modelo siguen siendo 96 por día para todo el equipo.'),
+      list.childElementCount ? list : h('p', { class: 'muted small' }, 'Todos los puestos están ocupados.'));
+  }
 
   /* ---------- Lienzo ---------- */
   function board() {
@@ -213,11 +247,11 @@ export async function renderTeam(box, user, { base = String(CONFIG.API_BASE || '
       order.onclick = (e) => { e.stopPropagation(); orderDialog(m); };
       const port = h('span', { class: 'tn-port', title: 'Arrastrá hasta otro nodo para cambiar a quién reporta', 'aria-hidden': 'true' });
       const n = h('div', { class: `tn tn-${m.kind} st-${m.status}`, tabindex: '0', role: 'button', 'aria-label': `${m.name}, ${KIND[m.kind]}, rango ${m.rank}, ${sl}. Abrir detalle.`, dataset: { id: m.id } },
-        m.kind !== 'ceo' ? port : null,
+        m.kind !== 'ceo' && m.kind !== 'coceo' ? port : null,
         h('div', { class: 'tn-top' }, h('span', { class: 'tn-dot ' + sc, 'aria-hidden': 'true' }), h('strong', { class: 'tn-name' }, m.name), h('span', { class: 'tn-rank', title: 'Rango' }, 'R' + m.rank)),
         h('div', { class: 'tn-role' }, m.role !== m.name ? m.role : m.kind === 'lead' && m.rank >= 3 ? 'Supervisor' : KIND[m.kind]),
-        chips(m.tags, 3),
-        h('div', { class: 'tn-meta' }, m.progress && m.progress.rest ? h('span', { class: 'tn-rest', title: 'Sala de descanso (metáfora): ' + m.progress.rest }, 'Descansa') : null, `Nv ${m.progress ? m.progress.level : 1} · ${m.tasks_done} tareas · ${m.queue} en cola · ${m.last_run_at ? ago(m.last_run_at) : 'sin turnos'}`),
+        earned(m, 3),
+        h('div', { class: 'tn-meta' }, m.progress && m.progress.isNew ? h('span', { class: 'tn-new', title: 'Agente nuevo: arranca en 0 XP' }, 'Nuevo') : null, m.progress && m.progress.rest ? h('span', { class: 'tn-rest', title: 'Sala de descanso (metáfora): ' + m.progress.rest }, 'Descansa') : null, `Nv ${m.progress ? m.progress.level : 1} · ${m.progress ? m.progress.xp : 0} XP · ${m.queue} en cola · ${m.last_run_at ? ago(m.last_run_at) : 'sin turnos'}`),
         h('div', { class: 'tn-foot' }, sw, order));
       n.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); detail(m.id); } });
       nodes[m.id] = n; stage.append(n); place(m.id);
@@ -331,9 +365,11 @@ export async function renderTeam(box, user, { base = String(CONFIG.API_BASE || '
           h('div', {}, h('small', { class: 'label' }, 'Herramientas y permisos'), h('ul', { class: 'team-tools' }, ...(m.tools || []).map((t) => h('li', {}, t)))),
           h('div', {}, h('small', { class: 'label' }, 'Tope por día'), h('strong', {}, `${m.max_per_day} tareas`))),
         m.progress ? h('div', { class: 'team-progress' },
-          h('p', { class: 'muted tiny' }, 'Progreso (metáfora de juego, calculada con tareas reales; no mide inteligencia): +5 por tarea hecha, +20 por propuesta aprobada, +3 por propuesta, −2 por error.'),
-          h('div', { class: 'team-pgrid' }, ...[['Nivel', m.progress.level], ['XP', m.progress.xp], ['Edad', `${m.progress.ageDays} día(s)`], ['Hechas', m.progress.done], ['Aprobadas', m.progress.approved], ['Errores', m.progress.failed]].map(([k, v]) => h('div', {}, h('small', {}, k), h('strong', {}, String(v))))),
-          h('small', { class: 'label' }, `Lecciones aprendidas (${m.progress.lessonCount}) · entran en sus próximos pedidos al modelo`),
+          h('p', { class: 'muted tiny' }, 'Experiencia con eventos reales (no mide inteligencia): +5 tarea hecha, +1 control de rutina, +2 delegación, +20 propuesta aprobada, +5 publicación chica que pasó las pruebas, +10 entrenamiento aprobado, −2 error, −15 arreglo revertido, −20 aprobación revocada. ' + ((d.growth && d.growth.note) || '')),
+          h('div', { class: 'team-pgrid' }, ...[['Nivel interno', `${m.progress.level} · ${m.progress.title}`], ['XP', m.progress.xp], ['Edad', `${m.progress.ageDays} día(s)`], ['Hechas', m.progress.done], ['Aprobadas', m.progress.approved], ['Errores', m.progress.failed]].map(([k, v]) => h('div', {}, h('small', {}, k), h('strong', {}, String(v))))),
+          h('small', { class: 'label' }, 'Habilidades ganadas (con tareas y entrenamientos reales)'),
+          (m.progress.skills || []).length ? earned(m, 12) : h('p', { class: 'muted small' }, m.progress.isNew ? 'Nuevo: todavía no ganó habilidades.' : 'Todavía ninguna.'),
+          h('small', { class: 'label' }, `Lecciones aprendidas (${m.progress.lessonCount}) · las 5 más nuevas entran (recortadas) en sus próximos pedidos al modelo`),
           m.progress.lessons.length ? h('ul', { class: 'team-lessons' }, ...m.progress.lessons.map((l) => h('li', {}, l))) : h('p', { class: 'muted small' }, 'Todavía ninguna.')) : null,
         h('div', { class: 'team-detail-actions' }, seg, runOne,
           h('button', { class: 'btn btn-sm btn-primary', type: 'button', html: icon('send') + 'Dar orden', onclick: () => { dlg.close(); orderDialog(m); } }),
