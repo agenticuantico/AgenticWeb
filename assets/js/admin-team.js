@@ -199,7 +199,7 @@ export async function renderTeam(box, user, { base = String(CONFIG.API_BASE || '
       }
       svg.innerHTML = svg.innerHTML.split('</defs>')[0] + '</defs>' + out;
       let maxX = 0, maxY = 0; for (const p of Object.values(pos)) { maxX = Math.max(maxX, p.x + NODE_W + 120); maxY = Math.max(maxY, p.y + NODE_H + 40); }
-      svg.setAttribute('width', String(maxX)); svg.setAttribute('height', String(maxY));
+      svg.setAttribute('width', String(maxX)); svg.setAttribute('height', String(maxY)); svg.style.width = maxX + 'px'; svg.style.height = maxY + 'px';
     };
     const place = (id) => { const n = nodes[id]; n.style.transform = `translate(${pos[id].x}px, ${pos[id].y}px)`; };
     for (const m of d.members) {
@@ -211,11 +211,10 @@ export async function renderTeam(box, user, { base = String(CONFIG.API_BASE || '
       const port = h('span', { class: 'tn-port', title: 'Arrastrá hasta otro nodo para cambiar a quién reporta', 'aria-hidden': 'true' });
       const n = h('div', { class: `tn tn-${m.kind} st-${m.status}`, tabindex: '0', role: 'button', 'aria-label': `${m.name}, ${KIND[m.kind]}, rango ${m.rank}, ${sl}. Abrir detalle.`, dataset: { id: m.id } },
         m.kind !== 'ceo' ? port : null,
-        h('div', { class: 'tn-top' }, h('span', { class: 'tn-dot ' + sc, 'aria-hidden': 'true' }), h('strong', { class: 'tn-name' }, m.name), h('span', { class: 'tn-rank', title: 'Rango' }, 'R' + m.rank)),
+        h('div', { class: 'tn-top' }, h('span', { class: 'tn-dot ' + sc, 'aria-hidden': 'true' }), h('strong', { class: 'tn-name' }, m.name), m.progress && m.progress.rest ? h('span', { class: 'tn-rest', title: 'Sala de descanso (metáfora): ' + m.progress.rest }, 'Descansa') : null, h('span', { class: 'tn-rank', title: 'Rango' }, 'R' + m.rank)),
         h('div', { class: 'tn-role' }, m.role !== m.name ? m.role : m.kind === 'lead' && m.rank >= 3 ? 'Supervisor' : KIND[m.kind]),
         chips(m.tags, 3),
         h('div', { class: 'tn-meta' }, `Nv ${m.progress ? m.progress.level : 1} · ${m.tasks_done} tareas · ${m.queue} en cola · ${m.last_run_at ? ago(m.last_run_at) : 'sin turnos'}`),
-        m.progress && m.progress.rest ? h('div', { class: 'tn-rest', title: 'Sala de descanso (metáfora): no toma tareas por ahora' }, 'Descansa: ' + m.progress.rest.toLowerCase()) : null,
         h('div', { class: 'tn-foot' }, sw, order));
       n.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); detail(m.id); } });
       nodes[m.id] = n; stage.append(n); place(m.id);
@@ -288,7 +287,7 @@ export async function renderTeam(box, user, { base = String(CONFIG.API_BASE || '
       h('button', { type: 'button', class: 'btn btn-sm btn-ghost', onclick: async () => { if (!(await confirmDialog({ title: 'Ordenar', text: 'Vuelve a acomodar todos los nodos en su lugar automático.', ok: 'Ordenar' }))) return; try { await call('/api/admin/team/layout', { method: 'POST', body: { reset: true } }); load(); } catch (e) { fail(e); } } }, 'Ordenar'));
     const legend = h('p', { class: 'muted tiny tc-legend' }, 'Arrastrá un nodo para moverlo · arrastrá el punto de arriba de un nodo hasta otro para cambiar a quién reporta · línea animada = orden que bajó por esa conexión en las últimas 24 h · línea punteada = tarea asignada por el CEO.');
     requestAnimationFrame(() => fit(false));
-    return h('div', { class: 'tc-wrap' }, vp, tools, legend);
+    return h('div', { class: 'tc-wrap' }, legend, h('div', { class: 'tc-box' }, vp, tools));
   }
 
   /* ---------- Diálogos ---------- */
