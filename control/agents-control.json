@@ -1,6 +1,6 @@
 {
-  "state": "activo",
+  "state": "pausado",
   "agents": {},
-  "updatedAt": "2026-10-31T00:00:00Z",
-  "updatedBy": "inicial"
+  "updatedAt": "2026-11-09T12:03:12.503Z",
+  "updatedBy": "clave de setup"
 }
