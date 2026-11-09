@@ -83,7 +83,7 @@ export async function speak(markdown, opts = {}) {
     let blob = await synthesize(text, opts.lang, opts.signal);
     if (me.cancelled) return;
     if (!blob && naturalOnly) { await new Promise((r) => setTimeout(r, 900)); if (me.cancelled) return; blob = await synthesize(text, opts.lang, opts.signal); if (me.cancelled) return; }
-    if (blob) return playWithAnalyser(blob, opts, me);
+    if (blob) return playWithAnalyser(blob, opts, me, text);
     if (naturalOnly) { opts.onUnavailable && opts.onUnavailable(); opts.onEnd && opts.onEnd(); return; }
   }
   return speakBrowser(text, opts, me);
@@ -99,7 +99,12 @@ export function stop() {
 }
 export function isSpeaking() { return !!(audioEl && !audioEl.paused) || ('speechSynthesis' in window && speechSynthesis.speaking); }
 
-function playWithAnalyser(blob, opts, me) {
+/* Avisa al personaje qué texto se está diciendo y cuánto dura (elige vocales y momentos de gesto). */
+function announce(text, dur) {
+  try { dispatchEvent(new CustomEvent('ac-speech', { detail: text ? { text, dur, start: performance.now() } : {} })); } catch {}
+}
+
+function playWithAnalyser(blob, opts, me, text = '') {
   return new Promise((resolve) => {
     const url = URL.createObjectURL(blob);
     const a = new Audio(url);
@@ -131,11 +136,11 @@ function playWithAnalyser(blob, opts, me) {
         opts.onViseme && opts.onViseme(v);
         raf = requestAnimationFrame(tick);
       };
-      a.addEventListener('play', () => { opts.onStart && opts.onStart(); tick(); }, { once: true });
+      a.addEventListener('play', () => { announce(text, isFinite(a.duration) ? a.duration * 1000 : 0); opts.onStart && opts.onStart(); tick(); }, { once: true });
     } catch {
-      a.addEventListener('play', () => opts.onStart && opts.onStart(), { once: true });
+      a.addEventListener('play', () => { announce(text, isFinite(a.duration) ? a.duration * 1000 : 0); opts.onStart && opts.onStart(); }, { once: true });
     }
-    const end = () => { cancelAnimationFrame(raf); opts.onViseme && opts.onViseme(ZERO); URL.revokeObjectURL(url); if (audioEl === a) audioEl = null; opts.onEnd && opts.onEnd(); resolve(); };
+    const end = () => { announce(null); cancelAnimationFrame(raf); opts.onViseme && opts.onViseme(ZERO); URL.revokeObjectURL(url); if (audioEl === a) audioEl = null; opts.onEnd && opts.onEnd(); resolve(); };
     a.addEventListener('ended', end, { once: true });
     a.addEventListener('error', end, { once: true });
     a.play().catch(() => { end(); });
@@ -167,6 +172,7 @@ async function speakBrowser(text, opts, me) {
       };
       u.onstart = () => {
         if (!started) { started = true; opts.onStart && opts.onStart(); }
+        announce(chunk.trim(), chunk.trim().length * 62 / u.rate);
         // si el motor no emite límites de palabra, animamos por tiempo estimado
         const words = chunk.trim().split(/\s+/);
         const msPerChar = 62 / u.rate;
@@ -188,6 +194,7 @@ async function speakBrowser(text, opts, me) {
     });
   }
   clearTimeout(timer);
+  announce(null);
   opts.onViseme && opts.onViseme(ZERO);
   opts.onEnd && opts.onEnd();
 }

@@ -6,7 +6,7 @@ import { watchUser, getProfile } from './auth.js';
 import { setIdTokenProvider } from './chat/engine.js';
 import { esc } from './ui.js';
 
-import { AvatarStage } from './chat/avatar.js';
+import { AvatarStage } from './chat/avatar.js?v=7.8.0';
 
 /* Portada: personaje en vivo, liviano: sigue el cursor (o el último toque), respira y parpadea. Nada más.
    Los gestos completos (poses, manos, cejas) y los labios sincronizados con la voz van en la videollamada

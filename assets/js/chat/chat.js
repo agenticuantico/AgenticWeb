@@ -14,7 +14,7 @@ import { renderMarkdown, looksLikeMarkdown } from './md.js';
 import { LANGS, getLang, flagUrl, startLang } from './languages.js';
 const SITE_IDS = ['es-AR', 'es-ES', 'en-US', 'pt-BR'];
 import { AGENTS, TOOLS, SKILLS, CONNECTORS, agentById, initials } from './agents.js';
-import { speak, stop as stopSpeech } from './voice.js';
+import { speak, stop as stopSpeech } from './voice.js?v=7.8.0';
 import { VoiceRecorder, fmtClock } from './recorder.js';
 import { readFile, fmtSize } from './docs.js';
 // Rendimiento (Fase 3): la computadora del agente y la videollamada se cargan recién cuando se usan.
@@ -32,9 +32,9 @@ const MODES = {
 };
 
 const PHASES = { thinking: 'Pensando', searching: 'Buscando', coding: 'Escribiendo código', verifying: 'Verificando', reading: 'Leyendo', agent: 'Especialista', confirm: 'Confirmación' };
-const FACE = '/media/avatar/face-256.webp?v=7.7.0';
-const FACE_SET = '/media/avatar/face-128.webp?v=7.7.0 128w, /media/avatar/face-256.webp?v=7.7.0 256w, /media/avatar/face-512.webp?v=7.7.0 512w';
-const FACE_PNG = '/media/avatar/face-256.png?v=7.7.0';
+const FACE = '/media/avatar/face-256.webp?v=7.8.0';
+const FACE_SET = '/media/avatar/face-128.webp?v=7.8.0 128w, /media/avatar/face-256.webp?v=7.8.0 256w, /media/avatar/face-512.webp?v=7.8.0 512w';
+const FACE_PNG = '/media/avatar/face-256.png?v=7.8.0';
 
 const SUGGESTIONS = [
   { t: '¿Qué es AgentiCuántico?', i: 'info' },
@@ -500,7 +500,7 @@ export class ChatApp {
     if (!this.flag('voice')) return;
     const show = () => { const st = this.avatar.state; this._call.open(this.$('form') || this.root); this._call.setState(st); };
     if (this._call) { show(); return; }
-    import('./avatar-call.js').then(({ getAvatarCall }) => {
+    import('./avatar-call.js?v=7.8.0').then(({ getAvatarCall }) => {
       if (!this._call) { this._call = getAvatarCall(); this._call.onClose = () => { stopSpeech(); if (this.handsFree) this.act_handsfree(); }; }
       show();
     }).catch(() => {});

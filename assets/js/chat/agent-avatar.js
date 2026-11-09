@@ -3,10 +3,10 @@
  * (medio cuerpo, gestos, labios sincronizados, secuencia neuronal) que se carga solo cuando se usa.
  * API compatible con AvatarStage: setState, setVisemes, setLevel, pulse, load, onReady, state.
  */
-import { AvatarStage } from './avatar.js';
+import { AvatarStage } from './avatar.js?v=7.8.0';
 
 const LABELS = { idle: '', listening: 'Escuchando', thinking: 'Procesando…', talking: 'Hablando' };
-const MODEL = '/media/avatar/agente.glb?v=7.7.0';
+const MODEL = '/media/avatar/agente.glb?v=7.8.0';
 
 /** ¿Conviene el 3D en este dispositivo? (WebGL, sin movimiento reducido, sin ahorro de datos ni poca memoria) */
 export function canUse3D() {
@@ -41,7 +41,7 @@ export class AgentAvatar {
     if (this._p) return this._p;
     if (!canUse3D()) { this.el.classList.add('no-3d'); this._p = Promise.resolve(null); return this._p; }
     this.loadEl.hidden = false; this.loadEl.textContent = 'Cargando avatar…';
-    this._p = import('../../vendor/a3d/agent3d.js?v=7.7.0')
+    this._p = import('../../vendor/a3d/agent3d.js?v=7.8.0')
       .then((m) => m.createAgent3D(this.holder, {
         modelUrl: MODEL, framing: this.framing,
         onProgress: (p) => { this.loadEl.textContent = `Cargando avatar… ${Math.round(p * 100)}%`; },
@@ -69,5 +69,5 @@ export class AgentAvatar {
   setVisemes(v) { this.portrait.setVisemes(v); this.a3 && this.a3.setVisemes(v); }
   setLevel(lv) { this.portrait.setLevel(lv); this.a3 && this.a3.setLevel(lv); }
   pulse() { this.portrait.pulse(); this.a3 && this.a3.pulse(); }
-  setFraming(m) { this.framing = m; this.a3 && this.a3.setFraming(m); }
+  setFraming(m) { this.framing = m; this.portrait.setFraming && this.portrait.setFraming(m); this.a3 && this.a3.setFraming(m); }
 }
