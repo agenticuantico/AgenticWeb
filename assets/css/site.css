@@ -9,7 +9,7 @@
 .hero h1 { font-size: var(--fs-hero); line-height: 1.1; letter-spacing: -.015em; margin-bottom: 18px; }
 .hero h1 .accent { background: var(--lime); color: #10140a; padding: 0 .16em .04em; border-radius: .18em; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
 .hero .lead { max-width: 640px; margin: 0 auto 26px; }
-.hero-ctas { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.hero-ctas { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 12px; }
 .trust { display: flex; gap: 8px 18px; justify-content: center; flex-wrap: wrap; margin-top: 18px; font-size: var(--fs-sm); color: var(--muted); }
 .trust span { display: inline-flex; align-items: center; gap: 6px; }
 .trust svg { width: 16px; height: 16px; color: var(--gold); }
