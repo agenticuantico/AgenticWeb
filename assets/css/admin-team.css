@@ -272,3 +272,5 @@
 .live-filters { display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); align-items: end; margin-bottom: 10px; }
 .live-filters label { display: flex; flex-direction: column; gap: 2px; }
 @media (max-width: 480px) { .live-teams { grid-template-columns: 1fr; } .live-views { max-width: 100%; } }
+.gate-denied .btn { white-space: normal; max-width: 100%; text-align: center; }
+@media (max-width: 480px) { .live-views { grid-template-columns: repeat(2, 1fr); overflow: visible; } }
