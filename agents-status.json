@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-09T12:09:36.539Z",
+  "updated": "2026-11-09T12:10:55.480Z",
   "source": "agentes-24-7",
   "note": "Estado público del equipo de agentes del sitio. Lo actualiza el workflow Agentes 24/7 (solo datos).",
   "agents": [
@@ -42,7 +42,7 @@
       "role": "Carga diferida de imágenes",
       "emoji": "⚡",
       "auto": true,
-      "status": "activo",
+      "status": "espera",
       "last_activity": "Revisó su área y no encontró nada para arreglar.",
       "last_run": "2026-11-09T12:09:09.316Z",
       "pr": null
@@ -54,9 +54,9 @@
       "emoji": "🧭",
       "auto": false,
       "status": "revision",
-      "last_activity": "Propuso una mejora: Claridad en el llamado a la acción (espera aprobación).",
-      "last_run": "2026-11-09T12:09:10.713Z",
-      "pr": "https://github.com/agenticuantico/AgenticWeb/pull/3"
+      "last_activity": "Tiene una propuesta esperando aprobación.",
+      "last_run": "2026-11-09T12:10:04.525Z",
+      "pr": null
     },
     {
       "id": "diseno-web",
@@ -64,10 +64,10 @@
       "role": "Propone ajustes de CSS responsive",
       "emoji": "🌐",
       "auto": false,
-      "status": "espera",
-      "last_activity": "Listo para su primera ronda.",
-      "last_run": null,
-      "pr": null
+      "status": "revision",
+      "last_activity": "Propuso una mejora: Ajuste de espaciado en CTAs del Hero (espera aprobación).",
+      "last_run": "2026-11-09T12:10:05.819Z",
+      "pr": "https://github.com/agenticuantico/AgenticWeb/pull/4"
     },
     {
       "id": "seo",
@@ -75,10 +75,10 @@
       "role": "Propone títulos y descripciones",
       "emoji": "🔎",
       "auto": false,
-      "status": "espera",
-      "last_activity": "Listo para su primera ronda.",
-      "last_run": null,
-      "pr": null
+      "status": "revision",
+      "last_activity": "Propuso una mejora: Optimización de meta descripción (espera aprobación).",
+      "last_run": "2026-11-09T12:10:19.433Z",
+      "pr": "https://github.com/agenticuantico/AgenticWeb/pull/5"
     }
   ]
 }
