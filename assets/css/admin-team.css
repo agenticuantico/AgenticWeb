@@ -51,6 +51,7 @@
 .tn-lead { border-color: #b7c58f; }
 .tn.st-pausado { background: #fffaf0; }
 .tn.st-desactivado { opacity: .62; }
+.tn > * { flex-shrink: 0; }
 .tn-top { display: flex; align-items: center; gap: 6px; }
 .tn-name { font-size: .92rem; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; }
 .tn-rank { font: 700 11px/1 var(--font-display, system-ui); padding: 3px 6px; border-radius: 6px; background: #18181b; color: #9fff00; }
@@ -96,7 +97,8 @@
   .team-actions .btn { flex: 1 1 auto; }
 }
 @media (prefers-reduced-motion: reduce) { .tn-switch i { transition: none; } }
-.tn-rest { font-size: 10px; color: #7a5c14; background: var(--gold-soft); border-radius: 6px; padding: 2px 5px; flex: none; }
+.tn-rest { font-size: 10px; color: #7a5c14; background: var(--gold-soft); border-radius: 6px; padding: 1px 5px; margin-right: 4px; }
+.tn-meta { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .tn .team-chips { flex-wrap: nowrap; overflow: hidden; }
 .team-progress { border: 1px solid var(--line); border-radius: var(--r-md); padding: 12px; }
 .team-pgrid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; margin: 6px 0 10px; }
@@ -115,3 +117,4 @@
 .tab-badge { display: inline-grid; place-items: center; min-width: 18px; height: 18px; padding: 0 5px; margin-left: 6px; border-radius: 999px; background: #c2362b; color: #fff; font-size: 11px; font-weight: 700; }
 .team-reps { margin: 6px 0 10px; } .team-reps summary { cursor: pointer; font-weight: 600; font-size: var(--fs-sm); } .team-reps ul { padding-left: 18px; display: grid; gap: 6px; }
 @media (max-width: 640px) { .tc-tools { top: auto; bottom: 10px; right: 10px; } }
+.team-profile > div { display: grid; gap: 4px; align-content: start; }

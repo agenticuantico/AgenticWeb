@@ -185,8 +185,9 @@ export async function renderTeam(box, user, { base = String(CONFIG.API_BASE || '
         if (!m.parent_id || !pos[m.parent_id]) continue;
         const a = pos[m.parent_id], b = pos[m.id];
         const x1 = a.x + NODE_W / 2, y1 = a.y + NODE_H, x2 = b.x + NODE_W / 2, y2 = b.y; const my = (y1 + y2) / 2;
+        const stacked = b.x > a.x && b.x - a.x < NODE_W / 2 && b.y > a.y + NODE_H; // columna: codo por el costado izquierdo
         const flowing = (d.assignments || []).some((a) => a.member_id === m.id && Date.now() - a.created_at < 24 * 3600e3);
-        out += `<path class="tc-edge${m.status !== 'activo' ? ' off' : ''}${flowing ? ' flow' : ''}" d="M${x1},${y1} C${x1},${my} ${x2},${my} ${x2},${y2}"/>`;
+        out += `<path class="tc-edge${m.status !== 'activo' ? ' off' : ''}${flowing ? ' flow' : ''}" d="${stacked ? `M${a.x + 9},${y1} V${b.y + NODE_H / 2} H${b.x}` : `M${x1},${y1} C${x1},${my} ${x2},${my} ${x2},${y2}`}"/>`;
       }
       // Asignaciones del CEO (últimas 24 h): flechas punteadas del CEO al agente.
       const ceo = d.members.find((m) => m.kind === 'ceo');
@@ -211,10 +212,10 @@ export async function renderTeam(box, user, { base = String(CONFIG.API_BASE || '
       const port = h('span', { class: 'tn-port', title: 'Arrastrá hasta otro nodo para cambiar a quién reporta', 'aria-hidden': 'true' });
       const n = h('div', { class: `tn tn-${m.kind} st-${m.status}`, tabindex: '0', role: 'button', 'aria-label': `${m.name}, ${KIND[m.kind]}, rango ${m.rank}, ${sl}. Abrir detalle.`, dataset: { id: m.id } },
         m.kind !== 'ceo' ? port : null,
-        h('div', { class: 'tn-top' }, h('span', { class: 'tn-dot ' + sc, 'aria-hidden': 'true' }), h('strong', { class: 'tn-name' }, m.name), m.progress && m.progress.rest ? h('span', { class: 'tn-rest', title: 'Sala de descanso (metáfora): ' + m.progress.rest }, 'Descansa') : null, h('span', { class: 'tn-rank', title: 'Rango' }, 'R' + m.rank)),
+        h('div', { class: 'tn-top' }, h('span', { class: 'tn-dot ' + sc, 'aria-hidden': 'true' }), h('strong', { class: 'tn-name' }, m.name), h('span', { class: 'tn-rank', title: 'Rango' }, 'R' + m.rank)),
         h('div', { class: 'tn-role' }, m.role !== m.name ? m.role : m.kind === 'lead' && m.rank >= 3 ? 'Supervisor' : KIND[m.kind]),
         chips(m.tags, 3),
-        h('div', { class: 'tn-meta' }, `Nv ${m.progress ? m.progress.level : 1} · ${m.tasks_done} tareas · ${m.queue} en cola · ${m.last_run_at ? ago(m.last_run_at) : 'sin turnos'}`),
+        h('div', { class: 'tn-meta' }, m.progress && m.progress.rest ? h('span', { class: 'tn-rest', title: 'Sala de descanso (metáfora): ' + m.progress.rest }, 'Descansa') : null, `Nv ${m.progress ? m.progress.level : 1} · ${m.tasks_done} tareas · ${m.queue} en cola · ${m.last_run_at ? ago(m.last_run_at) : 'sin turnos'}`),
         h('div', { class: 'tn-foot' }, sw, order));
       n.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); detail(m.id); } });
       nodes[m.id] = n; stage.append(n); place(m.id);
