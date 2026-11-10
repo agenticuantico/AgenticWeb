@@ -21,7 +21,7 @@
 .an-pulse { width: 8px; height: 8px; border-radius: 50%; background: #16a34a; box-shadow: 0 0 0 0 rgba(22, 163, 74, .5); animation: anPulse 1.8s infinite; flex: none; }
 @keyframes anPulse { 0% { box-shadow: 0 0 0 0 rgba(22, 163, 74, .5); } 70% { box-shadow: 0 0 0 8px rgba(22, 163, 74, 0); } 100% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0); } }
 @media (prefers-reduced-motion: reduce) { .an-pulse { animation: none; } }
-.an-trend-chip { font-size: var(--fs-xs); font-weight: 700; white-space: nowrap; }
+.an-trend-chip { font-size: var(--fs-xs); font-weight: 700; white-space: normal; line-height: 1.25; }
 .an-trend-chip.up { color: #15803d; } .an-trend-chip.down { color: #b91c1c; } .an-trend-chip.flat { color: #52525b; }
 
 .an-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }

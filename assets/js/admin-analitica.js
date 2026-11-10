@@ -94,7 +94,7 @@ async function worldMap(counts, { live = false } = {}) {
 
 function trendChip(cur, prev) {
   if (!prev && !cur) return h('span', { class: 'an-trend-chip flat' }, 'sin cambios');
-  if (!prev) return h('span', { class: 'an-trend-chip flat' }, 'sin datos del período anterior');
+  if (!prev) return h('span', { class: 'an-trend-chip flat' }, 'sin período anterior para comparar');
   const d = Math.round(((cur - prev) / prev) * 100);
   return h('span', { class: 'an-trend-chip ' + (d > 0 ? 'up' : d < 0 ? 'down' : 'flat') }, (d > 0 ? '▲ +' : d < 0 ? '▼ ' : '') + d + '% vs. período anterior');
 }
