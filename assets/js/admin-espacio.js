@@ -17,7 +17,7 @@ const ERRW = {
 };
 const fail = (e) => toast(ERRW[e && e.code] || (e && e.message) || 'No se pudo completar.', 'danger');
 const AREAS = [['dev', 'Desarrollo'], ['soporte', 'Soporte'], ['diseno', 'Diseño'], ['crecimiento', 'Crecimiento']];
-const when = (t) => new Date(t).toLocaleString('es-AR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+const when = (t) => new Date(t).toLocaleString('es-AR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hourCycle: 'h23', timeZone: 'America/Argentina/Buenos_Aires' });
 
 /* =================== Espacio de trabajo =================== */
 export async function renderWorkspace(box, token, me) {
@@ -241,9 +241,9 @@ async function renderReports(box, token) {
   let d;
   try { d = await api('/api/panel/perf/reports', { token }); } catch (e) { if (e.status === 403) { box.replaceChildren(); return; } box.replaceChildren(h('div', { class: 'alert warn' }, h('span', { html: icon('warn') }), h('div', {}, 'No se pudieron leer los informes: ' + e.message))); return; }
   const gen = d.canGenerate ? h('button', { class: 'btn btn-sm', type: 'button', html: icon('file') + '<span>Pedir informes ahora</span>', onclick: async (ev) => { ev.currentTarget.disabled = true; try { const r = await api('/api/panel/perf/reports/generate', { method: 'POST', token, body: {} }); toast(r.created.length ? `Informes nuevos: ${r.created.length}` : 'No hay supervisores con equipo a cargo.', 'success'); renderReports(box, token); } catch (e2) { fail(e2); } } }) : null;
-  const card = (r, i) => {
+  const card = (r) => {
     const b = r.body || { agents: [], recommendations: [], team: {} };
-    const det = h('details', { class: 'rep', open: i === 0 && !r.readAt ? '' : null },
+    const det = h('details', { class: 'rep' },
       h('summary', {}, h('span', { class: 'rep-area' }, r.areaLabel), h('strong', {}, r.supervisorName), !r.readAt ? h('span', { class: 'chip info' }, 'Nuevo') : null, h('span', { class: 'muted tiny' }, when(r.createdAt) + ' · para ' + (r.recipients || []).join(' y '))),
       h('p', { class: 'small' }, r.summary),
       h('div', { class: 'rep-recs' }, ...b.recommendations.map((x) => { const [l, c] = VERD[x.kind] || [x.kind, '']; return h('p', { class: 'small rep-rec' }, h('span', { class: 'chip ' + c }, l), ' ', x.text); })),
@@ -259,5 +259,5 @@ async function renderReports(box, token) {
   };
   box.replaceChildren(h('section', { class: 'card panel' }, h('div', { class: 'panel-head' }, h('h2', {}, 'Informes de supervisores'), d.unread ? h('span', { class: 'chip info' }, `${d.unread} sin leer`) : null, gen),
     h('p', { class: 'small muted' }, `Cada supervisor evalúa a su equipo con datos reales y manda el informe al CEO y al Co-CEO cada ${d.every} días. Sin datos suficientes, no hay puntaje.`),
-    d.reports.length ? h('div', { class: 'rep-list' }, ...d.reports.slice(0, 16).map(card)) : h('p', { class: 'muted small' }, 'Todavía no hay informes. El primero sale en el próximo turno de la mañana' + (d.canGenerate ? ', o pedilo ahora.' : '.'))));
+    d.reports.length ? h('div', { class: 'rep-list' }, ...d.reports.slice(0, 16).map((r) => card(r))) : h('p', { class: 'muted small' }, 'Todavía no hay informes. El primero sale en el próximo turno de la mañana' + (d.canGenerate ? ', o pedilo ahora.' : '.'))));
 }
