@@ -30,7 +30,9 @@ function dailyBars(rows, cur, color) {
 
 function gatewayCard(id, d) {
   const g = GW[id]; const p = d.providers[id]; const s = d.gateways[id];
-  const [stLabel, stCls] = STATUS[s.status] || STATUS.sin_configurar;
+  const [stLabel0, stCls] = STATUS[s.status] || STATUS.sin_configurar;
+  // El servidor manda el texto honesto (p. ej. «Activa · esperando el primer aviso»); si no, el de siempre.
+  const stLabel = s.statusLabel || stLabel0;
   const fact = (label, ok, extra = '') => h('li', { class: ok ? 'on' : 'off' }, h('span', { 'aria-hidden': 'true' }, ok ? '✓' : '—'), h('span', {}, label + (extra ? ': ' + extra : '')));
   const subs = Object.entries(s.subscriptions || {}).filter(([, n]) => n > 0);
   const stat = (label, value, cls = '') => h('div', { class: 'pg-stat ' + cls }, h('small', {}, label), h('b', { 'data-no-i18n': '' }, value));
@@ -51,12 +53,12 @@ function gatewayCard(id, d) {
     h('div', {}, h('p', { class: 'pg-sec' }, 'Últimos 30 días (' + g.cur + ')'), dailyBars(d.series[id], g.cur, g.color)),
     h('ul', { class: 'pg-facts' },
       fact('Credenciales', s.configured, s.mode ? 'modo ' + s.mode : ''),
-      fact('Avisos automáticos (webhook)', s.webhook),
+      fact('Avisos automáticos (webhook)', !!(s.webhook || s.verification), s.verification === 'api' ? 'verificados consultando a Mercado Pago (sin clave)' : s.verification === 'firma' ? 'con firma' : ''),
       fact('Planes configurados', s.plans > 0, nf.format(s.plans) + ' de 2')),
     h('p', { class: 'tiny muted' },
       subs.length ? 'Suscripciones: ' + subs.map(([k, n]) => nf.format(n) + ' ' + (SUB_L[k] || k)).join(' · ') + '. ' : 'Sin suscripciones registradas. ',
       p.lastPaymentAt ? 'Último cobro: ' + tAR(p.lastPaymentAt) + '.' : 'Sin cobros registrados todavía.',
-      s.lastWebhookAt ? ' Último aviso: ' + tAR(s.lastWebhookAt) + '.' : ''),
+      s.lastWebhookAt ? ' Último aviso verificado: ' + tAR(s.lastWebhookAt) + '.' : (s.verification === 'api' ? ' Todavía no llegó ningún aviso; las suscripciones de los enlaces de plan se confirman al volver del pago y en la revisión de cada hora.' : '')),
     (p.otherCurrencies || []).some((o) => o.monthCents) ? h('p', { class: 'tiny muted' }, 'Cobros en otra moneda (aparte, sin convertir): ' + p.otherCurrencies.filter((o) => o.monthCents).map((o) => money(o.monthCents, o.currency)).join(', ')) : null);
 }
 
@@ -76,7 +78,7 @@ export async function renderPayments(box, token) {
     const mp = d.providers.mercadopago, pp = d.providers.paypal;
     const sumRow = (id) => { const g = GW[id]; const x = d.providers[id]; const st = d.gateways[id];
       return h('div', { class: 'pg-sum-row', style: `--gw:${g.color};--gw-soft:${g.soft}` },
-        h('div', { class: 'pg-sum-who' }, h('img', { src: g.logo, alt: g.name, width: Math.round(g.lw * 0.7), height: Math.round(g.lh * 0.7), decoding: 'async' }), h('span', {}, g.curLabel), h('span', { class: 'pg-status ' + (STATUS[st.status] || STATUS.sin_configurar)[1] }, h('i', {}), (STATUS[st.status] || STATUS.sin_configurar)[0])),
+        h('div', { class: 'pg-sum-who' }, h('img', { src: g.logo, alt: g.name, width: Math.round(g.lw * 0.7), height: Math.round(g.lh * 0.7), decoding: 'async' }), h('span', {}, g.curLabel), h('span', { class: 'pg-status ' + (STATUS[st.status] || STATUS.sin_configurar)[1] }, h('i', {}), st.statusLabel || (STATUS[st.status] || STATUS.sin_configurar)[0])),
         ...[['Hoy', money(x.todayCents, g.cur)], ['Este mes', money(x.monthCents, g.cur)], ['Total', money(x.totalCents, g.cur)], ['Cobros del mes', nf.format(x.monthPayments)], ['Suscripciones activas', nf.format(x.activeSubscriptions)]]
           .map(([l, v], i) => h('div', { class: 'pg-sum-cell' + (i === 1 ? ' main' : '') }, h('small', {}, l), h('b', { 'data-no-i18n': '' }, v)))); };
     const tiles = h('section', { class: 'card panel pg-sum' }, h('div', { class: 'panel-head' }, h('h2', {}, 'Ingresos del sitio'), h('span', { class: 'chip' }, 'por moneda, sin mezclar')),

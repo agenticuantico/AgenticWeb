@@ -106,7 +106,7 @@ export async function handleReturn(user) {
     sessionStorage.removeItem('ac.mpPending');
     await recordPending(user.uid, { provider, plan, subscriptionId: id || null });
     history.replaceState(null, '', location.pathname);
-    return { ok: true, plan, provider };
+    return { ok: true, plan, provider, subscriptionId: id || null };
   } catch (e) {
     return { ok: false, error: friendlyError(e) };
   }
