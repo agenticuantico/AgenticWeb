@@ -535,3 +535,10 @@
   .vpc-load.on { background: #9fff00; }
 }
 .ab-card.cc.vpc-os.is-full .cc-sum { background: #1b1a22; border-color: rgba(255, 255, 255, .1); color: #f2f1ee; }
+/* El chat aplica «.chat.ace button { font: inherit }»: los botones del escritorio fijan su tamaño con más especificidad */
+.ab-card.cc.vpc-os .vpc-ico { font-size: 11px; font-weight: 600; line-height: 1.2; }
+.ab-card.cc.vpc-os .vpc-twin { font-size: 12.5px; font-weight: 650; }
+.ab-card.cc.vpc-os .vpc-btn { font-size: 13px; font-weight: 650; }
+.ab-card.cc.vpc-os .vpc-link { font-size: 12.5px; font-weight: 650; }
+.ab-card.cc.vpc-os .cc-act { font-size: 13px; font-weight: 650; }
+@container (min-width: 900px) { .ab-card.cc.vpc-os .vpc-ico { font-size: 12px; } }
