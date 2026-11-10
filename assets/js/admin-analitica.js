@@ -49,16 +49,16 @@ export function donutChart(entries, { labelOf = (k) => k, colorOf = (_k, i) => P
 }
 
 /** Área doble (vistas y visitantes) por día. */
-function trendChart(series) {
+function trendChart(series, width = 720) {
   if (!series.some((p) => p.views || p.visitors)) return `<p class="an-empty">${EMPTY}</p>`;
-  const w = 720, hh = 220, px = 34, py = 18;
+  const w = Math.round(width), hh = w < 520 ? 190 : 240, px = 34, py = 18;
   const max = Math.max(1, ...series.map((p) => p.views));
   const x = (i) => px + (i * (w - px * 2)) / Math.max(1, series.length - 1);
   const y = (v) => hh - py - 18 - (v / max) * (hh - py * 2 - 18);
   const path = (k) => series.map((p, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(p[k]).toFixed(1)}`).join('');
   const area = (k) => `${path(k)}L${x(series.length - 1).toFixed(1)},${y(0).toFixed(1)}L${x(0).toFixed(1)},${y(0).toFixed(1)}Z`;
   const ticks = [0, Math.round(max / 2), max];
-  const step = Math.ceil(series.length / 7);
+  const step = Math.ceil(series.length / (w < 520 ? 4 : 8));
   const single = series.length === 1;
   return `<svg viewBox="0 0 ${w} ${hh}" class="an-trend" role="img" aria-label="Vistas y visitantes por día: ${series.reduce((a, p) => a + p.views, 0)} vistas en total">
     <defs><linearGradient id="anV" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#2563eb" stop-opacity=".32"/><stop offset="1" stop-color="#2563eb" stop-opacity="0"/></linearGradient>
@@ -150,7 +150,8 @@ export async function renderAnalytics(box, token) {
       tile('Países', nf.format(countries.filter(([k]) => k !== 'XX').length), h('span', { class: 'an-sub' }, countries[0] ? 'más visitas: ' + ccName(countries[0][0]) : EMPTY), 't-geo', 'flag'),
       tile('Registros', nf.format(T.signups), h('span', { class: 'an-sub' }, 'cuentas nuevas'), 't-sign', 'userPlus'));
 
-    const trend = card('Visitas por día', 'an-wide'); trend.insertAdjacentHTML('beforeend', trendChart(d.series));
+    const tw = Math.max(300, Math.min(1180, (body.clientWidth || 720) - 38));
+    const trend = card('Visitas por día', 'an-wide'); trend.insertAdjacentHTML('beforeend', trendChart(d.series, tw));
 
     const liveCard = card('En vivo ahora', 'an-wide an-live', h('span', { class: 'chip ok' }, h('span', { class: 'dot' }), 'cada 20 s'));
     liveParts.n = h('strong', { class: 'an-live-n' }, '0'); liveParts.at = h('span', { class: 'muted small' }, '');
@@ -168,7 +169,7 @@ export async function renderAnalytics(box, token) {
     const os = card('Sistema operativo'); os.insertAdjacentHTML('beforeend', donutChart(sorted(d.dims.os), { title: 'Sistema operativo', colorOf: (k, i) => OS_C[k] || PALETTE[i] }));
     const pages = card('Dónde visitaron (páginas)', 'an-span2'); pages.insertAdjacentHTML('beforeend', colorBars(sorted(d.dims.page), { labeler: pageLabel, max: 10, sum: total(d.dims.page) }));
     const ref = card('De dónde llegan'); ref.insertAdjacentHTML('beforeend', colorBars(sorted(d.dims.ref), { labeler: refLabel, max: 8, colorOf: (_k, i) => PALETTE[(i + 3) % PALETTE.length] }));
-    const hrs = card('Horario de visitas'); hrs.insertAdjacentHTML('beforeend', hoursChart(d.dims.hour));
+    const hrs = card('Horario de visitas', 'an-wide'); hrs.insertAdjacentHTML('beforeend', hoursChart(d.dims.hour));
 
     const src = d.sources || {};
     const note = h('p', { class: 'tiny muted an-foot' }, 'Fuente: contadores agregados del sitio (solo con cookies de analítica aceptadas). País según Cloudflare; dispositivo, navegador y sistema según el navegador. «En vivo» = activo en los últimos 5 minutos. Días en hora UTC.'
