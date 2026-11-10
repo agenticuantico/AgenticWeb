@@ -94,7 +94,7 @@ async function worldMap(counts, { live = false } = {}) {
 
 function trendChip(cur, prev) {
   if (!prev && !cur) return h('span', { class: 'an-trend-chip flat' }, 'sin cambios');
-  if (!prev) return h('span', { class: 'an-trend-chip up' }, 'nuevo');
+  if (!prev) return h('span', { class: 'an-trend-chip flat' }, 'sin datos del período anterior');
   const d = Math.round(((cur - prev) / prev) * 100);
   return h('span', { class: 'an-trend-chip ' + (d > 0 ? 'up' : d < 0 ? 'down' : 'flat') }, (d > 0 ? '▲ +' : d < 0 ? '▼ ' : '') + d + '% vs. período anterior');
 }
@@ -151,6 +151,15 @@ export async function renderAnalytics(box, token) {
       tile('Registros', nf.format(T.signups), h('span', { class: 'an-sub' }, 'cuentas nuevas'), 't-sign', 'userPlus'));
 
     const tw = Math.max(300, Math.min(1180, (body.clientWidth || 720) - 38));
+    const W = d.windows || {};
+    const sumCard = card('Resumen de visitas', 'an-wide');
+    const row = (k, l) => { const w = W[k]; return w ? h('div', { class: 'an-sum-col' }, h('small', {}, l), h('div', { class: 'an-sum-n' }, h('strong', { class: 'c-views' }, nf.format(w.views)), h('span', {}, 'vistas')), h('div', { class: 'an-sum-n' }, h('strong', { class: 'c-users' }, nf.format(w.visitors)), h('span', {}, 'visitantes')), h('span', { class: 'muted tiny' }, nf.format(w.signups) + ' registros')) : null; };
+    const VT = d.visitorTypes || { nuevo: 0, recurrente: 0, total: 0, enough: false };
+    const vtBox = h('div', { class: 'an-sum-vt' }, h('small', {}, 'Nuevos y recurrentes (período)'));
+    if (VT.enough) vtBox.insertAdjacentHTML('beforeend', donutChart([['nuevo', VT.nuevo], ['recurrente', VT.recurrente]].filter(([, v]) => v > 0), { title: 'Visitantes nuevos y recurrentes', labelOf: (k) => (k === 'nuevo' ? 'Nuevos' : 'Recurrentes'), colorOf: (k) => (k === 'nuevo' ? '#0d9488' : '#db2777') }));
+    else vtBox.append(h('p', { class: 'an-empty' }, 'Sin datos suficientes' + (VT.total ? ` (${VT.total} visitante${VT.total === 1 ? '' : 's'} medido${VT.total === 1 ? '' : 's'})` : '') + '. Se mide desde ' + (VT.since ? 'el ' + dm(VT.since) : 'que el sitio empiece a mandar el dato') + '; antes no hay forma de saberlo.'));
+    sumCard.append(h('div', { class: 'an-sum' }, row('today', 'Hoy'), row('d7', 'Últimos 7 días'), row('d30', 'Últimos 30 días'), row('d90', 'Últimos 90 días'), vtBox),
+      h('p', { class: 'tiny muted' }, 'Visitantes = navegadores distintos por día, sumados por día (una persona que vuelve otro día cuenta otra vez).'));
     const trend = card('Visitas por día', 'an-wide'); trend.insertAdjacentHTML('beforeend', trendChart(d.series, tw));
 
     const liveCard = card('En vivo ahora', 'an-wide an-live', h('span', { class: 'chip ok' }, h('span', { class: 'dot' }), 'cada 20 s'));
@@ -175,7 +184,7 @@ export async function renderAnalytics(box, token) {
     const note = h('p', { class: 'tiny muted an-foot' }, 'Fuente: contadores agregados del sitio (solo con cookies de analítica aceptadas). País según Cloudflare; dispositivo, navegador y sistema según el navegador. «En vivo» = activo en los últimos 5 minutos. Días en hora UTC.'
       + (src.d1Since ? ` Registro en el servidor desde el ${dm(src.d1Since)}; antes, historial de Firestore.` : ' Historial de Firestore.')
       + (src.firestore && !src.firestore.ok ? ' (El historial de Firestore no respondió: se muestra solo lo del servidor.)' : ''));
-    body.replaceChildren(tiles, h('div', { class: 'an-grid' }, trend, liveCard, geo, dev, br, os, ref, pages, hrs), note);
+    body.replaceChildren(tiles, h('div', { class: 'an-grid' }, sumCard, trend, liveCard, geo, dev, br, os, ref, pages, hrs), note);
     drawLive(d.live);
   }
   refresh.onclick = load;

@@ -115,8 +115,11 @@ export function startServerAnalytics() {
   const day = new Date().toISOString().slice(0, 10);
   let nv = 0;
   try { if (localStorage.getItem('ac.seen2') !== day) { localStorage.setItem('ac.seen2', day); nv = 1; } } catch {}
+  // ¿Volvió? Solo se guarda la FECHA de la primera visita en este navegador (nada más) y se manda 0/1, nunca la fecha.
+  let rv = 0;
+  try { const first = localStorage.getItem('ac.first'); if (!first) localStorage.setItem('ac.first', day); else if (first !== day) rv = 1; } catch {}
   const r = refKey();
-  beacon('v', { nv, ...(r ? { r } : {}), tm: navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent) ? 1 : 0 });
+  beacon('v', { nv, ...(nv ? { rv } : {}), ...(r ? { r } : {}), tm: navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent) ? 1 : 0 });
   let beats = 0;
   const t = setInterval(() => {
     if (document.visibilityState !== 'visible') return;
