@@ -18,8 +18,8 @@ import { speak, stop as stopSpeech } from './voice.js';
 import { VoiceRecorder, fmtClock } from './recorder.js';
 import { readFile, fmtSize } from './docs.js';
 // Rendimiento (Fase 3): la computadora del agente y la videollamada se cargan recién cuando se usan.
-import { needsWebAction, isFollowUp } from './intent.js';
-import { decideRoute, OVERRIDES, ROUTE_LABEL } from './router.js?v=7.12.0';
+import { needsWebAction, isFollowUp } from './intent.js?v=7.13.0';
+import { decideRoute, OVERRIDES, ROUTE_LABEL } from './router.js?v=7.13.0';
 import { workScreen, fmtElapsed } from './work-screen.js?v=7.12.0';
 import { lastWebArtifact } from './iterate.js?v=7.12.0';
 import { detectMediaIntent, mediaMessage, mediaCard, isMediaMessage, runMedia as runMediaTask } from './media.js';
@@ -646,7 +646,7 @@ export class ChatApp {
       msg._browser = true;
       if (this.browserCard) this.browserCard.detach();
       const chatId = this.chat.id;
-      const { AgentBrowserCard } = await import('../agent-browser.js');
+      const { AgentBrowserCard } = await import('../agent-browser.js?v=7.13.0');
       this.browserCard = new AgentBrowserCard({
         thread: this.$('inner'), composer: this.$('form'), text, conv: chatId, lang: this.lang.code, isPaid: this.isPaid,
         idToken: this.user ? () => this.user.getIdToken() : null, onScroll: () => this.scrollToEnd(true),
@@ -794,10 +794,10 @@ export class ChatApp {
       // (evita que el chat diga que no puede navegar mientras la computadora trabaja).
       if (userMsg._browser && engine.state.live && engine.state.caps && engine.state.caps.browser) {
         const a = { id: uid('m'), role: 'assistant', content: ({
-          'en-US': "On it. I'm working on the **agent computer**: I plan and do every step on my own and you see them live. I only stop to ask your approval before buying, paying, sending, posting or applying, and if a site needs a sign-in I show you a secure form.",
-          'pt-BR': 'Já estou nisso. Trabalho no **computador do agente**: planejo e faço cada passo sozinho, e você vê tudo ao vivo. Só paro para pedir sua aprovação antes de comprar, pagar, enviar, publicar ou me candidatar, e se um site pedir login eu mostro um formulário seguro.',
-          'es-ES': 'Me pongo con ello. Trabajo en el **ordenador del agente**: planifico y hago cada paso solo y lo ves en directo. Solo me detengo a pedir tu aprobación antes de comprar, pagar, enviar, publicar o postularme y, si un sitio pide iniciar sesión, te muestro un formulario seguro.'
-        })[this.lang.id] || 'Me pongo a trabajar. Uso la **computadora del agente**: planifico y hago cada paso solo, y lo ves en vivo. Solo freno para pedirte aprobación antes de comprar, pagar, enviar, publicar o postular, y si un sitio pide iniciar sesión te muestro un formulario seguro.', at: Date.now() };
+          'en-US': "On it. I'm opening the **virtual computer** (a browser in the cloud): I plan and do every step on my own and you see them live. I only stop to ask your approval before buying, paying, sending, posting or applying, and if a site needs a sign-in I show you a secure form.",
+          'pt-BR': 'Já estou nisso. Abro o **computador virtual** (um navegador na nuvem): planejo e faço cada passo sozinho, e você vê tudo ao vivo. Só paro para pedir sua aprovação antes de comprar, pagar, enviar, publicar ou me candidatar, e se um site pedir login eu mostro um formulário seguro.',
+          'es-ES': 'Me pongo con ello. Abro el **ordenador virtual** (un navegador en la nube): planifico y hago cada paso solo y lo ves en directo. Solo me detengo a pedir tu aprobación antes de comprar, pagar, enviar, publicar o postularme y, si un sitio pide iniciar sesión, te muestro un formulario seguro.'
+        })[this.lang.id] || 'Me pongo a trabajar. Abro el **ordenador virtual** (un navegador en la nube): planifico y hago cada paso solo, y lo ves en vivo. Solo freno para pedirte aprobación antes de comprar, pagar, enviar, publicar o postular, y si un sitio pide iniciar sesión tomás el control y escribís vos.', at: Date.now() };
         this.pushMessage(a);
         // La tarjeta de la computadora va debajo de este aviso.
         if (this.browserCard && this.browserCard.el && this.browserCard.el.isConnected) this.$('inner').append(this.browserCard.el);

@@ -11,7 +11,7 @@
  * Ajuste manual opcional (escondido en «Ajustes de respuesta», apagado por defecto):
  *  'smart' (automático) | 'fast' | 'deep' | 'auto' (agente). Con un modo fijo se respeta el comportamiento anterior.
  */
-import { EXPLICIT_SEARCH, BROWSER_ACTION, RESEARCH, routeWebIntent, needsWebAction } from './intent.js';
+import { EXPLICIT_SEARCH, BROWSER_ACTION, RESEARCH, routeWebIntent, needsWebAction, wantsComputer } from './intent.js?v=7.13.0';
 import { isIterateOrder } from './iterate.js?v=7.12.0';
 
 const W = '(?![\\wáéíóúñ])';
@@ -69,7 +69,7 @@ export const OVERRIDES = {
 
 /** Etiqueta del estado mientras responde, según la decisión. */
 export const ROUTE_LABEL = {
-  fast: 'Escribiendo…', think: 'Pensando a fondo…', search: 'Buscando en la web…', browser: 'Encendiendo la computadora…',
+  fast: 'Escribiendo…', think: 'Pensando a fondo…', search: 'Buscando en la web…', browser: 'Encendiendo el ordenador virtual…',
   agent: 'Trabajando en tu pedido…', tools: 'Usando tus cuentas…', media: 'Creando…'
 };
 
@@ -83,6 +83,8 @@ export function decideRoute(text, o = {}) {
   const ov = o.override && o.override !== 'smart' && OVERRIDES[o.override] ? o.override : 'smart';
   if (!t) return { kind: 'fast', mode: 'fast', why: 'empty' };
   if (o.followBrowser && FOLLOW.test(t)) return { kind: 'browser', mode: ov === 'smart' ? 'fast' : ov, why: 'follow' };
+  // «…en el ordenador», «usá el ordenador»: la persona pide ver la tarea en el ordenador virtual (manda sobre la búsqueda).
+  if (wantsComputer(t)) return { kind: 'browser', mode: ov === 'smart' ? 'fast' : ov, why: 'computer' };
   // Orden sobre el diseño que ya está en la conversación («implementalo y mejoralo», «agregá panel admin 3D»):
   // la ejecuta el agente con ese archivo como base (nunca una respuesta solo en texto).
   if (o.hasArtifact && !EXPLICIT_SEARCH.test(t) && !isBrowserAction(t) && isIterateOrder(t)) return { kind: 'agent', mode: 'auto', why: 'iterate' };

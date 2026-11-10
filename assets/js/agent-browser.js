@@ -1,5 +1,9 @@
 /**
- * Computadora del agente (modo híbrido): el agente planifica y trabaja solo hasta terminar.
+ * Ordenador virtual (antes «Computadora del agente»): un navegador en la nube con ventana tipo escritorio remoto
+ * (barra de título, barra de direcciones, pantalla en vivo, acción actual, pasos, tiempo, Detener, plegar, pantalla
+ * completa y «Qué hice» al final, solo con pasos reales). Se enciende solo cuando el pedido lo necesita o cuando la
+ * persona dice «en el ordenador» / «usá el ordenador»; la sesión es de su cuenta y nadie más la ve.
+ * Modo híbrido: el agente planifica y trabaja solo hasta terminar.
  *  - Por defecto trabaja en «modo lectura»: busca y lee páginas como texto (rápido y sin gastar minutos de
  *    navegador). La vista muestra la página leída (título, dirección, texto) o los resultados de búsqueda.
  *  - Abre el navegador real solo cuando hace falta (clics, formularios, inicios de sesión) y lo cierra en cuanto
@@ -13,15 +17,15 @@
  */
 import { h, icon } from './ui.js';
 import * as engine from './chat/engine.js';
-import { needsWebAction, isFollowUp } from './chat/intent.js';
-import { statusLine, visitedSites, summaryMeta, workMode, workSteps } from './chat/computer-status.js';
+import { needsWebAction, isFollowUp, wantsComputer, stripComputer } from './chat/intent.js?v=7.13.0';
+import { statusLine, visitedSites, summaryMeta, workMode, workSteps, VPC_NAME, VPC_HELP, elapsedText, taskElapsed, quotaText, addressText, whatIDid } from './chat/computer-status.js?v=7.13.0';
 /** Reexportadas para el código que ya las importaba desde acá (la lógica vive en chat/intent.js, sin DOM). */
 export { needsWebAction, isFollowUp };
 
 (function css() {
   if (typeof document === 'undefined' || document.getElementById('ac-ab2-css')) return;
   const l = document.createElement('link');
-  l.id = 'ac-ab2-css'; l.rel = 'stylesheet'; l.href = '/assets/css/agent-browser.css?v=3.0.0';
+  l.id = 'ac-ab2-css'; l.rel = 'stylesheet'; l.href = '/assets/css/agent-browser.css?v=7.13.0';
   document.head.appendChild(l);
 })();
 
@@ -30,6 +34,12 @@ const SITES = [
   [/zonajobs/i, 'https://www.zonajobs.com.ar/'], [/indeed/i, 'https://ar.indeed.com/'], [/mercado ?libre/i, 'https://www.mercadolibre.com.ar/'],
   [/gmail|correo|mail/i, 'https://mail.google.com/']
 ];
+
+/** Pedido de búsqueda explícito en el ordenador sin sitio puntual: arranca en un buscador con el pedido. */
+export function computerStartUrl(text) {
+  const q = stripComputer(text).replace(/^(busc[aá](me)?|fijate|mir[aá]|averigu[aá]|decime|mostrame)\s+/i, '').slice(0, 200).trim();
+  return q ? 'https://www.bing.com/search?setlang=es&q=' + encodeURIComponent(q) : null;
+}
 
 export function guessUrl(text) {
   const m = /\bhttps?:\/\/[^\s<>"']{4,300}/i.exec(text) || /\b([a-z0-9-]+\.)+(com|ar|net|org|io|dev|es|mx|co|br)(\.[a-z]{2})?(\/[^\s]*)?/i.exec(text);
@@ -60,7 +70,7 @@ export function approvalCard(container, text, detail) {
 }
 
 const STATUS_TEXT = {
-  starting: 'Encendiendo la computadora', ready: 'Trabajando', thinking: 'Pensando el siguiente paso', acting: 'Trabajando',
+  starting: 'Encendiendo el ordenador virtual', ready: 'Trabajando', thinking: 'Pensando el siguiente paso', acting: 'Trabajando',
   awaiting_approval: 'Esperando tu aprobación', needs_user: 'Necesita tu acción', queued: 'En fila', takeover: 'Tenés el control', done: 'Tarea terminada', ended: 'Sesión cerrada', error: 'No disponible'
 };
 
@@ -72,7 +82,9 @@ export class AgentBrowserCard {
   constructor(o) {
     this.o = o;
     this.goal = String(o.text || '').trim();
-    this.url = guessUrl(this.goal);
+    // «…en el ordenador» / «usá el ordenador»: se abre el navegador en la nube desde el primer paso (vista en vivo).
+    this.explicit = wantsComputer(this.goal);
+    this.url = guessUrl(this.goal) || (this.explicit ? computerStartUrl(this.goal) : null);
     this.state = null;
     this.timer = 0; this.tick = 0;
     this.stopped = false; this.stepping = false; this.approving = false; this.askKey = '';
@@ -109,23 +121,103 @@ export class AgentBrowserCard {
     this.kb = this.keyboardBar();
     // Pantalla en vivo: tocarla abre la vista completa (con «Tomar el control»). La ✕ detiene al agente.
     this.badge = h('span', { class: 'cc-badge', 'data-no-i18n': '' }, 'Modo lectura');
-    this.screen = h('div', { class: 'cc-screen', role: 'button', tabindex: '0', 'aria-label': 'Ver la computadora del agente en pantalla completa' },
+    this.screen = h('div', { class: 'cc-screen', role: 'button', tabindex: '0', 'aria-label': 'Ver el ordenador virtual en pantalla completa' },
       this.view, this.badge, h('span', { class: 'cc-zoom', 'aria-hidden': 'true', html: icon('expand') }));
     this.screen.addEventListener('click', (e) => { if (!this.el.classList.contains('is-full')) { e.preventDefault(); this.toggleFull(true); } });
     this.screen.addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && !this.el.classList.contains('is-full') && e.target === this.screen) { e.preventDefault(); this.toggleFull(true); } });
     this.xBtn = h('button', { class: 'cc-x', type: 'button', 'aria-label': 'Detener al agente', title: 'Detener', html: icon('close'), onclick: (e) => { e.stopPropagation(); this.stop(); } });
-    this.lineText = h('span', { class: 'cc-text', 'data-no-i18n': '' }, 'Encendiendo la computadora…');
+    this.lineText = h('span', { class: 'cc-text', 'data-no-i18n': '' }, 'Encendiendo el ordenador virtual…');
     this.line = h('div', { class: 'cc-line', role: 'status', 'aria-live': 'polite' }, h('span', { class: 'cc-dot', 'aria-hidden': 'true' }), this.lineText, this.clock);
     this.modeNote = h('p', { class: 'cc-note', hidden: true });
     this.sum = h('div', { class: 'cc-sum', hidden: true });
-    this.head = h('header', { class: 'ab-head' }, h('span', { class: 'ab-title', html: icon('monitor') + '<span>Computadora del agente</span>' }), this.pill, h('span', { class: 'ab-actions' }, this.fullBtn, this.stopBtn));
-    this.el = h('section', { class: 'ab-card cc', 'aria-label': 'Computadora del agente', 'data-status': 'starting' },
-      this.head,
+    this.head = h('header', { class: 'ab-head' }, h('span', { class: 'ab-title', html: icon('monitor') + '<span>' + VPC_NAME + '</span>' }), this.pill, h('span', { class: 'ab-actions' }, this.fullBtn, this.stopBtn));
+    this.buildWindow();
+    this.el = h('section', { class: 'ab-card cc vpc', 'aria-label': VPC_NAME, 'data-status': 'starting' },
+      this.head, this.bar, this.vAddr, this.help,
       h('div', { class: 'cc-frame' }, this.screen, this.xBtn),
-      this.line, this.modeNote, this.sum,
+      this.line, this.modeNote, this.miniSteps, this.foot, this.sum,
       this.modeBar, this.addr, this.kb, this.controls, this.notice, this.asks, this.approvals, this.planBox, this.stepsBox, this.filesBox, this.result);
     this.o.thread.append(this.el);
     this.o.onScroll && this.o.onScroll();
+  }
+
+  /** Ventana tipo escritorio remoto: barra de título (tiempo, ayuda, plegar, pantalla completa, Detener) y dirección. */
+  buildWindow() {
+    const hid = 'vpc-help-' + Math.random().toString(36).slice(2, 8);
+    this.elapsed = h('span', { class: 'vpc-time', title: 'Tiempo de la tarea' }, h('span', { html: icon('clock') }), h('b', { 'data-no-i18n': '', 'aria-label': 'Tiempo de la tarea' }, '0:00'));
+    this.helpBtn = h('button', { class: 'vpc-btn', type: 'button', 'aria-label': '¿Qué es el ordenador virtual?', title: '¿Qué es?', 'aria-expanded': 'false', 'aria-controls': hid, html: icon('info'), onclick: () => this.toggleHelp() });
+    this.foldBtn = h('button', { class: 'vpc-btn', type: 'button', 'aria-label': 'Plegar', title: 'Plegar', 'aria-expanded': 'true', html: icon('collapse'), onclick: () => this.toggleFold() });
+    this.maxBtn = h('button', { class: 'vpc-btn', type: 'button', 'aria-label': 'Pantalla completa', title: 'Pantalla completa', html: icon('expand'), onclick: () => this.toggleFull() });
+    this.vStop = h('button', { class: 'vpc-btn vpc-stop', type: 'button', 'aria-label': 'Detener', title: 'Detener', onclick: () => this.stop() }, h('span', { html: icon('stop') }), h('span', { class: 'vpc-stop-t' }, 'Detener'));
+    this.bar = h('header', { class: 'vpc-bar' },
+      h('span', { class: 'vpc-dots', 'aria-hidden': 'true' }, h('i'), h('i'), h('i')),
+      h('span', { class: 'vpc-title' }, h('span', { html: icon('monitor') }), h('strong', {}, VPC_NAME)),
+      this.elapsed,
+      h('span', { class: 'vpc-acts' }, this.helpBtn, this.foldBtn, this.maxBtn, this.vStop));
+    this.addrText = h('span', { class: 'vpc-url', 'data-no-i18n': '' }, this.url || 'Preparando…');
+    this.modeTag = h('span', { class: 'vpc-mode' }, 'Lectura');
+    this.vAddr = h('div', { class: 'vpc-addr', role: 'group', 'aria-label': 'Dirección actual' }, h('span', { class: 'vpc-lock', html: icon('lock') }), this.addrText, this.modeTag);
+    this.help = h('p', { class: 'vpc-help', id: hid, hidden: true }, VPC_HELP);
+    this.miniSteps = h('ol', { class: 'vpc-steps', 'aria-label': 'Pasos', hidden: true });
+    this.quota = h('span', { class: 'vpc-quota', 'aria-live': 'polite' }, '');
+    this.logoutBtn = h('button', { class: 'vpc-link', type: 'button', hidden: true, onclick: () => this.logoutSessions() }, h('span', { html: icon('logout') }), h('span', { class: 'vpc-link-t' }, 'Cerrar sesiones'));
+    this.foot = h('div', { class: 'vpc-foot' }, this.quota, this.logoutBtn);
+  }
+
+  toggleHelp(force) {
+    const on = typeof force === 'boolean' ? force : this.help.hidden;
+    this.help.hidden = !on;
+    this.helpBtn.setAttribute('aria-expanded', String(on));
+  }
+
+  toggleFold(force) {
+    const fold = typeof force === 'boolean' ? force : !this.el.classList.contains('is-folded');
+    this.el.classList.toggle('is-folded', fold);
+    this.foldBtn.setAttribute('aria-expanded', String(!fold));
+    this.foldBtn.setAttribute('aria-label', fold ? 'Desplegar' : 'Plegar');
+    this.foldBtn.title = fold ? 'Desplegar' : 'Plegar';
+    this.foldBtn.innerHTML = icon(fold ? 'expand' : 'collapse');
+    this.o.onScroll && this.o.onScroll();
+  }
+
+  /** Barra de dirección, modo, pasos cortos, tiempo, cupo y sesiones guardadas. */
+  renderWindow(s) {
+    const addr = addressText(s);
+    this.addrText.textContent = addr || (s.mode === 'browser' ? 'Página en blanco' : 'Sin página abierta todavía');
+    this.addrText.title = addr;
+    const browser = s.mode === 'browser';
+    this.modeTag.textContent = browser ? 'En vivo' : 'Lectura';
+    this.modeTag.classList.toggle('is-live', browser);
+    this.modeTag.title = browser ? 'Navegador en la nube abierto' : 'Leo la página como texto (no gasta minutos)';
+    const steps = (s.steps || []).slice(-3);
+    this.miniSteps.hidden = !steps.length;
+    this.miniSteps.replaceChildren(...steps.map((x) => h('li', { class: 'st-' + x.status }, h('span', { class: 'st-ic', 'aria-hidden': 'true' }), h('span', { 'data-no-i18n': '' }, x.label))));
+    this.quota.textContent = quotaText(s);
+    const hosts = Array.isArray(s.jarHosts) ? s.jarHosts : [];
+    this.logoutBtn.hidden = !hosts.length;
+    if (hosts.length) { this.logoutBtn.title = 'Sesiones guardadas (cifradas): ' + hosts.join(', '); this.logoutBtn.querySelector('.vpc-link-t').textContent = `Cerrar sesiones (${hosts.length})`; }
+    this.renderElapsed();
+  }
+
+  renderElapsed() {
+    const b = this.elapsed && this.elapsed.querySelector('b');
+    if (b) b.textContent = elapsedText(taskElapsed(this.state));
+  }
+
+  /** «Cerrar sesiones»: borra las cookies guardadas (cifradas) de los sitios. Pide un segundo toque para confirmar. */
+  async logoutSessions() {
+    const t = this.logoutBtn.querySelector('.vpc-link-t');
+    if (!this._logoutArm) { this._logoutArm = true; t.textContent = '¿Cerrar todas? Tocá de nuevo'; setTimeout(() => { if (this._logoutArm) { this._logoutArm = false; if (this.state) this.renderWindow(this.state); } }, 4000); return; }
+    this._logoutArm = false;
+    this.logoutBtn.disabled = true;
+    try {
+      const s = await this.api('/api/agent/browser/logout', { body: {} });
+      if (s && s.status && s.status !== 'none') this.apply(s);
+      if (this.state) this.state.jarHosts = [];
+      this.logoutBtn.hidden = true;
+      this.showNotice('Listo: cerré tus sesiones guardadas. La próxima vez cada sitio te va a pedir iniciar sesión de nuevo.', 'info');
+    } catch { this.showNotice('No pude cerrar las sesiones. Probá de nuevo en un momento.', 'warn'); }
+    finally { this.logoutBtn.disabled = false; }
   }
 
   /** Línea única de estado y nota del modo (navegador real / modo lectura). */
@@ -145,6 +237,7 @@ export class AgentBrowserCard {
   renderSummary(s, ended = false) {
     const sites = visitedSites(s);
     const steps = workSteps(s);
+    const did = whatIDid(s);
     const meta = summaryMeta(s);
     this.el.classList.toggle('is-done', !ended);
     this.el.classList.toggle('is-ended', ended);
@@ -157,14 +250,16 @@ export class AgentBrowserCard {
         h('span', { class: 'cc-sum-t' }, h('strong', {}, ended ? (s.endedReason === 'idle' ? 'La archivé por inactividad' : s.endedReason === 'detached' ? 'Pasé a tu nuevo pedido' : 'Detuviste al agente') : 'Listo'), h('small', { 'data-no-i18n': '' }, meta + (s.mode === 'browser' || (s.browserMs || 0) > 0 ? ' · navegador real' : ' · modo lectura')))),
       !ended && s.summary ? h('p', { class: 'cc-sum-p', 'data-no-i18n': '' }, s.summary) : null,
       sites.length ? h('div', { class: 'cc-sites', 'aria-label': 'Sitios visitados' }, ...sites.map((x) => h('span', { class: 'cc-site', 'data-no-i18n': '' }, h('i', { 'aria-hidden': 'true' }, x.charAt(0).toUpperCase()), x))) : null,
-      steps.length ? h('details', { class: 'cc-sum-steps' }, h('summary', {}, steps.length === 1 ? 'Ver el paso' : `Ver los ${steps.length} pasos`),
-        h('ol', {}, ...steps.slice(-20).map((x) => h('li', { class: 'st-' + x.status, 'data-no-i18n': '' }, x.label)))) : null,
+      did.length ? h('div', { class: 'cc-did' }, h('strong', { class: 'cc-did-h' }, 'Qué hice'),
+        h('ol', {}, ...did.slice(-12).map((x) => h('li', { class: x.ok ? 'ok' : 'err' }, h('span', { class: 'cc-did-ic', 'aria-hidden': 'true', html: icon(x.ok ? 'check' : 'close') }), h('span', { 'data-no-i18n': '' }, x.label), x.ok ? null : h('span', { class: 'sr-only' }, ' (no salió)')))),
+        did.length > 12 ? h('small', { class: 'muted' }, `y ${did.length - 12} pasos antes`) : null) : null,
+      steps.length && !did.length ? h('p', { class: 'cc-hint muted' }, 'No llegué a completar ningún paso.') : null,
       (s.sources || []).length && !ended ? h('div', { class: 'cc-srcs' }, h('small', { class: 'muted' }, 'Fuentes'), ...(s.sources || []).slice(0, 6).map((x, i) => h('a', { href: x.url, target: '_blank', rel: 'noopener noreferrer', 'data-no-i18n': '' }, `${i + 1}. ${x.title || host(x.url)}`))) : null,
       h('div', { class: 'cc-sum-acts' }, resume, this.state && (this.img && this.img.src || this.state.reader) ? again : null),
       !ended ? h('small', { class: 'cc-hint muted' }, 'Podés seguir acá: por ejemplo «ahora compará…» o «pasalo a una tabla».') : null].filter(Boolean));
   }
 
-  loader(text = 'Encendiendo la computadora') {
+  loader(text = 'Encendiendo el ordenador virtual') {
     return h('div', { class: 'ab-loader' }, h('div', { class: 'ab-orbit', 'aria-hidden': 'true' }, h('i'), h('i'), h('i')), h('p', {}, text), this.url ? h('small', { 'data-no-i18n': '' }, host(this.url)) : null);
   }
 
@@ -201,37 +296,37 @@ export class AgentBrowserCard {
     this.setPill('No disponible', 'off');
     this.el.dataset.status = 'error'; this.el.classList.add('is-off');
     this.lineText.textContent = title; this.line.dataset.kind = 'off';
-    this.xBtn.hidden = true; this.stopBtn.hidden = true; this.controls.hidden = true; this.clock.hidden = true;
+    this.xBtn.hidden = true; this.stopBtn.hidden = true; this.vStop.hidden = true; this.controls.hidden = true; this.clock.hidden = true; this.foot.hidden = true; this.vAddr.hidden = true;
     this.view.replaceChildren(h('div', { class: 'ab-off' }, h('span', { class: 'ab-off-ic', html: icon('monitor') }), h('strong', {}, title), h('p', {}, text), ...(action ? [action] : [])));
   }
 
   explain(e) {
     const ok = h('button', { class: 'btn btn-sm', type: 'button', onclick: () => this.el.remove() }, 'Entendido');
-    if (e.status === 401) return this.unavailable('Ingresá con tu cuenta', 'La computadora del agente necesita una cuenta para proteger tus sesiones.', h('a', { class: 'btn btn-sm', href: '/cuenta/' }, 'Ingresar'));
-    if (e.status === 503) return this.unavailable('La computadora del agente no está disponible', 'El servicio está en mantenimiento. No se realizó ninguna acción.', ok);
+    if (e.status === 401) return this.unavailable('Ingresá con tu cuenta', 'El ordenador virtual se abre con tu cuenta, así tu sesión es privada y nadie más la ve.', h('a', { class: 'btn btn-sm', href: '/cuenta/' }, 'Ingresar'));
+    if (e.status === 503) return this.unavailable('El ordenador virtual no está disponible', 'El servicio está en mantenimiento. No se realizó ninguna acción.', ok);
     if (e.status === 429) return this.unavailable('Hay muchos pedidos en este momento', 'Esperá unos segundos y volvé a pedírmelo. No se realizó ninguna acción.', ok);
-    return this.unavailable('No pude encender la computadora', 'Probá de nuevo en unos minutos. No se realizó ninguna acción.', ok);
+    return this.unavailable('No pude encender el ordenador virtual', 'Probá de nuevo en unos minutos. No se realizó ninguna acción.', ok);
   }
 
   async start() {
     const [st] = await Promise.all([engine.init(), new Promise((r) => setTimeout(r, 250))]);
     if (this.stopped) return;
     if (!st.live || !st.caps || !st.caps.browser) {
-      this.unavailable('La computadora del agente no está disponible', 'No pude conectarme al servicio. Mientras tanto te guío para que lo hagas vos, sin compartir contraseñas.', h('button', { class: 'btn btn-sm', type: 'button', onclick: () => this.el.remove() }, 'Entendido'));
+      this.unavailable('El ordenador virtual no está disponible', 'No pude conectarme al servicio. Mientras tanto te guío para que lo hagas vos, sin compartir contraseñas.', h('button', { class: 'btn btn-sm', type: 'button', onclick: () => this.el.remove() }, 'Entendido'));
       return;
     }
     try {
-      const s = await this.api('/api/agent/browser/start', { body: { goal: this.goal, url: this.url || undefined, device: this.device, conv: this.o.conv || undefined, lang: this.o.lang || undefined } });
-      this.img = h('img', { class: 'ab-frame', alt: 'Vista en vivo de la computadora del agente', decoding: 'async', draggable: 'false' });
+      const s = await this.api('/api/agent/browser/start', { body: { goal: this.goal, url: this.url || undefined, device: this.device, conv: this.o.conv || undefined, lang: this.o.lang || undefined, ...(this.explicit ? { mode: 'browser' } : {}) } });
+      this.img = h('img', { class: 'ab-frame', alt: 'Pantalla en vivo del ordenador virtual', decoding: 'async', draggable: 'false' });
       this.img.addEventListener('click', (ev) => this.onScreenClick(ev));
       this.reader = h('div', { class: 'ab-reader' });
       this.view.replaceChildren(this.reader, this.img, h('div', { class: 'ab-scan', 'aria-hidden': 'true' }));
       this.view.classList.add('is-live');
-      this.img.alt = 'Pantalla en vivo de la computadora del agente';
+      this.img.alt = 'Pantalla en vivo del ordenador virtual';
       this.view.dataset.device = s.device || this.device;
       this.controls.hidden = false; this.stepsBox.hidden = false;
       this.apply(s);
-      this.tick = setInterval(() => this.renderClock(), 1000);
+      this.tick = setInterval(() => { this.renderClock(); this.renderElapsed(); }, 1000);
       this.poll();
       this.loop();
     } catch (e) { this.explain(e); }
@@ -275,6 +370,7 @@ export class AgentBrowserCard {
     this.setPill(label, kind);
     this.el.dataset.status = s.status;
     this.renderLine(s);
+    this.renderWindow(s);
     this.renderClock();
     this.renderPlan(s);
     this.renderSteps(s.steps || []);
@@ -315,7 +411,7 @@ export class AgentBrowserCard {
     this.modeBar.replaceChildren(
       h('span', { class: 'ab-mode-chip' + (browser ? ' is-browser' : '') }, h('span', { html: icon(browser ? 'monitor' : 'file') }), browser ? 'Navegador real' : 'Modo lectura'),
       h('span', { class: 'ab-mode-meta muted' }, browser ? '' : `${Math.round((s.browserMs || 0) / 1000)} s de navegador`),
-      h('span', { class: 'ab-mode-left muted' }, left > 0 ? `Te quedan ${human(left)} de navegador hoy` : 'Sin minutos de navegador hoy'));
+      h('span', { class: 'ab-mode-left muted' }, left > 0 ? `Te quedan ${human(left)} de ordenador hoy` : 'Sin minutos de ordenador hoy'));
   }
 
   renderReader(s) {
@@ -390,13 +486,16 @@ export class AgentBrowserCard {
           h('div', { class: 'abf-row' }, h('button', { class: 'btn btn-sm btn-primary abf-saved', type: 'button', onclick: () => this.sendLogin({ useSaved: true }, form, status) }, h('span', { html: icon('check') }), 'Sí, usarla'),
             h('span', { class: 'small muted' }, 'o escribí otros datos abajo')))
         : null,
-      h('p', { class: 'small' }, 'Completá tus datos: los cargo yo en la página. Van directo al servidor, se guardan cifrados solo si lo elegís y el agente nunca los ve.'),
-      ask.needUser !== false ? h('label', { class: 'abf-field' }, h('span', {}, 'Usuario o correo'), user) : null,
-      ask.needPassword !== false ? h('label', { class: 'abf-field' }, h('span', {}, 'Contraseña'), h('div', { class: 'abf-pw' }, pass, eye)) : null,
-      ask.needCode ? h('label', { class: 'abf-field' }, h('span', {}, 'Código de verificación'), code) : null,
-      ask.needCode ? null : h('label', { class: 'abf-check' }, save, h('span', {}, 'Guardar esta cuenta para la próxima (cifrada)')),
-      h('div', { class: 'abf-row' }, h('button', { class: 'btn btn-sm btn-primary', type: 'submit' }, h('span', { html: icon('check') }), 'Ingresar'),
-        h('button', { class: 'btn btn-sm btn-ghost', type: 'button', onclick: () => this.setTakeover(true) }, 'Lo hago yo'), status),
+      h('div', { class: 'abf-take' },
+        h('p', { class: 'small' }, `Tomá el control y escribí vos tus datos en la pantalla${ask.host ? ' de ' + ask.host : ''}. Van directo al sitio: no los guardamos y el agente no los ve.`),
+        h('button', { class: 'btn btn-sm btn-primary abf-take-btn', type: 'button', onclick: () => { this.setTakeover(true); this.toggleFull(true); } }, h('span', { html: icon('keyboard') }), 'Tomar el control')),
+      h('details', { class: 'abf-alt' }, h('summary', {}, 'Prefiero que los cargues vos (formulario seguro)'),
+        h('p', { class: 'small' }, 'Los cargo yo en la página. Van directo al servidor, se guardan cifrados solo si lo elegís y el agente nunca los ve.'),
+        ask.needUser !== false ? h('label', { class: 'abf-field' }, h('span', {}, 'Usuario o correo'), user) : null,
+        ask.needPassword !== false ? h('label', { class: 'abf-field' }, h('span', {}, 'Contraseña'), h('div', { class: 'abf-pw' }, pass, eye)) : null,
+        ask.needCode ? h('label', { class: 'abf-field' }, h('span', {}, 'Código de verificación'), code) : null,
+        ask.needCode ? null : h('label', { class: 'abf-check' }, save, h('span', {}, 'Guardar esta cuenta para la próxima (cifrada)')),
+        h('div', { class: 'abf-row' }, h('button', { class: 'btn btn-sm', type: 'submit' }, h('span', { html: icon('check') }), 'Ingresar'), status)),
       h('p', { class: 'abf-fine muted' }, 'Nunca escribo datos de tarjetas. Podés borrar tus accesos guardados en Tu cuenta → Cuentas conectadas.'));
     form.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -405,7 +504,6 @@ export class AgentBrowserCard {
       if (!body.username && !body.password && !body.code) { status.textContent = 'Completá los datos.'; return; }
       this.sendLogin(body, form, status);
     });
-    setTimeout(() => (ask.needCode ? code : ask.needUser !== false ? user : pass).focus({ preventScroll: true }), 50);
     return form;
   }
 
@@ -548,7 +646,7 @@ export class AgentBrowserCard {
   detach() {
     this.stopped = true; clearTimeout(this.timer); clearInterval(this.tick);
     if (this.el.classList.contains('is-full')) this.toggleFull(false);
-    this.el.classList.add('is-detached'); this.controls.hidden = true; this.stopBtn.hidden = true; this.xBtn.hidden = true;
+    this.el.classList.add('is-detached'); this.controls.hidden = true; this.stopBtn.hidden = true; this.vStop.hidden = true; this.xBtn.hidden = true;
     if (this.state && !['done', 'ended'].includes(this.state.status)) this.renderSummary({ ...this.state, status: 'ended', endedReason: 'detached', canResume: false }, true);
   }
 
@@ -556,12 +654,12 @@ export class AgentBrowserCard {
     if (this.stopped && this._endedShown) return;
     this.stopped = true; this._endedShown = true;
     clearTimeout(this.timer); clearInterval(this.tick);
-    this.kb.hidden = true; this.controls.hidden = true; this.clock.hidden = true; this.stopBtn.hidden = true; this.asks.replaceChildren();
+    this.kb.hidden = true; this.controls.hidden = true; this.clock.hidden = true; this.stopBtn.hidden = true; this.vStop.hidden = true; this.asks.replaceChildren();
     this.view.classList.remove('is-takeover', 'is-busy');
     this.setPill('Detenida', 'off');
     const st = s || this.state || {};
     const reason = st.endedReason || '';
-    const txt = reason === 'idle' ? 'La archivé por inactividad.' : 'Detuviste la computadora del agente.';
+    const txt = reason === 'idle' ? 'La archivé por inactividad.' : reason === 'time_limit' ? 'Llegó al tiempo máximo de la tarea.' : 'Detuviste el ordenador virtual.';
     const resume = (st.canResume !== false) ? h('button', { class: 'btn btn-sm', type: 'button', onclick: () => this.resume() }, h('span', { html: icon('refresh') }), 'Retomar') : null;
     this.result.hidden = false;
     this.result.replaceChildren(h('div', { class: 'ab-res-h' }, h('span', { html: icon('power') }), h('strong', {}, 'Detenida')), h('p', {}, txt), ...(resume ? [resume] : []));
@@ -575,9 +673,9 @@ export class AgentBrowserCard {
     try {
       const s = await this.api('/api/agent/browser/resume', { body: {} });
       this.stopped = false; this._endedShown = false;
-      this.controls.hidden = false; this.stopBtn.hidden = false; this.result.hidden = true; this.xBtn.hidden = false;
+      this.controls.hidden = false; this.stopBtn.hidden = false; this.vStop.hidden = false; this.result.hidden = true; this.xBtn.hidden = false;
       this.apply(s);
-      this.tick = setInterval(() => this.renderClock(), 1000);
+      this.tick = setInterval(() => { this.renderClock(); this.renderElapsed(); }, 1000);
       this.poll(); this.loop();
     } catch (e) { this.showNotice('No pude retomar la tarea. Pedímela de nuevo.', 'warn'); }
   }
@@ -597,7 +695,10 @@ export class AgentBrowserCard {
     if (f) this.el.setAttribute('aria-modal', 'true'); else this.el.removeAttribute('aria-modal');
     this.screen.setAttribute('tabindex', f ? '-1' : '0');
     document.body.classList.toggle('ab-lock', f);
-    if (f) { this._esc = (e) => { if (e.key === 'Escape') this.toggleFull(false); }; document.addEventListener('keydown', this._esc); setTimeout(() => this.fullBtn.focus({ preventScroll: true }), 30); }
+    this.maxBtn.innerHTML = icon(f ? 'collapse' : 'expand');
+    this.maxBtn.setAttribute('aria-label', f ? 'Salir de pantalla completa' : 'Pantalla completa'); this.maxBtn.title = f ? 'Salir de pantalla completa' : 'Pantalla completa';
+    if (f && this.el.classList.contains('is-folded')) this.toggleFold(false);
+    if (f) { this._esc = (e) => { if (e.key === 'Escape') this.toggleFull(false); }; document.addEventListener('keydown', this._esc); setTimeout(() => this.maxBtn.focus({ preventScroll: true }), 30); }
     else { document.removeEventListener('keydown', this._esc); this.screen.focus({ preventScroll: true }); this.o.onScroll && this.o.onScroll(); }
   }
 }
