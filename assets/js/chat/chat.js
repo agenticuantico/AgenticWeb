@@ -14,15 +14,15 @@ import { renderMarkdown, looksLikeMarkdown } from './md.js';
 import { LANGS, getLang, flagUrl, startLang } from './languages.js';
 const SITE_IDS = ['es-AR', 'es-ES', 'en-US', 'pt-BR'];
 import { AGENTS, TOOLS, SKILLS, CONNECTORS, agentById, initials } from './agents.js';
-import { speak, stop as stopSpeech } from './voice.js?v=7.15.0';
+import { speak, stop as stopSpeech } from './voice.js?v=7.17.0';
 import { VoiceRecorder, fmtClock } from './recorder.js';
 import { readFile, fmtSize } from './docs.js';
 // Rendimiento (Fase 3): la computadora del agente y la videollamada se cargan recién cuando se usan.
-import { needsWebAction, isFollowUp } from './intent.js?v=7.15.0';
-import { decideRoute, OVERRIDES, ROUTE_LABEL } from './router.js?v=7.15.0';
-import { workScreen, fmtElapsed } from './work-screen.js?v=7.15.0';
-import { openComputerPanel } from './computer-panel.js?v=7.15.0';
-import { lastWebArtifact } from './iterate.js?v=7.15.0';
+import { needsWebAction, isFollowUp } from './intent.js?v=7.17.0';
+import { decideRoute, OVERRIDES, ROUTE_LABEL } from './router.js?v=7.17.0';
+import { workScreen, fmtElapsed } from './work-screen.js?v=7.17.0';
+import { openComputerPanel } from './computer-panel.js?v=7.17.0';
+import { lastWebArtifact } from './iterate.js?v=7.17.0';
 import { detectMediaIntent, mediaMessage, mediaCard, isMediaMessage, runMedia as runMediaTask } from './media.js';
 import { cleanArtifact, cleanThought } from './clean.js';
 import { PreviewCard, LiveFrame, previewKind, previewHtml, isPreviewable } from './preview-card.js';
@@ -35,9 +35,9 @@ const MODES = {
 };
 
 const PHASES = { thinking: 'Pensando', searching: 'Buscando', coding: 'Escribiendo código', verifying: 'Verificando', reading: 'Leyendo', agent: 'Especialista', confirm: 'Confirmación' };
-const FACE = '/media/avatar/face-256.webp?v=7.15.0';
-const FACE_SET = '/media/avatar/face-128.webp?v=7.15.0 128w, /media/avatar/face-256.webp?v=7.15.0 256w, /media/avatar/face-512.webp?v=7.15.0 512w';
-const FACE_PNG = '/media/avatar/face-256.png?v=7.15.0';
+const FACE = '/media/avatar/face-256.webp?v=7.17.0';
+const FACE_SET = '/media/avatar/face-128.webp?v=7.17.0 128w, /media/avatar/face-256.webp?v=7.17.0 256w, /media/avatar/face-512.webp?v=7.17.0 512w';
+const FACE_PNG = '/media/avatar/face-256.png?v=7.17.0';
 
 const SUGGESTIONS = [
   { t: '¿Qué es AgentiCuántico?', i: 'info' },
@@ -504,7 +504,7 @@ export class ChatApp {
     if (!this.flag('voice')) return;
     const show = () => { const st = this.avatar.state; this._call.open(this.$('form') || this.root); this._call.setState(st); };
     if (this._call) { show(); return; }
-    import('./avatar-call.js?v=7.15.0').then(({ getAvatarCall }) => {
+    import('./avatar-call.js?v=7.17.0').then(({ getAvatarCall }) => {
       if (!this._call) { this._call = getAvatarCall(); this._call.onClose = () => { stopSpeech(); if (this.handsFree) this.act_handsfree(); }; }
       show();
     }).catch(() => {});
@@ -675,7 +675,7 @@ export class ChatApp {
   async openBrowserCard(text) {
     if (this.browserCard) this.browserCard.detach();
     const chatId = this.chat.id;
-    const { AgentBrowserCard } = await import('../agent-browser.js?v=7.15.0');
+    const { AgentBrowserCard } = await import('../agent-browser.js?v=7.17.0');
     this.browserCard = new AgentBrowserCard({
       thread: this.$('inner'), composer: this.$('form'), text, conv: chatId, lang: this.lang.code, isPaid: this.isPaid,
       idToken: this.user ? () => this.user.getIdToken() : null, onScroll: () => this.scrollToEnd(true),

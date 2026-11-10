@@ -4,7 +4,7 @@ import { CONFIG, formatARS } from './config.js';
 import { PAYMENTS } from '../payments-config.js';
 import * as auth from './auth.js';
 import { getAuthApi, getStore, friendlyError } from './firebase.js';
-import { mountPlans, openPayModal } from './plans.js';
+import { mountPlans, openPayModal } from './plans.js?v=7.17.0';
 import { state as engineState, init as engineInit } from './chat/engine.js';
 import * as callMem from './companion/memory.js';
 
@@ -22,7 +22,7 @@ function renderAuth(tab = params.get('registro') ? 'signup' : 'login') {
   const card = h('div', { class: 'card auth-card' });
   const wrap = h('div', { class: 'auth-wrap' },
     h('div', { class: 'auth-aside' },
-      h('img', { src: '/media/avatar/face-256.webp?v=7.15.0', alt: '', width: 72, height: 72, class: 'auth-face' }),
+      h('img', { src: '/media/avatar/face-256.webp?v=7.17.0', alt: '', width: 72, height: 72, class: 'auth-face' }),
       h('h1', {}, tab === 'signup' ? 'Creá tu cuenta' : tab === 'reset' ? 'Recuperá tu acceso' : 'Te damos la bienvenida'),
       h('p', { class: 'muted' }, 'Sincronizá tus chats entre dispositivos, compartí conversaciones y elegí tu plan.'),
       h('ul', { class: 'checklist' }, ...['Chats guardados en tu cuenta', 'Todas las funciones en todos los planes', 'Pagos seguros con PayPal y Mercado Pago'].map((t) => h('li', { html: icon('check') + `<span>${t}</span>` })))),
