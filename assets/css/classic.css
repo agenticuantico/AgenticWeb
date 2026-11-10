@@ -383,3 +383,7 @@ html { background: #EDEEF5; }
 .hero-char .avatar-status { display: none; }
 .cyborg-hero-stage .hero-neural-canvas { display: none; }
 #heroVisualWrapper { background: linear-gradient(180deg, #b7bbcd 0%, #c1c7d3 20%, #ced1de 40%, #d0d3e0 60%, #c8cad7 80%, #b8bccb 100%); }
+
+/* Etiqueta visible para imágenes hechas con IA (antislop, publicado 2026-11-10) */
+.ai-made-label { position: absolute; top: 14px; right: 14px; z-index: 3; padding: 4px 10px; border-radius: 999px; background: rgba(24,24,27,.72); color: #fff; font-size: 11px; font-weight: 600; letter-spacing: .02em; line-height: 1.4; pointer-events: none; }
+.flag-example { margin: 0 0 10px; font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #52525b; }
