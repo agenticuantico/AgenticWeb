@@ -38,7 +38,12 @@ const SITES = [
 /** Pedido de búsqueda explícito en el ordenador sin sitio puntual: arranca en un buscador con el pedido. */
 export function computerStartUrl(text) {
   const q = stripComputer(text).replace(/^(busc[aá](me)?|fijate|mir[aá]|averigu[aá]|decime|mostrame)\s+/i, '').slice(0, 200).trim();
-  return q ? 'https://www.bing.com/search?setlang=es&q=' + encodeURIComponent(q) : null;
+  if (!q) return null;
+  // Clima: fuente abierta de pronóstico (los buscadores bloquean navegadores automáticos).
+  const w = /(clima|tiempo|pron[oó]stico|temperatura|lluvia)\s+(?:de|en|para|hoy en)?\s*(.+)$/i.exec(q);
+  if (w && w[2]) return 'https://wttr.in/' + encodeURIComponent(w[2].replace(/[?.!]+$/, '').trim()) + '?lang=es';
+  // Resto: el agente busca desde el servidor y abre el resultado en la pantalla.
+  return null;
 }
 
 export function guessUrl(text) {
