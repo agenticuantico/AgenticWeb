@@ -74,3 +74,4 @@
   .hn-actions .btn { width: 100%; justify-content: center; }
 }
 @media (prefers-reduced-motion: reduce) { .hn-ask { transition: none; } .hn-ask:hover { transform: none; } }
+@media (max-width: 480px) { .hero-tag-x { display: none; } }
