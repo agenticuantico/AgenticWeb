@@ -217,7 +217,7 @@ export class AgentBrowserCard {
       h('span', { class: 'vpc-tray' }, this.net, this.elapsed, h('span', { class: 'vpc-clock', title: 'Hora local' }, this.clockT)));
     this.renderTaskClock();
     // La capa del puntero sigue a la pantalla si cambia de tamaño (girar el celular, pantalla completa).
-    if (typeof ResizeObserver === 'function') { this._ro = new ResizeObserver(() => this.placeCursor()); this._ro.observe(this.screen); }
+    if (typeof ResizeObserver === 'function') { this._ro = new ResizeObserver(() => { this.ptr.classList.remove('has-bubble'); this.placeCursor(); }); this._ro.observe(this.screen); }
     this._online = () => this.kick();
     this._vis = () => { if (!document.hidden) this.kick(); };
     window.addEventListener('online', this._online);
@@ -424,7 +424,7 @@ export class AgentBrowserCard {
     this.showBubble(text, p, g);
     if (ev.kind === 'click') {
       this.cursor.classList.toggle('is-press', ev.status === 'running');
-      if (ev.status === 'done') { this.ring(p, ev.by === 'user' ? 'is-user' : ''); await pause(quick || this.reduced ? 0 : 320); }
+      if (ev.status === 'done') { this.ring(p, ev.by === 'user' ? 'is-user' : ''); await pause(quick || this.reduced ? 0 : 560); }   // la onda termina antes de mostrar la página nueva
     } else if (ev.kind === 'type') {
       if (ev.box) { this.fieldBox = ev.box; this.placeField(ev.box, g); }
       this.field.classList.toggle('on', !!ev.box && ev.status !== 'error');

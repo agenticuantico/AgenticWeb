@@ -542,3 +542,12 @@
 .ab-card.cc.vpc-os .vpc-link { font-size: 12.5px; font-weight: 650; }
 .ab-card.cc.vpc-os .cc-act { font-size: 13px; font-weight: 650; }
 @container (min-width: 900px) { .ab-card.cc.vpc-os .vpc-ico { font-size: 12px; } }
+/* Pantalla completa: el escritorio ocupa exactamente la pantalla (la página leída se desplaza dentro de la ventana) */
+.ab-card.cc.vpc-os.is-full > .vpc-desk { height: calc(100dvh - 48px - env(safe-area-inset-bottom)); min-height: 360px; }
+.ab-card.cc.vpc-os.is-full .vpc-win, .ab-card.cc.vpc-os.is-full .cc-frame, .ab-card.cc.vpc-os.is-full .cc-screen { min-height: 0; }
+.ab-card.cc.vpc-os.is-full .cc-frame { flex: 1 1 auto; }
+.ab-card.cc.vpc-os.is-full .ab-view { min-height: 0 !important; height: auto; }
+.ab-card.cc.vpc-os.is-full .ab-view.is-reader { overflow: hidden; }
+.ab-card.cc.vpc-os.is-full .ab-view.is-reader .ab-reader { max-height: 100%; overflow: auto; }
+.ab-card.cc.vpc-os.is-full .vpc-task { position: static; }
+.ab-card.cc.vpc-os.is-full .ab-view.is-live .ab-frame { position: absolute; inset: 0; width: 100%; height: 100%; }
