@@ -6,7 +6,7 @@ Sitio: https://agenticuantico.dev.ar/ · Contacto comercial: agenticuantico@gmai
 
 ## Qué hace hoy
 - Chat por texto y por voz: si se le habla, responde con voz femenina natural (español rioplatense y otros idiomas, 7 en total) y por escrito; llamada de voz manos libres.
-- Modo «Hace todo por vos»: arma un plan, usa herramientas, convoca especialistas, muestra cada paso y pide confirmación antes de cualquier acción con consecuencias (comprar, pagar, enviar, publicar).
+- Tareas de varios pasos (sin cambiar de modo): arma un plan, usa herramientas, convoca especialistas, muestra cada paso y pide confirmación antes de cualquier acción con consecuencias (comprar, pagar, enviar, publicar).
 - Agentes especialistas invitables (programación, diseño, legal, ciberseguridad, investigación) y agentes propios (planes Pro y Empresa).
 - Documentos: PDF, Word, Excel, CSV e imágenes; cámara para escanear.
 - Lienzo de código con vista previa, informes y archivos descargables.
