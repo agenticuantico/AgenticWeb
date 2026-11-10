@@ -41,7 +41,7 @@ export function computerStartUrl(text) {
   if (!q) return null;
   // Clima: fuente abierta de pronóstico (los buscadores bloquean navegadores automáticos).
   const w = /(clima|tiempo|pron[oó]stico|temperatura|lluvia)\s+(?:de|en|para|hoy en)?\s*(.+)$/i.exec(q);
-  if (w && w[2]) return 'https://wttr.in/' + encodeURIComponent(w[2].replace(/[?.!]+$/, '').trim()) + '?lang=es';
+  if (w && w[2]) return 'https://wttr.in/' + encodeURIComponent(w[2].replace(/[?.!]+$/, '').trim()) + '?lang=es&m';
   // Resto: el agente busca desde el servidor y abre el resultado en la pantalla.
   return null;
 }
@@ -376,6 +376,7 @@ export class AgentBrowserCard {
     this.el.dataset.status = s.status;
     this.renderLine(s);
     this.renderWindow(s);
+    this.vStop.hidden = s.status === 'done' || s.status === 'ended';
     this.renderClock();
     this.renderPlan(s);
     this.renderSteps(s.steps || []);
