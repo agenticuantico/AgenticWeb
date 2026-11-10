@@ -69,5 +69,5 @@ export class AgentAvatar {
   setVisemes(v) { this.portrait.setVisemes(v); this.a3 && this.a3.setVisemes(v); }
   setLevel(lv) { this.portrait.setLevel(lv); this.a3 && this.a3.setLevel(lv); }
   pulse() { this.portrait.pulse(); this.a3 && this.a3.pulse(); }
-  setFraming(m) { this.framing = m; this.a3 && this.a3.setFraming(m); }
+  setFraming(m) { this.framing = m; this.portrait.setFraming && this.portrait.setFraming(m); this.a3 && this.a3.setFraming(m); }
 }
