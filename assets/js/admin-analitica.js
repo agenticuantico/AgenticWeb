@@ -68,7 +68,7 @@ function trendChart(series, width = 720) {
     <path d="${path('views')}" fill="none" stroke="#2563eb" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
     <path d="${path('visitors')}" fill="none" stroke="#7c3aed" stroke-width="2.2" stroke-dasharray="5 4" stroke-linejoin="round"/>`}
     ${series.map((p, i) => `<g><circle cx="${single ? w / 2 : x(i)}" cy="${y(p.views)}" r="${single ? 7 : 3.4}" fill="#2563eb"><title>${dm(p.day)}: ${p.views} vistas · ${p.visitors} visitantes</title></circle></g>`).join('')}
-    ${series.map((p, i) => (i % step === 0 || i === series.length - 1 ? `<text x="${single ? w / 2 : x(i)}" y="${hh - 6}" text-anchor="middle" class="an-axis">${dm(p.day)}</text>` : '')).join('')}</svg>
+    ${series.map((p, i) => ((i % step === 0 && series.length - 1 - i >= step / 2) || i === series.length - 1 ? `<text x="${single ? w / 2 : x(i)}" y="${hh - 6}" text-anchor="middle" class="an-axis">${dm(p.day)}</text>` : '')).join('')}</svg>
     <p class="an-legend"><span><i style="background:#2563eb"></i>Vistas</span><span><i class="dash" style="border-color:#7c3aed"></i>Visitantes</span></p>`;
 }
 
@@ -175,7 +175,7 @@ export async function renderAnalytics(box, token) {
     const note = h('p', { class: 'tiny muted an-foot' }, 'Fuente: contadores agregados del sitio (solo con cookies de analítica aceptadas). País según Cloudflare; dispositivo, navegador y sistema según el navegador. «En vivo» = activo en los últimos 5 minutos. Días en hora UTC.'
       + (src.d1Since ? ` Registro en el servidor desde el ${dm(src.d1Since)}; antes, historial de Firestore.` : ' Historial de Firestore.')
       + (src.firestore && !src.firestore.ok ? ' (El historial de Firestore no respondió: se muestra solo lo del servidor.)' : ''));
-    body.replaceChildren(tiles, h('div', { class: 'an-grid' }, trend, liveCard, geo, dev, br, os, pages, ref, hrs), note);
+    body.replaceChildren(tiles, h('div', { class: 'an-grid' }, trend, liveCard, geo, dev, br, os, ref, pages, hrs), note);
     drawLive(d.live);
   }
   refresh.onclick = load;
