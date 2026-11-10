@@ -371,3 +371,7 @@
 @keyframes ab-spin { to { transform: rotate(360deg); } }
 /* Un solo reloj visible en la ventana chica (el tiempo de la tarea); el del tramo de navegador queda en pantalla completa */
 .ab-card.cc.vpc:not(.is-full) .cc-line .ab-clock { display: none !important; }
+/* Pantalla completa y terminada: sin botones repetidos (Detener y reloj quedan en la barra de título) */
+.ab-card.cc.vpc .ab-tbtn-stop, .ab-card.cc.vpc .ab-mode-left { display: none !important; }
+.ab-card.cc.vpc.is-full .vpc-btn[aria-label="Plegar"], .ab-card.cc.vpc.is-full .vpc-btn[aria-label="Desplegar"] { display: none; }
+.ab-card.cc.vpc.is-done > .ab-controls { display: none !important; }
