@@ -106,7 +106,7 @@ html { scroll-behavior: smooth; }
 .security-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
 @media (max-width: 860px) { .security-grid { grid-template-columns: 1fr; } }
 .steps-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; counter-reset: s; }
-.steps-3 .card::before { counter-increment: s; content: "0" counter(s); display: block; font-family: var(--font-display); font-size: 1.6rem; color: var(--gold); font-weight: 700; margin-bottom: 8px; }
+.steps-3 .card { min-height: 220px; display: flex; flex-direction: column; } .steps-3 .card::before { counter-increment: s; content: "0" counter(s); display: block; font-family: var(--font-display); font-size: 1.6rem; color: var(--gold); font-weight: 700; margin-bottom: 8px; }
 @media (max-width: 860px) { .steps-3 { grid-template-columns: 1fr; } }
 .compare { width: 100%; }
 .compare td:not(:first-child), .compare th:not(:first-child) { text-align: center; }
