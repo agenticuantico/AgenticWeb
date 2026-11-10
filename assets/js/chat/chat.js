@@ -675,7 +675,7 @@ export class ChatApp {
   async openBrowserCard(text) {
     if (this.browserCard) this.browserCard.detach();
     const chatId = this.chat.id;
-    const { AgentBrowserCard } = await import('../agent-browser.js?v=7.17.0');
+    const { AgentBrowserCard } = await import('../agent-browser.js?v=7.19.0');
     this.browserCard = new AgentBrowserCard({
       thread: this.$('inner'), composer: this.$('form'), text, conv: chatId, lang: this.lang.code, isPaid: this.isPaid,
       idToken: this.user ? () => this.user.getIdToken() : null, onScroll: () => this.scrollToEnd(true),
