@@ -14,14 +14,15 @@ import { renderMarkdown, looksLikeMarkdown } from './md.js';
 import { LANGS, getLang, flagUrl, startLang } from './languages.js';
 const SITE_IDS = ['es-AR', 'es-ES', 'en-US', 'pt-BR'];
 import { AGENTS, TOOLS, SKILLS, CONNECTORS, agentById, initials } from './agents.js';
-import { speak, stop as stopSpeech } from './voice.js?v=7.14.0';
+import { speak, stop as stopSpeech } from './voice.js?v=7.15.0';
 import { VoiceRecorder, fmtClock } from './recorder.js';
 import { readFile, fmtSize } from './docs.js';
 // Rendimiento (Fase 3): la computadora del agente y la videollamada se cargan recién cuando se usan.
-import { needsWebAction, isFollowUp } from './intent.js?v=7.14.0';
-import { decideRoute, OVERRIDES, ROUTE_LABEL } from './router.js?v=7.14.0';
-import { workScreen, fmtElapsed } from './work-screen.js?v=7.14.0';
-import { lastWebArtifact } from './iterate.js?v=7.14.0';
+import { needsWebAction, isFollowUp } from './intent.js?v=7.15.0';
+import { decideRoute, OVERRIDES, ROUTE_LABEL } from './router.js?v=7.15.0';
+import { workScreen, fmtElapsed } from './work-screen.js?v=7.15.0';
+import { openComputerPanel } from './computer-panel.js?v=7.15.0';
+import { lastWebArtifact } from './iterate.js?v=7.15.0';
 import { detectMediaIntent, mediaMessage, mediaCard, isMediaMessage, runMedia as runMediaTask } from './media.js';
 import { cleanArtifact, cleanThought } from './clean.js';
 import { PreviewCard, LiveFrame, previewKind, previewHtml, isPreviewable } from './preview-card.js';
@@ -34,9 +35,9 @@ const MODES = {
 };
 
 const PHASES = { thinking: 'Pensando', searching: 'Buscando', coding: 'Escribiendo código', verifying: 'Verificando', reading: 'Leyendo', agent: 'Especialista', confirm: 'Confirmación' };
-const FACE = '/media/avatar/face-256.webp?v=7.14.0';
-const FACE_SET = '/media/avatar/face-128.webp?v=7.14.0 128w, /media/avatar/face-256.webp?v=7.14.0 256w, /media/avatar/face-512.webp?v=7.14.0 512w';
-const FACE_PNG = '/media/avatar/face-256.png?v=7.14.0';
+const FACE = '/media/avatar/face-256.webp?v=7.15.0';
+const FACE_SET = '/media/avatar/face-128.webp?v=7.15.0 128w, /media/avatar/face-256.webp?v=7.15.0 256w, /media/avatar/face-512.webp?v=7.15.0 512w';
+const FACE_PNG = '/media/avatar/face-256.png?v=7.15.0';
 
 const SUGGESTIONS = [
   { t: '¿Qué es AgentiCuántico?', i: 'info' },
@@ -152,6 +153,7 @@ export class ChatApp {
             <div class="ace-left" data-popover-host>
               <button class="ace-ib round ace-plus" type="button" data-act="plus" aria-haspopup="menu" aria-expanded="false" aria-label="Cámara, archivos, agentes y conectores">${icon('plus')}</button>
               <button class="ace-ib round ace-web" type="button" data-act="websearch" aria-pressed="false" aria-label="Buscar en la web" title="Buscar en la web">${icon('globe')}</button>
+              ${full ? `<button class="ace-pc" type="button" data-act="computer" aria-haspopup="dialog" aria-label="Ordenador virtual: tareas en un navegador en la nube" title="Ordenador virtual">${icon('monitor')}<span class="ace-pc-t">Ordenador</span></button>` : ''}
               <button class="ace-fixed" type="button" data-act="modeSettings" data-role="fixedMode" hidden></button>
             </div>
             <div class="ace-right">
@@ -193,13 +195,13 @@ export class ChatApp {
     if (chip) {
       chip.hidden = !fixed;
       if (fixed) {
-        const label = this.override !== 'smart' ? OVERRIDES[fixed].label : 'Agente para el próximo mensaje';
+        const label = this.override !== 'smart' ? OVERRIDES[fixed].label : fixed === 'computer' ? 'Ordenador · próximo mensaje' : 'Agente para el próximo mensaje';
         chip.innerHTML = `<span>${esc(label)}</span>${icon('close')}`;
         chip.setAttribute('aria-label', `${label}. Tocá para volver a automático`);
         chip.title = 'Volver a automático';
       }
     }
-    this.$('input').placeholder = fixed === 'auto' ? 'Describí la tarea para el agente' : 'Preguntá o pedí una tarea';
+    this.$('input').placeholder = fixed === 'auto' ? 'Describí la tarea para el agente' : fixed === 'computer' ? 'Describí la tarea para el ordenador' : 'Preguntá o pedí una tarea';
   }
   renderEmpty() {
     const box = this.$('suggestions');
@@ -502,7 +504,7 @@ export class ChatApp {
     if (!this.flag('voice')) return;
     const show = () => { const st = this.avatar.state; this._call.open(this.$('form') || this.root); this._call.setState(st); };
     if (this._call) { show(); return; }
-    import('./avatar-call.js?v=7.14.0').then(({ getAvatarCall }) => {
+    import('./avatar-call.js?v=7.15.0').then(({ getAvatarCall }) => {
       if (!this._call) { this._call = getAvatarCall(); this._call.onClose = () => { stopSpeech(); if (this.handsFree) this.act_handsfree(); }; }
       show();
     }).catch(() => {});
@@ -636,7 +638,11 @@ export class ChatApp {
     // Un solo chat: el router decide por mensaje (rápido, pensar, búsqueda en vivo, computadora o agente).
     const forced = this.override !== 'smart' ? this.override : this.forceNext;
     const pending = this.pendingAction();
-    const decision = decideRoute(text, { override: forced || 'smart', followBrowser: !!follow, hasFiles: files.length > 0, hasArtifact: !!lastWebArtifact(this.chat.messages), pending });
+    // Botón «Ordenador» (o el chip «Ordenador · próximo mensaje»): la tarea va directo al ordenador virtual, sin frases mágicas.
+    const decision = forced === 'computer' || this._computerNext
+      ? { kind: 'browser', mode: 'fast', why: 'computer-button' }
+      : decideRoute(text, { override: forced || 'smart', followBrowser: !!follow, hasFiles: files.length > 0, hasArtifact: !!lastWebArtifact(this.chat.messages), pending });
+    this._computerNext = false;
     // «Está todo en el CV, podés hacerlo»: se retoma la acción pendiente con el pedido original.
     if (decision.why === 'resume' && decision.resume) {
       this.forceNext = null; this.renderMode();
@@ -669,7 +675,7 @@ export class ChatApp {
   async openBrowserCard(text) {
     if (this.browserCard) this.browserCard.detach();
     const chatId = this.chat.id;
-    const { AgentBrowserCard } = await import('../agent-browser.js?v=7.14.0');
+    const { AgentBrowserCard } = await import('../agent-browser.js?v=7.15.0');
     this.browserCard = new AgentBrowserCard({
       thread: this.$('inner'), composer: this.$('form'), text, conv: chatId, lang: this.lang.code, isPaid: this.isPaid,
       idToken: this.user ? () => this.user.getIdToken() : null, onScroll: () => this.scrollToEnd(true),
@@ -1496,7 +1502,7 @@ export class ChatApp {
   paywall(feature) {
     const p = CONFIG.PRICES;
     const body = h('div', { class: 'paywall' },
-      h('p', { class: 'muted' }, `${feature} son parte de los planes Pro y Empresa. Invitá especialistas a cualquier chat, usá «Hace todo por vos» con herramientas y creá agentes propios.`),
+      h('p', { class: 'muted' }, `${feature}: con Pro o Empresa tenés más uso por día. Todas las funciones están en los tres planes.`),
       h('div', { class: 'paywall-plans' }, ...PLANS.filter((x) => x.id !== 'gratis').map((pl) => h('div', { class: 'pw-plan' + (pl.featured ? ' featured' : '') },
         h('strong', {}, pl.name), h('span', { class: 'pw-price' }, formatARS(p[pl.id].ars), h('small', {}, ' /mes')), h('span', { class: 'muted small' }, `o USD ${p[pl.id].usd} /mes con PayPal`),
         h('ul', {}, ...pl.features.slice(1, 4).map((f) => h('li', {}, f)))))));
@@ -1504,6 +1510,19 @@ export class ChatApp {
       { label: 'Ahora no', class: 'btn-ghost' },
       { label: this.user ? 'Elegir plan' : 'Crear cuenta y elegir plan', class: 'btn-gold', onClick: () => { location.href = this.user ? '/cuenta/#planes' : '/cuenta/?registro=1&siguiente=planes'; } }
     ] });
+  }
+  /* =================== Botón «Ordenador» =================== */
+  /** Abre el panel del ordenador virtual con tareas de ejemplo (las frases «…en el ordenador» siguen andando). */
+  act_computer() {
+    if (this.busy) { toast('Esperá a que termine la respuesta actual.'); return; }
+    openComputerPanel(this);
+  }
+  /** Manda una tarea al ordenador virtual (desde el panel). */
+  sendToComputer(text) {
+    const t = String(text || '').trim();
+    if (!t) return;
+    this._computerNext = true;
+    this.send(t);
   }
   loginPrompt(text) {
     modal({ title: 'Necesitás una cuenta', body: `<p class="muted">${esc(text)}</p>`, actions: [{ label: 'Cancelar', class: 'btn-ghost' }, { label: 'Ingresar o registrarme', class: 'btn-primary', onClick: () => { location.href = '/cuenta/'; } }] });

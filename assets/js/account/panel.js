@@ -21,7 +21,7 @@ const TABS = [
   ['empleo', 'Empleo', 'briefcase']
 ];
 const METERS = [
-  ['messages', 'Mensajes del chat', 'El modo Agente cuenta 3 por pedido.'],
+  ['messages', 'Mensajes del chat', 'Una tarea de varios pasos del agente cuenta 3.'],
   ['webSearches', 'Búsquedas web en vivo', null],
   ['jobSearches', 'Búsquedas de empleo', null],
   ['jobDrafts', 'Borradores de CV y carta', null],

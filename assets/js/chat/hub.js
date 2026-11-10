@@ -66,7 +66,7 @@ function agentes(pane, chat) {
 }
 
 function herramientas(pane) {
-  pane.append(h('p', { class: 'muted' }, 'Herramientas que usa el modo «Hace todo por vos». Las que corren en tu dispositivo funcionan siempre; las demás se activan con el servidor.'));
+  pane.append(h('p', { class: 'muted' }, 'Herramientas que usa el agente en las tareas de varios pasos. Las que corren en tu dispositivo funcionan siempre; las demás se activan con el servidor.'));
   const list = h('div', { class: 'hub-list' });
   for (const t of TOOLS) list.append(h('div', { class: 'hub-item' }, h('span', { class: 'hub-ic', html: icon(t.icon) }), h('div', {}, h('strong', {}, t.name), h('p', { class: 'muted small' }, t.desc)), t.needsBackend ? backendChip() : h('span', { class: 'chip ok' }, 'En tu dispositivo')));
   pane.append(list);

@@ -1,5 +1,5 @@
 /** App completa /app/: barra lateral (proyectos, fijados, historial) y chat. */
-import { ChatApp } from './chat/chat.js?v=7.14.0';
+import { ChatApp } from './chat/chat.js?v=7.15.0';
 import { ChatStore } from './chat/store.js';
 import { watchUser, getProfile } from './auth.js';
 import { setIdTokenProvider } from './chat/engine.js';
@@ -23,6 +23,9 @@ let connectResume = connectReturn && connectReturn.ok ? pendingResume : null;
 const params = new URLSearchParams(location.search);
 if (params.get('modo') === 'auto') chat.setMode('auto', true);
 if (params.get('q')) chat.$('input').value = params.get('q').slice(0, 2000);
+// «Probar el ordenador» desde la portada (/app/?ordenador=1): abre el panel del ordenador cuando se sabe si hay cuenta.
+let openPcPanel = params.get('ordenador') === '1';
+const pcPanelOnce = () => { if (!openPcPanel) return; openPcPanel = false; setTimeout(() => chat.act_computer(), 150); };
 
 const shell = $('appShell');
 
@@ -154,10 +157,11 @@ document.addEventListener('keydown', (e) => {
 watchUser(async (u) => {
   // El token va primero: un mensaje enviado mientras carga el perfil ya sale con la cuenta (no como invitado).
   setIdTokenProvider(u ? () => u.getIdToken() : null);
-  if (!u) { store.attachUser(null); return; }
+  if (!u) { store.attachUser(null); pcPanelOnce(); return; }
   const profile = await getProfile(u.uid);
   const p = profile && !profile._error ? profile : null;
   chat.setUser(u, p);
+  pcPanelOnce();
   await store.attachUser(u.uid);
   // Pedido del chat que esperaba esta conexión: se retoma con la sesión ya cargada.
   if (connectResume) { const r = connectResume; connectResume = null; chat.resumeRequest(r); }

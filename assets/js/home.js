@@ -1,12 +1,11 @@
-/** Portada: chat embebido (con el hero neuronal sincronizado), planes y estado del equipo de agentes. */
-import { ChatApp } from './chat/chat.js?v=7.14.0';
+/** Portada: chat embebido (con el personaje sincronizado), ejemplos que rellenan el chat y planes. */
+import { ChatApp } from './chat/chat.js?v=7.15.0';
 import { ChatStore } from './chat/store.js';
 import { mountPlans } from './plans.js';
 import { watchUser, getProfile } from './auth.js';
 import { setIdTokenProvider } from './chat/engine.js';
-import { esc } from './ui.js';
 
-import { AvatarStage } from './chat/avatar.js?v=7.14.0';
+import { AvatarStage } from './chat/avatar.js?v=7.15.0';
 
 /* Portada: personaje en vivo, liviano: sigue el cursor (o el último toque), respira y parpadea. Nada más.
    Los gestos completos (poses, manos, cejas) y los labios sincronizados con la voz van en la videollamada
@@ -35,10 +34,10 @@ watchUser(async (u) => {
 /* Cartel del hero: estado del chat (mismos textos que antes, ya traducidos) */
 {
   const HUD = {
-    idle: ['Vías neuronales activas · En espera', 'Conectado al chat', '#9fff00'],
-    listening: ['Vías neuronales activas · En espera', 'Conectado al chat', '#9fff00'],
-    thinking: ['Razonamiento en proceso…', 'Análisis multi-agente', '#a855f7'],
-    talking: ['Respondiendo', 'Texto y voz femenina', '#22c55e']
+    idle: ['En espera · escribí en el chat', 'Conectado al chat', '#9fff00'],
+    listening: ['Te escucho', 'Hablá cuando quieras', '#9fff00'],
+    thinking: ['Pensando…', 'Preparando la respuesta', '#a855f7'],
+    talking: ['Respondiendo', 'Por escrito y con voz', '#22c55e']
   };
   const st = document.getElementById('heroHudStatus'), dt = document.getElementById('heroHudDetail'), dot = document.getElementById('heroHudDot');
   const orig = avatar.setState.bind(avatar);
@@ -53,25 +52,15 @@ watchUser(async (u) => {
   if (stage) stage.addEventListener('click', () => { const c = document.getElementById('chat'); c && c.scrollIntoView({ behavior: 'smooth' }); setTimeout(() => { const i = document.querySelector('#homeChat textarea'); i && i.focus({ preventScroll: true }); }, 500); });
 }
 
-/* Equipo de agentes 24/7 (tarjetas clásicas) */
-function ago(iso) {
-  const t = Date.parse(iso); if (!t) return '';
-  const s = Math.max(0, (Date.now() - t) / 1000);
-  if (s < 90) return 'hace instantes';
-  if (s < 3600) return 'hace ' + Math.round(s / 60) + ' min';
-  if (s < 86400) return 'hace ' + Math.round(s / 3600) + ' h';
-  return 'hace ' + Math.round(s / 86400) + ' d';
-}
-fetch('/agents-status.json', { cache: 'no-cache' })
-  .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
-  .then((d) => {
-    const grid = document.getElementById('teamGrid');
-    grid.innerHTML = (d.agents || []).slice(0, 12).map((a) => {
-      const st = a.status === 'activo' ? 'activo' : a.status === 'revision' ? 'revision' : 'espera';
-      const label = st === 'activo' ? 'Activo' : st === 'revision' ? 'En revisión' : 'En espera';
-      const link = '';
-      return `<article class="agent-card"><div class="agent-top"><span class="agent-emoji agent-initials" aria-hidden="true">${esc(String(a.name || '?').split(/\s+/).map((w) => w[0]).join('').slice(0, 2).toUpperCase())}</span><div class="agent-name">${esc(a.name)}<small>${esc(a.role || '')}</small></div><span class="agent-state ${st}">${label}</span></div><p class="agent-last">${esc(a.last_activity || 'Listo para su primera tarea programada.')}</p>${a.last_run || link ? `<div class="agent-meta"><span>${esc(ago(a.last_run))}</span>${link}</div>` : ''}</article>`;
-    }).join('');
-    document.getElementById('teamUpdated').innerHTML = `<span class="hero-hud-dot"></span><span>Actualizado ${esc(ago(d.updated) || '')}</span>`;
-  })
-  .catch(() => { document.getElementById('teamUpdated').innerHTML = '<span class="hero-hud-dot"></span><span>Estado no disponible</span>'; });
+/* «Qué le podés pedir hoy»: el ejemplo se escribe en el chat de arriba (no se envía solo) para que la persona lo ajuste. */
+document.querySelectorAll('[data-ask]').forEach((b) => b.addEventListener('click', () => {
+  const input = document.querySelector('#homeChat textarea');
+  const c = document.getElementById('chat');
+  if (!input) return;
+  // Texto visible (ya traducido al idioma elegido), sin las comillas de cita.
+  const shown = (b.querySelector('.hn-ask-t')?.textContent || '').trim().replace(/^[«“"]\s*|\s*[»”"]$/g, '');
+  input.value = shown || b.getAttribute('data-ask') || '';
+  input.dispatchEvent(new Event('input', { bubbles: true }));
+  c && c.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'end' });
+  setTimeout(() => { input.focus({ preventScroll: true }); try { input.setSelectionRange(input.value.length, input.value.length); } catch {} }, 450);
+}));
