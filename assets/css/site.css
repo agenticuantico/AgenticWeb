@@ -1,6 +1,7 @@
 /* =========================================================================
    AgentiCuántico · páginas públicas (portada, planes, institucional)
    ========================================================================= */
+html { scroll-behavior: smooth; }
 .hero { position: relative; padding: clamp(28px, 5vw, 64px) 0 clamp(40px, 6vw, 80px); overflow: hidden; }
 .hero::before { content: ""; position: absolute; inset: -20% -10% auto; height: 120%; z-index: -1; background:
   radial-gradient(40% 50% at 70% 20%, rgba(243, 209, 128, .35), transparent 70%),
