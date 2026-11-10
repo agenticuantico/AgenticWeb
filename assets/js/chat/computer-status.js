@@ -1,5 +1,5 @@
 /**
- * Computadora del agente en el chat: textos de la línea de estado y del resumen final (sin DOM, se prueba con vitest).
+ * Ordenador virtual (antes «Computadora del agente») en el chat: textos de la línea de estado y del resumen final (sin DOM, se prueba con vitest).
  * Una sola línea debajo de la pantalla: «Recorriendo dominio…», «Leyendo dominio…», «Escribiendo…», etc.
  */
 
@@ -13,14 +13,14 @@ const READ_LABEL = /^(Leer|Leí|Leo)\s+(.+)$/i;
  * @returns {{ text: string, kind: 'run'|'wait'|'you'|'ok'|'off', mode: 'browser'|'reader'|null }}
  */
 export function statusLine(s) {
-  if (!s || !s.status) return { text: 'Encendiendo la computadora…', kind: 'run', mode: null };
+  if (!s || !s.status) return { text: 'Encendiendo el ordenador virtual…', kind: 'run', mode: null };
   const browser = s.mode === 'browser';
   const mode = browser ? 'browser' : 'reader';
   const host = s.host || hostOf(s.url) || (s.reader && s.reader.host) || '';
   const steps = Array.isArray(s.steps) ? s.steps : [];
   const cur = [...steps].reverse().find((x) => x.status === 'running') || steps[steps.length - 1];
   switch (s.status) {
-    case 'starting': return { text: 'Encendiendo la computadora…', kind: 'run', mode };
+    case 'starting': return { text: 'Encendiendo el ordenador virtual…', kind: 'run', mode };
     case 'queued': return { text: `En fila para un navegador · puesto ${(s.queue && s.queue.position) || 1}`, kind: 'wait', mode };
     case 'thinking': return { text: 'Pensando el siguiente paso…', kind: 'run', mode };
     case 'awaiting_approval': return { text: 'Esperando tu aprobación', kind: 'wait', mode };
@@ -74,4 +74,53 @@ export function workMode(s) {
   const left = Math.max(s.browserLeftMs || 0, s.remoteLeftMs || 0);
   const noMinutes = s.notice === 'light_fallback' || !!s.browserBlocked || (typeof s.browserLeftMs === 'number' && left <= 0);
   return { label: 'Modo lectura', note: noMinutes ? 'Sin minutos de navegador hoy: leo las páginas como texto.' : 'Leo las páginas como texto (más rápido, sin gastar minutos).' };
+}
+
+/* ---------- Ordenador virtual: ventana tipo escritorio remoto ---------- */
+
+/** Nombre visible. Es un navegador en la nube, no una computadora completa ni un servidor propio. */
+export const VPC_NAME = 'Ordenador virtual';
+export const VPC_HELP = 'Es un navegador en la nube que abre páginas, hace clics y completa formularios por vos mientras mirás. No es una computadora completa ni un servidor propio. Tu sesión es privada: solo la ves vos. Si un sitio pide iniciar sesión, tocás «Tomar el control» y escribís vos: el agente no ve tus contraseñas. Las sesiones de los sitios se guardan cifradas 7 días y las borrás con «Cerrar sesiones».';
+
+/** «0:42», «12:05», «1:02:10». */
+export function elapsedText(ms) {
+  const t = Math.max(0, Math.floor((Number(ms) || 0) / 1000));
+  const h = Math.floor(t / 3600), m = Math.floor((t % 3600) / 60), s = t % 60;
+  return h ? `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}` : `${m}:${String(s).padStart(2, '0')}`;
+}
+
+/** Tiempo de la tarea: corre mientras trabaja y se congela al terminar (último paso). */
+export function taskElapsed(s, now = Date.now()) {
+  if (!s) return 0;
+  const from = Number(s.taskAt || s.startedAt || 0);
+  if (!from) return 0;
+  const steps = Array.isArray(s.steps) ? s.steps : [];
+  const end = s.status === 'done' || s.status === 'ended' ? Number((steps[steps.length - 1] || {}).at || now) : now;
+  return Math.max(0, end - from);
+}
+
+/** Cupo honesto del día: «Te quedan 3 min de ordenador hoy». */
+export function quotaText(s) {
+  if (!s) return '';
+  const left = Math.max(Number(s.browserLeftMs) || 0, Number(s.remoteLeftMs) || 0);
+  if (left <= 0) return 'Hoy no te quedan minutos de ordenador: sigo leyendo las páginas como texto (eso no gasta minutos).';
+  if (left < 60_000) return `Te quedan ${Math.max(1, Math.round(left / 1000))} s de ordenador hoy`;
+  const min = Math.floor(left / 60_000);
+  return `Te quedan ${min} min de ordenador hoy`;
+}
+
+/** URL completa para la barra de direcciones (sin credenciales ni fragmentos largos). */
+export function addressText(s) {
+  const raw = (s && (s.url || (s.reader && s.reader.url))) || '';
+  try {
+    const u = new URL(raw);
+    if (!/^https?:$/.test(u.protocol)) return '';
+    u.username = ''; u.password = ''; u.hash = '';
+    return u.toString().slice(0, 300);
+  } catch { return ''; }
+}
+
+/** «Qué hice»: solo pasos reales terminados o con error (nunca inventados). */
+export function whatIDid(s) {
+  return workSteps(s).filter((x) => x.status === 'done' || x.status === 'error').map((x) => ({ label: String(x.label || ''), ok: x.status === 'done' })).filter((x) => x.label);
 }

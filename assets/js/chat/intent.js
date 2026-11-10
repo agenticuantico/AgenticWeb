@@ -18,6 +18,20 @@ export const RESEARCH = /(busc(a|á|ar) en (google|la web|internet)|busc(a|á)(m
 /** Pedido explícito de búsqueda en vivo al comienzo («Buscá en la web: …», «Search the web: …», «Pesquise na web: …»). */
 export const EXPLICIT_SEARCH = /^\s*(busc[aá](me)?|busca(me)?|googlea(me)?|googl[eé][aá]|search( the web| online)?|look up|pesquis[ae]|procur[ae])\s*(en|na|no|on|in)?\s*(la |a |o )?(web|internet|google|línea|linea)?\s*[:,-]/i;
 
+/**
+ * Pedido explícito del ordenador virtual («buscá el clima en el ordenador», «usá el ordenador para…», «abrí el ordenador
+ * virtual»). Manda sobre la búsqueda en vivo: la persona quiere ver la tarea en la pantalla.
+ */
+export const EXPLICIT_COMPUTER = /((us[aá](r|me|lo)?|abr[ií](r|me)?|prend[eé](r)?|encend[eé](r)?)\s+(el|tu)\s+(ordenador|computadora)(?![\wáéíóúñ])|(en|con|desde|por)\s+(el|tu)\s+ordenador(?![\wáéíóúñ])|(ordenador|computadora)\s+(virtual|del agente))/i;
+export function wantsComputer(text) { return EXPLICIT_COMPUTER.test(String(text || '')); }
+
+/** Saca la mención del ordenador para usar el resto como búsqueda («buscá el clima de Bahía Blanca»). */
+export function stripComputer(text) {
+  return String(text || '')
+    .replace(/\s*,?\s*((us[aá](r|me|lo)?|abr[ií](r|me)?|prend[eé](r)?|encend[eé](r)?)\s+(el|tu)\s+(ordenador|computadora)(\s+(virtual|del agente))?|(en|con|desde|por)\s+(el|tu)\s+(ordenador|computadora)(\s+(virtual|del agente))?)(\s+(para|y))?(?![\wáéíóúñ])/ig, ' ')
+    .replace(/\s{2,}/g, ' ').replace(/^[\s,.:;-]+|[\s,.:;-]+$/g, '').trim();
+}
+
 const FOLLOW = /^\s*(segu[ií]|continu[aá]|dale|sigue|retom[aá]|ahora (compar[aá]|busc[aá]|hac[eé]|arm[aá]|export[aá]|guard[aá]|pas[aá]|resum[ií]|agreg[aá])|tambi[eé]n (busc[aá]|compar[aá]|agreg[aá])|export[aá](lo)? a|pas[aá](lo)? a (csv|tabla|pdf))/i;
 
 /** Lo mismo que antes hacía needsWebAction (acción o investigación): se mantiene para el modo Agente. */
@@ -32,6 +46,7 @@ export function isFollowUp(text) { return FOLLOW.test(String(text || '')); }
 export function routeWebIntent(text, mode) {
   const t = String(text || '').trim();
   if (!t) return null;
+  if (wantsComputer(t)) return 'browser';
   if (mode === 'auto') return needsWebAction(t) ? 'browser' : null;
   // Rápido / Profundo: un pedido explícito de búsqueda manda, aunque nombre un sitio («Buscá en la web: ofertas en LinkedIn»).
   if (EXPLICIT_SEARCH.test(t)) return 'search';
