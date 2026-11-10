@@ -14,6 +14,8 @@ import { renderTeam } from './admin-team.js?v=7.14.0';
 import * as staffUi from './admin-staff.js?v=7.14.0';
 import { renderWorkspace, renderPerf } from './admin-espacio.js?v=7.14.0';
 import { renderKpis } from './admin-indicadores.js?v=7.14.0';
+import { renderAnalytics } from './admin-analitica.js?v=7.15.0';
+import { renderPayments } from './admin-pagos.js?v=7.15.0';
 
 /** Roles con canales en el Espacio de trabajo (el servidor vuelve a controlar cada canal). */
 const WS_ROLES = new Set(['ceo', 'coceo', 'supervisor']);
@@ -107,7 +109,9 @@ function renderPanel(token, me) {
     h('div', { class: 'row' }, h('button', { class: 'btn', type: 'button', html: icon('lock') + 'Cambiar clave', onclick: () => staffUi.changeKeyDialog(token) }), h('button', { class: 'btn btn-ghost', type: 'button', html: icon('logout') + 'Salir', onclick: out }))));
   if (!perms.has('team.order')) root.append(h('div', { class: 'alert' }, h('span', { html: icon('info') }), h('div', {}, 'Tu rol es de solo lectura en el equipo de agentes: podés mirar, pero no dar órdenes ni aprobar.')));
   const tabBar = h('nav', { class: 'admin-tabs', role: 'tablist', 'aria-label': 'Secciones del panel' });
-  const TABS = [['equipo', 'Equipo', 'users'], ['agentes', 'Agentes', 'spark']];
+  const TABS = [];
+  if (u.owner && perms.has('billing.view')) TABS.push(['analitica', 'Analítica', 'chart'], ['pagos', 'Pagos', 'card']);
+  TABS.push(['equipo', 'Equipo', 'users'], ['agentes', 'Agentes', 'spark']);
   TABS.push(['envivo', 'En vivo', 'clock']);   // solo lectura, todos los roles (panel.view)
   if (WS_ROLES.has(u.role)) TABS.push(['espacio', 'Espacio de trabajo', 'send']);
   if (perms.has('audit.view')) TABS.push(['indicadores', 'Indicadores', 'chart']);
@@ -119,11 +123,13 @@ function renderPanel(token, me) {
   for (const [id] of TABS) { boxes[id] = h('div', { class: 'stack-lg' }); panes[id] = h('div', { role: 'tabpanel', hidden: true }, boxes[id]); }
   const loaded = {};
   const show = (id) => {
-    if (!panes[id]) id = 'equipo';
+    if (!panes[id]) id = panes.analitica ? 'analitica' : 'equipo';
     for (const [kk, el] of Object.entries(panes)) el.hidden = kk !== id;
     tabBar.querySelectorAll('[role=tab]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === id)));
     history.replaceState(null, '', '#' + id);
     if (loaded[id]) return; loaded[id] = 1;
+    if (id === 'analitica') renderAnalytics(boxes.analitica, token);
+    if (id === 'pagos') renderPayments(boxes.pagos, token);
     if (id === 'equipo') renderTeam(boxes.equipo, null, { extraHeaders: hdr, owner: u.role === 'ceo' });
     if (id === 'agentes') import('./admin-agents.js?v=7.14.0').then((m) => m.renderAutonomy(boxes.agentes, null, { extraHeaders: hdr }));
     if (id === 'espacio') renderWorkspace(boxes.espacio, token, me);
@@ -136,7 +142,7 @@ function renderPanel(token, me) {
   };
   for (const [id, label, ic] of TABS) tabBar.append(h('button', { type: 'button', role: 'tab', 'data-tab': id, html: icon(ic) + `<span>${label}</span>`, onclick: () => show(id) }));
   root.append(tabBar, ...Object.values(panes));
-  show(location.hash.slice(1) || 'equipo');
+  show(location.hash.slice(1) || (panes.analitica ? 'analitica' : 'equipo'));
 }
 
 const wantsPanel = () => { const hs = new URLSearchParams(location.hash.slice(1)); return !!(hs.get('restablecer') || hs.get('invitacion') || staffUi.session.get() || sessionStorage.getItem('ac.panelMode') === 'equipo'); };
@@ -234,11 +240,10 @@ async function renderDashboard(user) {
   const head = h('div', { class: 'admin-head' },
     h('div', {}, h('p', { class: 'eyebrow' }, 'Panel del CEO'), h('h1', {}, 'AgentiCuántico · Control')),
     h('div', { class: 'row' },
-      h('select', { class: 'select', id: 'range', 'aria-label': 'Período', style: 'width:auto' }, h('option', { value: '7' }, 'Últimos 7 días'), h('option', { value: '30', selected: true }, 'Últimos 30 días'), h('option', { value: '90' }, 'Últimos 90 días')),
       h('button', { class: 'btn', type: 'button', onclick: () => renderDashboard(user), html: icon('refresh') + 'Actualizar' }),
       h('button', { class: 'btn btn-danger', type: 'button', id: 'killBtn', html: icon('power') + 'Parada de emergencia' })));
   root.append(head);
-  const TABS = [['analitica', 'Analítica', 'chart'], ['equipo', 'Equipo', 'users'], ['espacio', 'Espacio de trabajo', 'send'], ['envivo', 'En vivo', 'clock'], ['indicadores', 'Indicadores', 'chart'], ['rendimiento', 'Rendimiento', 'bolt'], ['leads', 'Leads', 'users'], ['agentes', 'Agentes', 'spark'], ['humano', 'Equipo humano', 'user'], ['bitacora', 'Bitácora', 'clock'], ['gobernanza', 'Gobernanza IA', 'flag'], ['operacion', 'Operación', 'shield'], ['configuracion', 'Configuración', 'settings']];
+  const TABS = [['analitica', 'Analítica', 'chart'], ['pagos', 'Pagos', 'card'], ['equipo', 'Equipo', 'users'], ['espacio', 'Espacio de trabajo', 'send'], ['envivo', 'En vivo', 'clock'], ['indicadores', 'Indicadores', 'chart'], ['rendimiento', 'Rendimiento', 'bolt'], ['leads', 'Leads', 'users'], ['agentes', 'Agentes', 'spark'], ['humano', 'Equipo humano', 'user'], ['bitacora', 'Bitácora', 'clock'], ['gobernanza', 'Gobernanza IA', 'flag'], ['operacion', 'Operación', 'shield'], ['configuracion', 'Configuración', 'settings']];
   const tabBar = h('nav', { class: 'admin-tabs', role: 'tablist', 'aria-label': 'Secciones del panel' });
   const panes = {};
   const kpis = h('div', { class: 'kpis' });
@@ -248,14 +253,13 @@ async function renderDashboard(user) {
   const agentsBox = h('div', { class: 'stack-lg' });
   const govBox = h('div', { class: 'stack-lg gov-admin' });
   const teamBox = h('div', { class: 'stack-lg' });
-  panes.analitica = h('div', { role: 'tabpanel' }, kpis, grid);
   panes.equipo = h('div', { role: 'tabpanel', hidden: true }, teamBox);
   panes.leads = h('div', { role: 'tabpanel', hidden: true }, leadsBox);
   panes.agentes = h('div', { role: 'tabpanel', hidden: true }, agentsBox);
   panes.gobernanza = h('div', { role: 'tabpanel', hidden: true }, govBox);
   panes.operacion = h('div', { role: 'tabpanel', hidden: true }, opsGrid);
   const extra = {};
-  for (const id of ['espacio', 'envivo', 'indicadores', 'rendimiento', 'humano', 'bitacora', 'configuracion']) { extra[id] = h('div', { class: 'stack-lg' }); panes[id] = h('div', { role: 'tabpanel', hidden: true }, extra[id]); }
+  for (const id of ['analitica', 'pagos', 'espacio', 'envivo', 'indicadores', 'rendimiento', 'humano', 'bitacora', 'configuracion']) { extra[id] = h('div', { class: 'stack-lg' }); panes[id] = h('div', { role: 'tabpanel', hidden: true }, extra[id]); }
   // Secciones del equipo humano: la cuenta Google del dueño se cambia por una sesión del panel (el servidor verifica el token).
   let panelP = null;
   const panelSession = () => (panelP ||= (async () => {
@@ -277,6 +281,8 @@ async function renderDashboard(user) {
     if (id === 'equipo' && !loaded.equipo) { loaded.equipo = 1; renderTeam(teamBox, user, { owner: true }); }
     if (extra[id] && !loaded[id]) {
       loaded[id] = 1;
+      if (id === 'analitica') withPanel(extra[id], renderAnalytics);
+      if (id === 'pagos') withPanel(extra[id], renderPayments);
       if (id === 'espacio') withPanel(extra[id], renderWorkspace);
       if (id === 'envivo') withPanel(extra[id], (b, t, me) => import('./admin-envivo.js?v=7.14.0').then((m) => m.renderLive(b, t, me)));
       if (id === 'rendimiento') withPanel(extra[id], renderPerf);
@@ -293,103 +299,8 @@ async function renderDashboard(user) {
   root.append(tabBar, ...Object.values(panes));
   const card = (title, cls = '', extra = null) => { const c = h('section', { class: 'card panel ' + cls }, h('div', { class: 'panel-head' }, h('h2', {}, title), extra)); grid.append(c); return c; };
 
+  // Analítica y Pagos: datos del servidor (agregados, solo dueño) en admin-analitica.js / admin-pagos.js.
   const { fs, db } = await getStore();
-  const days = Number(document.getElementById('range').value || 30);
-  document.getElementById('range').onchange = () => renderDashboard(user);
-
-  // --- Estadísticas diarias ---
-  const start = new Date(Date.now() - (days - 1) * 86400000).toISOString().slice(0, 10);
-  let stats = [];
-  let statsErr = null;
-  try {
-    const s = await fs.getDocs(fs.query(fs.collection(db, 'stats_daily'), fs.where(fs.documentId(), '>=', start)));
-    stats = s.docs.map((d) => ({ day: d.id, ...d.data() }));
-  } catch (e) { statsErr = friendlyError(e); }
-  const series = [];
-  for (let i = days - 1; i >= 0; i--) {
-    const d = new Date(Date.now() - i * 86400000).toISOString().slice(0, 10);
-    const row = stats.find((x) => x.day === d);
-    series.push({ label: d.slice(8, 10) + '/' + d.slice(5, 7), v: row ? Number(row.views || 0) : 0, u: row ? Number(row.visitors || 0) : 0, s: row ? Number(row.signups || 0) : 0 });
-  }
-  const today = series[series.length - 1];
-  const totalViews = series.reduce((a, p) => a + p.v, 0);
-  const totalVisitors = series.reduce((a, p) => a + p.u, 0);
-  const totalSignups = series.reduce((a, p) => a + p.s, 0);
-
-  // --- Usuarios y planes ---
-  const counts = {};
-  try {
-    const col = fs.collection(db, 'users');
-    const [all, pro, emp] = await Promise.all([fs.getCount(col), fs.getCount(fs.query(col, fs.where('plan', '==', 'pro'))), fs.getCount(fs.query(col, fs.where('plan', '==', 'empresa')))]);
-    counts.all = all.data().count; counts.pro = pro.data().count; counts.empresa = emp.data().count; counts.gratis = Math.max(0, counts.all - counts.pro - counts.empresa);
-  } catch (e) { counts.err = friendlyError(e); }
-
-  const kpi = (label, value, sub, ic) => h('div', { class: 'kpi' }, h('span', { class: 'kpi-ic', html: icon(ic) }), h('div', {}, h('small', {}, label), h('strong', {}, value), sub ? h('span', { class: 'muted tiny' }, sub) : null));
-  const liveEl = h('strong', {}, '—');
-  kpis.append(
-    kpi('Visitas hoy', today.v.toLocaleString('es-AR'), `${totalViews.toLocaleString('es-AR')} en ${days} días`, 'eye'),
-    kpi('Visitantes únicos', totalVisitors.toLocaleString('es-AR'), 'por día, sumados', 'users'),
-    h('div', { class: 'kpi live' }, h('span', { class: 'kpi-ic', html: icon('globe') }), h('div', {}, h('small', {}, 'En línea ahora'), liveEl, h('span', { class: 'muted tiny' }, 'presencia en tiempo real'))),
-    kpi('Registros', totalSignups.toLocaleString('es-AR'), (typeof counts.all === 'number' ? counts.all.toLocaleString('es-AR') : '—') + ' usuarios en total', 'userPlus'),
-    ...revenueKpis(user));
-  // Ingresos reales por moneda (Mercado Pago ARS · PayPal USD), desde el Worker (D1)
-  renderRevenueCard(grid, user);
-  if (statsErr) grid.append(h('div', { class: 'alert warn wide' }, h('span', { html: icon('warn') }), h('div', {}, 'No se pudieron leer las estadísticas: ', statsErr, ' Publicá las reglas de Firestore (firebase/firestore.rules).')));
-
-  card('Visitas por día', 'span-2').insertAdjacentHTML('beforeend', areaChart(series));
-  const countries = sumMaps(stats, 'country');
-  const mapCard = card('Visitantes por país', 'span-2');
-  const mapWrap = h('div', { class: 'map-wrap' }, h('div', { class: 'skeleton', style: 'height:260px' }));
-  mapCard.append(h('div', { class: 'map-grid' }, mapWrap, h('div', { html: bars(Object.entries(countries), { labeler: ccName, flagged: true, max: 10 }) })));
-  worldMap(countries).then((svg) => { mapWrap.innerHTML = svg; });
-  card('Dispositivos').insertAdjacentHTML('beforeend', donut(Object.entries(sumMaps(stats, 'device')), { mobile: 'Teléfono', desktop: 'Computadora', tablet: 'Tablet' }));
-  card('Sistemas operativos').insertAdjacentHTML('beforeend', bars(Object.entries(sumMaps(stats, 'os'))));
-  card('Navegadores').insertAdjacentHTML('beforeend', bars(Object.entries(sumMaps(stats, 'browser'))));
-  card('Páginas más vistas').insertAdjacentHTML('beforeend', bars(Object.entries(sumMaps(stats, 'page')), { labeler: (k) => (k === 'inicio' ? '/' : '/' + k.replace(/_/g, '/')) }));
-  card('Origen del tráfico').insertAdjacentHTML('beforeend', bars(Object.entries(sumMaps(stats, 'ref')), { labeler: (k) => k.replace(/_/g, '.') }));
-  card('Planes').insertAdjacentHTML('beforeend', counts.err ? `<p class="muted small">${esc(counts.err)}</p>` : donut([['gratis', counts.gratis], ['pro', counts.pro], ['empresa', counts.empresa]], { gratis: 'Gratis', pro: 'Pro', empresa: 'Empresa' }));
-  const hours = sumMaps(stats, 'hour');
-  card('Horario de visitas (UTC)').insertAdjacentHTML('beforeend', `<div class="hours">${Array.from({ length: 24 }, (_, i) => { const k = String(i).padStart(2, '0'); const v = hours[k] || 0; const m = Math.max(1, ...Object.values(hours)); return `<i style="height:${Math.max(4, (v / m) * 100)}%" title="${k}h: ${v}"></i>`; }).join('')}</div><div class="hours-axis"><span>0h</span><span>12h</span><span>23h</span></div>`);
-
-  // --- En vivo (RTDB) ---
-  const liveCard = card('En vivo', '', h('span', { class: 'chip ok' }, h('span', { class: 'dot' }), 'tiempo real'));
-  const liveBody = h('div', {}, h('p', { class: 'muted small' }, 'Conectando…'));
-  liveCard.append(liveBody);
-  const liveMapCard = card('Mapa en vivo', 'span-2', h('span', { class: 'chip ok' }, h('span', { class: 'dot' }), 'ahora'));
-  const liveMap = h('div', { class: 'map-wrap' }, h('div', { class: 'skeleton', style: 'height:220px' }));
-  liveMapCard.append(liveMap);
-  getRtdb().then(({ rt, db: rdb }) => {
-    rt.onValue(rt.ref(rdb, 'presence'), (snap) => {
-      const v = snap.val() || {};
-      const list = Object.values(v).filter((p) => p && Date.now() - (p.t || 0) < 6 * 3600_000);
-      liveEl.textContent = list.length.toLocaleString('es-AR');
-      const byC = {}, byD = {}, byP = {};
-      list.forEach((p) => { byC[p.c] = (byC[p.c] || 0) + 1; byD[p.d] = (byD[p.d] || 0) + 1; byP[p.p] = (byP[p.p] || 0) + 1; });
-      worldMap(byC).then((svg) => { liveMap.innerHTML = svg; });
-      liveBody.innerHTML = `<p style="font-size:2rem;font-weight:700;margin:0">${list.length}</p><p class="muted small">usuarios conectados</p>` + bars(Object.entries(byC), { labeler: ccName, flagged: true, max: 6 }) + bars(Object.entries(byD), { labeler: (k) => ({ mobile: 'Teléfono', desktop: 'Computadora', tablet: 'Tablet' }[k] || k) }) + bars(Object.entries(byP), { labeler: (k) => (k === 'inicio' ? '/' : '/' + k), max: 5 });
-    }, (e) => { liveBody.innerHTML = `<p class="muted small">Presencia no disponible: ${esc(friendlyError(e))} Publicá firebase/database.rules.json.</p>`; liveMap.innerHTML = '<p class="muted small">Sin datos de presencia.</p>'; });
-  }).catch(() => { liveBody.innerHTML = '<p class="muted small">Realtime Database no disponible.</p>'; });
-
-  // --- Ranking de países por período (todo / 7 días / hoy) ---
-  const rankCard = card('Ranking de países', 'span-2');
-  const rankSeg = h('div', { class: 'seg seg-sm', role: 'tablist', 'aria-label': 'Período del ranking' });
-  const rankBody = h('div', {});
-  rankCard.querySelector('.panel-head').append(rankSeg);
-  rankCard.append(rankBody);
-  let allStats = null;
-  const drawRank = async (period) => {
-    rankSeg.querySelectorAll('button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.p === period)));
-    let src = [];
-    if (period === 'hoy') src = stats.filter((d) => d.day === new Date().toISOString().slice(0, 10));
-    else if (period === '7d') { const from = new Date(Date.now() - 6 * 864e5).toISOString().slice(0, 10); src = stats.filter((d) => d.day >= from); }
-    else {
-      if (!allStats) { try { const q = await fs.getDocs(fs.collection(db, 'stats_daily')); allStats = q.docs.map((d) => ({ day: d.id, ...d.data() })); } catch { allStats = stats; } }
-      src = allStats;
-    }
-    rankBody.innerHTML = bars(Object.entries(sumMaps(src, 'country')), { labeler: ccName, flagged: true, max: 15 });
-  };
-  for (const [p, l] of [['todo', 'Histórico'], ['7d', '7 días'], ['hoy', 'Hoy']]) rankSeg.append(h('button', { type: 'button', role: 'tab', 'data-p': p, onclick: () => drawRank(p) }, l));
-  drawRank('7d');
 
   // --- Herramientas ---
   renderSystemTools(opsGrid, user, fs, db);
