@@ -3,8 +3,11 @@
  *  - Una escritura agregada por vista en stats_daily/{AAAA-MM-DD} (contadores, sin IP ni identificadores).
  *  - País aproximado desde https://www.cloudflare.com/cdn-cgi/trace (campo loc) o el idioma del navegador.
  *  - Presencia en vivo en Realtime Database (/presence/{sesión}), se borra sola al desconectarse.
+ *  - Desde 2026-11-10 también al servidor propio (POST /api/t): vista agregada + latido de presencia cada 60 s mientras
+ *    la pestaña está visible. El país lo pone Cloudflare (request.cf); sin IP, sin correo, sin cookies.
  */
 import { getStore, getRtdb } from './firebase.js';
+import { CONFIG } from './config.js';
 
 export function parseUA(ua = navigator.userAgent) {
   const isTablet = /iPad|Tablet|PlayBook|Silk/i.test(ua) || (/Android/i.test(ua) && !/Mobile/i.test(ua)) || (navigator.maxTouchPoints > 1 && /Macintosh/.test(ua));
@@ -91,8 +94,42 @@ export async function startPresence() {
   });
 }
 
+/* ---------- Servidor propio: vistas agregadas y presencia de 5 minutos ---------- */
+const API = String(CONFIG.API_BASE || '').replace(/\/+$/, '');
+function tabSid() {
+  try { let s = sessionStorage.getItem('ac.sid'); if (!s) { s = 's' + Math.random().toString(36).slice(2, 12); sessionStorage.setItem('ac.sid', s); } return s; }
+  catch { return 's' + Math.random().toString(36).slice(2, 12); }
+}
+function beacon(k, extra = {}) {
+  if (!API) return;
+  const body = JSON.stringify({ k, sid: tabSid(), p: pageKey(), ...extra });
+  try {
+    // text/plain: sin preflight. keepalive: llega aunque se cierre la pestaña.
+    fetch(API + '/api/t', { method: 'POST', body, headers: { 'Content-Type': 'text/plain' }, keepalive: true, credentials: 'omit', cache: 'no-store' }).catch(() => {});
+  } catch {}
+}
+let serverStarted = false;
+export function startServerAnalytics() {
+  if (serverStarted || !API) return; serverStarted = true;
+  if (navigator.webdriver && !/[?&]track=1/.test(location.search)) return; // no contar robots de prueba
+  const day = new Date().toISOString().slice(0, 10);
+  let nv = 0;
+  try { if (localStorage.getItem('ac.seen2') !== day) { localStorage.setItem('ac.seen2', day); nv = 1; } } catch {}
+  const r = refKey();
+  beacon('v', { nv, ...(r ? { r } : {}), tm: navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent) ? 1 : 0 });
+  let beats = 0;
+  const t = setInterval(() => {
+    if (document.visibilityState !== 'visible') return;
+    if (++beats > 60) { clearInterval(t); return; }   // como mucho 1 hora de latidos por página
+    beacon('p');
+  }, 60_000);
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') beacon('p'); });
+  addEventListener('pagehide', () => beacon('x'));
+}
+
 export function initAnalytics() {
   const run = () => {
+    startServerAnalytics();
     trackPageView().catch((e) => console.warn('[analítica] no disponible', e && e.code));
     startPresence().catch(() => {});
   };
