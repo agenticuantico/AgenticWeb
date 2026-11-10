@@ -380,3 +380,13 @@
 .ab-card.cc.vpc.is-full .ab-view { min-height: min(56vh, 620px); }
 /* Celular: el título entra completo */
 @media (max-width: 520px) { .vpc-title > span, .vpc-time > span { display: none; } .vpc-time { padding: 3px 8px; } }
+/* Formulario seguro de inicio de sesión como camino principal (2026-11-10); «Tomar el control» queda como enlace secundario */
+.abf-login { gap: 10px; }
+.abf-lead { margin: 0; color: #3f3f46; }
+.abf-check label { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px; cursor: pointer; }
+.abf-check small { font-size: 11.5px; font-weight: 500; }
+.abf-actions .abf-submit { min-height: 40px; padding: 0 18px; }
+.abf-alt-take { margin: 0; font-size: 12.5px; }
+.abf-link { border: 0; background: none; padding: 2px 0; font: inherit; font-weight: 650; color: #18181b; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; min-height: 32px; }
+.abf-link:focus-visible, .abf-forget:focus-visible { outline: 2px solid #e6c579; outline-offset: 2px; border-radius: 6px; }
+@media (max-width: 420px) { .abf-consent .abf-row .btn { flex: 1 1 auto; justify-content: center; } }

@@ -2214,5 +2214,17 @@
 "Contesta enseguida lo simple y se toma más tiempo para cuentas, código o problemas largos. No tenés que elegir un modo.": "Answers simple things right away and takes longer for math, code or long problems. You don't have to pick a mode.",
 "Chat que decide solo cuánto pensar, voz, llamada en vivo, documentos, cámara, lienzo de código, búsqueda web con fuentes, memoria, cuentas y suscripciones. Con cuenta también tenés tareas programadas y el ordenador virtual, un navegador real que el agente usa mientras mirás. Las conexiones con Gmail, Drive y Calendar todavía no están abiertas al público; GitHub y LinkedIn están en prueba.": "A chat that decides on its own how much to think, voice, live calls, documents, camera, code canvas, web search with sources, memory, accounts and subscriptions. With an account you also get scheduled tasks and the virtual computer, a real browser the agent uses while you watch. Connections to Gmail, Drive and Calendar are not open to the public yet; GitHub and LinkedIn are in testing.",
 "Cómo funciona AgentiCuántico: chat por voz o texto, documentos, tareas de varios pasos con plan visible y un ordenador virtual con navegador real. Lo importante siempre te lo pregunta.": "How AgentiCuántico works: voice or text chat, documents, multi-step tasks with a visible plan and a virtual computer with a real browser. It always asks you before anything important.",
-"Si la tarea tiene varios pasos, arma un plan, usa herramientas y te muestra cada paso; cuando hace falta una página web, usa el ordenador virtual y ves la pantalla en vivo.": "If the task has several steps, it makes a plan, uses tools and shows you each step; when a web page is needed, it uses the virtual computer and you see the screen live."
+"Si la tarea tiene varios pasos, arma un plan, usa herramientas y te muestra cada paso; cuando hace falta una página web, usa el ordenador virtual y ves la pantalla en vivo.": "If the task has several steps, it makes a plan, uses tools and shows you each step; when a web page is needed, it uses the virtual computer and you see the screen live.",
+"Correo o usuario": "Email or username",
+"Celular": "Mobile phone",
+"Recordar en este sitio": "Remember on this site",
+"(cifrado, solo para vos; lo borrás cuando quieras)": "(encrypted, only for you; delete it anytime)",
+"Usar la guardada": "Use the saved one",
+"Olvidar la guardada": "Forget the saved one",
+"Enviar código": "Send code",
+"¿Preferís escribirlo vos en la pantalla?": "Prefer to type it yourself on the screen?",
+"Nunca escribo datos de tarjetas. Las cuentas recordadas se borran en Tu cuenta → Cuentas conectadas.": "I never type card details. Remembered accounts can be deleted in Your account → Connected accounts.",
+"Listo: borré la cuenta guardada de este sitio.": "Done: I deleted the saved account for this site.",
+"No había una cuenta guardada.": "There was no saved account.",
+"No pude completarlo. Probá de nuevo o tocá «Tomar el control».": "I couldn't complete it. Try again or tap “Take control”."
 }

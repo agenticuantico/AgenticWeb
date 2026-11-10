@@ -2212,5 +2212,17 @@
 "Contesta enseguida lo simple y se toma más tiempo para cuentas, código o problemas largos. No tenés que elegir un modo.": "Responde na hora o que é simples e leva mais tempo para contas, código ou problemas longos. Você não precisa escolher um modo.",
 "Chat que decide solo cuánto pensar, voz, llamada en vivo, documentos, cámara, lienzo de código, búsqueda web con fuentes, memoria, cuentas y suscripciones. Con cuenta también tenés tareas programadas y el ordenador virtual, un navegador real que el agente usa mientras mirás. Las conexiones con Gmail, Drive y Calendar todavía no están abiertas al público; GitHub y LinkedIn están en prueba.": "Chat que decide sozinho quanto pensar, voz, chamada ao vivo, documentos, câmera, tela de código, pesquisa na web com fontes, memória, contas e assinaturas. Com conta você também tem tarefas agendadas e o computador virtual, um navegador real que o agente usa enquanto você assiste. As conexões com Gmail, Drive e Calendar ainda não estão abertas ao público; GitHub e LinkedIn estão em teste.",
 "Cómo funciona AgentiCuántico: chat por voz o texto, documentos, tareas de varios pasos con plan visible y un ordenador virtual con navegador real. Lo importante siempre te lo pregunta.": "Como o AgentiCuántico funciona: chat por voz ou texto, documentos, tarefas de várias etapas com plano visível e um computador virtual com navegador real. O que é importante, ele sempre pergunta antes.",
-"Si la tarea tiene varios pasos, arma un plan, usa herramientas y te muestra cada paso; cuando hace falta una página web, usa el ordenador virtual y ves la pantalla en vivo.": "Se a tarefa tem várias etapas, ele monta um plano, usa ferramentas e mostra cada passo; quando precisa de uma página web, usa o computador virtual e você vê a tela ao vivo."
+"Si la tarea tiene varios pasos, arma un plan, usa herramientas y te muestra cada paso; cuando hace falta una página web, usa el ordenador virtual y ves la pantalla en vivo.": "Se a tarefa tem várias etapas, ele monta um plano, usa ferramentas e mostra cada passo; quando precisa de uma página web, usa o computador virtual e você vê a tela ao vivo.",
+"Correo o usuario": "E-mail ou usuário",
+"Celular": "Celular",
+"Recordar en este sitio": "Lembrar neste site",
+"(cifrado, solo para vos; lo borrás cuando quieras)": "(criptografado, só para você; apague quando quiser)",
+"Usar la guardada": "Usar a salva",
+"Olvidar la guardada": "Esquecer a salva",
+"Enviar código": "Enviar código",
+"¿Preferís escribirlo vos en la pantalla?": "Prefere digitar você mesmo na tela?",
+"Nunca escribo datos de tarjetas. Las cuentas recordadas se borran en Tu cuenta → Cuentas conectadas.": "Nunca digito dados de cartão. As contas lembradas são apagadas em Sua conta → Contas conectadas.",
+"Listo: borré la cuenta guardada de este sitio.": "Pronto: apaguei a conta salva deste site.",
+"No había una cuenta guardada.": "Não havia uma conta salva.",
+"No pude completarlo. Probá de nuevo o tocá «Tomar el control».": "Não consegui concluir. Tente de novo ou toque em “Assumir o controle”."
 }

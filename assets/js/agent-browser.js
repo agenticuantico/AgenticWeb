@@ -17,15 +17,15 @@
  */
 import { h, icon } from './ui.js';
 import * as engine from './chat/engine.js';
-import { needsWebAction, isFollowUp, wantsComputer, stripComputer } from './chat/intent.js?v=7.13.0';
-import { statusLine, visitedSites, summaryMeta, workMode, workSteps, VPC_NAME, VPC_HELP, elapsedText, taskElapsed, quotaText, addressText, whatIDid } from './chat/computer-status.js?v=7.13.0';
+import { needsWebAction, isFollowUp, wantsComputer, stripComputer } from './chat/intent.js?v=7.14.0';
+import { statusLine, visitedSites, summaryMeta, workMode, workSteps, VPC_NAME, VPC_HELP, elapsedText, taskElapsed, quotaText, addressText, whatIDid } from './chat/computer-status.js?v=7.14.0';
 /** Reexportadas para el código que ya las importaba desde acá (la lógica vive en chat/intent.js, sin DOM). */
 export { needsWebAction, isFollowUp };
 
 (function css() {
   if (typeof document === 'undefined' || document.getElementById('ac-ab2-css')) return;
   const l = document.createElement('link');
-  l.id = 'ac-ab2-css'; l.rel = 'stylesheet'; l.href = '/assets/css/agent-browser.css?v=7.13.0';
+  l.id = 'ac-ab2-css'; l.rel = 'stylesheet'; l.href = '/assets/css/agent-browser.css?v=7.14.0';
   document.head.appendChild(l);
 })();
 
@@ -483,38 +483,64 @@ export class AgentBrowserCard {
   }
 
   loginCard(ask) {
-    const user = h('input', { name: 'username', autocomplete: 'off', autocapitalize: 'off', spellcheck: 'false', 'aria-label': 'Usuario o correo', placeholder: 'tu@correo.com' });
-    const pass = h('input', { name: 'password', type: 'password', autocomplete: 'new-password', 'aria-label': 'Contraseña', placeholder: 'Tu contraseña' });
-    const code = h('input', { name: 'code', inputmode: 'numeric', autocomplete: 'one-time-code', 'aria-label': 'Código de verificación', placeholder: '123456', maxlength: '12' });
-    const save = h('input', { type: 'checkbox', name: 'save' });   // guardar es opcional: casilla sin tildar
-    const eye = h('button', { class: 'abf-eye', type: 'button', 'aria-label': 'Mostrar contraseña', html: icon('eye'), onclick: () => { pass.type = pass.type === 'password' ? 'text' : 'password'; } });
+    // Formulario seguro (camino principal): los datos van por HTTPS directo al servidor, que los escribe en la página.
+    // No pasan por el modelo, no quedan en el chat ni en los pasos, y solo se guardan (cifrados) si se tilda «Recordar en este sitio».
+    const uid = 'abf' + Math.random().toString(36).slice(2, 8);
+    const inp = (name, attrs) => h('input', { id: `${uid}-${name}`, name, autocomplete: 'off', autocapitalize: 'off', spellcheck: 'false', ...attrs });
+    const user = inp('username', { placeholder: 'tu@correo.com o tu usuario' });
+    const pass = inp('password', { type: 'password', autocomplete: 'new-password', placeholder: 'Tu contraseña' });
+    const phone = inp('phone', { type: 'tel', inputmode: 'tel', placeholder: '+54 9 291 000 0000', maxlength: '30' });
+    const code = inp('code', { inputmode: 'numeric', autocomplete: 'one-time-code', placeholder: '123456', maxlength: '12' });
+    const save = h('input', { type: 'checkbox', name: 'save', id: `${uid}-save` });   // opcional: sin tildar
+    const eye = h('button', { class: 'abf-eye', type: 'button', 'aria-label': 'Mostrar contraseña', 'aria-controls': `${uid}-password`, html: icon('eye'), onclick: () => { pass.type = pass.type === 'password' ? 'text' : 'password'; eye.setAttribute('aria-label', pass.type === 'password' ? 'Mostrar contraseña' : 'Ocultar contraseña'); } });
     const status = h('span', { class: 'abf-status small muted', 'aria-live': 'polite' });
-    const form = h('form', { class: 'ab-form-card abf-login', autocomplete: 'off' },
-      h('div', { class: 'ap-head' }, h('span', { class: 'abf-ic', html: icon('lock') }), h('strong', {}, 'Iniciar sesión'), ask.host ? h('span', { class: 'abf-host', 'data-no-i18n': '' }, ask.host) : null),
-      ask.saved && !ask.needCode
-        ? h('div', { class: 'abf-consent' }, h('p', { class: 'small' }, `Tenés una cuenta guardada para ${ask.host || 'este sitio'}. ¿Te doy permiso para usarla ahora? Solo la cargo si tocás «Sí, usarla».`),
-          h('div', { class: 'abf-row' }, h('button', { class: 'btn btn-sm btn-primary abf-saved', type: 'button', onclick: () => this.sendLogin({ useSaved: true }, form, status) }, h('span', { html: icon('check') }), 'Sí, usarla'),
-            h('span', { class: 'small muted' }, 'o escribí otros datos abajo')))
+    const field = (label, el, extra) => h('div', { class: 'abf-field' }, h('label', { for: el.id }, label), extra || el);
+    const onlyCode = !!ask.needCode && !ask.needUser && !ask.needPassword && !ask.needPhone;
+    const showUser = !onlyCode && ask.needUser !== false;
+    const showPass = !onlyCode && ask.needPassword !== false;
+    const showPhone = !!ask.needPhone;
+    const showCode = !!ask.needCode;
+    const host = ask.host || 'este sitio';
+    const take = () => { this.setTakeover(true); this.toggleFull(true); };
+    const form = h('form', { class: 'ab-form-card abf-login', autocomplete: 'off', 'aria-label': `Iniciar sesión en ${host}` },
+      h('div', { class: 'ap-head' }, h('span', { class: 'abf-ic', html: icon('lock') }), h('strong', {}, onlyCode ? 'Código de verificación' : 'Iniciar sesión'), ask.host ? h('span', { class: 'abf-host', 'data-no-i18n': '' }, ask.host) : null),
+      h('p', { class: 'small abf-lead' }, onlyCode
+        ? `${host} te mandó un código. Escribilo acá y lo cargo yo en la página.`
+        : `Escribí tus datos acá y los cargo yo en ${host}. Van cifrados directo al servidor: el agente no los ve y no quedan en el chat.`),
+      ask.saved && !onlyCode
+        ? h('div', { class: 'abf-consent' },
+          h('p', { class: 'small' }, `Tenés una cuenta guardada para ${host}. Solo la uso si tocás «Usar la guardada».`),
+          h('div', { class: 'abf-row' },
+            h('button', { class: 'btn btn-sm btn-primary abf-saved', type: 'button', onclick: () => this.sendLogin({ useSaved: true }, form, status) }, h('span', { html: icon('check') }), 'Usar la guardada'),
+            h('button', { class: 'btn btn-sm btn-ghost abf-forget', type: 'button', onclick: (e) => this.forgetLogin(ask.host, e.currentTarget, status) }, 'Olvidar la guardada')))
         : null,
-      h('div', { class: 'abf-take' },
-        h('p', { class: 'small' }, `Tomá el control y escribí vos tus datos en la pantalla${ask.host ? ' de ' + ask.host : ''}. Van directo al sitio: no los guardamos y el agente no los ve.`),
-        h('button', { class: 'btn btn-sm btn-primary abf-take-btn', type: 'button', onclick: () => { this.setTakeover(true); this.toggleFull(true); } }, h('span', { html: icon('keyboard') }), 'Tomar el control')),
-      h('details', { class: 'abf-alt' }, h('summary', {}, 'Prefiero que los cargues vos (formulario seguro)'),
-        h('p', { class: 'small' }, 'Los cargo yo en la página. Van directo al servidor, se guardan cifrados solo si lo elegís y el agente nunca los ve.'),
-        ask.needUser !== false ? h('label', { class: 'abf-field' }, h('span', {}, 'Usuario o correo'), user) : null,
-        ask.needPassword !== false ? h('label', { class: 'abf-field' }, h('span', {}, 'Contraseña'), h('div', { class: 'abf-pw' }, pass, eye)) : null,
-        ask.needCode ? h('label', { class: 'abf-field' }, h('span', {}, 'Código de verificación'), code) : null,
-        ask.needCode ? null : h('label', { class: 'abf-check' }, save, h('span', {}, 'Guardar esta cuenta para la próxima (cifrada)')),
-        h('div', { class: 'abf-row' }, h('button', { class: 'btn btn-sm', type: 'submit' }, h('span', { html: icon('check') }), 'Ingresar'), status)),
-      h('p', { class: 'abf-fine muted' }, 'Nunca escribo datos de tarjetas. Podés borrar tus accesos guardados en Tu cuenta → Cuentas conectadas.'));
+      showUser ? field('Correo o usuario', user) : null,
+      showPhone ? field('Celular', phone) : null,
+      showPass ? field('Contraseña', pass, h('div', { class: 'abf-pw' }, pass, eye)) : null,
+      showCode ? field('Código de verificación', code) : null,
+      onlyCode ? null : h('div', { class: 'abf-check' }, save, h('label', { for: save.id }, h('span', {}, 'Recordar en este sitio'), h('small', { class: 'muted' }, ' (cifrado, solo para vos; lo borrás cuando quieras)'))),
+      h('div', { class: 'abf-row abf-actions' }, h('button', { class: 'btn btn-sm btn-primary abf-submit', type: 'submit' }, h('span', { html: icon('check') }), onlyCode ? 'Enviar código' : 'Ingresar'), status),
+      h('p', { class: 'abf-alt-take small muted' }, '¿Preferís escribirlo vos en la pantalla? ',
+        h('button', { class: 'abf-link', type: 'button', onclick: take }, 'Tomar el control')),
+      h('p', { class: 'abf-fine muted' }, 'Nunca escribo datos de tarjetas. Las cuentas recordadas se borran en Tu cuenta → Cuentas conectadas.'));
     form.addEventListener('submit', (e) => {
       e.preventDefault();
-      const body = { username: user.value, password: pass.value, code: code.value.replace(/\s+/g, ''), save: !ask.needCode && save.checked, host: ask.host };
-      user.value = ''; pass.value = ''; code.value = '';
-      if (!body.username && !body.password && !body.code) { status.textContent = 'Completá los datos.'; return; }
+      const body = { username: showUser ? user.value : '', password: showPass ? pass.value : '', phone: showPhone ? phone.value.trim() : '', code: showCode ? code.value.replace(/\s+/g, '') : '', save: !onlyCode && save.checked, host: ask.host };
+      user.value = ''; pass.value = ''; phone.value = ''; code.value = '';
+      if (!body.username && !body.password && !body.phone && !body.code) { status.textContent = 'Completá los datos.'; return; }
       this.sendLogin(body, form, status);
     });
+    setTimeout(() => { const first = form.querySelector('input:not([type=checkbox])'); if (first && !matchMedia('(max-width: 600px)').matches) first.focus({ preventScroll: true }); }, 50);
     return form;
+  }
+
+  async forgetLogin(host, btn, status) {
+    btn.disabled = true;
+    try {
+      const r = await this.api('/api/agent/logins/delete', { body: { host, match: true } });
+      status.textContent = r && r.ok ? 'Listo: borré la cuenta guardada de este sitio.' : 'No había una cuenta guardada.';
+      const box = btn.closest('.abf-consent'); if (box) box.remove();
+    } catch { btn.disabled = false; status.textContent = 'No pude borrarla. Probá desde Tu cuenta → Cuentas conectadas.'; }
   }
 
   async sendLogin(body, form, status) {
@@ -527,7 +553,7 @@ export class AgentBrowserCard {
       this.loop();
     } catch (e) {
       form.querySelectorAll('button,input').forEach((x) => { x.disabled = false; });
-      status.textContent = e.code === 'browser_busy' ? 'Esperando un navegador libre…' : 'No pude completarlo. Probá «Lo hago yo».';
+      status.textContent = e.code === 'browser_busy' ? 'Esperando un navegador libre…' : 'No pude completarlo. Probá de nuevo o tocá «Tomar el control».';
     }
   }
 
