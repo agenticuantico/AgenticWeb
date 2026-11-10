@@ -1,6 +1,6 @@
 /** Idiomas de conversación y voz (banderas rectangulares premium en /assets/flags/rect/). */
 export const LANGS = [
-  { id: 'es-AR', code: 'es', short: 'ES', name: 'Español', region: 'Argentina', flag: 'ar', greeting: '¡Hola! Soy AgentiCuántico.', sub: 'Conversá conmigo, pedime código o una tarea completa: yo me encargo.' },
+  { id: 'es-AR', code: 'es', short: 'ES', name: 'Español', region: 'Argentina', flag: 'ar', greeting: '¡Hola! Soy AgentiCuántico.', sub: 'Conversa conmigo, pídeme código o una tarea completa: yo me encargo.' },
   { id: 'es-ES', code: 'es', short: 'ES', name: 'Español', region: 'España', flag: 'es', greeting: '¡Hola! Soy AgentiCuántico.', sub: 'Conversa conmigo, pídeme código o una tarea completa: yo me encargo.' },
   { id: 'en-US', code: 'en', short: 'EN', name: 'English', region: 'United States', flag: 'us', greeting: 'Hi! I’m AgentiCuántico.', sub: 'Chat with me, ask for code or a complete task: I’ll handle it.' },
   { id: 'pt-BR', code: 'pt', short: 'PT', name: 'Português', region: 'Brasil', flag: 'br', greeting: 'Olá! Eu sou o AgentiCuántico.', sub: 'Converse comigo, peça código ou uma tarefa completa: eu cuido disso.' },

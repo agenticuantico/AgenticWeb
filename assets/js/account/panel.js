@@ -136,7 +136,7 @@ export function openAccount(tab = 'perfil', opts = {}) {
 function signedOut() {
   return h('div', { class: 'acc-empty' },
     h('span', { class: 'acc-empty-ic', html: icon('lock') }),
-    h('h3', {}, 'Ingresá para ver tu cuenta'),
+    h('h3', {}, 'Ingresa para ver tu cuenta'),
     h('p', { class: 'muted' }, 'Tu uso, tus tareas y tus cuentas conectadas se guardan con tu cuenta.'),
     h('a', { class: 'btn btn-primary', href: '/cuenta/?volver=' + encodeURIComponent('/app/#cuenta') }, 'Ingresar'));
 }
@@ -169,7 +169,7 @@ async function viewProfile(el, ctx, load) {
 function voiceLine() {
   const box = h('p', { class: 'acc-note acc-voice', 'aria-live': 'polite' }, h('span', { html: icon('mic') }), h('span', {}, 'Voz del chat: revisando…'));
   call('/api/voice').then((v) => {
-    const txt = !v.stt.available && !v.tts.available ? 'Voz del chat: no disponible en este momento. Podés escribir igual.'
+    const txt = !v.stt.available && !v.tts.available ? 'Voz del chat: no disponible en este momento. Puedes escribir igual.'
       : v.elevenlabs ? 'Voz del chat: voz natural premium activa.'
       : v.deepgram ? 'Voz del chat: voz neural Deepgram activa, con respaldo gratis.'
       : 'Voz del chat: voz neural gratis (con un tope diario; si se agota, usa la voz de tu navegador).';

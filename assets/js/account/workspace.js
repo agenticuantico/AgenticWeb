@@ -19,7 +19,7 @@ export async function renderMemory(el, ctx) {
   const w = await call('/api/workspace');
   el.append(h('div', { class: 'acc-section-h' },
     h('h3', {}, 'Memoria'),
-    h('p', { class: 'muted' }, 'Datos cortos que el chat recuerda entre conversaciones. Son tuyos: los podés cambiar o borrar cuando quieras. Nunca se guardan contraseñas, códigos, tarjetas ni CBU.')));
+    h('p', { class: 'muted' }, 'Datos cortos que el chat recuerda entre conversaciones. Son tuyos: los puedes cambiar o borrar cuando quieras. Nunca se guardan contraseñas, códigos, tarjetas ni CBU.')));
 
   const swId = fid('memsw');
   const sw = h('input', { type: 'checkbox', id: swId, role: 'switch' });
@@ -38,7 +38,7 @@ export async function renderMemory(el, ctx) {
   const draw = (items) => {
     list.innerHTML = '';
     count.textContent = items.length ? `${items.length} de 200 datos guardados.` : '';
-    if (!items.length) { list.append(h('li', { class: 'acc-empty sm' }, h('span', { class: 'acc-empty-ic', html: icon('memory') }), h('p', {}, 'Todavía no hay datos. Agregá uno abajo o decile al chat «Recordá que…».'))); return; }
+    if (!items.length) { list.append(h('li', { class: 'acc-empty sm' }, h('span', { class: 'acc-empty-ic', html: icon('memory') }), h('p', {}, 'Todavía no hay datos. Agrega uno abajo o dile al chat «Recuerda que…».'))); return; }
     for (const m of items) list.append(memItem(m, items, draw));
     clearBtn.hidden = !items.length;
   };
@@ -59,7 +59,7 @@ export async function renderMemory(el, ctx) {
   form.addEventListener('submit', async (e) => {
     e.preventDefault(); err.textContent = '';
     const v = input.value.trim();
-    if (v.length < 2) { err.textContent = 'Escribí el dato que querés que recuerde.'; input.focus(); return; }
+    if (v.length < 2) { err.textContent = 'Escribe el dato que quieres que recuerde.'; input.focus(); return; }
     addBtn.disabled = true;
     try {
       const r = await call('/api/memory', { method: 'POST', body: { text: v } });
@@ -114,12 +114,12 @@ export async function renderProjects(el, ctx) {
   const store = ctx.chat && ctx.chat.store ? ctx.chat.store : null;
   el.append(h('div', { class: 'acc-section-h' },
     h('h3', {}, 'Proyectos'),
-    h('p', { class: 'muted' }, 'Agrupá tus chats por tema: un trabajo, una mudanza, un estudio. Para mover un chat, tocá «⋯» al lado del chat en la barra lateral.')));
+    h('p', { class: 'muted' }, 'Agrupa tus chats por tema: un trabajo, una mudanza, un estudio. Para mover un chat, toca «⋯» al lado del chat en la barra lateral.')));
   const list = h('div', { class: 'acc-projects' });
   const titleOf = (chatId) => { const c = store && store.get(chatId); return c ? c.title : null; };
   const draw = () => {
     list.innerHTML = '';
-    if (!w.projects.length) { list.append(h('div', { class: 'acc-empty sm' }, h('span', { class: 'acc-empty-ic', html: icon('folder') }), h('p', {}, 'Todavía no tenés proyectos. Creá el primero abajo.'))); return; }
+    if (!w.projects.length) { list.append(h('div', { class: 'acc-empty sm' }, h('span', { class: 'acc-empty-ic', html: icon('folder') }), h('p', {}, 'Todavía no tienes proyectos. Crea el primero abajo.'))); return; }
     for (const p of w.projects) list.append(projectCard(p, w, titleOf, draw, ctx));
   };
   draw();
@@ -152,7 +152,7 @@ function projectCard(p, w, titleOf, draw, ctx) {
     cancel.addEventListener('click', close);
     form.addEventListener('submit', async (e) => {
       e.preventDefault(); err.textContent = '';
-      if (!f.name.value.trim()) { err.textContent = 'Escribí un nombre para el proyecto.'; f.name.focus(); return; }
+      if (!f.name.value.trim()) { err.textContent = 'Escribe un nombre para el proyecto.'; f.name.focus(); return; }
       save.disabled = true;
       try { const r = await call(`/api/projects/${encodeURIComponent(p.id)}/edit`, { method: 'POST', body: { name: f.name.value, description: f.desc.value } }); Object.assign(p, r.project); toast('Proyecto actualizado.', 'ok'); refreshApp(); draw(); }
       catch (e2) { err.textContent = errorText(e2); save.disabled = false; }
@@ -181,7 +181,7 @@ function projectForm(w, draw) {
   const form = h('form', { class: 'acc-card acc-form', novalidate: true }, h('h4', {}, 'Nuevo proyecto'), f.el, err, h('div', { class: 'acc-row' }, submit));
   form.addEventListener('submit', async (e) => {
     e.preventDefault(); err.textContent = '';
-    if (!f.name.value.trim()) { err.textContent = 'Escribí un nombre para el proyecto.'; f.name.focus(); return; }
+    if (!f.name.value.trim()) { err.textContent = 'Escribe un nombre para el proyecto.'; f.name.focus(); return; }
     submit.disabled = true;
     try { const r = await call('/api/projects', { method: 'POST', body: { name: f.name.value, description: f.desc.value } }); w.projects.push(r.project); f.name.value = ''; f.desc.value = ''; toast('Proyecto creado.', 'ok'); refreshApp(); draw(); }
     catch (e2) { err.textContent = errorText(e2); }

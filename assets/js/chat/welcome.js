@@ -1,5 +1,5 @@
 /**
- * Bienvenida corta de primera visita en /app/: 3 pasos (preguntá, conectá una cuenta, creá una tarea), salteable.
+ * Bienvenida corta de primera visita en /app/: 3 pasos (pregunta, conecta una cuenta, crea una tarea), salteable.
  * Diálogo nativo (<dialog>) → foco atrapado, Esc cierra, el foco vuelve al campo del chat. Se recuerda en localStorage.
  */
 import { h, icon } from '../ui.js';

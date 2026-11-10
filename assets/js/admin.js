@@ -7,15 +7,15 @@ import { CONFIG } from './config.js';
 import * as auth from './auth.js';
 import { getStore, getRtdb, friendlyError } from './firebase.js';
 import { DEFAULT_SYSTEM, clearSystemCache } from './sysconfig.js';
-import { renderLeads, renderAgentsControl } from './admin-control.js?v=7.14.0';
+import { renderLeads, renderAgentsControl } from './admin-control.js?v=7.19.0';
 import { revenueKpis, renderRevenueCard } from './admin-revenue.js';
 import { renderGovernance } from './admin-governance.js';
-import { renderTeam } from './admin-team.js?v=7.14.0';
-import * as staffUi from './admin-staff.js?v=7.14.0';
-import { renderWorkspace, renderPerf } from './admin-espacio.js?v=7.16.0';
-import { renderKpis } from './admin-indicadores.js?v=7.14.0';
-import { renderAnalytics } from './admin-analitica.js?v=7.16.0';
-import { renderPayments } from './admin-pagos.js?v=7.18.0';
+import { renderTeam } from './admin-team.js?v=7.19.0';
+import * as staffUi from './admin-staff.js?v=7.19.0';
+import { renderWorkspace, renderPerf } from './admin-espacio.js?v=7.19.0';
+import { renderKpis } from './admin-indicadores.js?v=7.19.0';
+import { renderAnalytics } from './admin-analitica.js?v=7.19.0';
+import { renderPayments } from './admin-pagos.js?v=7.19.0';
 
 /** Roles con canales en el Espacio de trabajo (el servidor vuelve a controlar cada canal). */
 const WS_ROLES = new Set(['ceo', 'coceo', 'supervisor']);
@@ -50,7 +50,7 @@ function loginGate(msg) {
   const form = h('form', { class: 'stack', novalidate: true }, h('label', { class: 'label' }, 'Correo'), email, h('label', { class: 'label' }, 'Contraseña'), pass, err, submit);
   form.addEventListener('submit', async (e) => {
     e.preventDefault(); err.hidden = true;
-    if (!email.value || !pass.value) { err.textContent = 'Completá correo y contraseña.'; err.hidden = false; return; }
+    if (!email.value || !pass.value) { err.textContent = 'Completa correo y contraseña.'; err.hidden = false; return; }
     submit.disabled = true;
     try { await auth.signInEmail(email.value, pass.value); }
     catch (ex) { err.textContent = friendlyError(ex); err.hidden = false; }
@@ -63,7 +63,7 @@ function loginGate(msg) {
     // Solo se envía si el correo escrito es el de la cuenta dueña; el mensaje es el mismo en cualquier caso.
     err.hidden = true;
     const v = (email.value || '').trim().toLowerCase();
-    if (!v) { err.textContent = 'Escribí el correo de la cuenta.'; err.hidden = false; return; }
+    if (!v) { err.textContent = 'Escribe el correo de la cuenta.'; err.hidden = false; return; }
     try { if (await isOwner(v)) await auth.resetPassword(v); } catch {}
     info.textContent = 'Si el correo corresponde a una cuenta con acceso, te llegará un enlace para crear o cambiar la contraseña.'; info.hidden = false;
   };
@@ -107,7 +107,7 @@ function renderPanel(token, me) {
     h('div', {}, h('p', { class: 'eyebrow' }, (u.owner ? 'Panel del CEO' : 'Panel del equipo') + (CONFIG.PREVIEW_KEY_LOGIN === true ? ' · copia de prueba' : '')), h('h1', {}, 'AgentiCuántico · Control'),
       h('p', { class: 'small muted panel-who' }, (u.name || u.email || '') + ' · ' + (u.roleLabel || u.role || ''))),
     h('div', { class: 'row' }, h('button', { class: 'btn', type: 'button', html: icon('lock') + 'Cambiar clave', onclick: () => staffUi.changeKeyDialog(token) }), h('button', { class: 'btn btn-ghost', type: 'button', html: icon('logout') + 'Salir', onclick: out }))));
-  if (!perms.has('team.order')) root.append(h('div', { class: 'alert' }, h('span', { html: icon('info') }), h('div', {}, 'Tu rol es de solo lectura en el equipo de agentes: podés mirar, pero no dar órdenes ni aprobar.')));
+  if (!perms.has('team.order')) root.append(h('div', { class: 'alert' }, h('span', { html: icon('info') }), h('div', {}, 'Tu rol es de solo lectura en el equipo de agentes: puedes mirar, pero no dar órdenes ni aprobar.')));
   const tabBar = h('nav', { class: 'admin-tabs', role: 'tablist', 'aria-label': 'Secciones del panel' });
   const TABS = [];
   if (u.owner && perms.has('billing.view')) TABS.push(['analitica', 'Analítica', 'chart'], ['pagos', 'Pagos', 'card']);
@@ -131,9 +131,9 @@ function renderPanel(token, me) {
     if (id === 'analitica') renderAnalytics(boxes.analitica, token);
     if (id === 'pagos') renderPayments(boxes.pagos, token);
     if (id === 'equipo') renderTeam(boxes.equipo, null, { extraHeaders: hdr, owner: u.role === 'ceo' });
-    if (id === 'agentes') import('./admin-agents.js?v=7.14.0').then((m) => m.renderAutonomy(boxes.agentes, null, { extraHeaders: hdr }));
+    if (id === 'agentes') import('./admin-agents.js?v=7.19.0').then((m) => m.renderAutonomy(boxes.agentes, null, { extraHeaders: hdr }));
     if (id === 'espacio') renderWorkspace(boxes.espacio, token, me);
-    if (id === 'envivo') import('./admin-envivo.js?v=7.14.0').then((m) => m.renderLive(boxes.envivo, token, me));
+    if (id === 'envivo') import('./admin-envivo.js?v=7.19.0').then((m) => m.renderLive(boxes.envivo, token, me));
     if (id === 'rendimiento') renderPerf(boxes.rendimiento, token, me);
     if (id === 'indicadores') renderKpis(boxes.indicadores, token, me);
     if (id === 'humano') staffUi.renderStaff(boxes.humano, token, me);
@@ -156,12 +156,12 @@ auth.watchUser(async (user) => {
   if (!ok && isOwnerEmail && user.emailVerified) {
     root.innerHTML = '';
     const btn = h('button', { class: 'btn btn-primary', type: 'button' }, 'Activar acceso de dueño');
-    btn.onclick = async () => { btn.disabled = true; try { await auth.bootstrapOwner(user); logEvent(user, 'admin_bootstrap'); location.reload(); } catch (e) { btn.disabled = false; toast('No se pudo activar: ' + friendlyError(e) + ' Verificá que las reglas estén publicadas.', 'error', 8000); } };
+    btn.onclick = async () => { btn.disabled = true; try { await auth.bootstrapOwner(user); logEvent(user, 'admin_bootstrap'); location.reload(); } catch (e) { btn.disabled = false; toast('No se pudo activar: ' + friendlyError(e) + ' Verifica que las reglas estén publicadas.', 'error', 8000); } };
     root.append(h('div', { class: 'card gate' }, h('span', { class: 'gate-ic', html: icon('shield') }), h('h1', {}, 'Primer ingreso del dueño'), h('p', { class: 'muted' }, 'Tu cuenta todavía no tiene el rol de administración. Se crea una sola vez (admins/' + user.uid.slice(0, 6) + '…) y las reglas lo verifican con el token de tu correo verificado.'), btn));
     return;
   }
   if (!ok && isOwnerEmail && !user.emailVerified) {
-    loginGate('Verificá el correo de la cuenta dueña (el enlace de «Crear contraseña» también lo verifica) y volvé a ingresar.');
+    loginGate('Verifica el correo de la cuenta dueña (el enlace de «Crear contraseña» también lo verifica) y vuelve a ingresar.');
     return;
   }
   if (!ok) {
@@ -180,9 +180,9 @@ auth.watchUser(async (user) => {
     root.innerHTML = '';
     // 3) Cuenta desconocida: «Acceso denegado», pero sin callejón sin salida: entrar como equipo con correo y clave.
     const teamIn = h('button', { class: 'btn btn-primary', type: 'button' }, 'Soy del equipo: entrar con mi correo y clave');
-    teamIn.onclick = () => { sessionStorage.setItem('ac.panelMode', 'equipo'); staffUi.loginGate(root, renderPanel, 'Entrá con el correo y la clave que elegiste al aceptar la invitación.', (user.email || '').toLowerCase()); };
+    teamIn.onclick = () => { sessionStorage.setItem('ac.panelMode', 'equipo'); staffUi.loginGate(root, renderPanel, 'Entra con el correo y la clave que elegiste al aceptar la invitación.', (user.email || '').toLowerCase()); };
     root.append(h('div', { class: 'card gate gate-denied' }, h('span', { class: 'gate-ic', html: icon('shield') }), h('h1', {}, 'Acceso denegado'), h('p', { class: 'muted' }, `La cuenta de Google ${user.email || ''} no es la dueña ni una persona activa del equipo. El intento quedó registrado.`),
-      h('p', { class: 'small' }, 'Si te invitaron al equipo (Co-CEO, supervisor…), entrá con tu correo y clave:'),
+      h('p', { class: 'small' }, 'Si te invitaron al equipo (Co-CEO, supervisor…), entra con tu correo y clave:'),
       h('div', { class: 'row', style: 'justify-content:center;flex-wrap:wrap' }, teamIn,
         h('button', { class: 'btn', type: 'button', onclick: async () => { await auth.signOutUser(); location.reload(); } }, 'Salir de Google y cambiar de cuenta'),
         h('a', { class: 'btn btn-ghost', href: '/' }, 'Volver al inicio'))));
@@ -284,7 +284,7 @@ async function renderDashboard(user) {
       if (id === 'analitica') withPanel(extra[id], renderAnalytics);
       if (id === 'pagos') withPanel(extra[id], renderPayments);
       if (id === 'espacio') withPanel(extra[id], renderWorkspace);
-      if (id === 'envivo') withPanel(extra[id], (b, t, me) => import('./admin-envivo.js?v=7.14.0').then((m) => m.renderLive(b, t, me)));
+      if (id === 'envivo') withPanel(extra[id], (b, t, me) => import('./admin-envivo.js?v=7.19.0').then((m) => m.renderLive(b, t, me)));
       if (id === 'rendimiento') withPanel(extra[id], renderPerf);
       if (id === 'indicadores') withPanel(extra[id], renderKpis);
       if (id === 'humano') withPanel(extra[id], (b, t, me) => staffUi.renderStaff(b, t, me));
@@ -349,7 +349,7 @@ async function renderSystemTools(grid, user, fs, db) {
       h('h3', { style: 'margin-top:16px' }, 'Mantenimiento'), mtMsg, h('div', { class: 'row' }, h('label', { class: 'check' }, mtOn, h('span', {}, 'Sitio en mantenimiento')), h('button', { class: 'btn btn-sm', type: 'button', onclick: () => save({ maintenance: mtOn.checked, maintenanceMessage: mtMsg.value.trim() }, `mantenimiento=${mtOn.checked}`) }, 'Guardar')))));
   document.getElementById('killBtn').onclick = async () => {
     if (!(await confirmDialog({ title: 'Parada de emergencia', text: 'Pone todo el sitio en mantenimiento, apaga chat y registros y detiene los agentes automáticos. ¿Continuar?', ok: 'Continuar', danger: true }))) return;
-    if (!(await confirmDialog({ title: 'Confirmación final', text: 'Confirmá la PARADA DE EMERGENCIA. Se puede revertir desde este panel.', ok: 'Activar parada', danger: true }))) return;
+    if (!(await confirmDialog({ title: 'Confirmación final', text: 'Confirma la PARADA DE EMERGENCIA. Se puede revertir desde este panel.', ok: 'Activar parada', danger: true }))) return;
     await save({ killSwitch: true, flags: { chat: false, signups: false, agents247: false }, agents: { state: 'detenido', updatedBy: user.email } }, 'killSwitch=true (agentes detenidos)');
     renderDashboard(user);
   };
@@ -429,7 +429,7 @@ async function renderSubscriptions(grid, user, fs, db) {
   const c = h('section', { class: 'card panel span-2' }, h('div', { class: 'panel-head' }, h('h2', {}, 'Suscripciones'), h('span', { class: 'chip warn' }, 'Confirmación manual hasta activar el servidor')));
   grid.append(c);
   const box = h('div', { class: 'table-wrap' }, h('div', { class: 'skeleton', style: 'height:80px' }));
-  c.append(h('p', { class: 'muted small' }, 'Antes de confirmar, verificá el cobro en Mercado Pago (Tu negocio → Suscripciones) o en PayPal (Actividad). Confirmar activa el plan por 30 días.'), box);
+  c.append(h('p', { class: 'muted small' }, 'Antes de confirmar, verifica el cobro en Mercado Pago (Tu negocio → Suscripciones) o en PayPal (Actividad). Confirmar activa el plan por 30 días.'), box);
   const load = async () => {
     try {
       const col = fs.collection(db, 'users');
@@ -458,7 +458,7 @@ async function renderSubscriptions(grid, user, fs, db) {
         };
         const cancel = h('button', { class: 'btn btn-sm btn-danger-ghost', type: 'button' }, s.status === 'pending' ? 'Rechazar' : 'Cancelar');
         cancel.onclick = async () => {
-          if (!(await confirmDialog({ title: s.status === 'pending' ? 'Rechazar suscripción' : 'Cancelar suscripción', text: `${u.email}: ${s.status === 'pending' ? 'el plan no se activa.' : 'conserva el acceso hasta el fin del período; cancelá también en el procesador.'}`, ok: 'Confirmar', danger: true }))) return;
+          if (!(await confirmDialog({ title: s.status === 'pending' ? 'Rechazar suscripción' : 'Cancelar suscripción', text: `${u.email}: ${s.status === 'pending' ? 'el plan no se activa.' : 'conserva el acceso hasta el fin del período; cancela también en el procesador.'}`, ok: 'Confirmar', danger: true }))) return;
           try {
             const patch = { 'subscription.status': 'canceled', 'subscription.autoRenew': false, 'subscription.canceledBy': user.email, 'subscription.canceledAt': fs.serverTimestamp() };
             if (s.status === 'pending') Object.assign(patch, { plan: 'gratis', planStatus: 'active' });

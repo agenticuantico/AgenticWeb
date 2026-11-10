@@ -247,7 +247,7 @@ footer{background:#0b0705;padding:64px 0 32px;font-size:.9rem;color:var(--muted)
   <nav aria-label="Principal"><ul class="nav-links">{{#nav}}<li><a href="{{href}}">{{label}}</a></li>{{/nav}}</ul></nav>
   <div class="nav-right">
     <span class="cart" id="cart" aria-live="polite">{{ui.cart}} <b id="cartN">0</b></span>
-    <a class="btn btn-primary" href="#visitanos">{{navCta}}</a>
+    <a class="btn btn-primary" href="#visítanos">{{navCta}}</a>
     <button class="burger" id="burger" type="button" aria-label="{{ui.menu}}" aria-expanded="false" aria-controls="sheet"><span></span><span></span></button>
   </div>
 </header>
@@ -352,13 +352,13 @@ footer{background:#0b0705;padding:64px 0 32px;font-size:.9rem;color:var(--muted)
   </div>
 </section>
 
-<section class="sec light" id="visitanos">
+<section class="sec light" id="visítanos">
   <div class="wrap visit">
     <div class="reveal">
       <span class="eyebrow">{{visit.eyebrow}}</span><h2>{{visit.title}}</h2><p class="lead">{{visit.lead}}</p>
       <p class="addr">{{visit.address}}</p><p>{{visit.city}}</p>
       <ul class="hours">{{#visit.hours}}<li><span>{{days}}</span><span>{{time}}</span></li>{{/visit.hours}}</ul>
-      <div class="row"><a class="btn btn-primary" href="#visitanos">{{visit.directions}}</a><a class="btn btn-ghost" href="mailto:{{visit.email}}">{{visit.email}}</a></div>
+      <div class="row"><a class="btn btn-primary" href="#visítanos">{{visit.directions}}</a><a class="btn btn-ghost" href="mailto:{{visit.email}}">{{visit.email}}</a></div>
     </div>
     <div class="map reveal" role="img" aria-label="{{visit.mapLabel}}">
       <svg viewBox="0 0 600 460" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
@@ -376,7 +376,7 @@ footer{background:#0b0705;padding:64px 0 32px;font-size:.9rem;color:var(--muted)
 <section class="final" id="reservar">
   <div class="wrap reveal">
     <h2>{{final.title}}</h2><p class="lead">{{final.lead}}</p>
-    <div class="ctas"><a class="btn btn-primary" href="#visitanos">{{final.cta}}</a><a class="btn btn-ghost" href="#tienda">{{final.cta2}}</a></div>
+    <div class="ctas"><a class="btn btn-primary" href="#visítanos">{{final.cta}}</a><a class="btn btn-ghost" href="#tienda">{{final.cta2}}</a></div>
   </div>
 </section>
 </main>
@@ -442,7 +442,7 @@ footer{background:#0b0705;padding:64px 0 32px;font-size:.9rem;color:var(--muted)
 <script type="module">
 /*
  * Escena inmersiva: taza de cerámica con café, granos flotando y, al hacer scroll, el café sale expulsado hacia la
- * pantalla y la salpica. Todo depende del progreso del scroll (determinista: si volvés atrás, el café vuelve a la taza).
+ * pantalla y la salpica. Todo depende del progreso del scroll (determinista: si vuelves atrás, el café vuelve a la taza).
  * WebGL con three.js (CDN fijado); si no hay WebGL o no carga, versión 2D en canvas. Respeta "reducir movimiento".
  */
 const THREE_URL = 'https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.min.js';

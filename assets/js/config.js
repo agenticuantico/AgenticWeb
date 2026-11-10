@@ -1,6 +1,6 @@
 /**
  * AgentiCuántico · configuración pública del sitio.
- * Todo lo que está acá es público por diseño (va al navegador). Nunca pongas secretos.
+ * Todo lo que está aquí es público por diseño (va al navegador). Nunca pongas secretos.
  */
 import FIREBASE from './firebase-config.js';
 

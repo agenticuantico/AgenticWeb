@@ -2,7 +2,7 @@
   var IMG_W = 1376, IMG_H = 768;           // tamaño real de la foto del hero
   var POS_Y = 0.30;                         // object-position: center 30%
   var STATES = {
-    idle: { status: "En espera · escribí en el chat", detail: "Conectado al chat", sub: "Vías neuronales en línea · Lista", color: "#9fff00", speed: 1 },
+    idle: { status: "En espera · escribe en el chat", detail: "Conectado al chat", sub: "Vías neuronales en línea · Lista", color: "#9fff00", speed: 1 },
     thinking: { status: "Pensando…", detail: "Puede tardar unos segundos", sub: "Vías neuronales en proceso · Pensando…", color: "#a855f7", speed: 2.6 },
     speaking: { status: "Respondiendo", detail: "Por escrito y con voz", sub: "Vías neuronales en respuesta · Explicando", color: "#22c55e", speed: 1.8 }
   };

@@ -29,7 +29,7 @@
   "skip": "Saltar al contenido",
   "menu": "Menú",
   "close": "Cerrar",
-  "scroll": "Deslizá",
+  "scroll": "Desliza",
   "name": "Nombre",
   "email": "Email",
   "message": "Mensaje",
@@ -62,7 +62,7 @@
  "navCta": "Agendar visita",
  "hero": {
   "eyebrow": "Desarrollo residencial · Preventa",
-  "title": "Viví donde",
+  "title": "Vive donde",
   "titleEm": "todo queda cerca.",
   "lead": "Unidades luminosas, amenities pensados para la vida diaria y financiación en pesos durante la obra.",
   "primary": "Ver unidades",
@@ -119,7 +119,7 @@
  },
  "offer": {
   "eyebrow": "Unidades",
-  "title": "Elegí tu próximo hogar.",
+  "title": "Elige tu próximo hogar.",
   "lead": "Valores de referencia en preventa.",
   "items": [
    {
@@ -153,7 +153,7 @@
  },
  "gallery": {
   "eyebrow": "Galería",
-  "title": "Imaginate viviendo acá.",
+  "title": "Imagínate viviendo aquí.",
   "items": [
    {
     "src": "",
@@ -198,8 +198,8 @@
  },
  "contact": {
   "eyebrow": "Contacto",
-  "title": "Coordiná tu visita.",
-  "lead": "Recorré el showroom y conocé las unidades disponibles.",
+  "title": "Coordina tu visita.",
+  "lead": "Recorre el showroom y conoce las unidades disponibles.",
   "address": "Dirección del showroom",
   "city": "Tu ciudad",
   "hours": [

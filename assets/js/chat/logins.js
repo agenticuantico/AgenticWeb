@@ -1,7 +1,7 @@
 /**
  * Cuentas guardadas de la computadora del agente (Centro de control → Conectores → Cuentas).
  * La persona guarda usuario y contraseña de un sitio; el servidor los cifra y solo los usa para completar el
- * formulario de inicio de sesión de ese sitio. Acá solo se muestra el sitio y el usuario enmascarado. Nunca se
+ * formulario de inicio de sesión de ese sitio. Aquí solo se muestra el sitio y el usuario enmascarado. Nunca se
  * devuelven las contraseñas ni las ve el agente.
  */
 import { h, icon, toast, confirmDialog } from '../ui.js';
@@ -27,22 +27,22 @@ async function api(chat, path, body) {
   return j;
 }
 
-const ERR = { vault_unavailable: 'La bóveda de cuentas no está disponible en este momento.', invalid_host: 'Escribí un sitio válido, por ejemplo mercadolibre.com.ar.', invalid_credentials: 'Completá el usuario y la contraseña.', login_required: 'Ingresá a tu cuenta para guardar cuentas.', session_expired: 'Tu sesión venció. Ingresá de nuevo para ver tus cuentas guardadas.', offline: 'El servidor no responde en este momento.', network: 'No hay conexión a internet.' };
+const ERR = { vault_unavailable: 'La bóveda de cuentas no está disponible en este momento.', invalid_host: 'Escribe un sitio válido, por ejemplo mercadolibre.com.ar.', invalid_credentials: 'Completa el usuario y la contraseña.', login_required: 'Ingresa a tu cuenta para guardar cuentas.', session_expired: 'Tu sesión venció. Ingresa de nuevo para ver tus cuentas guardadas.', offline: 'El servidor no responde en este momento.', network: 'No hay conexión a internet.' };
 
 export async function renderLogins(pane, chat) {
   const sec = h('section', { class: 'lg-sec' },
     h('h3', { class: 'conn-subtitle' }, h('span', { html: icon('lock') }), 'Cuentas para la computadora del agente'),
-    h('p', { class: 'muted small' }, 'Guardá tus inicios de sesión: cuando un sitio los pida, el agente los completa solo. Se guardan cifrados, nunca se muestran y el agente no los ve.'));
+    h('p', { class: 'muted small' }, 'Guarda tus inicios de sesión: cuando un sitio los pida, el agente los completa solo. Se guardan cifrados, nunca se muestran y el agente no los ve.'));
   const list = h('div', { class: 'lg-list' });
   sec.append(list);
   pane.append(sec);
   const draw = async () => {
     list.replaceChildren(h('div', { class: 'skeleton', style: 'height:44px;border-radius:12px' }));
-    if (!chat.user) { list.replaceChildren(h('button', { class: 'btn btn-sm', type: 'button', onclick: () => chat.loginPrompt('Ingresá para guardar tus cuentas.') }, 'Ingresar')); return; }
+    if (!chat.user) { list.replaceChildren(h('button', { class: 'btn btn-sm', type: 'button', onclick: () => chat.loginPrompt('Ingresa para guardar tus cuentas.') }, 'Ingresar')); return; }
     let st;
     try { st = await api(chat, '/api/agent/logins'); } catch (e) {
       const again = e.code === 'session_expired'
-        ? h('button', { class: 'btn btn-sm', type: 'button', onclick: () => chat.loginPrompt('Tu sesión venció. Ingresá de nuevo.') }, 'Ingresar de nuevo')
+        ? h('button', { class: 'btn btn-sm', type: 'button', onclick: () => chat.loginPrompt('Tu sesión venció. Ingresa de nuevo.') }, 'Ingresar de nuevo')
         : h('button', { class: 'btn btn-sm', type: 'button', onclick: () => draw() }, 'Reintentar');
       list.replaceChildren(h('p', { class: 'muted small', 'data-state': e.code || 'error' }, ERR[e.code] || 'No pude cargar tus cuentas.'), again);
       return;

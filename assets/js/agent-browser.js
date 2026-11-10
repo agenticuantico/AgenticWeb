@@ -2,7 +2,7 @@
  * Ordenador virtual (antes «Computadora del agente»): un navegador en la nube con ventana tipo escritorio remoto
  * (barra de título, barra de direcciones, pantalla en vivo, acción actual, pasos, tiempo, Detener, plegar, pantalla
  * completa y «Qué hice» al final, solo con pasos reales). Se enciende solo cuando el pedido lo necesita o cuando la
- * persona dice «en el ordenador» / «usá el ordenador»; la sesión es de su cuenta y nadie más la ve.
+ * persona dice «en el ordenador» / «usa el ordenador»; la sesión es de su cuenta y nadie más la ve.
  * Modo híbrido: el agente planifica y trabaja solo hasta terminar.
  *  - Por defecto trabaja en «modo lectura»: busca y lee páginas como texto (rápido y sin gastar minutos de
  *    navegador). La vista muestra la página leída (título, dirección, texto) o los resultados de búsqueda.
@@ -13,19 +13,19 @@
  *    formulario seguro de inicio de sesión (el servidor lo completa en la página; el agente no ve nada);
  *    preguntas con opciones. «Tomar el control» queda como alternativa. Nunca completa datos de tarjetas.
  *  - Archivos: informes, tablas (CSV/MD), documentos, capturas y PDF aparecen en el chat con vista previa.
- *  - Mismo contexto en la conversación: «seguí», «ahora compará…» continúan con lo ya reunido. Se puede retomar.
+ *  - Mismo contexto en la conversación: «sigue», «ahora compara…» continúan con lo ya reunido. Se puede retomar.
  */
 import { h, icon } from './ui.js';
 import * as engine from './chat/engine.js';
-import { needsWebAction, isFollowUp, wantsComputer, stripComputer } from './chat/intent.js?v=7.17.0';
-import { statusLine, visitedSites, summaryMeta, workMode, workSteps, VPC_NAME, VPC_HELP, elapsedText, taskElapsed, quotaText, addressText, whatIDid } from './chat/computer-status.js?v=7.17.0';
-/** Reexportadas para el código que ya las importaba desde acá (la lógica vive en chat/intent.js, sin DOM). */
+import { needsWebAction, isFollowUp, wantsComputer, stripComputer } from './chat/intent.js?v=7.19.0';
+import { statusLine, visitedSites, summaryMeta, workMode, workSteps, VPC_NAME, VPC_HELP, elapsedText, taskElapsed, quotaText, addressText, whatIDid } from './chat/computer-status.js?v=7.19.0';
+/** Reexportadas para el código que ya las importaba desde aquí (la lógica vive en chat/intent.js, sin DOM). */
 export { needsWebAction, isFollowUp };
 
 (function css() {
   if (typeof document === 'undefined' || document.getElementById('ac-ab2-css')) return;
   const l = document.createElement('link');
-  l.id = 'ac-ab2-css'; l.rel = 'stylesheet'; l.href = '/assets/css/agent-browser.css?v=7.17.0';
+  l.id = 'ac-ab2-css'; l.rel = 'stylesheet'; l.href = '/assets/css/agent-browser.css?v=7.19.0';
   document.head.appendChild(l);
 })();
 
@@ -37,7 +37,7 @@ const SITES = [
 
 /** Pedido de búsqueda explícito en el ordenador sin sitio puntual: arranca en un buscador con el pedido. */
 export function computerStartUrl(text) {
-  const q = stripComputer(text).replace(/^(busc[aá](me)?|fijate|mir[aá]|averigu[aá]|decime|mostrame)\s+/i, '').slice(0, 200).trim();
+  const q = stripComputer(text).replace(/^(busc[aá](me)?|b[uú]scame|f[ií]jate|mir[aá]|averigu[aá]|decime|dime|mostrame|mu[eé]strame)\s+/i, '').slice(0, 200).trim();
   if (!q) return null;
   // Clima: fuente abierta de pronóstico (los buscadores bloquean navegadores automáticos).
   const w = /(clima|tiempo|pron[oó]stico|temperatura|lluvia)\s+(?:de|en|para|hoy en)?\s*(.+)$/i.exec(q);
@@ -76,7 +76,7 @@ export function approvalCard(container, text, detail) {
 
 const STATUS_TEXT = {
   starting: 'Encendiendo el ordenador virtual', ready: 'Trabajando', thinking: 'Pensando el siguiente paso', acting: 'Trabajando',
-  awaiting_approval: 'Esperando tu aprobación', needs_user: 'Necesita tu acción', queued: 'En fila', takeover: 'Tenés el control', done: 'Tarea terminada', ended: 'Sesión cerrada', error: 'No disponible'
+  awaiting_approval: 'Esperando tu aprobación', needs_user: 'Necesita tu acción', queued: 'En fila', takeover: 'Tienes el control', done: 'Tarea terminada', ended: 'Sesión cerrada', error: 'No disponible'
 };
 
 export class AgentBrowserCard {
@@ -87,7 +87,7 @@ export class AgentBrowserCard {
   constructor(o) {
     this.o = o;
     this.goal = String(o.text || '').trim();
-    // «…en el ordenador» / «usá el ordenador»: se abre el navegador en la nube desde el primer paso (vista en vivo).
+    // «…en el ordenador» / «usa el ordenador»: se abre el navegador en la nube desde el primer paso (vista en vivo).
     this.explicit = wantsComputer(this.goal);
     this.url = guessUrl(this.goal) || (this.explicit ? computerStartUrl(this.goal) : null);
     this.state = null;
@@ -212,7 +212,7 @@ export class AgentBrowserCard {
   /** «Cerrar sesiones»: borra las cookies guardadas (cifradas) de los sitios. Pide un segundo toque para confirmar. */
   async logoutSessions() {
     const t = this.logoutBtn.querySelector('.vpc-link-t');
-    if (!this._logoutArm) { this._logoutArm = true; t.textContent = '¿Cerrar todas? Tocá de nuevo'; setTimeout(() => { if (this._logoutArm) { this._logoutArm = false; if (this.state) this.renderWindow(this.state); } }, 4000); return; }
+    if (!this._logoutArm) { this._logoutArm = true; t.textContent = '¿Cerrar todas? Toca de nuevo'; setTimeout(() => { if (this._logoutArm) { this._logoutArm = false; if (this.state) this.renderWindow(this.state); } }, 4000); return; }
     this._logoutArm = false;
     this.logoutBtn.disabled = true;
     try {
@@ -221,7 +221,7 @@ export class AgentBrowserCard {
       if (this.state) this.state.jarHosts = [];
       this.logoutBtn.hidden = true;
       this.showNotice('Listo: cerré tus sesiones guardadas. La próxima vez cada sitio te va a pedir iniciar sesión de nuevo.', 'info');
-    } catch { this.showNotice('No pude cerrar las sesiones. Probá de nuevo en un momento.', 'warn'); }
+    } catch { this.showNotice('No pude cerrar las sesiones. Prueba de nuevo en un momento.', 'warn'); }
     finally { this.logoutBtn.disabled = false; }
   }
 
@@ -261,22 +261,22 @@ export class AgentBrowserCard {
       steps.length && !did.length ? h('p', { class: 'cc-hint muted' }, 'No llegué a completar ningún paso.') : null,
       (s.sources || []).length && !ended ? h('div', { class: 'cc-srcs' }, h('small', { class: 'muted' }, 'Fuentes'), ...(s.sources || []).slice(0, 6).map((x, i) => h('a', { href: x.url, target: '_blank', rel: 'noopener noreferrer', 'data-no-i18n': '' }, `${i + 1}. ${x.title || host(x.url)}`))) : null,
       h('div', { class: 'cc-sum-acts' }, resume, this.state && (this.img && this.img.src || this.state.reader) ? again : null),
-      !ended ? h('small', { class: 'cc-hint muted' }, 'Podés seguir acá: por ejemplo «ahora compará…» o «pasalo a una tabla».') : null].filter(Boolean));
+      !ended ? h('small', { class: 'cc-hint muted' }, 'Puedes seguir aquí: por ejemplo «ahora compara…» o «pásalo a una tabla».') : null].filter(Boolean));
   }
 
   loader(text = 'Encendiendo el ordenador virtual') {
     return h('div', { class: 'ab-loader' }, h('div', { class: 'ab-orbit', 'aria-hidden': 'true' }, h('i'), h('i'), h('i')), h('p', {}, text), this.url ? h('small', { 'data-no-i18n': '' }, host(this.url)) : null);
   }
 
-  /** Barra del modo «tomar el control»: lo que escribís va directo a la página y no se guarda. */
+  /** Barra del modo «tomar el control»: lo que escribes va directo a la página y no se guarda. */
   keyboardBar() {
-    const input = h('input', { class: 'ab-kb-in', type: 'text', autocomplete: 'off', autocapitalize: 'off', spellcheck: 'false', enterkeyhint: 'send', 'aria-label': 'Escribir en la página', placeholder: 'Escribí acá y tocá Enviar' });
+    const input = h('input', { class: 'ab-kb-in', type: 'text', autocomplete: 'off', autocapitalize: 'off', spellcheck: 'false', enterkeyhint: 'send', 'aria-label': 'Escribir en la página', placeholder: 'Escribe aquí y toca Enviar' });
     const pw = h('button', { class: 'ab-kb-eye', type: 'button', 'aria-label': 'Ocultar lo que escribo', html: icon('eye'), onclick: () => { input.type = input.type === 'password' ? 'text' : 'password'; } });
     const send = async (withEnter) => { const v = input.value; input.value = ''; if (v) await this.input({ kind: 'type', text: v }); if (withEnter) await this.input({ kind: 'key', key: 'Enter' }); input.focus({ preventScroll: true }); };
     input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); send(false); } });
     const key = (k, label, ic) => h('button', { class: 'ab-key', type: 'button', 'aria-label': label, title: label, html: ic ? icon(ic) : '', onclick: () => this.input({ kind: 'key', key: k }) }, ic ? null : label);
     return h('div', { class: 'ab-kb', hidden: true },
-      h('p', { class: 'ab-kb-tip' }, h('span', { html: icon('lock') }), 'Tocá la pantalla para elegir un campo y escribí. Lo que escribís va directo a la página: no lo guardamos ni lo ve el agente.'),
+      h('p', { class: 'ab-kb-tip' }, h('span', { html: icon('lock') }), 'Toca la pantalla para elegir un campo y escribe. Lo que escribes va directo a la página: no lo guardamos ni lo ve el agente.'),
       h('div', { class: 'ab-kb-row' }, input, pw, h('button', { class: 'btn btn-sm btn-primary ab-kb-send', type: 'button', onclick: () => send(false) }, 'Enviar')),
       h('div', { class: 'ab-kb-keys' }, key('Enter', 'Enter'), key('Tab', 'Tab'), key('Backspace', 'Borrar'),
         h('button', { class: 'ab-key', type: 'button', 'aria-label': 'Subir', title: 'Subir', html: icon('send'), onclick: () => this.input({ kind: 'scroll', dy: -500 }) }),
@@ -307,17 +307,17 @@ export class AgentBrowserCard {
 
   explain(e) {
     const ok = h('button', { class: 'btn btn-sm', type: 'button', onclick: () => this.el.remove() }, 'Entendido');
-    if (e.status === 401) return this.unavailable('Ingresá con tu cuenta', 'El ordenador virtual se abre con tu cuenta, así tu sesión es privada y nadie más la ve.', h('a', { class: 'btn btn-sm', href: '/cuenta/' }, 'Ingresar'));
+    if (e.status === 401) return this.unavailable('Ingresa con tu cuenta', 'El ordenador virtual se abre con tu cuenta, así tu sesión es privada y nadie más la ve.', h('a', { class: 'btn btn-sm', href: '/cuenta/' }, 'Ingresar'));
     if (e.status === 503) return this.unavailable('El ordenador virtual no está disponible', 'El servicio está en mantenimiento. No se realizó ninguna acción.', ok);
-    if (e.status === 429) return this.unavailable('Hay muchos pedidos en este momento', 'Esperá unos segundos y volvé a pedírmelo. No se realizó ninguna acción.', ok);
-    return this.unavailable('No pude encender el ordenador virtual', 'Probá de nuevo en unos minutos. No se realizó ninguna acción.', ok);
+    if (e.status === 429) return this.unavailable('Hay muchos pedidos en este momento', 'Espera unos segundos y vuelve a pedírmelo. No se realizó ninguna acción.', ok);
+    return this.unavailable('No pude encender el ordenador virtual', 'Prueba de nuevo en unos minutos. No se realizó ninguna acción.', ok);
   }
 
   async start() {
     const [st] = await Promise.all([engine.init(), new Promise((r) => setTimeout(r, 250))]);
     if (this.stopped) return;
     if (!st.live || !st.caps || !st.caps.browser) {
-      this.unavailable('El ordenador virtual no está disponible', 'No pude conectarme al servicio. Mientras tanto te guío para que lo hagas vos, sin compartir contraseñas.', h('button', { class: 'btn btn-sm', type: 'button', onclick: () => this.el.remove() }, 'Entendido'));
+      this.unavailable('El ordenador virtual no está disponible', 'No pude conectarme al servicio. Mientras tanto te guío para que lo hagas tú, sin compartir contraseñas.', h('button', { class: 'btn btn-sm', type: 'button', onclick: () => this.el.remove() }, 'Entendido'));
       return;
     }
     try {
@@ -404,7 +404,7 @@ export class AgentBrowserCard {
       this.result.hidden = false;
       this.result.replaceChildren(...[h('div', { class: 'ab-res-h' }, h('span', { html: icon('check') }), h('strong', {}, 'Resultado')), h('p', { class: 'ab-res-t', 'data-no-i18n': '' }, s.summary),
         (s.sources || []).length ? h('div', { class: 'ab-srcs' }, h('small', { class: 'muted' }, 'Fuentes'), ...(s.sources || []).slice(0, 8).map((x, i) => h('a', { href: x.url, target: '_blank', rel: 'noopener noreferrer', 'data-no-i18n': '' }, `${i + 1}. ${x.title || host(x.url)}`))) : null,
-        h('small', { class: 'muted' }, 'Podés seguir en esta conversación: por ejemplo «ahora compará…» o «pasalo a una tabla».')].filter(Boolean));
+        h('small', { class: 'muted' }, 'Puedes seguir en esta conversación: por ejemplo «ahora compara…» o «pásalo a una tabla».')].filter(Boolean));
     } else if (s.status !== 'ended') this.result.hidden = true;
     if (s.status === 'ended') this.ended(s);
     this.o.onScroll && this.o.onScroll();
@@ -505,11 +505,11 @@ export class AgentBrowserCard {
     const form = h('form', { class: 'ab-form-card abf-login', autocomplete: 'off', 'aria-label': `Iniciar sesión en ${host}` },
       h('div', { class: 'ap-head' }, h('span', { class: 'abf-ic', html: icon('lock') }), h('strong', {}, onlyCode ? 'Código de verificación' : 'Iniciar sesión'), ask.host ? h('span', { class: 'abf-host', 'data-no-i18n': '' }, ask.host) : null),
       h('p', { class: 'small abf-lead' }, onlyCode
-        ? `${host} te mandó un código. Escribilo acá y lo cargo yo en la página.`
-        : `Escribí tus datos acá y los cargo yo en ${host}. Van cifrados directo al servidor: el agente no los ve y no quedan en el chat.`),
+        ? `${host} te mandó un código. Escríbelo aquí y lo cargo yo en la página.`
+        : `Escribe tus datos aquí y los cargo yo en ${host}. Van cifrados directo al servidor: el agente no los ve y no quedan en el chat.`),
       ask.saved && !onlyCode
         ? h('div', { class: 'abf-consent' },
-          h('p', { class: 'small' }, `Tenés una cuenta guardada para ${host}. Solo la uso si tocás «Usar la guardada».`),
+          h('p', { class: 'small' }, `Tienes una cuenta guardada para ${host}. Solo la uso si tocas «Usar la guardada».`),
           h('div', { class: 'abf-row' },
             h('button', { class: 'btn btn-sm btn-primary abf-saved', type: 'button', onclick: () => this.sendLogin({ useSaved: true }, form, status) }, h('span', { html: icon('check') }), 'Usar la guardada'),
             h('button', { class: 'btn btn-sm btn-ghost abf-forget', type: 'button', onclick: (e) => this.forgetLogin(ask.host, e.currentTarget, status) }, 'Olvidar la guardada')))
@@ -518,16 +518,16 @@ export class AgentBrowserCard {
       showPhone ? field('Celular', phone) : null,
       showPass ? field('Contraseña', pass, h('div', { class: 'abf-pw' }, pass, eye)) : null,
       showCode ? field('Código de verificación', code) : null,
-      onlyCode ? null : h('div', { class: 'abf-check' }, save, h('label', { for: save.id }, h('span', {}, 'Recordar en este sitio'), h('small', { class: 'muted' }, ' (cifrado, solo para vos; lo borrás cuando quieras)'))),
+      onlyCode ? null : h('div', { class: 'abf-check' }, save, h('label', { for: save.id }, h('span', {}, 'Recordar en este sitio'), h('small', { class: 'muted' }, ' (cifrado, solo para ti; lo borras cuando quieras)'))),
       h('div', { class: 'abf-row abf-actions' }, h('button', { class: 'btn btn-sm btn-primary abf-submit', type: 'submit' }, h('span', { html: icon('check') }), onlyCode ? 'Enviar código' : 'Ingresar'), status),
-      h('p', { class: 'abf-alt-take small muted' }, '¿Preferís escribirlo vos en la pantalla? ',
+      h('p', { class: 'abf-alt-take small muted' }, '¿Prefieres escribirlo tú en la pantalla? ',
         h('button', { class: 'abf-link', type: 'button', onclick: take }, 'Tomar el control')),
       h('p', { class: 'abf-fine muted' }, 'Nunca escribo datos de tarjetas. Las cuentas recordadas se borran en Tu cuenta → Cuentas conectadas.'));
     form.addEventListener('submit', (e) => {
       e.preventDefault();
       const body = { username: showUser ? user.value : '', password: showPass ? pass.value : '', phone: showPhone ? phone.value.trim() : '', code: showCode ? code.value.replace(/\s+/g, '') : '', save: !onlyCode && save.checked, host: ask.host };
       user.value = ''; pass.value = ''; phone.value = ''; code.value = '';
-      if (!body.username && !body.password && !body.phone && !body.code) { status.textContent = 'Completá los datos.'; return; }
+      if (!body.username && !body.password && !body.phone && !body.code) { status.textContent = 'Completa los datos.'; return; }
       this.sendLogin(body, form, status);
     });
     setTimeout(() => { const first = form.querySelector('input:not([type=checkbox])'); if (first && !matchMedia('(max-width: 600px)').matches) first.focus({ preventScroll: true }); }, 50);
@@ -540,7 +540,7 @@ export class AgentBrowserCard {
       const r = await this.api('/api/agent/logins/delete', { body: { host, match: true } });
       status.textContent = r && r.ok ? 'Listo: borré la cuenta guardada de este sitio.' : 'No había una cuenta guardada.';
       const box = btn.closest('.abf-consent'); if (box) box.remove();
-    } catch { btn.disabled = false; status.textContent = 'No pude borrarla. Probá desde Tu cuenta → Cuentas conectadas.'; }
+    } catch { btn.disabled = false; status.textContent = 'No pude borrarla. Prueba desde Tu cuenta → Cuentas conectadas.'; }
   }
 
   async sendLogin(body, form, status) {
@@ -553,14 +553,14 @@ export class AgentBrowserCard {
       this.loop();
     } catch (e) {
       form.querySelectorAll('button,input').forEach((x) => { x.disabled = false; });
-      status.textContent = e.code === 'browser_busy' ? 'Esperando un navegador libre…' : 'No pude completarlo. Probá de nuevo o tocá «Tomar el control».';
+      status.textContent = e.code === 'browser_busy' ? 'Esperando un navegador libre…' : 'No pude completarlo. Prueba de nuevo o toca «Tomar el control».';
     }
   }
 
   questionCard(ask) {
     const other = h('input', { class: 'abf-other', placeholder: 'Otra respuesta', 'aria-label': 'Otra respuesta' });
     const card = h('div', { class: 'ab-form-card abf-q', role: 'group' },
-      h('div', { class: 'ap-head' }, h('span', { class: 'abf-ic', html: icon('bulb') }), h('strong', {}, 'Elegí una opción')),
+      h('div', { class: 'ap-head' }, h('span', { class: 'abf-ic', html: icon('bulb') }), h('strong', {}, 'Elige una opción')),
       h('p', { 'data-no-i18n': '' }, ask.message),
       h('div', { class: 'abf-choices' }, ...ask.choices.map((c) => h('button', { class: 'abf-choice', type: 'button', 'data-no-i18n': '', onclick: () => this.answer(c, card) }, c))),
       h('form', { class: 'abf-row', onsubmit: (e) => { e.preventDefault(); if (other.value.trim()) this.answer(other.value.trim(), card); } }, other, h('button', { class: 'btn btn-sm', type: 'submit' }, 'Enviar')));
@@ -568,7 +568,7 @@ export class AgentBrowserCard {
   }
 
   infoCard(ask) {
-    const inp = h('input', { class: 'abf-other', placeholder: 'Escribí tu respuesta', 'aria-label': 'Tu respuesta' });
+    const inp = h('input', { class: 'abf-other', placeholder: 'Escribe tu respuesta', 'aria-label': 'Tu respuesta' });
     const card = h('div', { class: 'ab-form-card abf-info', role: 'group' },
       h('div', { class: 'ap-head' }, h('span', { class: 'abf-ic', html: icon(ask.kind === 'captcha' ? 'shield' : 'user') }), h('strong', {}, ask.kind === 'captcha' ? 'Verificación humana' : 'Necesito un dato')),
       h('p', { 'data-no-i18n': '' }, ask.message),
@@ -632,7 +632,7 @@ export class AgentBrowserCard {
     this.toolsBtn.open = false;
     this.setPill(kind === 'pdf' ? 'Creando el PDF' : kind === 'screenshot' ? 'Sacando la captura' : 'Guardando el texto', 'run');
     try { this.apply(await this.api('/api/agent/browser/capture', { body: { kind } })); }
-    catch (e) { this.showNotice(e.code === 'nothing_to_capture' ? 'Todavía no hay una página abierta para guardar.' : e.status === 429 ? 'Para la captura o el PDF hace falta el navegador real y hoy no hay minutos. Probá «Texto de la página».' : 'No pude guardarlo. Probá de nuevo.', 'warn'); if (this.state) this.apply(this.state); }
+    catch (e) { this.showNotice(e.code === 'nothing_to_capture' ? 'Todavía no hay una página abierta para guardar.' : e.status === 429 ? 'Para la captura o el PDF hace falta el navegador real y hoy no hay minutos. Prueba «Texto de la página».' : 'No pude guardarlo. Prueba de nuevo.', 'warn'); if (this.state) this.apply(this.state); }
   }
 
   /* ---------- Control manual ---------- */
@@ -645,7 +645,7 @@ export class AgentBrowserCard {
       else if (!on || s.status === 'queued') this.loop();
     } catch (e) {
       if (e.code === 'no_session') return this.ended();
-      this.showNotice(e.code === 'browser_quota_user' || e.code === 'browser_quota_global' ? 'Hoy no quedan minutos de navegador real para tomar el control. Se renuevan mañana.' : 'Todos los navegadores están ocupados. Probá en un minuto.', 'warn');
+      this.showNotice(e.code === 'browser_quota_user' || e.code === 'browser_quota_global' ? 'Hoy no quedan minutos de navegador real para tomar el control. Se renuevan mañana.' : 'Todos los navegadores están ocupados. Prueba en un minuto.', 'warn');
     }
   }
 

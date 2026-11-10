@@ -6,9 +6,9 @@
  */
 import { h, icon, esc, toast, modal } from '../ui.js';
 import { prefs } from '../consent.js';
-import { AgentAvatar } from '../chat/agent-avatar.js?v=7.17.0';
+import { AgentAvatar } from '../chat/agent-avatar.js?v=7.19.0';
 import * as engine from '../chat/engine.js';
-import { speak, stop as stopSpeech } from '../chat/voice.js?v=7.17.0';
+import { speak, stop as stopSpeech } from '../chat/voice.js?v=7.19.0';
 import { LANGS, getLang, flagUrl, startLang } from '../chat/languages.js';
 import { watchUser, getProfile } from '../auth.js';
 import { systemPrompt, localReply, greeting, extractFacts, CRISIS_RE } from './brain.js';
@@ -61,7 +61,7 @@ watchUser(async (u) => {
   S.profile = p && !p._error ? p : null;
   S.settings = await mem.getSettings(u.uid);
   S.optIn = S.settings.optIn === true;
-  $('memNote').textContent = S.optIn ? 'Recuerda lo que le contás (podés verlo y borrarlo en Mi cuenta).' : 'La memoria está apagada.';
+  $('memNote').textContent = S.optIn ? 'Recuerda lo que le cuentas (puedes verlo y borrarlo en Mi cuenta).' : 'La memoria está apagada.';
   updateQuota();
 });
 function updateQuota() {
@@ -75,7 +75,7 @@ updateQuota();
 async function startCall() {
   if (window.AC_SYSTEM && (window.AC_SYSTEM.killSwitch || window.AC_SYSTEM.flags.voice === false)) { toast('Las llamadas están pausadas momentáneamente.'); return; }
   if (updateQuota() <= 0) {
-    modal({ title: 'Llegaste al límite de hoy', body: `<p class="muted">El plan Gratis incluye ${mem.LIMIT_MIN.gratis} minutos de llamada por día. Con Pro tenés ${mem.LIMIT_MIN.pro} y con Empresa ${mem.LIMIT_MIN.empresa}.</p>`, actions: [{ label: 'Ahora no', class: 'btn-ghost' }, { label: 'Ver planes', class: 'btn-gold', onClick: () => { location.href = '/planes.html'; } }] });
+    modal({ title: 'Llegaste al límite de hoy', body: `<p class="muted">El plan Gratis incluye ${mem.LIMIT_MIN.gratis} minutos de llamada por día. Con Pro tienes ${mem.LIMIT_MIN.pro} y con Empresa ${mem.LIMIT_MIN.empresa}.</p>`, actions: [{ label: 'Ahora no', class: 'btn-ghost' }, { label: 'Ver planes', class: 'btn-gold', onClick: () => { location.href = '/planes.html'; } }] });
     return;
   }
   // AudioContext creado DENTRO del toque en «Llamar»: en Chrome para Android, si se crea después de varias
@@ -83,7 +83,7 @@ async function startCall() {
   try { const AC = window.AudioContext || window.webkitAudioContext; if (!S.ctx || S.ctx.state === 'closed') S.ctx = new AC(); S.ctx.resume && S.ctx.resume().catch(() => {}); } catch {}
   // Permiso de memoria la primera vez (solo con cuenta)
   if (S.user && !S.incognito && S.settings.optIn === undefined) {
-    const ok = await modal({ title: '¿Querés que te recuerde?', body: '<p class="muted">Si lo permitís, después de cada llamada guardo datos útiles que me cuentes (tu nombre, personas importantes, intereses, objetivos, cómo te sentís) para darte continuidad día a día. Los ves, editás y borrás en <strong>Mi cuenta → Memoria de llamadas</strong>. Podés cambiarlo cuando quieras o llamar en modo incógnito.</p>', actions: [{ label: 'No, gracias', value: false, class: 'btn-ghost' }, { label: 'Sí, recordame', value: true, class: 'btn-primary' }] }).done;
+    const ok = await modal({ title: '¿Quieres que te recuerde?', body: '<p class="muted">Si lo permites, después de cada llamada guardo datos útiles que me cuentes (tu nombre, personas importantes, intereses, objetivos, cómo te sientes) para darte continuidad día a día. Los ves, editas y borras en <strong>Mi cuenta → Memoria de llamadas</strong>. Puedes cambiarlo cuando quieras o llamar en modo incógnito.</p>', actions: [{ label: 'No, gracias', value: false, class: 'btn-ghost' }, { label: 'Sí, recuérdame', value: true, class: 'btn-primary' }] }).done;
     S.optIn = ok === true;
     S.settings.optIn = S.optIn;
     mem.saveSettings(S.user.uid, { optIn: S.optIn }).catch(() => {});
@@ -94,7 +94,7 @@ async function startCall() {
   } catch (e) {
     setState('ready');
     const denied = e && e.name === 'NotAllowedError';
-    modal({ title: denied ? 'Necesito permiso para el micrófono' : 'No encontré un micrófono', body: `<p class="muted">${denied ? 'Para hablar conmigo, habilitá el micrófono desde el candado de la barra de direcciones y volvé a tocar «Llamar».' : 'Conectá un micrófono o probá desde tu teléfono.'}</p><p class="small muted">También podés escribirme en el <a href="/app/">chat</a>.</p>` });
+    modal({ title: denied ? 'Necesito permiso para el micrófono' : 'No encontré un micrófono', body: `<p class="muted">${denied ? 'Para hablar conmigo, habilita el micrófono desde el candado de la barra de direcciones y vuelve a tocar «Llamar».' : 'Conecta un micrófono o prueba desde tu teléfono.'}</p><p class="small muted">También puedes escribirme en el <a href="/app/">chat</a>.</p>` });
     return;
   }
   try { S.wakeLock = await navigator.wakeLock?.request('screen'); } catch {}
@@ -105,7 +105,7 @@ async function startCall() {
     S.stream.getTracks().forEach((t) => t.stop());
     try { S.wakeLock && S.wakeLock.release(); } catch {}
     setState('ready');
-    modal({ title: 'Llegaste al límite de hoy', body: '<p class="muted">Usaste todos los minutos de llamada de tu plan por hoy. Podés seguir por el <a href="/app/">chat</a> o ver los <a href="/planes.html">planes</a>.</p>' });
+    modal({ title: 'Llegaste al límite de hoy', body: '<p class="muted">Usaste todos los minutos de llamada de tu plan por hoy. Puedes seguir por el <a href="/app/">chat</a> o ver los <a href="/planes.html">planes</a>.</p>' });
     return;
   }
   S.serverLeft = Number.isFinite(gate.remainingSec) ? gate.remainingSec : null;
@@ -142,7 +142,7 @@ async function heartbeat() {
 
 async function firstLine() {
   if (engine.state.live) {
-    const r = await ask('[La llamada recién empieza: saludá breve y con continuidad si corresponde.]', true).catch(() => null);
+    const r = await ask('[La llamada recién empieza: saluda breve y con continuidad si corresponde.]', true).catch(() => null);
     if (r) return r;
   }
   return greeting({ name: S.name, memory: S.memory, lang: S.lang.code });
@@ -282,16 +282,16 @@ async function onSpeechEnd() {
   }
   if (S.state === 'ended') return;
   if (!text) {
-    if (!S.sr && !(engine.state.caps && engine.state.caps.stt)) { await say('Te escucho, pero este navegador todavía no me deja entender las palabras. Probá desde Chrome o Edge, o escribime en el chat.'); }
+    if (!S.sr && !(engine.state.caps && engine.state.caps.stt)) { await say('Te escucho, pero este navegador todavía no me deja entender las palabras. Prueba desde Chrome o Edge, o escríbeme en el chat.'); }
     else if ((sttErr === 'quota' || sttErr === 'server' || sttErr === 'offline') && !S.sttWarned) {
       // Causa real, una sola vez por llamada: no es el micrófono de la persona.
       S.sttWarned = true;
-      await say(sttErr === 'quota' ? 'Te oigo, pero el servicio que pasa tu voz a texto llegó a su límite de hoy, así que ahora no entiendo las palabras. No es tu micrófono. Podés escribirme en el chat.' : 'Te oigo, pero tuve un problema en el servidor para entender las palabras. No es tu micrófono. Probá de nuevo en un momento.');
+      await say(sttErr === 'quota' ? 'Te oigo, pero el servicio que pasa tu voz a texto llegó a su límite de hoy, así que ahora no entiendo las palabras. No es tu micrófono. Puedes escribirme en el chat.' : 'Te oigo, pero tuve un problema en el servidor para entender las palabras. No es tu micrófono. Prueba de nuevo en un momento.');
     }
     listen();
     return;
   }
-  addTranscript('Vos', text);
+  addTranscript('Tú', text);
   S.utterances.push(text);
   if (CRISIS_RE.test(text)) showCrisis();
   const reply = await ask(text);
@@ -307,7 +307,7 @@ async function ask(text, isSystem = false) {
     S.abort = new AbortController();
     try {
       const msgs = [...S.history.slice(-16), { role: 'user', content: text }];
-      const r = await engine.chat({ messages: msgs, lang: S.lang.code, mode: 'fast', system: sys + '\nRespondé en 1 a 3 oraciones, para ser dichas en voz alta, sin listas ni formato.', agent: { id: 'companera', name: 'AgentiCuántico', system: sys }, signal: S.abort.signal, onDelta: () => {} });
+      const r = await engine.chat({ messages: msgs, lang: S.lang.code, mode: 'fast', system: sys + '\nResponde en 1 a 3 oraciones, para ser dichas en voz alta, sin listas ni formato.', agent: { id: 'companera', name: 'AgentiCuántico', system: sys }, signal: S.abort.signal, onDelta: () => {} });
       if (!r.local) { if (!isSystem) S.history.push({ role: 'user', content: text }); S.history.push({ role: 'assistant', content: r.text }); return r.text; }
     } catch (e) { if (e.name === 'AbortError') return null; }
     if (isSystem) return null;
@@ -356,14 +356,14 @@ function toggleMute() {
 function addTranscript(who, text) {
   const box = $('trList');
   box.querySelector('.live')?.remove();
-  box.append(h('p', { class: who === 'Vos' ? 'me' : who === '—' ? 'sys' : 'ai' }, h('strong', {}, who + ': '), text));
+  box.append(h('p', { class: who === 'Tú' ? 'me' : who === '—' ? 'sys' : 'ai' }, h('strong', {}, who + ': '), text));
   box.scrollTop = box.scrollHeight;
 }
 function liveLine(text) {
   const box = $('trList');
   let el = box.querySelector('.live');
   if (!el) { el = h('p', { class: 'me live' }); box.append(el); }
-  el.innerHTML = '<strong>Vos: </strong>' + esc(text);
+  el.innerHTML = '<strong>Tú: </strong>' + esc(text);
   box.scrollTop = box.scrollHeight;
 }
 function showCrisis() {
@@ -403,7 +403,7 @@ async function endCall(msg) {
       saved = n ? `Guardé ${n} ${n === 1 ? 'dato nuevo' : 'datos nuevos'} para la próxima.` : 'No hubo datos nuevos para recordar.';
     } catch { saved = 'No pude guardar la memoria esta vez.'; }
   } else if (S.incognito) saved = 'Llamada incógnito: no se guardó nada.';
-  else if (!S.user) saved = 'Ingresá con tu cuenta para que pueda recordarte día a día.';
+  else if (!S.user) saved = 'Ingresa con tu cuenta para que pueda recordarte día a día.';
   $('summaryMem').textContent = saved;
 }
 window.addEventListener('pagehide', () => { if (S.state !== 'ready' && S.state !== 'ended') endCall(); });

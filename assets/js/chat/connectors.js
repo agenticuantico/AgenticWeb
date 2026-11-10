@@ -42,46 +42,46 @@ const LOGO = {
 };
 
 const ERR = {
-  login_required: 'Ingresá a tu cuenta para continuar.',
+  login_required: 'Ingresa a tu cuenta para continuar.',
   connectors_unavailable: 'Los conectores no están disponibles en este momento.',
   github_not_configured: 'La conexión con GitHub todavía no está habilitada.',
   github_device_flow_disabled: 'La conexión con GitHub todavía no está habilitada.',
-  github_not_connected: 'Conectá tu cuenta de GitHub primero.',
-  github_token_revoked: 'GitHub revocó el acceso. Volvé a conectar tu cuenta.',
+  github_not_connected: 'Conecta tu cuenta de GitHub primero.',
+  github_token_revoked: 'GitHub revocó el acceso. Vuelve a conectar tu cuenta.',
   github_validation_failed: 'GitHub rechazó los datos (¿ya existe un repositorio con ese nombre?).',
-  github_not_found: 'No encontramos ese repositorio o no tenés acceso.',
+  github_not_found: 'No encontramos ese repositorio o no tienes acceso.',
   github_forbidden: 'GitHub no permite esta acción con tus permisos.',
-  github_no_push_permission: 'No tenés permiso de escritura en ese repositorio.',
-  invalid_repo_name: 'Nombre de repositorio inválido. Usá letras, números, guiones o puntos.',
+  github_no_push_permission: 'No tienes permiso de escritura en ese repositorio.',
+  invalid_repo_name: 'Nombre de repositorio inválido. Usa letras, números, guiones o puntos.',
   invalid_path: 'Hay una ruta de archivo inválida.',
   cloudflare_token_format: 'Ese token no tiene el formato de un API token de Cloudflare.',
-  cloudflare_token_invalid: 'Cloudflare no aceptó el token. Revisá que esté activo y copiado completo.',
-  cloudflare_account_required: 'No pudimos ver ninguna cuenta con ese token. Agregá el permiso Account Settings: Read o indicá el Account ID.',
+  cloudflare_token_invalid: 'Cloudflare no aceptó el token. Revisa que esté activo y copiado completo.',
+  cloudflare_account_required: 'No pudimos ver ninguna cuenta con ese token. Agrega el permiso Account Settings: Read o indica el Account ID.',
   cloudflare_account_format: 'El Account ID tiene 32 caracteres hexadecimales.',
   cloudflare_permission_missing: 'Al token le falta un permiso para esta acción (Workers Scripts: Edit).',
-  cloudflare_not_connected: 'Conectá tu cuenta de Cloudflare primero.',
+  cloudflare_not_connected: 'Conecta tu cuenta de Cloudflare primero.',
   invalid_worker_name: 'Nombre inválido: minúsculas, números y guiones (máx. 63).',
   invalid_worker_code: 'El código tiene que ser un módulo con «export default».',
-  payload_too_large: 'Los archivos son demasiado grandes para publicarlos desde acá.',
-  rate_limited: 'Demasiados intentos seguidos. Esperá un minuto.',
-  expired: 'La autorización venció. Probá conectar de nuevo.',
+  payload_too_large: 'Los archivos son demasiado grandes para publicarlos desde aquí.',
+  rate_limited: 'Demasiados intentos seguidos. Espera un minuto.',
+  expired: 'La autorización venció. Prueba conectar de nuevo.',
   forbidden: 'Esta autorización pertenece a otra cuenta.',
   denied: 'Cancelaste la autorización en GitHub.',
-  invalid_state: 'La autorización no se pudo verificar. Probá conectar de nuevo.',
+  invalid_state: 'La autorización no se pudo verificar. Prueba conectar de nuevo.',
   not_configured: 'La conexión con GitHub todavía no está habilitada.',
-  failed: 'GitHub no completó la autorización. Probá de nuevo.',
-  invalid_request: 'La autorización no se pudo verificar. Probá conectar de nuevo.',
-  cloudflare_oauth_not_configured: 'El inicio de sesión con Cloudflare todavía no está habilitado. Podés conectar con un token en «Opciones avanzadas».',
+  failed: 'GitHub no completó la autorización. Prueba de nuevo.',
+  invalid_request: 'La autorización no se pudo verificar. Prueba conectar de nuevo.',
+  cloudflare_oauth_not_configured: 'El inicio de sesión con Cloudflare todavía no está habilitado. Puedes conectar con un token en «Opciones avanzadas».',
   linkedin_not_configured: 'La conexión con LinkedIn todavía no está habilitada.',
   google_not_configured: 'La conexión con Gmail todavía no está habilitada.',
   gcalendar_not_configured: 'La conexión con Google Calendar todavía no está habilitada.',
   gdrive_not_configured: 'La conexión con Google Drive todavía no está habilitada.',
-  invalid_return: 'No se pudo preparar la vuelta a AgentiCuántico. Recargá la página y probá de nuevo.',
-  offline: 'El servidor no responde en este momento. Probá de nuevo en un rato.',
-  session_expired: 'Tu sesión venció. Ingresá de nuevo para ver y conectar tus cuentas.',
-  network: 'No hay conexión. Revisá internet y probá de nuevo.'
+  invalid_return: 'No se pudo preparar la vuelta a AgentiCuántico. Recarga la página y prueba de nuevo.',
+  offline: 'El servidor no responde en este momento. Prueba de nuevo en un rato.',
+  session_expired: 'Tu sesión venció. Ingresa de nuevo para ver y conectar tus cuentas.',
+  network: 'No hay conexión. Revisa internet y prueba de nuevo.'
 };
-const errText = (code) => ERR[code] || 'No se pudo completar la acción. Probá de nuevo en unos minutos.';
+const errText = (code) => ERR[code] || 'No se pudo completar la acción. Prueba de nuevo en unos minutos.';
 
 /** Aviso de estado del panel: data-state = login | offline | network | error (para estilos y pruebas). */
 function stateBox(kind, text, action) {
@@ -162,16 +162,16 @@ export async function renderConnectors(pane, chat, others) {
     const n = hubNotice; hubNotice = null;
     pane.append(h('div', { class: 'alert ' + (n.ok ? 'ok' : 'warn') + ' conn-return', role: n.ok ? 'status' : 'alert' }, h('span', { html: icon(n.ok ? 'check' : 'info') }), h('div', {}, n.text)));
   }
-  pane.append(h('p', { class: 'muted' }, 'Conectá tus cuentas para que el agente trabaje en tu nombre. Antes de crear, modificar o publicar algo, siempre te pide confirmación.'));
+  pane.append(h('p', { class: 'muted' }, 'Conecta tus cuentas para que el agente trabaje en tu nombre. Antes de crear, modificar o publicar algo, siempre te pide confirmación.'));
   const box = h('div', { class: 'conn-grid' });
   pane.append(box);
   const draw = async () => {
     box.innerHTML = '';
     // 1) Sin cuenta: no hace falta el servidor para mostrar los conectores; cada uno pide ingresar.
     if (!chat.user) {
-      box.append(stateBox('login', 'Ingresá a tu cuenta para conectar GitHub, Cloudflare, LinkedIn, Gmail y Google Drive. Cada persona conecta sus propias cuentas.', h('button', { class: 'btn btn-primary btn-sm', type: 'button', onclick: () => chat.loginPrompt('Ingresá a tu cuenta para conectar tus cuentas.') }, 'Ingresar')));
+      box.append(stateBox('login', 'Ingresa a tu cuenta para conectar GitHub, Cloudflare, LinkedIn, Gmail y Google Drive. Cada persona conecta sus propias cuentas.', h('button', { class: 'btn btn-primary btn-sm', type: 'button', onclick: () => chat.loginPrompt('Ingresa a tu cuenta para conectar tus cuentas.') }, 'Ingresar')));
       for (const [id, title, desc] of LOGGED_OUT) {
-        box.append(card(id, title, desc, h('div', { class: 'conn-actions' }, h('button', { class: 'btn btn-sm', type: 'button', onclick: () => chat.loginPrompt(`Ingresá a tu cuenta para conectar ${title}.`) }, 'Ingresar para conectar'))));
+        box.append(card(id, title, desc, h('div', { class: 'conn-actions' }, h('button', { class: 'btn btn-sm', type: 'button', onclick: () => chat.loginPrompt(`Ingresa a tu cuenta para conectar ${title}.`) }, 'Ingresar para conectar'))));
       }
       return;
     }
@@ -182,7 +182,7 @@ export async function renderConnectors(pane, chat, others) {
       const code = e && e.code;
       // 2) Sesión vencida: botón para ingresar de nuevo (no es un problema del servidor).
       if (code === 'session_expired' || code === 'login_required') {
-        box.append(stateBox('login', errText('session_expired'), h('button', { class: 'btn btn-primary btn-sm', type: 'button', onclick: () => chat.loginPrompt('Tu sesión venció. Ingresá de nuevo para conectar tus cuentas.') }, 'Ingresar de nuevo')));
+        box.append(stateBox('login', errText('session_expired'), h('button', { class: 'btn btn-primary btn-sm', type: 'button', onclick: () => chat.loginPrompt('Tu sesión venció. Ingresa de nuevo para conectar tus cuentas.') }, 'Ingresar de nuevo')));
         return;
       }
       // 3) Sin internet o servidor caído de verdad (ya se reintentó): explicar y ofrecer reintentar.
@@ -243,7 +243,7 @@ function githubCard(chat, st, redraw) {
     btn.disabled = false; btn.removeAttribute('aria-busy');
   });
   cardEl = card('github', 'GitHub', 'Repositorios: ver, crear y subir archivos.',
-    h('ul', { class: 'conn-points' }, h('li', {}, 'Iniciás sesión en GitHub, autorizás el acceso y volvés acá ya conectado.'), h('li', {}, 'Podés desconectarlo cuando quieras.')),
+    h('ul', { class: 'conn-points' }, h('li', {}, 'Inicias sesión en GitHub, autorizas el acceso y vuelves aquí ya conectado.'), h('li', {}, 'Puedes desconectarlo cuando quieras.')),
     h('div', { class: 'conn-actions' }, btn));
   return cardEl;
 }
@@ -253,7 +253,7 @@ function deviceDialog(chat, r, redraw) {
   const status = h('p', { class: 'muted small', 'aria-live': 'polite' }, 'Esperando la autorización…');
   const code = h('div', { class: 'conn-code', 'data-no-i18n': '' }, r.userCode);
   const body = h('div', { class: 'conn-device' },
-    h('p', {}, 'Abrí GitHub, ingresá este código y autorizá el acceso:'), code,
+    h('p', {}, 'Abre GitHub, ingresa este código y autoriza el acceso:'), code,
     h('div', { class: 'conn-actions' },
       h('a', { class: 'btn btn-primary btn-sm', href: r.verificationUri, target: '_blank', rel: 'noopener' }, 'Abrir GitHub'),
       h('button', { class: 'btn btn-sm', type: 'button', onclick: () => { navigator.clipboard && navigator.clipboard.writeText(r.userCode).then(() => toast('Código copiado')); } }, 'Copiar código')),
@@ -267,7 +267,7 @@ function deviceDialog(chat, r, redraw) {
       const p = await api(chat, '/api/connectors/github/device/poll', { method: 'POST', body: { id: r.id } });
       if (p.status === 'connected') { stop = true; m.close(true); toast('GitHub conectado'); redraw(); return; }
       if (p.status === 'slow_down') wait = (p.interval || 10) * 1000;
-      if (p.status === 'expired' || p.status === 'denied') { status.textContent = p.status === 'denied' ? 'Cancelaste la autorización en GitHub.' : 'El código venció. Cerrá y probá de nuevo.'; return; }
+      if (p.status === 'expired' || p.status === 'denied') { status.textContent = p.status === 'denied' ? 'Cancelaste la autorización en GitHub.' : 'El código venció. Cierra y prueba de nuevo.'; return; }
     } catch (e) { status.textContent = errText(e.code); return; }
     setTimeout(tick, wait);
   };
@@ -280,7 +280,7 @@ async function reposDialog(chat) {
   try {
     const { repos } = await api(chat, '/api/connectors/github/repos');
     list.innerHTML = '';
-    if (!repos.length) list.append(h('p', { class: 'muted' }, 'Todavía no tenés repositorios.'));
+    if (!repos.length) list.append(h('p', { class: 'muted' }, 'Todavía no tienes repositorios.'));
     for (const r of repos) list.append(h('a', { class: 'conn-row', href: r.url, target: '_blank', rel: 'noopener' },
       h('span', { class: 'conn-row-main' }, h('strong', { 'data-no-i18n': '' }, r.fullName), r.description ? h('small', { class: 'muted', 'data-no-i18n': '' }, r.description) : null),
       h('span', { class: 'chip' + (r.private ? '' : ' info') }, r.private ? 'Privado' : 'Público')));
@@ -291,7 +291,7 @@ function createRepoDialog(chat) {
   const form = h('form', { class: 'conn-form' },
     field('Nombre del repositorio', h('input', { class: 'input', name: 'name', required: true, maxlength: 100, pattern: '[A-Za-z0-9._-]+', placeholder: 'mi-proyecto', autocomplete: 'off' })),
     field('Descripción (opcional)', h('input', { class: 'input', name: 'description', maxlength: 300 })),
-    h('label', { class: 'conn-check' }, h('input', { type: 'checkbox', name: 'private', checked: true }), h('span', {}, 'Privado (solo vos lo ves)')),
+    h('label', { class: 'conn-check' }, h('input', { type: 'checkbox', name: 'private', checked: true }), h('span', {}, 'Privado (solo tú lo ves)')),
     h('div', { class: 'conn-actions end' }, h('button', { class: 'btn btn-primary', type: 'submit' }, 'Continuar')));
   const m = modal({ title: 'Crear repositorio', body: form });
   form.addEventListener('submit', async (e) => {
@@ -317,7 +317,7 @@ function cloudflareCard(chat, st, redraw) {
       h('div', { class: 'conn-actions' },
         h('button', { class: 'btn btn-sm', type: 'button', onclick: () => workersDialog(chat) }, 'Ver Workers'),
         h('button', { class: 'btn btn-sm btn-danger-ghost', type: 'button', onclick: async () => {
-          if (!(await confirmDialog({ title: 'Desconectar Cloudflare', text: 'Se borra el token guardado. Para anularlo del todo, eliminalo también en Cloudflare → API Tokens.', ok: 'Desconectar', danger: true }))) return;
+          if (!(await confirmDialog({ title: 'Desconectar Cloudflare', text: 'Se borra el token guardado. Para anularlo del todo, elimínalo también en Cloudflare → API Tokens.', ok: 'Desconectar', danger: true }))) return;
           try { await api(chat, '/api/connectors/cloudflare/disconnect', { method: 'POST', body: {} }); toast('Cloudflare desconectado'); redraw(); } catch (e) { fail(e); }
         } }, 'Desconectar')));
   }
@@ -326,17 +326,17 @@ function cloudflareCard(chat, st, redraw) {
   const oauthReady = !!((st.available && st.available.cloudflareOAuth) || cfp.oauth);
   const form = h('form', { class: 'conn-form', autocomplete: 'off' },
     h('ol', { class: 'conn-steps' },
-      h('li', {}, 'Abrí ', h('a', { href: 'https://dash.cloudflare.com/profile/api-tokens', target: '_blank', rel: 'noopener' }, 'dash.cloudflare.com/profile/api-tokens'), ' y tocá «Create Token» → «Create Custom Token».'),
-      h('li', {}, 'Agregá estos permisos:',
+      h('li', {}, 'Abre ', h('a', { href: 'https://dash.cloudflare.com/profile/api-tokens', target: '_blank', rel: 'noopener' }, 'dash.cloudflare.com/profile/api-tokens'), ' y toca «Create Token» → «Create Custom Token».'),
+      h('li', {}, 'Agrega estos permisos:',
         h('ul', { class: 'conn-perms', 'data-no-i18n': '' },
           h('li', {}, h('code', {}, 'Account · Workers Scripts · Edit')),
           h('li', {}, h('code', {}, 'Account · Account Settings · Read')),
           h('li', {}, h('code', {}, 'Account · Cloudflare Pages · Edit ', h('em', {}, '(opt.)'))),
           h('li', {}, h('code', {}, 'User · User Details · Read ', h('em', {}, '(opt.)'))))),
-      h('li', {}, 'En «Account Resources» elegí tu cuenta, creá el token y copialo.')),
-    h('div', { class: 'field' }, h('label', { for: tokenId }, 'API token'), h('input', { class: 'input', id: tokenId, name: 'token', type: 'password', required: true, minlength: 30, maxlength: 200, autocomplete: 'off', spellcheck: 'false', placeholder: 'Pegá tu API token' })),
+      h('li', {}, 'En «Account Resources» elige tu cuenta, crea el token y cópialo.')),
+    h('div', { class: 'field' }, h('label', { for: tokenId }, 'API token'), h('input', { class: 'input', id: tokenId, name: 'token', type: 'password', required: true, minlength: 30, maxlength: 200, autocomplete: 'off', spellcheck: 'false', placeholder: 'Pega tu API token' })),
     h('div', { class: 'field' }, h('label', { for: accId }, 'Account ID (opcional)'), h('input', { class: 'input', id: accId, name: 'accountId', maxlength: 32, pattern: '[a-fA-F0-9]{32}', autocomplete: 'off', spellcheck: 'false' })),
-    h('p', { class: 'muted small' }, 'Se guarda cifrado y nunca se muestra de nuevo. Podés revocarlo cuando quieras desde Cloudflare o desconectarlo acá.'),
+    h('p', { class: 'muted small' }, 'Se guarda cifrado y nunca se muestra de nuevo. Puedes revocarlo cuando quieras desde Cloudflare o desconectarlo aquí.'),
     h('div', { class: 'conn-actions' }, h('button', { class: 'btn btn-sm', type: 'submit' }, 'Verificar y conectar')));
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -353,14 +353,14 @@ function cloudflareCard(chat, st, redraw) {
   });
   // Respaldo: el token queda plegado en «Opciones avanzadas»; el camino principal es iniciar sesión en Cloudflare.
   const adv = h('details', { class: 'conn-adv conn-collapse' }, h('summary', {}, 'Opciones avanzadas: conectar con un API token'), form);
-  const note = h('p', { class: 'muted small conn-note', role: 'status', hidden: true }, 'El inicio de sesión directo con Cloudflare todavía no está habilitado. Mientras tanto podés conectar con un API token acá abajo.');
+  const note = h('p', { class: 'muted small conn-note', role: 'status', hidden: true }, 'El inicio de sesión directo con Cloudflare todavía no está habilitado. Mientras tanto puedes conectar con un API token aquí abajo.');
   const btn = h('button', { class: 'btn btn-primary btn-sm', type: 'button' }, h('span', { class: 'conn-btn-ic', html: LOGO.cloudflare }), 'Conectar con Cloudflare');
   btn.addEventListener('click', async () => {
     if (!oauthReady) { note.hidden = false; adv.open = true; form.token.focus(); return; }
     await goConnect(btn, 'cloudflare', 'Cloudflare', wrapCard);
   });
   const wrapCard = card('cloudflare', 'Cloudflare', 'Workers y sitios: ver y publicar.',
-    h('ul', { class: 'conn-points' }, h('li', {}, 'Tocás «Conectar», iniciás sesión en Cloudflare, aprobás el acceso y volvés acá ya conectado.'), h('li', {}, 'Podés desconectarlo cuando quieras.')),
+    h('ul', { class: 'conn-points' }, h('li', {}, 'Tocas «Conectar», inicias sesión en Cloudflare, apruebas el acceso y vuelves aquí ya conectado.'), h('li', {}, 'Puedes desconectarlo cuando quieras.')),
     h('div', { class: 'conn-actions' }, btn), note, adv);
   return wrapCard;
 }
@@ -385,7 +385,7 @@ async function goConnect(btn, provider, label, where) {
   try {
     const r = await startConnect(provider, { from: 'hub' });
     if (r && r.mode === 'redirect') return;
-    if (r && r.mode === 'device' && r.userCode) { toast(`Abrí ${r.verificationUri} y escribí el código ${r.userCode}`, '', 15000); window.open(r.verificationUri, '_blank', 'noopener'); }
+    if (r && r.mode === 'device' && r.userCode) { toast(`Abre ${r.verificationUri} y escribe el código ${r.userCode}`, '', 15000); window.open(r.verificationUri, '_blank', 'noopener'); }
   } catch (e) { fail(e, where); }
   btn.disabled = false; btn.removeAttribute('aria-busy'); btn.innerHTML = prev;
 }
@@ -398,7 +398,7 @@ function oauthCard(chat, p, redraw) {
     let c;
     if (p.status === 'expired') { const rb = h('button', { class: 'btn btn-primary btn-sm', type: 'button', onclick: () => goConnect(rb, p.id, p.label, c) }, 'Reconectar'); acts.append(rb); }
     acts.append(h('button', { class: 'btn btn-sm btn-danger-ghost', type: 'button', onclick: async () => {
-      if (!(await confirmDialog({ title: `Desconectar ${p.label}`, text: `Se borra el acceso guardado y se revoca el permiso en ${p.label}. Podés volver a conectarla cuando quieras.`, ok: 'Desconectar', danger: true }))) return;
+      if (!(await confirmDialog({ title: `Desconectar ${p.label}`, text: `Se borra el acceso guardado y se revoca el permiso en ${p.label}. Puedes volver a conectarla cuando quieras.`, ok: 'Desconectar', danger: true }))) return;
       try { await api(chat, `/api/connectors/${p.id}/disconnect`, { method: 'POST', body: {} }); toast(`${p.label} desconectada`); redraw(); } catch (e) { fail(e, c); }
     } }, 'Desconectar'));
     c = card(p.id, p.label, desc, who({ ...conn, login: conn.login || conn.name || '' }, p.status === 'expired' ? 'El permiso venció' : 'Conectado como'), acts);
@@ -411,7 +411,7 @@ function oauthCard(chat, p, redraw) {
   let c;
   btn.addEventListener('click', () => goConnect(btn, p.id, p.label, c));
   c = card(p.id, p.label, desc,
-    h('ul', { class: 'conn-points' }, h('li', {}, `Iniciás sesión en ${p.label}, aprobás el acceso y volvés acá ya conectado.`), h('li', {}, 'Todo lo que publica o envía te pide «Confirmar» antes.')),
+    h('ul', { class: 'conn-points' }, h('li', {}, `Inicias sesión en ${p.label}, apruebas el acceso y vuelves aquí ya conectado.`), h('li', {}, 'Todo lo que publica o envía te pide «Confirmar» antes.')),
     // Límite real del proveedor que informa el servidor (p. ej. Google en modo de prueba: solo usuarios de prueba).
     p.note ? h('p', { class: 'muted small conn-note', 'data-conn-limit': '' }, h('span', { class: 'conn-inline-ic', html: icon('info') }), String(p.note)) : null,
     h('div', { class: 'conn-actions' }, btn));
@@ -424,7 +424,7 @@ async function workersDialog(chat) {
   try {
     const r = await api(chat, '/api/connectors/cloudflare/workers');
     list.innerHTML = '';
-    if (!r.workers.length && !(r.pages || []).length) list.append(h('p', { class: 'muted' }, 'Todavía no tenés Workers ni sitios.'));
+    if (!r.workers.length && !(r.pages || []).length) list.append(h('p', { class: 'muted' }, 'Todavía no tienes Workers ni sitios.'));
     for (const w of r.workers) list.append(row(w.name, w.url, 'Worker'));
     for (const p of r.pages || []) list.append(row(p.name, p.url, 'Pages'));
   } catch (e) { list.innerHTML = ''; list.append(h('p', { class: 'muted' }, errText(e.code))); }
@@ -438,11 +438,11 @@ async function workersDialog(chat) {
 /* =================== Publicar un entregable del agente =================== */
 export async function publishArtifact(chat, art) {
   ensureCss();
-  if (!chat.user) return chat.loginPrompt('Ingresá a tu cuenta para publicar en GitHub o Cloudflare.');
+  if (!chat.user) return chat.loginPrompt('Ingresa a tu cuenta para publicar en GitHub o Cloudflare.');
   let st;
   try { st = await api(chat, '/api/connectors'); } catch (e) { return fail(e); }
   if (!st.github && !st.cloudflare) {
-    const go = await confirmDialog({ title: 'Publicar', text: 'Conectá GitHub o Cloudflare en el Centro de control para publicar este archivo.', ok: 'Ir a Conectores' });
+    const go = await confirmDialog({ title: 'Publicar', text: 'Conecta GitHub o Cloudflare en el Centro de control para publicar este archivo.', ok: 'Ir a Conectores' });
     if (go) chat.openHub('conectores');
     return;
   }
@@ -451,7 +451,7 @@ export async function publishArtifact(chat, art) {
   const isHtml = /\.html?$/i.test(name) || /html/.test(art.mime || '');
   const body = h('div', { class: 'conn-publish' });
   const m = modal({ title: 'Publicar', body });
-  body.append(h('p', { class: 'muted' }, 'Elegí dónde publicar ', h('strong', { 'data-no-i18n': '' }, name), '. Antes de hacer cambios te mostramos qué se va a crear o reemplazar.'));
+  body.append(h('p', { class: 'muted' }, 'Elige dónde publicar ', h('strong', { 'data-no-i18n': '' }, name), '. Antes de hacer cambios te mostramos qué se va a crear o reemplazar.'));
   if (st.github) {
     const sel = h('select', { class: 'select', name: 'repo', required: true }, h('option', { value: '' }, 'Cargando…'));
     const fGh = h('form', { class: 'conn-form card-lite' },
@@ -462,7 +462,7 @@ export async function publishArtifact(chat, art) {
       h('div', { class: 'conn-actions' }, h('button', { class: 'btn btn-primary btn-sm', type: 'submit' }, 'Continuar')));
     api(chat, '/api/connectors/github/repos').then(({ repos }) => {
       sel.innerHTML = '';
-      sel.append(h('option', { value: '' }, 'Elegí un repositorio'));
+      sel.append(h('option', { value: '' }, 'Elige un repositorio'));
       for (const r of repos.filter((x) => x.canPush)) sel.append(h('option', { value: r.fullName }, r.fullName));
     }).catch((e) => { sel.innerHTML = ''; sel.append(h('option', { value: '' }, errText(e.code))); });
     fGh.addEventListener('submit', async (e) => {

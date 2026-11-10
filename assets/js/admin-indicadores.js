@@ -8,7 +8,7 @@ import { api } from './admin-staff.js';
 import { CONFIG } from './config.js';
 
 const BASE = String(CONFIG.API_BASE || '').replace(/\/+$/, '');
-const ERRK = { owner_only: 'Solo el dueño puede hacer esto.', invalid_month: 'Elegí el mes.', invalid_amount: 'El monto no es válido.', invalid_currency: 'Elegí la moneda.', invalid_period: 'El período no es válido.', forbidden_role: 'Tu rol no ve los indicadores.' };
+const ERRK = { owner_only: 'Solo el dueño puede hacer esto.', invalid_month: 'Elige el mes.', invalid_amount: 'El monto no es válido.', invalid_currency: 'Elige la moneda.', invalid_period: 'El período no es válido.', forbidden_role: 'Tu rol no ve los indicadores.' };
 const fail = (e) => toast(ERRK[e && e.code] || (e && e.message) || 'No se pudo completar.', 'danger');
 const GROUPS = [['agentes', 'Agentes'], ['personas', 'Personas'], ['trafico', 'Tráfico y leads'], ['negocio', 'Negocio (solo el dueño)']];
 const fmt = (m) => (m.value == null ? '—' : (m.unit === 'ARS' ? '$ ' : '') + Number(m.value).toLocaleString('es-AR', { maximumFractionDigits: 2 }) + (m.unit === '%' ? ' %' : m.unit === 'ARS' ? '' : ''));
@@ -77,7 +77,7 @@ export async function renderKpis(box, token, me) {
     const form = h('form', { class: 'kpi-spend-form', novalidate: true }, h('label', { class: 'label' }, 'Mes', month), h('label', { class: 'label' }, 'Monto', amount), h('label', { class: 'label' }, 'Moneda', cur), h('label', { class: 'label' }, 'Canal', channel), save);
     form.addEventListener('submit', async (e) => { e.preventDefault(); save.disabled = true; try { await api('/api/panel/kpi/spend', { method: 'POST', token, body: { month: month.value, amount: Number(amount.value), currency: cur.value, channel: channel.value } }); toast('Gasto guardado', 'success'); load(); } catch (ex) { fail(ex); save.disabled = false; } });
     const rows = (d.business && d.business.spend) || [];
-    return h('section', { class: 'card panel' }, h('div', { class: 'panel-head' }, h('h2', {}, 'Gasto de marketing (para el CAC)')), h('p', { class: 'small muted' }, 'Lo cargás vos a mano, por mes. Sin gasto cargado, el CAC muestra «falta dato de gasto».'), form,
+    return h('section', { class: 'card panel' }, h('div', { class: 'panel-head' }, h('h2', {}, 'Gasto de marketing (para el CAC)')), h('p', { class: 'small muted' }, 'Lo cargas tú a mano, por mes. Sin gasto cargado, el CAC muestra «falta dato de gasto».'), form,
       rows.length ? h('ul', { class: 'team-props' }, ...rows.map((s) => h('li', { class: 'team-prop done' }, `${s.mes} · ${s.moneda} ${Number(s.monto).toLocaleString('es-AR')}${s.canal ? ' · ' + s.canal : ''} `,
         h('button', { class: 'linklike tiny', type: 'button', onclick: async () => { if (!(await confirmDialog({ title: 'Borrar gasto', text: `¿Borrar ${s.mes} · ${s.moneda} ${s.monto}?`, ok: 'Borrar', danger: true }))) return; try { await api('/api/panel/kpi/spend/' + s.id, { method: 'DELETE', token }); load(); } catch (e) { fail(e); } } }, 'Borrar')))) : h('p', { class: 'muted small' }, 'Todavía no cargaste gasto.'));
   }
@@ -90,7 +90,7 @@ export async function renderKpis(box, token, me) {
       try {
         const r = await api('/api/panel/kpi/token', { method: 'POST', token, body: { label: 'Power BI' } });
         const field = h('input', { class: 'input', readonly: true, value: r.token, 'aria-label': 'Token (se muestra una sola vez)' });
-        out.replaceChildren(h('div', { class: 'alert' }, h('span', { html: icon('lock') }), h('div', {}, h('strong', {}, 'Copialo ahora: no se vuelve a mostrar. '), 'Guardalo solo en Power BI (encabezado Authorization: Bearer …).')), field,
+        out.replaceChildren(h('div', { class: 'alert' }, h('span', { html: icon('lock') }), h('div', {}, h('strong', {}, 'Cópialo ahora: no se vuelve a mostrar. '), 'Guárdalo solo en Power BI (encabezado Authorization: Bearer …).')), field,
           h('button', { class: 'btn btn-sm', type: 'button', onclick: async () => { try { await navigator.clipboard.writeText(r.token); toast('Copiado', 'success'); } catch { field.select(); } } }, 'Copiar'));
       } catch (e) { fail(e); }
     };

@@ -3,13 +3,13 @@
   "brand": "Grano & Brasa",
   "brandMark": "G&B",
   "title": "Grano & Brasa · Café de especialidad y granos tostados en casa",
-  "description": "Cafetería de especialidad y tostadores: espresso, filtrados y granos frescos de origen único. Vení a probarlos o llevalos a tu casa.",
+  "description": "Cafetería de especialidad y tostadores: espresso, filtrados y granos frescos de origen único. Ven a probarlos o llévalos a tu casa.",
   "nav": [
     { "label": "Historia", "href": "#historia" },
     { "label": "Carta", "href": "#carta" },
     { "label": "Orígenes", "href": "#origenes" },
     { "label": "Tienda", "href": "#tienda" },
-    { "label": "Visitanos", "href": "#visitanos" }
+    { "label": "Visítanos", "href": "#visítanos" }
   ],
   "navCta": "Reservar mesa",
   "hero": {
@@ -20,7 +20,7 @@
     "lead": "Seleccionamos granos de origen único, los tostamos en pequeños lotes cada semana y los servimos en su punto exacto. Una cafetería para quedarse y una tienda para llevarse el aroma a casa.",
     "primary": "Ver la carta",
     "secondary": "Comprar granos",
-    "scrollHint": "Deslizá para servir"
+    "scrollHint": "Desliza para servir"
   },
   "scenes": [
     { "kicker": "01 · Tostado lento", "title": "Lotes pequeños, perfil preciso.", "text": "Cada origen tiene su curva de tueste. La afinamos hasta que el dulzor natural del grano aparece sin amargor." },
@@ -31,7 +31,7 @@
     "eyebrow": "Nuestra historia",
     "title": "Empezamos tostando para amigos. Hoy tostamos para un barrio entero.",
     "body": "Grano & Brasa nació de una obsesión simple: entender por qué un café puede saber a frutos rojos, a chocolate o a flores. Viajamos a las fincas, aprendimos de quienes cultivan y volvimos con una certeza: el buen café es trabajo de muchas manos.",
-    "body2": "Compramos directo a productores, pagamos por calidad y tostamos en el local, a la vista. Lo que tomás en la barra es exactamente lo que te llevás en la bolsa.",
+    "body2": "Compramos directo a productores, pagamos por calidad y tostamos en el local, a la vista. Lo que tomas en la barra es exactamente lo que te llevas en la bolsa.",
     "stats": [
       { "value": "48 h", "label": "del tostador a tu taza" },
       { "value": "6", "label": "orígenes en rotación" },
@@ -41,7 +41,7 @@
   "menu": {
     "eyebrow": "La carta",
     "title": "Espresso, filtrados y algo rico para acompañar.",
-    "lead": "Precios de referencia. Preguntá en la barra por el origen de la semana.",
+    "lead": "Precios de referencia. Pregunta en la barra por el origen de la semana.",
     "groups": [
       { "name": "Barra de espresso", "note": "Doble shot, leche entera o vegetal", "items": [
         { "name": "Espresso", "desc": "Origen de la semana, 18 g en 36 g", "price": "$ 2.400" },
@@ -73,8 +73,8 @@
   },
   "shop": {
     "eyebrow": "Tienda de granos",
-    "title": "Llevate el aroma a casa.",
-    "lead": "Tostado de esta semana, en bolsas con válvula. Elegí grano entero o molido para tu método.",
+    "title": "Llévate el aroma a casa.",
+    "lead": "Tostado de esta semana, en bolsas con válvula. Elige grano entero o molido para tu método.",
     "products": [
       { "name": "Etiopía Yirgacheffe", "notes": "Floral y cítrico", "price": "$ 14.900", "weight": "250 g", "tag": "Más vendido", "tone": "#c9a46a" },
       { "name": "Colombia Huila", "notes": "Dulce y frutal", "price": "$ 13.500", "weight": "250 g", "tag": "Nuevo lote", "tone": "#b3633f" },
@@ -100,9 +100,9 @@
     ]
   },
   "visit": {
-    "eyebrow": "Visitanos",
+    "eyebrow": "Visítanos",
     "title": "Te esperamos con la máquina encendida.",
-    "lead": "Vení a tomar algo, conocer el tostador o retirar tu pedido de granos.",
+    "lead": "Ven a tomar algo, conocer el tostador o retirar tu pedido de granos.",
     "address": "Calle y número del local",
     "city": "Tu ciudad",
     "hours": [
@@ -116,7 +116,7 @@
   },
   "final": {
     "title": "Tu próxima taza favorita te está esperando.",
-    "lead": "Reservá una mesa o pedí tus granos para retirar hoy mismo.",
+    "lead": "Reserva una mesa o pide tus granos para retirar hoy mismo.",
     "cta": "Reservar mesa",
     "cta2": "Pedir granos"
   },

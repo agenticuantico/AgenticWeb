@@ -42,7 +42,7 @@ export async function renderPayPal(container, { plan, user, onApproved, onError 
   container.innerHTML = '';
   if (!paypalReady(plan)) { container.append(h('p', { class: 'muted small' }, 'PayPal en configuración.')); return; }
   if (!user) {
-    container.append(h('a', { class: 'btn btn-block', href: '/cuenta/?registro=1&siguiente=planes' }, 'Ingresá para pagar con PayPal'));
+    container.append(h('a', { class: 'btn btn-block', href: '/cuenta/?registro=1&siguiente=planes' }, 'Ingresa para pagar con PayPal'));
     return;
   }
   const slot = h('div', { class: 'pp-slot', 'aria-busy': 'true' }, h('div', { class: 'skeleton', style: 'height:46px;border-radius:999px' }));
@@ -67,7 +67,7 @@ export async function renderPayPal(container, { plan, user, onApproved, onError 
         onApproved && onApproved(data.subscriptionID);
       },
       onCancel: () => onError && onError('Cancelaste el pago en PayPal. No se cobró nada.'),
-      onError: (err) => { console.warn('[paypal]', err); onError && onError('PayPal no pudo procesar la suscripción. Probá de nuevo o con otro medio.'); }
+      onError: (err) => { console.warn('[paypal]', err); onError && onError('PayPal no pudo procesar la suscripción. Prueba de nuevo o con otro medio.'); }
     }).render(slot);
   } catch (e) {
     slot.innerHTML = '';
@@ -82,7 +82,7 @@ export function renderMercadoPago(container, { plan, user }) {
     container.append(h('button', { class: 'btn btn-block', type: 'button', disabled: true, title: 'Estamos terminando la configuración de Mercado Pago' }, h('span', {}, 'Mercado Pago muy pronto')));
     return;
   }
-  if (!user) { container.append(h('a', { class: 'btn btn-block', href: '/cuenta/?registro=1&siguiente=planes' }, 'Ingresá para pagar con Mercado Pago')); return; }
+  if (!user) { container.append(h('a', { class: 'btn btn-block', href: '/cuenta/?registro=1&siguiente=planes' }, 'Ingresa para pagar con Mercado Pago')); return; }
   const a = h('a', { class: 'btn btn-block btn-mp', href: PAYMENTS.mercadopago.checkout[plan], rel: 'noopener', 'aria-label': 'Pagar con Mercado Pago', html: '<span>Pagar con</span><img src="/assets/brands/mercadopago-blanco.svg" alt="Mercado Pago" width="92" height="24">' });
   // El checkout de planes no acepta referencias propias: recordamos el plan elegido para registrar
   // la suscripción como pendiente al volver (back_url /cuenta/?preapproval_id=...).

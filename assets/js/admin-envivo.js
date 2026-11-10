@@ -5,8 +5,8 @@
  * Ingresos: nunca (el servidor oculta montos). Los textos se pintan como texto, nunca como HTML.
  */
 import { h, icon, toast } from './ui.js';
-import { api } from './admin-staff.js?v=7.14.0';
-import { download } from './admin-indicadores.js?v=7.14.0';
+import { api } from './admin-staff.js?v=7.19.0';
+import { download } from './admin-indicadores.js?v=7.19.0';
 
 const TYPE = { orden: 'Orden', delegacion: 'Delegación', resultado: 'Resultado', propuesta: 'Propuesta', decision: 'Decisión', recomendacion: 'Recomendación', entrenamiento: 'Entrenamiento', puesto: 'Puesto', ascenso: 'Ascenso' };
 const TCLS = { orden: 'info', delegacion: 'info', resultado: 'ok', propuesta: 'gold', decision: 'ok', recomendacion: 'warn', entrenamiento: '', puesto: '', ascenso: '' };
@@ -60,7 +60,7 @@ export async function renderLive(box, token) {
     if (view === 'actividad') {
       const lt = ov.lastTick && ov.lastTick.did && ov.lastTick.did.length ? h('div', { class: 'small' }, h('strong', {}, 'Último turno: '), ov.lastTick.did.join(' · ')) : null;
       body.replaceChildren(h('section', { class: 'card panel' }, h('div', { class: 'panel-head' }, h('h2', {}, 'Actividad (últimas 48 h)')), lt,
-        ov.events.length ? h('ol', { class: 'live-feed' }, ...ov.events.map((e) => evItem(e, !seen.has(key(e))))) : h('p', { class: 'muted small' }, 'Sin actividad en las últimas 48 horas. Cuando los agentes trabajen en su turno, aparece acá.')));
+        ov.events.length ? h('ol', { class: 'live-feed' }, ...ov.events.map((e) => evItem(e, !seen.has(key(e))))) : h('p', { class: 'muted small' }, 'Sin actividad en las últimas 48 horas. Cuando los agentes trabajen en su turno, aparece aquí.')));
     } else if (view === 'equipos') {
       body.replaceChildren(h('ul', { class: 'live-teams' }, ...ov.teams.map((t) => h('li', { class: 'card panel live-team' },
         h('div', { class: 'panel-head' }, h('h2', {}, t.label), h('span', { class: 'muted tiny' }, `${t.active} de ${t.members} activos`)),

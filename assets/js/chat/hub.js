@@ -31,7 +31,7 @@ const backendChip = () => engineState.live ? h('span', { class: 'chip ok' }, 'Ac
 
 function agentes(pane, chat) {
   const ws = chat.store.ws;
-  pane.append(h('p', { class: 'muted' }, 'Invitá especialistas a la conversación con «Invitar agente» o escribiendo @nombre. Cada uno responde con su nombre. Disponible en todos los planes.'));
+  pane.append(h('p', { class: 'muted' }, 'Invita especialistas a la conversación con «Invitar agente» o escribiendo @nombre. Cada uno responde con su nombre. Disponible en todos los planes.'));
   if (!chat.featuresUnlocked) pane.append(h('div', { class: 'alert info' }, h('span', { html: icon('lock') }), h('div', {}, 'Tu plan actual es Gratis. ', h('a', { href: '/planes.html' }, 'Ver planes Pro y Empresa'))));
   const grid = h('div', { class: 'agent-grid' });
   for (const a of [...AGENTS, ...(ws.customAgents || [])]) {
@@ -74,7 +74,7 @@ function herramientas(pane) {
 
 function habilidades(pane, chat) {
   const ws = chat.store.ws;
-  pane.append(h('p', { class: 'muted' }, 'Activá habilidades para ajustar cómo responde. Se aplican a todas tus conversaciones.'));
+  pane.append(h('p', { class: 'muted' }, 'Activa habilidades para ajustar cómo responde. Se aplican a todas tus conversaciones.'));
   const list = h('div', { class: 'hub-list' });
   for (const s of SKILLS) {
     const input = h('input', { type: 'checkbox', checked: (ws.skills || []).includes(s.id) || null, 'aria-label': s.name });
@@ -122,7 +122,7 @@ async function automatizaciones(pane, chat) {
   const form = h('form', { class: 'card hub-form' },
     h('h3', {}, 'Nueva automatización'),
     field('Título', h('input', { class: 'input', name: 'title', required: true, maxlength: 80, placeholder: 'Ej.: Resumen de noticias del sector' })),
-    field('Qué tiene que hacer', h('textarea', { class: 'textarea', name: 'prompt', required: true, maxlength: 2000, placeholder: 'Ej.: Buscá novedades sobre IA en Argentina y mandame un resumen.' })),
+    field('Qué tiene que hacer', h('textarea', { class: 'textarea', name: 'prompt', required: true, maxlength: 2000, placeholder: 'Ej.: Busca novedades sobre IA en Argentina y mándame un resumen.' })),
     h('div', { class: 'grid', style: 'grid-template-columns:1fr 1fr' },
       field('Frecuencia', h('select', { class: 'select', name: 'schedule' }, h('option', { value: 'daily' }, 'Todos los días'), h('option', { value: 'weekdays' }, 'Lunes a viernes'), h('option', { value: 'weekly' }, 'Cada semana'))),
       field('Hora (Argentina)', h('input', { class: 'input', name: 'time', type: 'time', value: '09:00', required: true }))),
@@ -144,7 +144,7 @@ function memoria(pane, chat) {
   const fail = (e) => import('../account/api.js').then((m) => toast(m.errorText(e), 'warn')).catch(() => toast('No se pudo guardar.', 'warn'));
   const sw = h('input', { type: 'checkbox', checked: ws.memoryOn || null, 'aria-label': 'Usar memoria' });
   sw.addEventListener('change', () => st.setMemoryOn(sw.checked).catch((e) => { sw.checked = !sw.checked; fail(e); }));
-  pane.append(h('label', { class: 'hub-item' }, h('div', {}, h('strong', {}, 'Usar memoria'), h('p', { class: 'muted small' }, 'Datos que recuerdo entre conversaciones. Decí «Recordá que…» para agregar uno. Los chats incógnito nunca se usan ni se guardan.'), h('p', { class: 'muted small' }, st.serverOk ? 'Se guarda en tu cuenta. Nunca guardo contraseñas, códigos ni tarjetas.' : 'Nunca guardo contraseñas, códigos ni tarjetas.')), h('span', { class: 'switch' }, sw, h('span'))));
+  pane.append(h('label', { class: 'hub-item' }, h('div', {}, h('strong', {}, 'Usar memoria'), h('p', { class: 'muted small' }, 'Datos que recuerdo entre conversaciones. Di «Recuerda que…» para agregar uno. Los chats incógnito nunca se usan ni se guardan.'), h('p', { class: 'muted small' }, st.serverOk ? 'Se guarda en tu cuenta. Nunca guardo contraseñas, códigos ni tarjetas.' : 'Nunca guardo contraseñas, códigos ni tarjetas.')), h('span', { class: 'switch' }, sw, h('span'))));
   const list = h('div', { class: 'hub-list' });
   const clearBox = h('div');
   const draw = () => {
@@ -165,7 +165,7 @@ function memoria(pane, chat) {
 
 function instrucciones(pane, chat) {
   const ws = chat.store.ws;
-  const ta = h('textarea', { class: 'textarea', maxlength: 1500, rows: 7, placeholder: 'Ej.: Respondé breve, con ejemplos de Argentina. Soy desarrollador.', 'aria-label': 'Instrucciones personalizadas' });
+  const ta = h('textarea', { class: 'textarea', maxlength: 1500, rows: 7, placeholder: 'Ej.: Responde breve, con ejemplos de Argentina. Soy desarrollador.', 'aria-label': 'Instrucciones personalizadas' });
   ta.value = ws.instructions || '';
   pane.append(h('p', { class: 'muted' }, 'Instrucciones que se aplican a todas tus conversaciones (no a las de incógnito).'), ta,
     h('div', { class: 'row', style: 'margin-top:12px;justify-content:flex-end' }, h('button', { class: 'btn btn-primary', type: 'button', onclick: () => { ws.instructions = ta.value.trim(); chat.store.saveWorkspace(); toast('Instrucciones guardadas'); } }, 'Guardar')));

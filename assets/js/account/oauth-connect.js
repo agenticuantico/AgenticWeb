@@ -2,7 +2,7 @@
  * Conectar una cuenta (GitHub, Gmail, LinkedIn) con redirección de página completa:
  *   «Conectar» → pantalla de permiso del proveedor (en la misma pestaña, sin ventanas emergentes) →
  *   la persona aprueba allí → vuelve a /app/?cuenta=conectada&proveedor=<p> (o ?cuenta=error&…&motivo=<m>).
- * Si el pedido salió del chat («revisá mis mails»), se guarda el pedido pendiente en esta pestaña
+ * Si el pedido salió del chat («revisa mis mails»), se guarda el pedido pendiente en esta pestaña
  * (sessionStorage, 15 min) y al volver el chat lo retoma solo.
  * La sesión de la cuenta (Firebase) vive en este navegador y no se toca durante la redirección.
  */
@@ -79,8 +79,8 @@ export function returnMessage(ret) {
   return ({
     denied: `Cancelaste la conexión con ${ret.label}. No se guardó nada.`,
     not_configured: `La conexión con ${ret.label} todavía no está habilitada.`,
-    expired: 'El enlace venció. Tocá «Conectar» de nuevo.',
-    invalid_state: 'La conexión no se pudo verificar (pasó mucho tiempo o se abrió en otro navegador). Probá de nuevo.',
-    profile_failed: `${ret.label} no devolvió los datos de la cuenta. Probá de nuevo.`
-  })[ret.reason] || `No se pudo conectar ${ret.label}. Probá de nuevo.`;
+    expired: 'El enlace venció. Toca «Conectar» de nuevo.',
+    invalid_state: 'La conexión no se pudo verificar (pasó mucho tiempo o se abrió en otro navegador). Prueba de nuevo.',
+    profile_failed: `${ret.label} no devolvió los datos de la cuenta. Prueba de nuevo.`
+  })[ret.reason] || `No se pudo conectar ${ret.label}. Prueba de nuevo.`;
 }

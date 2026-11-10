@@ -7,7 +7,7 @@
 import { h, icon, esc, toast, confirmDialog, fmtDate, timeAgo } from './ui.js';
 import { CONFIG } from './config.js';
 import { getStore, friendlyError } from './firebase.js';
-import { renderAutonomy } from './admin-agents.js?v=7.14.0';
+import { renderAutonomy } from './admin-agents.js?v=7.19.0';
 
 const STAGES = [['nuevo', 'Nuevo'], ['contactado', 'Contactado'], ['reunion', 'Reunión'], ['negociacion', 'Negociación'], ['cerrado', 'Cerrado'], ['descartado', 'Descartado']];
 const TYPES = { inversion: 'Inversión', asociacion: 'Asociación', whitelabel: 'White-label', piloto: 'Piloto enterprise', reunion: 'Reunión', consulta: 'Consulta', empresa: 'Plan Empresa' };
@@ -66,7 +66,7 @@ export async function renderLeads(box, user) {
     const s = await fs.getDocs(fs.query(fs.collection(db, 'leads'), fs.orderBy('createdAt', 'desc'), fs.limit(500)));
     leads = s.docs.map((d) => ({ id: d.id, ...d.data() }));
   } catch (e) {
-    box.append(h('div', { class: 'alert warn' }, h('span', { html: icon('warn') }), h('div', {}, 'No se pudieron leer los leads: ', friendlyError(e), ' Publicá las reglas de Firestore (firebase/firestore.rules).')));
+    box.append(h('div', { class: 'alert warn' }, h('span', { html: icon('warn') }), h('div', {}, 'No se pudieron leer los leads: ', friendlyError(e), ' Publica las reglas de Firestore (firebase/firestore.rules).')));
     return;
   }
   const fCountry = h('select', { class: 'select', 'aria-label': 'Filtrar por país' }, h('option', { value: '' }, 'Todos los países'), ...[...new Set(leads.map((l) => l.country))].sort().map((c) => h('option', { value: c }, ccName(c))));
@@ -136,7 +136,7 @@ export async function renderAgentsControl(box, user, onStateChange) {
   box.append(grid);
 
   // Órdenes
-  const text = h('textarea', { class: 'input', rows: 3, maxlength: 4000, placeholder: 'Ej.: Mejorá la portada en móvil; arreglá el chat a 320 px; mejorá el cerebro 3D.', 'aria-label': 'Orden para los agentes' });
+  const text = h('textarea', { class: 'input', rows: 3, maxlength: 4000, placeholder: 'Ej.: Mejora la portada en móvil; arregla el chat a 320 px; mejora el cerebro 3D.', 'aria-label': 'Orden para los agentes' });
   const repo = h('select', { class: 'select', 'aria-label': 'Repositorio destino' }, h('option', { value: 'AgenticWeb' }, 'AgenticWeb (sitio)'), h('option', { value: 'AgenticDev' }, 'AgenticDev (privado)'), h('option', { value: 'cerebro' }, 'Cerebro'));
   const prio = h('select', { class: 'select', 'aria-label': 'Prioridad' }, ...[['baja', 'Baja'], ['media', 'Media'], ['alta', 'Alta'], ['urgente', 'Urgente']].map(([v, l]) => h('option', { value: v, selected: v === 'media' || null }, l)));
   const send = h('button', { class: 'btn btn-primary', type: 'button', html: icon('send') + 'Enviar orden' });
@@ -157,7 +157,7 @@ export async function renderAgentsControl(box, user, onStateChange) {
     } catch (e) { toast(friendlyError(e), 'error', 6000); } finally { send.disabled = false; }
   };
   grid.append(h('section', { class: 'card panel wide' }, h('div', { class: 'panel-head' }, h('h2', {}, 'Órdenes a los agentes')), text, h('div', { class: 'row', style: 'margin-top:8px' }, repo, prio, send),
-    h('p', { class: 'tiny muted' }, 'Los agentes trabajan en una rama y abren un PR. Nunca mergean a main: lo aprobás vos acá.'), list));
+    h('p', { class: 'tiny muted' }, 'Los agentes trabajan en una rama y abren un PR. Nunca mergean a main: lo apruebas tú aquí.'), list));
 
   async function loadOrders() {
     list.innerHTML = '<div class="skeleton" style="height:60px"></div>';
@@ -178,9 +178,9 @@ export async function renderAgentsControl(box, user, onStateChange) {
         };
         const ok = h('button', { class: 'btn btn-sm btn-primary', type: 'button' }, 'Aprobar y mergear');
         ok.onclick = async () => {
-          if (!(await confirmDialog({ title: 'Aprobar PR', text: `Se mergea el PR #${o.prNumber} en ${o.repo}. ¿Confirmás?`, ok: 'Aprobar y mergear' }))) return;
+          if (!(await confirmDialog({ title: 'Aprobar PR', text: `Se mergea el PR #${o.prNumber} en ${o.repo}. ¿Confirmas?`, ok: 'Aprobar y mergear' }))) return;
           try { await workerCall(user, `/api/admin/pr/${o.repo}/${o.prNumber}/approve`, { body: { confirm: true } }); await fs.updateDoc(fs.doc(db, 'agent_orders', o.id), { status: 'aprobado', updatedAt: fs.serverTimestamp() }); audit(user, 'pr_approve', `${o.repo}#${o.prNumber}`); toast('PR aprobado y mergeado', 'ok'); loadOrders(); }
-          catch (e) { toast(e.code === 'worker_unavailable' ? 'Aprobar requiere el servidor conectado. Podés revisar y mergear en GitHub.' : e.message, 'error', 7000); }
+          catch (e) { toast(e.code === 'worker_unavailable' ? 'Aprobar requiere el servidor conectado. Puedes revisar y mergear en GitHub.' : e.message, 'error', 7000); }
         };
         const no = h('button', { class: 'btn btn-sm btn-danger-ghost', type: 'button' }, 'Rechazar');
         no.onclick = async () => {

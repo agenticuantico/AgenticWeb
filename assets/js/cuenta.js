@@ -4,7 +4,7 @@ import { CONFIG, formatARS } from './config.js';
 import { PAYMENTS } from '../payments-config.js';
 import * as auth from './auth.js';
 import { getAuthApi, getStore, friendlyError } from './firebase.js';
-import { mountPlans, openPayModal } from './plans.js?v=7.17.0';
+import { mountPlans, openPayModal } from './plans.js?v=7.19.0';
 import { state as engineState, init as engineInit } from './chat/engine.js';
 import * as callMem from './companion/memory.js';
 
@@ -22,9 +22,9 @@ function renderAuth(tab = params.get('registro') ? 'signup' : 'login') {
   const card = h('div', { class: 'card auth-card' });
   const wrap = h('div', { class: 'auth-wrap' },
     h('div', { class: 'auth-aside' },
-      h('img', { src: '/media/avatar/face-256.webp?v=7.17.0', alt: '', width: 72, height: 72, class: 'auth-face' }),
-      h('h1', {}, tab === 'signup' ? 'Creá tu cuenta' : tab === 'reset' ? 'Recuperá tu acceso' : 'Te damos la bienvenida'),
-      h('p', { class: 'muted' }, 'Sincronizá tus chats entre dispositivos, compartí conversaciones y elegí tu plan.'),
+      h('img', { src: '/media/avatar/face-256.webp?v=7.19.0', alt: '', width: 72, height: 72, class: 'auth-face' }),
+      h('h1', {}, tab === 'signup' ? 'Crea tu cuenta' : tab === 'reset' ? 'Recupera tu acceso' : 'Te damos la bienvenida'),
+      h('p', { class: 'muted' }, 'Sincroniza tus chats entre dispositivos, comparte conversaciones y elige tu plan.'),
       h('ul', { class: 'checklist' }, ...['Chats guardados en tu cuenta', 'Todas las funciones en todos los planes', 'Pagos seguros con PayPal y Mercado Pago'].map((t) => h('li', { html: icon('check') + `<span>${t}</span>` })))),
     card);
   root.append(wrap);
@@ -45,7 +45,7 @@ function renderAuth(tab = params.get('registro') ? 'signup' : 'login') {
       e.preventDefault();
       const btn = f.querySelector('[type=submit]');
       busy(btn, true, 'Enviando…'); err(errorBox);
-      try { await auth.resetPassword(f.email.value); f.replaceWith(h('div', { class: 'alert ok' }, h('span', { html: icon('mail') }), h('div', {}, 'Si existe una cuenta con ese correo, te llegó un enlace para restablecer la contraseña. Revisá también spam.'))); }
+      try { await auth.resetPassword(f.email.value); f.replaceWith(h('div', { class: 'alert ok' }, h('span', { html: icon('mail') }), h('div', {}, 'Si existe una cuenta con ese correo, te llegó un enlace para restablecer la contraseña. Revisa también spam.'))); }
       catch (ex) { err(errorBox, friendlyError(ex)); busy(btn, false, 'Enviar enlace'); }
     });
     card.append(f);
@@ -56,7 +56,7 @@ function renderAuth(tab = params.get('registro') ? 'signup' : 'login') {
   const termsBox = h('input', { type: 'checkbox', name: 'terms', id: 'terms', required: tab === 'signup' || null });
   const terms = h('label', { class: 'check', for: 'terms' }, termsBox, h('span', { html: 'Acepto los <a href="/legal/terminos.html" target="_blank">Términos y condiciones</a> y la <a href="/legal/privacidad.html" target="_blank">Política de privacidad</a>.' }));
   google.addEventListener('click', async () => {
-    if (tab === 'signup' && !termsBox.checked) { err(errorBox, 'Para crear la cuenta tenés que aceptar los términos y la política de privacidad.'); termsBox.focus(); return; }
+    if (tab === 'signup' && !termsBox.checked) { err(errorBox, 'Para crear la cuenta tienes que aceptar los términos y la política de privacidad.'); termsBox.focus(); return; }
     busy(google, true); err(errorBox);
     try {
       const r = await auth.signInGoogle({ termsAccepted: termsBox.checked });
@@ -74,16 +74,16 @@ function renderAuth(tab = params.get('registro') ? 'signup' : 'login') {
     const f = h('form', { class: 'auth-form', novalidate: true },
       field('Nombre', h('input', { class: 'input', name: 'name', autocomplete: 'name', required: true, maxlength: 80 })),
       field('Correo', h('input', { class: 'input', type: 'email', name: 'email', autocomplete: 'email', required: true })),
-      field('Contraseña', pass, 'Mínimo 8 caracteres. Mejor si combinás letras, números y símbolos.'), meter,
+      field('Contraseña', pass, 'Mínimo 8 caracteres. Mejor si combinas letras, números y símbolos.'), meter,
       terms, errorBox,
       h('button', { class: 'btn btn-primary btn-block', type: 'submit' }, 'Crear cuenta'));
     f.addEventListener('submit', async (e) => {
       e.preventDefault();
       err(errorBox);
-      if (!f.name.value.trim()) return err(errorBox, 'Ingresá tu nombre.');
+      if (!f.name.value.trim()) return err(errorBox, 'Ingresa tu nombre.');
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email.value)) return err(errorBox, 'El correo no es válido.');
       if (pass.value.length < 8 || !/[A-Za-z]/.test(pass.value) || !/[0-9]/.test(pass.value)) return err(errorBox, 'La contraseña necesita al menos 8 caracteres, con letras y números.');
-      if (!termsBox.checked) return err(errorBox, 'Tenés que aceptar los términos y la política de privacidad.');
+      if (!termsBox.checked) return err(errorBox, 'Tienes que aceptar los términos y la política de privacidad.');
       const btn = f.querySelector('[type=submit]');
       busy(btn, true, 'Creando cuenta…');
       try { await auth.signUpEmail({ name: f.name.value, email: f.email.value, password: pass.value, country: auth.guessCountry() }); toast('Cuenta creada. Te enviamos un correo para verificarla.', 'ok', 6000); }
@@ -97,11 +97,11 @@ function renderAuth(tab = params.get('registro') ? 'signup' : 'login') {
       errorBox,
       h('button', { class: 'btn btn-primary btn-block', type: 'submit' }, 'Ingresar'),
       h('button', { class: 'linklike small', type: 'button', style: 'margin-top:12px', onclick: () => renderAuth('reset') }, '¿Olvidaste tu contraseña?'),
-      h('p', { class: 'tiny muted', style: 'margin-top:14px', html: 'Al continuar aceptás los <a href="/legal/terminos.html">Términos</a> y la <a href="/legal/privacidad.html">Política de privacidad</a>.' }));
+      h('p', { class: 'tiny muted', style: 'margin-top:14px', html: 'Al continuar aceptas los <a href="/legal/terminos.html">Términos</a> y la <a href="/legal/privacidad.html">Política de privacidad</a>.' }));
     f.addEventListener('submit', async (e) => {
       e.preventDefault();
       err(errorBox);
-      if (!f.email.value || !f.password.value) return err(errorBox, 'Completá correo y contraseña.');
+      if (!f.email.value || !f.password.value) return err(errorBox, 'Completa correo y contraseña.');
       const btn = f.querySelector('[type=submit]');
       busy(btn, true, 'Ingresando…');
       try { await auth.signInEmail(f.email.value, f.password.value); }
@@ -127,7 +127,7 @@ async function renderPanel(user) {
   const dataError = profile && profile._error;
   if (dataError) profile = null;
   // volver de un checkout
-  const ret = await import('./payments.js?v=7.18.0').then((m) => m.handleReturn(user)).catch(() => null);
+  const ret = await import('./payments.js?v=7.19.0').then((m) => m.handleReturn(user)).catch(() => null);
   // Al volver de Mercado Pago con el id de la suscripción, se pide al servidor que la confirme YA consultando a Mercado Pago
   // (el servidor solo toma el id y lee el estado real de la API; no hace falta webhook ni clave). Sin esperar respuesta.
   if (ret && ret.ok && ret.provider === 'mercadopago' && ret.subscriptionId) {
@@ -145,14 +145,14 @@ async function renderPanel(user) {
   if (googleNotice) {
     root.append(h('div', { class: 'alert ok', role: 'status' }, h('span', { html: icon('check') }), h('div', {},
       h('strong', {}, googleNotice.isNewUser ? 'Tu cuenta quedó registrada con Google.' : 'Tu cuenta de Google quedó vinculada.'),
-      h('p', { style: 'margin:6px 0 0' }, 'Permisos otorgados: ', googleNotice.granted.join(' y '), '. No pedimos acceso a Gmail, Drive, Calendar ni a tus contactos. Podés revocar el acceso cuando quieras desde ', h('a', { href: 'https://myaccount.google.com/permissions', target: '_blank', rel: 'noopener' }, 'tu cuenta de Google'), '.'))));
+      h('p', { style: 'margin:6px 0 0' }, 'Permisos otorgados: ', googleNotice.granted.join(' y '), '. No pedimos acceso a Gmail, Drive, Calendar ni a tus contactos. Puedes revocar el acceso cuando quieras desde ', h('a', { href: 'https://myaccount.google.com/permissions', target: '_blank', rel: 'noopener' }, 'tu cuenta de Google'), '.'))));
     googleNotice = null;
   }
   if (!user.emailVerified && user.providerData.some((p) => p.providerId === 'password')) {
-    root.append(h('div', { class: 'alert warn' }, h('span', { html: icon('mail') }), h('div', {}, 'Verificá tu correo para proteger tu cuenta. ', h('button', { class: 'linklike', type: 'button', onclick: async () => { try { await auth.resendVerification(); toast('Te reenviamos el correo de verificación.'); } catch (e) { toast(friendlyError(e), 'error'); } } }, 'Reenviar correo'))));
+    root.append(h('div', { class: 'alert warn' }, h('span', { html: icon('mail') }), h('div', {}, 'Verifica tu correo para proteger tu cuenta. ', h('button', { class: 'linklike', type: 'button', onclick: async () => { try { await auth.resendVerification(); toast('Te reenviamos el correo de verificación.'); } catch (e) { toast(friendlyError(e), 'error'); } } }, 'Reenviar correo'))));
   }
-  if (dataError) root.append(h('div', { class: 'alert info' }, h('span', { html: icon('info') }), h('div', {}, 'Tu cuenta funciona, pero el perfil y la membresía todavía no se pueden cargar. Volvé a intentar en unos minutos.')));
-  if (profile && profile.suspended) root.append(h('div', { class: 'alert danger' }, 'Tu cuenta está suspendida. Escribinos desde el ', h('a', { href: '/contacto/' }, 'formulario de contacto'), '.'));
+  if (dataError) root.append(h('div', { class: 'alert info' }, h('span', { html: icon('info') }), h('div', {}, 'Tu cuenta funciona, pero el perfil y la membresía todavía no se pueden cargar. Vuelve a intentar en unos minutos.')));
+  if (profile && profile.suspended) root.append(h('div', { class: 'alert danger' }, 'Tu cuenta está suspendida. Escríbenos desde el ', h('a', { href: '/contacto/' }, 'formulario de contacto'), '.'));
 
   const nav = h('nav', { class: 'acc-tabs', role: 'tablist', 'aria-label': 'Secciones de tu cuenta' });
   const pane = h('div', { class: 'acc-pane', role: 'tabpanel' });
@@ -198,7 +198,7 @@ function membresia(pane, { user, profile, reload }) {
     tile('Plan', PLAN_NAME[plan] || plan, stLabel, 'planes'),
     h('div', { class: 'acc-tile' }, h('small', {}, 'Llamadas hoy'), h('strong', {}, `${usedMin} / ${limMin} min`), h('span', { class: 'meter', role: 'meter', 'aria-valuemin': 0, 'aria-valuemax': limMin, 'aria-valuenow': usedMin, 'aria-label': 'Minutos de llamada usados hoy' }, h('i', { style: `width:${Math.min(100, (usedMin / limMin) * 100).toFixed(0)}%` }))),
     tile('Renovación', sub ? (autoRenew ? 'Automática' : 'Desactivada') : '—', end ? (autoRenew ? 'Próximo cobro ' : 'Hasta ') + fmtDate(end) : 'Sin suscripción', null),
-    tile('Seguridad', user.emailVerified ? 'Correo verificado' : 'Verificá tu correo', user.providerData.map((p) => (p.providerId === 'google.com' ? 'Google' : 'Contraseña')).join(' + '), 'seguridad')));
+    tile('Seguridad', user.emailVerified ? 'Correo verificado' : 'Verifica tu correo', user.providerData.map((p) => (p.providerId === 'google.com' ? 'Google' : 'Contraseña')).join(' + '), 'seguridad')));
   pane.append(h('div', { class: 'card' },
     h('div', { class: 'row', style: 'justify-content:space-between' },
       h('div', {}, h('p', { class: 'eyebrow' }, 'Tu plan'), h('h2', { style: 'margin:0' }, PLAN_NAME[plan] || plan)),
@@ -209,7 +209,7 @@ function membresia(pane, { user, profile, reload }) {
       h('dt', {}, 'Días restantes'), h('dd', {}, left == null ? '—' : `${left} ${left === 1 ? 'día' : 'días'}`),
       h('dt', {}, 'Medio de pago'), h('dd', {}, sub ? `${provName}${sub.subscriptionId ? ' · ' + sub.subscriptionId : ''}` : '—'))));
   if (sub && sub.status === 'pending') {
-    pane.append(h('div', { class: 'alert info' }, h('span', { html: icon('clock') }), h('div', {}, h('strong', {}, `Pago en verificación (${PLAN_NAME[sub.plan] || ''}, ${provName}).`), h('p', { style: 'margin:4px 0 0' }, 'El procesador recibió tu autorización. El plan se activa cuando confirmamos el cobro; recién ahí empiezan tus 30 días. Si pasan 24 h sin novedades, escribinos desde el formulario de contacto.'))));
+    pane.append(h('div', { class: 'alert info' }, h('span', { html: icon('clock') }), h('div', {}, h('strong', {}, `Pago en verificación (${PLAN_NAME[sub.plan] || ''}, ${provName}).`), h('p', { style: 'margin:4px 0 0' }, 'El procesador recibió tu autorización. El plan se activa cuando confirmamos el cobro; recién ahí empiezan tus 30 días. Si pasan 24 h sin novedades, escríbenos desde el formulario de contacto.'))));
   }
   if (sub && ['active', 'paused', 'canceled'].includes(sub.status)) {
     const toggle = h('input', { type: 'checkbox', checked: autoRenew || null, 'aria-label': 'Renovación automática' });
@@ -217,7 +217,7 @@ function membresia(pane, { user, profile, reload }) {
     pane.append(h('div', { class: 'card renew' },
       h('label', { class: 'hub-item', style: 'border:0;padding:0' },
         h('div', {}, h('strong', {}, 'Renovación automática: ' + (autoRenew ? 'activada' : 'desactivada')),
-          h('p', { class: 'muted small' }, autoRenew ? 'Se cobra cada 30 días. Si la desactivás, no se te vuelve a cobrar y conservás el acceso hasta ' + (end ? fmtDate(end) : 'el fin del período') + '.' : 'No habrá más cobros. Podés reactivarla cuando quieras.')),
+          h('p', { class: 'muted small' }, autoRenew ? 'Se cobra cada 30 días. Si la desactivas, no se te vuelve a cobrar y conservas el acceso hasta ' + (end ? fmtDate(end) : 'el fin del período') + '.' : 'No habrá más cobros. Puedes reactivarla cuando quieras.')),
         h('span', { class: 'switch' }, toggle, h('span'))),
       sub.autoRenewRequest ? h('p', { class: 'tiny muted', style: 'margin:8px 0 0' }, `Pedido registrado: ${sub.autoRenewRequest === 'cancel' ? 'desactivar' : 'reactivar'} la renovación.`) : null));
   }
@@ -226,13 +226,13 @@ function membresia(pane, { user, profile, reload }) {
   else if (plan !== 'gratis') actions.append(h('button', { class: 'btn', type: 'button', onclick: () => document.querySelector('[data-tab="planes"]').click() }, 'Cambiar de plan'));
   if (sub && sub.status === 'active') actions.append(h('button', { class: 'btn', type: 'button', onclick: () => billingAction('pause', user, profile, reload) }, 'Pausar'));
   if (sub && sub.status === 'paused') actions.append(h('button', { class: 'btn btn-primary', type: 'button', onclick: () => billingAction('resume', user, profile, reload) }, 'Reanudar'));
-  pane.append(actions, h('p', { class: 'small muted' }, 'Podés desactivar la renovación o pausar cuando quieras. Si contrataste hace menos de 10 días, podés usar el ', h('a', { href: '/legal/reembolsos.html#arrepentimiento' }, 'botón de arrepentimiento'), ' (Res. 424/2020).'));
+  pane.append(actions, h('p', { class: 'small muted' }, 'Puedes desactivar la renovación o pausar cuando quieras. Si contrataste hace menos de 10 días, puedes usar el ', h('a', { href: '/legal/reembolsos.html#arrepentimiento' }, 'botón de arrepentimiento'), ' (Res. 424/2020).'));
 }
 
 async function billingAction(action, user, profile, reload) {
-  const txt = { pause: ['Pausar suscripción', 'No se te cobra el próximo período y se pausan los beneficios hasta reanudar.', 'Pausar'], cancel: ['Desactivar renovación automática', 'No se te vuelve a cobrar. Conservás los beneficios hasta el fin del período pagado.', 'Desactivar renovación'], resume: ['Reactivar', 'Se reactiva el cobro mensual con tu medio de pago.', 'Reactivar'] }[action];
+  const txt = { pause: ['Pausar suscripción', 'No se te cobra el próximo período y se pausan los beneficios hasta reanudar.', 'Pausar'], cancel: ['Desactivar renovación automática', 'No se te vuelve a cobrar. Conservas los beneficios hasta el fin del período pagado.', 'Desactivar renovación'], resume: ['Reactivar', 'Se reactiva el cobro mensual con tu medio de pago.', 'Reactivar'] }[action];
   if (!(await confirmDialog({ title: txt[0], text: txt[1], ok: txt[2], danger: action === 'cancel' }))) return;
-  if (action === 'cancel' && !(await confirmDialog({ title: '¿Seguro?', text: 'Confirmá una vez más que querés desactivar la renovación automática.', ok: 'Sí, desactivar', danger: true }))) return;
+  if (action === 'cancel' && !(await confirmDialog({ title: '¿Seguro?', text: 'Confirma una vez más que quieres desactivar la renovación automática.', ok: 'Sí, desactivar', danger: true }))) return;
   await engineInit();
   // 1) Con el servidor activo, la acción se ejecuta en el procesador (worker-v2).
   if (engineState.live) {
@@ -249,12 +249,12 @@ async function billingAction(action, user, profile, reload) {
   } catch {}
   const prov = profile && profile.subscription && profile.subscription.provider;
   const link = prov === 'paypal' ? 'https://www.paypal.com/myaccount/autopay/' : 'https://www.mercadopago.com.ar/subscriptions';
-  modal({ title: 'Pedido registrado', body: h('div', {}, h('p', {}, 'Registramos tu pedido y lo procesamos a la brevedad. Para que sea inmediato, también podés hacerlo vos desde el procesador:'), h('a', { class: 'btn btn-primary', href: link, target: '_blank', rel: 'noopener' }, prov === 'paypal' ? 'Abrir pagos automáticos de PayPal' : 'Abrir mis suscripciones de Mercado Pago'), h('p', { class: 'small muted', style: 'margin-top:12px' }, 'Consultas: desde el formulario de contacto (agenticuantico.dev.ar/contacto/)')) });
+  modal({ title: 'Pedido registrado', body: h('div', {}, h('p', {}, 'Registramos tu pedido y lo procesamos a la brevedad. Para que sea inmediato, también puedes hacerlo tú desde el procesador:'), h('a', { class: 'btn btn-primary', href: link, target: '_blank', rel: 'noopener' }, prov === 'paypal' ? 'Abrir pagos automáticos de PayPal' : 'Abrir mis suscripciones de Mercado Pago'), h('p', { class: 'small muted', style: 'margin-top:12px' }, 'Consultas: desde el formulario de contacto (agenticuantico.dev.ar/contacto/)')) });
   reload();
 }
 
 function planes(pane, { user, profile, reload }) {
-  pane.append(h('h2', {}, 'Elegí tu plan'), h('p', { class: 'muted' }, 'Mercado Pago cobra en pesos y PayPal en dólares. Tu tarjeta queda en el procesador: AgentiCuántico nunca la ve.'));
+  pane.append(h('h2', {}, 'Elige tu plan'), h('p', { class: 'muted' }, 'Mercado Pago cobra en pesos y PayPal en dólares. Tu tarjeta queda en el procesador: AgentiCuántico nunca la ve.'));
   const mount = h('div', { id: 'planes' });
   pane.append(mount);
   mountPlans(mount, { user, profile, onChange: () => setTimeout(reload, 600) });
@@ -264,7 +264,7 @@ function planes(pane, { user, profile, reload }) {
   try { mem = JSON.parse(sessionStorage.getItem('ac.mpPending') || 'null'); } catch {}
   if (mem && Date.now() - mem.at < 3600_000 && !(profile && profile.subscription && profile.subscription.status === 'pending')) {
     pane.prepend(h('div', { class: 'alert info' }, h('div', {}, '¿Aprobaste la suscripción en Mercado Pago? ',
-      h('button', { class: 'linklike', type: 'button', onclick: async () => { const m = await import('./payments.js?v=7.18.0'); try { await m.recordPending(user.uid, { provider: 'mercadopago', plan: mem.plan, subscriptionId: null }); sessionStorage.removeItem('ac.mpPending'); toast('Pago en verificación.', 'ok'); reload(); } catch (e) { toast(friendlyError(e), 'error'); } } }, 'Sí, la aprobé'))));
+      h('button', { class: 'linklike', type: 'button', onclick: async () => { const m = await import('./payments.js?v=7.19.0'); try { await m.recordPending(user.uid, { provider: 'mercadopago', plan: mem.plan, subscriptionId: null }); sessionStorage.removeItem('ac.mpPending'); toast('Pago en verificación.', 'ok'); reload(); } catch (e) { toast(friendlyError(e), 'error'); } } }, 'Sí, la aprobé'))));
   }
 }
 
@@ -292,17 +292,17 @@ function perfil(pane, { user, profile, reload }) {
   pane.append(f);
   const sec = h('div', { class: 'card', style: 'margin-top:16px' }, h('h2', {}, 'Seguridad'));
   if (user.providerData.some((p) => p.providerId === 'password')) sec.append(h('p', { class: 'muted' }, 'Para cambiar la contraseña te enviamos un enlace a tu correo.'), h('button', { class: 'btn', type: 'button', onclick: async () => { try { await auth.resetPassword(user.email); toast('Te enviamos el enlace a ' + user.email); } catch (e) { toast(friendlyError(e), 'error'); } } }, 'Cambiar contraseña'));
-  else sec.append(h('p', { class: 'muted' }, 'Ingresás con Google; la contraseña y la verificación en dos pasos se administran en tu cuenta de Google.'));
+  else sec.append(h('p', { class: 'muted' }, 'Ingresas con Google; la contraseña y la verificación en dos pasos se administran en tu cuenta de Google.'));
   pane.append(sec);
 }
 
 async function companera(pane, { user }) {
   const mem = await import('./companion/memory.js');
-  pane.append(h('h2', {}, 'Lo que AgentiCuántico recuerda de mí'), h('p', { class: 'muted' }, 'Datos que guardó después de tus llamadas para darte continuidad. Podés editarlos o borrarlos. Las llamadas incógnito no guardan nada.'));
+  pane.append(h('h2', {}, 'Lo que AgentiCuántico recuerda de mí'), h('p', { class: 'muted' }, 'Datos que guardó después de tus llamadas para darte continuidad. Puedes editarlos o borrarlos. Las llamadas incógnito no guardan nada.'));
   const settings = await mem.getSettings(user.uid);
   const sw = h('input', { type: 'checkbox', checked: settings.optIn === true || null, 'aria-label': 'Permitir que AgentiCuántico recuerde' });
   sw.addEventListener('change', async () => { try { await mem.saveSettings(user.uid, { optIn: sw.checked }); toast(sw.checked ? 'Memoria activada' : 'Memoria desactivada', 'ok'); } catch (e) { toast(friendlyError(e), 'error'); } });
-  pane.append(h('label', { class: 'hub-item' }, h('div', {}, h('strong', {}, 'Permitir que me recuerde'), h('p', { class: 'muted small' }, 'Si lo apagás, no se guardan datos nuevos (lo ya guardado queda hasta que lo borres).')), h('span', { class: 'switch' }, sw, h('span'))));
+  pane.append(h('label', { class: 'hub-item' }, h('div', {}, h('strong', {}, 'Permitir que me recuerde'), h('p', { class: 'muted small' }, 'Si lo apagas, no se guardan datos nuevos (lo ya guardado queda hasta que lo borres).')), h('span', { class: 'switch' }, sw, h('span'))));
   const list = h('div', { class: 'hub-list' }, h('div', { class: 'skeleton', style: 'height:60px' }));
   pane.append(list);
   const KIND = { nombre: 'Nombre', persona: 'Persona', 'interés': 'Interés', objetivo: 'Objetivo', 'ocupación': 'Ocupación', pendiente: 'Pendiente', 'ánimo': 'Ánimo', tema: 'Tema' };
@@ -310,13 +310,13 @@ async function companera(pane, { user }) {
     let items = [];
     try { items = await mem.listMemory(user.uid); } catch (e) { list.innerHTML = ''; list.append(h('p', { class: 'muted small' }, 'No disponible todavía: ' + friendlyError(e))); return; }
     list.innerHTML = '';
-    if (!items.length) list.append(h('p', { class: 'muted small' }, 'Todavía no recuerda nada. Llamala desde ', h('a', { href: '/llamada/' }, 'Llamada'), '.'));
+    if (!items.length) list.append(h('p', { class: 'muted small' }, 'Todavía no recuerda nada. Llámala desde ', h('a', { href: '/llamada/' }, 'Llamada'), '.'));
     for (const it of items) {
       const input = h('input', { class: 'input', value: it.text, maxlength: 200, 'aria-label': KIND[it.kind] || it.kind });
       input.addEventListener('change', async () => { try { await mem.updateMemory(user.uid, it.id, input.value.trim()); toast('Actualizado', 'ok'); } catch (e) { toast(friendlyError(e), 'error'); } });
       list.append(h('div', { class: 'hub-item' }, h('span', { class: 'chip gold' }, KIND[it.kind] || it.kind), input, h('button', { class: 'icon-btn sm', type: 'button', 'aria-label': 'Borrar', html: icon('trash'), onclick: async () => { try { await mem.deleteMemory(user.uid, it.id); draw(); } catch (e) { toast(friendlyError(e), 'error'); } } })));
     }
-    if (items.length) list.append(h('button', { class: 'btn btn-danger-ghost btn-sm', type: 'button', onclick: async () => { if (await confirmDialog({ title: 'Borrar todo', text: '¿Borrar todo lo que AgentiCuántico recuerda de vos?', ok: 'Borrar todo', danger: true })) { await mem.deleteAllMemory(user.uid).catch(() => {}); draw(); } } }, 'Borrar todo'));
+    if (items.length) list.append(h('button', { class: 'btn btn-danger-ghost btn-sm', type: 'button', onclick: async () => { if (await confirmDialog({ title: 'Borrar todo', text: '¿Borrar todo lo que AgentiCuántico recuerda de ti?', ok: 'Borrar todo', danger: true })) { await mem.deleteAllMemory(user.uid).catch(() => {}); draw(); } } }, 'Borrar todo'));
   };
   draw();
 }
@@ -329,7 +329,7 @@ async function facturacion(pane, { user }) {
     const { fs, db } = await getStore();
     const s = await fs.getDocs(fs.query(fs.collection(db, 'users', user.uid, 'payments'), fs.orderBy('createdAt', 'desc'), fs.limit(50)));
     box.innerHTML = '';
-    if (s.empty) { box.append(h('p', { class: 'muted' }, 'Todavía no hay pagos confirmados. Los cobros aparecen acá cuando el procesador los confirma.')); return; }
+    if (s.empty) { box.append(h('p', { class: 'muted' }, 'Todavía no hay pagos confirmados. Los cobros aparecen aquí cuando el procesador los confirma.')); return; }
     const rows = s.docs.map((d) => d.data());
     box.append(h('div', { class: 'table-wrap' }, h('table', { class: 'table' }, h('thead', {}, h('tr', {}, ...['Fecha', 'Concepto', 'Medio', 'Importe', 'Estado'].map((t) => h('th', {}, t)))),
       h('tbody', {}, ...rows.map((r) => h('tr', {}, h('td', {}, fmtDate(r.createdAt)), h('td', {}, r.description || ('Plan ' + (PLAN_NAME[r.plan] || ''))), h('td', {}, r.provider === 'paypal' ? 'PayPal' : 'Mercado Pago'), h('td', {}, `${r.currency || ''} ${Number(r.amount || 0).toLocaleString('es-AR')}`), h('td', {}, h('span', { class: 'chip ' + (r.status === 'approved' || r.status === 'COMPLETED' ? 'ok' : '') }, r.status || '—'))))))));
@@ -337,7 +337,7 @@ async function facturacion(pane, { user }) {
 }
 
 async function billetera(pane, { user }) {
-  pane.append(h('h2', {}, 'Billetera'), h('p', { class: 'muted' }, 'Tus medios de pago para el débito automático se guardan tokenizados en Mercado Pago o PayPal. Acá solo mostramos la marca y los últimos 4 dígitos; nunca el número completo ni el código de seguridad.'));
+  pane.append(h('h2', {}, 'Billetera'), h('p', { class: 'muted' }, 'Tus medios de pago para el débito automático se guardan tokenizados en Mercado Pago o PayPal. Aquí solo mostramos la marca y los últimos 4 dígitos; nunca el número completo ni el código de seguridad.'));
   const list = h('div', { class: 'hub-list' }, h('div', { class: 'skeleton', style: 'height:60px' }));
   pane.append(list);
   try {
@@ -350,7 +350,7 @@ async function billetera(pane, { user }) {
   await engineInit();
   const add = h('div', { class: 'card', style: 'margin-top:16px' }, h('h3', {}, 'Agregar tarjeta para débito automático'));
   if (engineState.live && engineState.caps && engineState.caps.billing && engineState.caps.billing.mercadopago && PAYMENTS.mercadopago.PUBLIC_KEY) {
-    add.append(h('p', { class: 'muted small' }, 'Cargá la tarjeta en el formulario seguro de Mercado Pago (Card Payment Brick).'), h('button', { class: 'btn btn-primary', type: 'button', onclick: () => openCardBrick(user) }, 'Agregar tarjeta'));
+    add.append(h('p', { class: 'muted small' }, 'Carga la tarjeta en el formulario seguro de Mercado Pago (Card Payment Brick).'), h('button', { class: 'btn btn-primary', type: 'button', onclick: () => openCardBrick(user) }, 'Agregar tarjeta'));
   } else {
     add.append(h('p', { class: 'muted small' }, 'Para guardar una tarjeta fuera de una suscripción hace falta el servidor de pagos, que se está activando. Mientras tanto, la tarjeta queda guardada en Mercado Pago o PayPal al suscribirte desde «Planes».'), h('button', { class: 'btn', type: 'button', disabled: true }, 'Agregar tarjeta (muy pronto)'));
   }
@@ -389,14 +389,14 @@ function seguridad(pane, { user }) {
   pane.append(h('div', { class: 'card stack' }, h('h2', { style: 'margin:0' }, 'Seguridad de la cuenta'),
     row('Correo', user.email + (user.emailVerified ? ' · verificado' : ' · sin verificar'), user.emailVerified ? h('span', { class: 'chip ok' }, 'Verificado') : h('button', { class: 'btn btn-sm', type: 'button', onclick: async () => { try { await auth.resendVerification(); toast('Te enviamos el correo de verificación.'); } catch (e) { toast(friendlyError(e), 'error'); } } }, 'Verificar')),
     row('Métodos de ingreso', providers.map((p) => (p === 'google.com' ? 'Google' : p === 'password' ? 'Correo y contraseña' : p)).join(' · ') || '—'),
-    row(hasPass ? 'Contraseña' : 'Crear contraseña', hasPass ? 'Te enviamos un enlace seguro para cambiarla.' : 'Agregá una contraseña para ingresar también sin Google.', h('button', { class: 'btn btn-sm', type: 'button', onclick: async () => { try { await auth.resetPassword(user.email); toast('Revisá tu correo: te enviamos el enlace.', 'ok'); } catch (e) { toast(friendlyError(e), 'error'); } } }, hasPass ? 'Cambiar' : 'Crear')),
+    row(hasPass ? 'Contraseña' : 'Crear contraseña', hasPass ? 'Te enviamos un enlace seguro para cambiarla.' : 'Agrega una contraseña para ingresar también sin Google.', h('button', { class: 'btn btn-sm', type: 'button', onclick: async () => { try { await auth.resetPassword(user.email); toast('Revisa tu correo: te enviamos el enlace.', 'ok'); } catch (e) { toast(friendlyError(e), 'error'); } } }, hasPass ? 'Cambiar' : 'Crear')),
     row('Cerrar sesión', 'Salir de esta cuenta en este dispositivo.', h('button', { class: 'btn btn-sm btn-ghost', type: 'button', onclick: async () => { await auth.signOutUser(); location.href = '/'; } }, 'Salir')),
-    h('p', { class: 'tiny muted' }, 'Nunca te vamos a pedir la contraseña por correo ni por chat. Ante cualquier actividad extraña, escribinos desde el ', h('a', { href: '/contacto/' }, 'formulario de contacto'), '.')));
+    h('p', { class: 'tiny muted' }, 'Nunca te vamos a pedir la contraseña por correo ni por chat. Ante cualquier actividad extraña, escríbenos desde el ', h('a', { href: '/contacto/' }, 'formulario de contacto'), '.')));
 }
 
 async function privacidad(pane, { user }) {
   pane.append(h('h2', {}, 'Datos y privacidad'),
-    h('p', { class: 'muted' }, 'Ejercé tus derechos de acceso, rectificación y supresión (Ley 25.326). También podés escribirnos desde el ', h('a', { href: '/contacto/' }, 'formulario de contacto'), '.'));
+    h('p', { class: 'muted' }, 'Ejerce tus derechos de acceso, rectificación y supresión (Ley 25.326). También puedes escribirnos desde el ', h('a', { href: '/contacto/' }, 'formulario de contacto'), '.'));
   const exp = h('button', { class: 'btn', type: 'button' }, h('span', { html: icon('download') }), 'Descargar mis datos (JSON)');
   exp.addEventListener('click', async () => {
     busy(exp, true);
@@ -416,7 +416,7 @@ async function privacidad(pane, { user }) {
     const { ChatStore } = await import('./chat/store.js'); const s = new ChatStore(); await s.attachUser(user.uid); await s.clearAll(); toast('Conversaciones borradas', 'ok');
   } }, 'Borrar todas mis conversaciones');
   const delAcc = h('button', { class: 'btn btn-danger', type: 'button', onclick: async () => {
-    if (!(await confirmDialog({ title: 'Eliminar cuenta', text: 'Se elimina tu acceso y tus datos de perfil y chats. Si tenés una suscripción activa, cancelala primero.', ok: 'Continuar', danger: true }))) return;
+    if (!(await confirmDialog({ title: 'Eliminar cuenta', text: 'Se elimina tu acceso y tus datos de perfil y chats. Si tienes una suscripción activa, cancélala primero.', ok: 'Continuar', danger: true }))) return;
     if (!(await confirmDialog({ title: 'Confirmación final', text: 'Esta acción es permanente. ¿Eliminar la cuenta ' + user.email + '?', ok: 'Eliminar definitivamente', danger: true }))) return;
     try {
       const { fs, db } = await getStore();
@@ -435,7 +435,7 @@ async function privacidad(pane, { user }) {
   try { const r = await auth.completeGoogleRedirect(); if (r) googleNotice = r; } catch (e) { console.warn(e); }
   if (params.get('verificado')) toast('¡Correo verificado! Gracias.', 'ok');
   auth.watchUser((u) => {
-    if (u) renderPanel(u).catch((e) => { console.error(e); root.innerHTML = '<div class="alert danger">No pudimos cargar tu cuenta. Recargá la página.</div>'; });
+    if (u) renderPanel(u).catch((e) => { console.error(e); root.innerHTML = '<div class="alert danger">No pudimos cargar tu cuenta. Recarga la página.</div>'; });
     else renderAuth();
     hydrateIcons(root);
   }, { force: true }).catch(() => renderAuth());

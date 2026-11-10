@@ -52,12 +52,12 @@ export function openPayModal(plan, user, onChange) {
       h('div', { style: 'text-align:right' }, h('strong', { class: 'pay-price' }, formatARS(price.ars)), h('small', { class: 'muted' }, ` o USD ${price.usd}`), h('div', { class: 'tiny muted' }, 'por mes'))),
     h('ul', { class: 'pay-facts' },
       h('li', { html: icon('check') + '<span><strong>Cobertura de 30 días</strong> desde la confirmación del pago.</span>' }),
-      h('li', { html: icon('refresh') + `<span><strong>Renovación automática</strong> cada 30 días (próxima: ${renew} aprox.). La desactivás cuando quieras desde Mi cuenta y conservás el acceso hasta el fin del período.</span>` }),
+      h('li', { html: icon('refresh') + `<span><strong>Renovación automática</strong> cada 30 días (próxima: ${renew} aprox.). La desactivas cuando quieras desde Mi cuenta y conservas el acceso hasta el fin del período.</span>` }),
       h('li', { html: icon('lock') + '<span><strong>Pago seguro</strong> en Mercado Pago o PayPal. AgentiCuántico nunca ve ni guarda tu tarjeta.</span>' })),
     h('div', { class: 'pay-methods' },
       h('div', {}, h('p', { class: 'label pay-label' }, h('img', { src: '/assets/brands/mercadopago-oficial.svg', alt: 'Mercado Pago', width: 77, height: 20 }), h('span', {}, 'Pesos argentinos · ' + formatARS(price.ars) + '/mes')), mpBox),
       h('div', {}, h('p', { class: 'label pay-label' }, h('img', { src: '/assets/brands/paypal-oficial.svg', alt: 'PayPal', width: 71, height: 20 }), h('span', {}, 'Dólares · USD ' + price.usd + '/mes')), ppBox)),
-    h('p', { class: 'tiny muted', html: 'Al suscribirte aceptás los <a href="/legal/terminos.html" target="_blank">Términos y condiciones</a> y la política de <a href="/legal/reembolsos.html" target="_blank">Reembolsos y cancelación</a> (incluye el botón de arrepentimiento de 10 días). El plan queda «en verificación» hasta que el procesador confirma el cobro.' }));
+    h('p', { class: 'tiny muted', html: 'Al suscribirte aceptas los <a href="/legal/terminos.html" target="_blank">Términos y condiciones</a> y la política de <a href="/legal/reembolsos.html" target="_blank">Reembolsos y cancelación</a> (incluye el botón de arrepentimiento de 10 días). El plan queda «en verificación» hasta que el procesador confirma el cobro.' }));
   const m = modal({ title: 'Suscribirte a ' + p.name, body, label: 'Pago del plan ' + p.name });
   import('./payments.js').then((pm) => {
     pm.renderMercadoPago(mpBox, { plan, user });
@@ -65,7 +65,7 @@ export function openPayModal(plan, user, onChange) {
       plan, user,
       onApproved: () => {
         m.close();
-        modal({ title: 'Pago en verificación', body: h('div', {}, h('div', { class: 'alert info' }, h('span', { html: icon('clock') }), h('div', {}, 'PayPal aprobó tu suscripción. Estamos verificando el cobro: el plan ' + p.name + ' se activa automáticamente cuando se confirma (suele tardar minutos).')), h('p', { class: 'small muted', style: 'margin-top:12px' }, 'Podés seguir el estado en Mi cuenta → Membresía.')), actions: [{ label: 'Ir a Mi cuenta', class: 'btn-primary', onClick: () => { location.href = '/cuenta/#membresia'; } }] });
+        modal({ title: 'Pago en verificación', body: h('div', {}, h('div', { class: 'alert info' }, h('span', { html: icon('clock') }), h('div', {}, 'PayPal aprobó tu suscripción. Estamos verificando el cobro: el plan ' + p.name + ' se activa automáticamente cuando se confirma (suele tardar minutos).')), h('p', { class: 'small muted', style: 'margin-top:12px' }, 'Puedes seguir el estado en Mi cuenta → Membresía.')), actions: [{ label: 'Ir a Mi cuenta', class: 'btn-primary', onClick: () => { location.href = '/cuenta/#membresia'; } }] });
         onChange && onChange();
       },
       onError: (msg) => toast(msg, 'error', 6000)

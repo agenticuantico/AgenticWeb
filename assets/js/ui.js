@@ -213,7 +213,7 @@ export function popover(anchor, items, { align = 'start', place = 'bottom', clas
 export function closePopovers() {
   document.querySelectorAll('.popover').forEach((p) => { p._anchor && p._anchor.setAttribute('aria-expanded', 'false'); p.remove(); });
 }
-// Cierra al tocar afuera. El clic que abrió el menú (sobre su ancla) también llega acá: se ignora.
+// Cierra al tocar afuera. El clic que abrió el menú (sobre su ancla) también llega aquí: se ignora.
 document.addEventListener('click', (e) => {
   if (e.target.closest('.popover')) return;
   document.querySelectorAll('.popover').forEach((p) => {

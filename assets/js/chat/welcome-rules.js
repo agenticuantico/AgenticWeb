@@ -14,7 +14,7 @@ export function shouldShowWelcome({ seen = null, search = '', hash = '' } = {}) 
   return true;
 }
 export const WELCOME_STEPS = [
-  { id: 'ask', icon: 'spark', title: 'Preguntá lo que necesites', text: 'Escribí o hablá como con una persona. Para datos de hoy, empezá con «Buscá en la web:» y te respondo con fuentes.', examples: ['Buscá en la web: dólar oficial hoy', 'Armame un plan de estudio semanal', 'Resumime este texto en 5 puntos'] },
-  { id: 'connect', icon: 'plug', title: 'Conectá una cuenta', text: 'Sumá tu correo, tu agenda o tus repositorios. El chat solo los usa cuando se lo pedís, y antes de enviar o publicar algo te pide «Confirmar».', action: { label: 'Ver cuentas conectadas', tab: 'conexiones' } },
-  { id: 'task', icon: 'clock', title: 'Creá una tarea', text: 'Dejá algo andando solo: por ejemplo, buscar empleo remoto todos los días a las 9. Los resultados quedan en Tu cuenta.', action: { label: 'Crear una tarea', tab: 'tareas' } }
+  { id: 'ask', icon: 'spark', title: 'Pregunta lo que necesites', text: 'Escribe o habla como con una persona. Para datos de hoy, empieza con «Busca en la web:» y te respondo con fuentes.', examples: ['Busca en la web: dólar oficial hoy', 'Ármame un plan de estudio semanal', 'Resúmeme este texto en 5 puntos'] },
+  { id: 'connect', icon: 'plug', title: 'Conecta una cuenta', text: 'Suma tu correo, tu agenda o tus repositorios. El chat solo los usa cuando se lo pides, y antes de enviar o publicar algo te pide «Confirmar».', action: { label: 'Ver cuentas conectadas', tab: 'conexiones' } },
+  { id: 'task', icon: 'clock', title: 'Crea una tarea', text: 'Deja algo andando solo: por ejemplo, buscar empleo remoto todos los días a las 9. Los resultados quedan en Tu cuenta.', action: { label: 'Crear una tarea', tab: 'tareas' } }
 ];

@@ -29,7 +29,7 @@
   "skip": "Saltar al contenido",
   "menu": "Menú",
   "close": "Cerrar",
-  "scroll": "Deslizá",
+  "scroll": "Desliza",
   "name": "Nombre",
   "email": "Email",
   "message": "Mensaje",
@@ -198,8 +198,8 @@
  },
  "contact": {
   "eyebrow": "Contacto",
-  "title": "Visitá el atelier.",
-  "lead": "Probate la colección con asesoramiento personalizado.",
+  "title": "Visita el atelier.",
+  "lead": "Pruébate la colección con asesoramiento personalizado.",
   "address": "Dirección del atelier",
   "city": "Tu ciudad",
   "hours": [
@@ -217,7 +217,7 @@
  },
  "final": {
   "title": "Menos, pero mejor.",
-  "lead": "Descubrí la nueva colección.",
+  "lead": "Descubre la nueva colección.",
   "cta": "Comprar ahora",
   "cta2": "Ver colección"
  },

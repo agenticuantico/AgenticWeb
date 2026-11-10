@@ -118,10 +118,10 @@ async function readSSE(res, onData, signal) {
 const noticeFor = (s) => (s === 401 ? 'login' : s === 402 ? 'upgrade' : s === 429 ? 'quota' : 'fallback');
 
 async function continueCut(o, text) {
-  const cutNote = { es: '\n\n_(La respuesta se cortó por un problema de conexión. Volvé a enviar tu mensaje.)_', en: '\n\n_(The answer was cut off by a connection problem. Please send your message again.)_', pt: '\n\n_(A resposta foi interrompida por um problema de conexão. Envie sua mensagem de novo.)_' };
+  const cutNote = { es: '\n\n_(La respuesta se cortó por un problema de conexión. Vuelve a enviar tu mensaje.)_', en: '\n\n_(The answer was cut off by a connection problem. Please send your message again.)_', pt: '\n\n_(A resposta foi interrompida por um problema de conexão. Envie sua mensagem de novo.)_' };
   const lang = /^en/.test(o.lang || '') ? 'en' : /^pt/.test(o.lang || '') ? 'pt' : 'es';
   try {
-    const messages = [...o.messages, { role: 'assistant', content: text }, { role: 'user', content: '(Tu respuesta anterior se cortó. Continuala exactamente desde donde quedó, sin repetir nada y sin mencionar el corte.)' }];
+    const messages = [...o.messages, { role: 'assistant', content: text }, { role: 'user', content: '(Tu respuesta anterior se cortó. Continúala exactamente desde donde quedó, sin repetir nada y sin mencionar el corte.)' }];
     const res = await api('/api/chat', { method: 'POST', signal: o.signal, body: { messages, agent: o.agent ? 'custom' : 'general', agentId: o.agent?.id, system: [o.agent?.system, o.system].filter(Boolean).join('\n\n').slice(0, 4000), lang: o.lang, mode: 'fast' } });
     if (!res.ok || !res.body) throw new Error('cont_' + res.status);
     let more = ''; let done = false;
@@ -224,10 +224,10 @@ export async function transcribe(blob, lang) {
 
 /** Mensaje honesto para una nota de voz sin texto, según la causa real. */
 export function sttFailureMessage(code, hasBrowserSR) {
-  if (code === 'quota') return 'Recibí tu nota de voz, pero el servicio que pasa la voz a texto llegó a su límite de hoy y no la pude transcribir. No es tu micrófono. ¿Me lo escribís, o probás de nuevo en un rato?';
-  if (code === 'server' || code === 'offline') return 'Recibí tu nota de voz, pero tuve un problema en el servidor al transcribirla. No es tu micrófono. ¿Me la mandás de nuevo, o me lo escribís?';
-  if (code === 'unavailable' && !hasBrowserSR) return 'Recibí tu nota de voz. Este navegador todavía no me deja transcribirla; cuando se active la transcripción del servidor la voy a entender. Mientras tanto, ¿me lo escribís?';
-  return 'Recibí tu nota de voz, pero no se oyen palabras claras. ¿Me lo repetís un poco más cerca del micrófono?';
+  if (code === 'quota') return 'Recibí tu nota de voz, pero el servicio que pasa la voz a texto llegó a su límite de hoy y no la pude transcribir. No es tu micrófono. ¿Me lo escribes, o pruebas de nuevo en un rato?';
+  if (code === 'server' || code === 'offline') return 'Recibí tu nota de voz, pero tuve un problema en el servidor al transcribirla. No es tu micrófono. ¿Me la mandas de nuevo, o me lo escribes?';
+  if (code === 'unavailable' && !hasBrowserSR) return 'Recibí tu nota de voz. Este navegador todavía no me deja transcribirla; cuando se active la transcripción del servidor la voy a entender. Mientras tanto, ¿me lo escribes?';
+  return 'Recibí tu nota de voz, pero no se oyen palabras claras. ¿Me lo repites un poco más cerca del micrófono?';
 }
 
 /** Voz del servidor (ElevenLabs vía worker-v2). Devuelve un Blob de audio o null. */
@@ -242,7 +242,7 @@ export async function synthesize(text, lang, signal) {
 }
 
 /**
- * Modo "Hace todo por vos": planifica, usa herramientas, consulta a los agentes invitados
+ * Modo "Hace todo por ti": planifica, usa herramientas, consulta a los agentes invitados
  * y pide confirmación antes de acciones con consecuencias.
  * o: { task, lang, agents:[agent], attachments, signal, onEvent(ev), confirm(question) => Promise<boolean> }
  */
@@ -316,18 +316,18 @@ const L = (lang, es, en, pt) => (lang === 'en' ? en : lang === 'pt' ? pt : es);
 
 function plansTable(lang) {
   return L(lang,
-    `Estos son los planes de **AgentiCuántico** (mensuales, cancelás cuando quieras):\n\n| Plan | Mercado Pago (ARS) | PayPal (USD) |\n|---|---|---|\n| Gratis | $0 | USD 0 |\n| **Pro** | ${formatARS(P.pro.ars)}/mes | USD ${P.pro.usd}/mes |\n| Empresa | ${formatARS(P.empresa.ars)}/mes | USD ${P.empresa.usd}/mes |\n\nLos tres planes tienen **todas las funciones**; cambia cuánto podés usar por día (mensajes, búsquedas web y minutos de Ordenador virtual). **Empresa** suma soporte prioritario por correo.\n\nPodés ver el detalle en [Planes](/planes.html).`,
+    `Estos son los planes de **AgentiCuántico** (mensuales, cancelas cuando quieras):\n\n| Plan | Mercado Pago (ARS) | PayPal (USD) |\n|---|---|---|\n| Gratis | $0 | USD 0 |\n| **Pro** | ${formatARS(P.pro.ars)}/mes | USD ${P.pro.usd}/mes |\n| Empresa | ${formatARS(P.empresa.ars)}/mes | USD ${P.empresa.usd}/mes |\n\nLos tres planes tienen **todas las funciones**; cambia cuánto puedes usar por día (mensajes, búsquedas web y minutos de Ordenador virtual). **Empresa** suma soporte prioritario por correo.\n\nPuedes ver el detalle en [Planes](/planes.html).`,
     `**AgentiCuántico** plans (monthly, cancel anytime):\n\n| Plan | Mercado Pago (ARS) | PayPal (USD) |\n|---|---|---|\n| Free | $0 | USD 0 |\n| **Pro** | ${formatARS(P.pro.ars)}/mo | USD ${P.pro.usd}/mo |\n| Business | ${formatARS(P.empresa.ars)}/mo | USD ${P.empresa.usd}/mo |`,
     `Planos da **AgentiCuántico** (mensais, cancele quando quiser):\n\n| Plano | Mercado Pago (ARS) | PayPal (USD) |\n|---|---|---|\n| Grátis | $0 | USD 0 |\n| **Pro** | ${formatARS(P.pro.ars)}/mês | USD ${P.pro.usd}/mês |\n| Empresa | ${formatARS(P.empresa.ars)}/mês | USD ${P.empresa.usd}/mês |`);
 }
 
 function codeAnswer(q, lang) {
   const t = q.toLowerCase();
-  if (/python|\.py\b/.test(t)) return L(lang, 'Acá tenés un ejemplo en **Python**, listo para copiar:', "Here's a **Python** example:", 'Um exemplo em **Python**:') +
+  if (/python|\.py\b/.test(t)) return L(lang, 'Aquí tienes un ejemplo en **Python**, listo para copiar:', "Here's a **Python** example:", 'Um exemplo em **Python**:') +
     '\n\n```python\nimport re\n\nEMAIL_RE = re.compile(r"^[^\\s@]+@[^\\s@]+\\.[a-z]{2,}$", re.IGNORECASE)\n\ndef es_email_valido(email: str) -> bool:\n    """Devuelve True si el email tiene un formato válido."""\n    return bool(EMAIL_RE.match(email.strip()))\n\ndef ordenar_precios(precios: list[float]) -> list[float]:\n    """Ordena de menor a mayor sin modificar la lista original."""\n    return sorted(precios)\n\nif __name__ == "__main__":\n    print(es_email_valido("hola@agenticuantico.dev.ar"))  # True\n    print(ordenar_precios([46800, 0, 15600]))           # [0, 15600, 46800]\n```\n\n' + L(lang, '¿Lo adapto a tu caso o le agrego tests?', 'Want tests too?', 'Quer testes também?');
   if (/\bsql\b|consulta sql|query/.test(t)) return L(lang, 'Ejemplo en **SQL**:', '**SQL** example:', 'Exemplo em **SQL**:') +
     "\n\n```sql\n-- Clientes con más compras en los últimos 30 días\nSELECT c.nombre, COUNT(p.id) AS compras, SUM(p.total) AS total\nFROM clientes c\nJOIN pedidos p ON p.cliente_id = c.id\nWHERE p.fecha >= CURRENT_DATE - INTERVAL '30 days'\nGROUP BY c.nombre\nORDER BY total DESC\nLIMIT 10;\n```";
-  if (/html|css|landing|p[aá]gina|web/.test(t)) return L(lang, 'Una base **HTML + CSS** responsive (abrila en el lienzo para ver la vista previa):', 'A responsive **HTML + CSS** starter:', 'Uma base **HTML + CSS** responsiva:') +
+  if (/html|css|landing|p[aá]gina|web/.test(t)) return L(lang, 'Una base **HTML + CSS** responsive (ábrela en el lienzo para ver la vista previa):', 'A responsive **HTML + CSS** starter:', 'Uma base **HTML + CSS** responsiva:') +
     '\n\n```html\n<!doctype html>\n<html lang="es">\n<head>\n  <meta charset="utf-8">\n  <meta name="viewport" content="width=device-width,initial-scale=1">\n  <title>Mi página</title>\n  <style>\n    body { margin: 0; font-family: system-ui, sans-serif; background: #faf8f4; color: #16151a; }\n    .hero { min-height: 70vh; display: grid; place-items: center; text-align: center; padding: 24px; }\n    .btn { background: #16151a; color: #fff; padding: 12px 22px; border-radius: 999px; font-weight: 700; text-decoration: none; }\n  </style>\n</head>\n<body>\n  <section class="hero">\n    <div>\n      <h1>Hola</h1>\n      <p>Tu propuesta en una línea.</p>\n      <a class="btn" href="#contacto">Empezar</a>\n    </div>\n  </section>\n</body>\n</html>\n```';
   return L(lang, 'Ejemplo en **JavaScript**:', '**JavaScript** example:', 'Exemplo em **JavaScript**:') +
     "\n\n```javascript\n/**\n * Valida un email con una expresión regular simple.\n * @param {string} email\n * @returns {boolean}\n */\nexport function esEmailValido(email) {\n  return /^[^\\s@]+@[^\\s@]+\\.[a-z]{2,}$/i.test(String(email).trim());\n}\n\nconsole.log(esEmailValido('hola@agenticuantico.dev.ar')); // true\n```";
@@ -344,9 +344,9 @@ export function localAnswer(q, lang = 'es', ctx = {}) {
     try { const v = calc(expr); return `**${expr} = ${fmtNum(v, lang)}**\n\n` + L(lang, 'Calculado con precisión, sin ejecutar código.', 'Computed exactly, no code execution.', 'Calculado com precisão.'); } catch {}
   }
   if (/(inici[aá]r? sesi[oó]n|\blog ?in\b|envi[aá](r|me|le)? (un |el |los )?(correo|mail|email)|postul|aplic(a|á|ar) a (empleos?|trabajos?|ofertas?)|formulario|linkedin|computrabajo|bumeran|zonajobs|indeed|clasificados?|public(a|á|ar) (un )?aviso)/.test(t)) {
-    return L(lang, 'Para actuar en sitios como LinkedIn, portales de empleo o tu correo uso el **navegador del agente**, que se habilita al conectar el servidor de AgentiCuántico. Cuando esté activo vas a ver cada paso en vivo y te voy a pedir aprobación antes de enviar o publicar.\n\nMientras tanto, te ayudo a dejar todo listo:\n\n1. **Preparar el material**: CV, carta de presentación o el texto del correo, adaptado a cada oferta.\n2. **Elegir dónde**: te digo qué buscar y qué filtros usar en cada sitio.\n3. **Revisar antes de enviar**: pegá la oferta o el borrador y lo mejoramos juntos.\n\nNunca me compartas contraseñas por el chat. ¿Arrancamos por el CV o por el mensaje?',
+    return L(lang, 'Para actuar en sitios como LinkedIn, portales de empleo o tu correo uso el **navegador del agente**, que se habilita al conectar el servidor de AgentiCuántico. Cuando esté activo vas a ver cada paso en vivo y te voy a pedir aprobación antes de enviar o publicar.\n\nMientras tanto, te ayudo a dejar todo listo:\n\n1. **Preparar el material**: CV, carta de presentación o el texto del correo, adaptado a cada oferta.\n2. **Elegir dónde**: te digo qué buscar y qué filtros usar en cada sitio.\n3. **Revisar antes de enviar**: pega la oferta o el borrador y lo mejoramos juntos.\n\nNunca me compartas contraseñas por el chat. ¿Arrancamos por el CV o por el mensaje?',
       'To act on sites like LinkedIn, job boards or your email I use the **agent browser**, which is enabled once the AgentiCuántico server is connected. Then you will see every step live and I will ask for your approval before sending or publishing.\n\nMeanwhile I can help you prepare your CV, cover letter or email and review them before you send. Never share passwords in the chat.',
-      'Para agir em sites como LinkedIn, portais de emprego ou seu e-mail uso o **navegador do agente**, que é habilitado ao conectar o servidor. Enquanto isso, posso preparar seu CV, carta ou e-mail e revisá-los antes do envio. Nunca compartilhe senhas no chat.');
+      'Para agir em sites como LinkedIn, portais de emprego ou seu e-mail uso o **navegador do agente**, que é habilitado ao conectar o servidor. Enquanto isso, posso preparar seu CV, carta ou e-mail e revisa-los antes do envio. Nunca compartilhe senhas no chat.');
   }
   if (/c[oó]digo|\bcode\b|funci[oó]n|function|javascript|typescript|python|script|\bhtml\b|\bcss\b|\bsql\b|programa|fun[cç][aã]o/.test(t)) return codeAnswer(q, lang);
   if (/plan|precio|pre[cç]o|price|pricing|cu[aá]nto cuesta|suscrip|subscri|assinatura|pagar|\bpay\b|mercado ?pago|paypal/.test(t)) return plansTable(lang);
@@ -356,32 +356,32 @@ export function localAnswer(q, lang = 'es', ctx = {}) {
       'Olá! Sou a **AgentiCuántico**. Posso explicar a plataforma, calcular, escrever código, analisar documentos e executar tarefas passo a passo. Por onde começamos?');
   }
   if (/agente|agent|invit|automatiz|tarea|task|tarefa|hace todo|todo por/.test(t)) {
-    return L(lang, 'Para tareas de varios pasos no tenés que elegir nada: pedímelo y yo:\n\n1. **Planifico** la tarea y te muestro los pasos.\n2. **Uso herramientas**: calculadora, lectura de documentos, búsqueda web, código con vista previa y el **Ordenador virtual** (un navegador en la nube) para trámites en páginas web.\n3. **Sumo especialistas** (Programador, Investigadora, Diseñador, Legal…) si hace falta.\n4. **Te pido confirmación** antes de cualquier acción con consecuencias.\n\nEstá en todos los planes. Para usar el Ordenador tocá el botón «Ordenador» del chat (con tu cuenta).',
+    return L(lang, 'Para tareas de varios pasos no tienes que elegir nada: pedímelo y yo:\n\n1. **Planifico** la tarea y te muestro los pasos.\n2. **Uso herramientas**: calculadora, lectura de documentos, búsqueda web, código con vista previa y el **Ordenador virtual** (un navegador en la nube) para trámites en páginas web.\n3. **Sumo especialistas** (Programador, Investigadora, Diseñador, Legal…) si hace falta.\n4. **Te pido confirmación** antes de cualquier acción con consecuencias.\n\nEstá en todos los planes. Para usar el Ordenador toca el botón «Ordenador» del chat (con tu cuenta).',
       'For multi-step tasks you do not need to pick a mode: just ask. I plan, use tools (including the virtual computer, a cloud browser), bring in specialists and ask for confirmation before consequential actions. Available on every plan.',
       'Para tarefas de várias etapas você não precisa escolher modo: é só pedir. Eu planejo, uso ferramentas (incluindo o computador virtual, um navegador na nuvem), chamo especialistas e peço confirmação antes de ações importantes. Disponível em todos os planos.');
   }
   if (/segur|privacidad|privacy|privacidade|datos personales|cookies/.test(t)) {
-    return L(lang, 'Sobre **seguridad y privacidad**:\n\n- Sin cuenta, tus chats quedan **solo en tu dispositivo**. Con cuenta, se sincronizan cifrados en tránsito con tu usuario.\n- El **modo incógnito** no guarda nada: ni historial, ni memoria.\n- Los pagos se procesan en **Mercado Pago** o **PayPal**: nunca guardamos números de tarjeta.\n- Podés pedir acceso, rectificación o supresión de tus datos (Ley 25.326) desde [tu cuenta](/cuenta/) o con ' + MAIL + '.\n\nMás detalle en la [Política de privacidad](/legal/privacidad.html).',
+    return L(lang, 'Sobre **seguridad y privacidad**:\n\n- Sin cuenta, tus chats quedan **solo en tu dispositivo**. Con cuenta, se sincronizan cifrados en tránsito con tu usuario.\n- El **modo incógnito** no guarda nada: ni historial, ni memoria.\n- Los pagos se procesan en **Mercado Pago** o **PayPal**: nunca guardamos números de tarjeta.\n- Puedes pedir acceso, rectificación o supresión de tus datos (Ley 25.326) desde [tu cuenta](/cuenta/) o con ' + MAIL + '.\n\nMás detalle en la [Política de privacidad](/legal/privacidad.html).',
       'Without an account your chats stay on your device; incognito saves nothing; payments run on Mercado Pago or PayPal and we never store card numbers. See the [Privacy policy](/legal/privacidad.html).',
       'Sem conta, seus chats ficam no seu dispositivo; o modo anônimo não salva nada; pagamentos via Mercado Pago ou PayPal, sem guardar cartões.');
   }
   if (/contact|correo|mail|escrib|comercial|hablar con|falar/.test(t)) {
-    return L(lang, `Escribinos desde ${MAIL}. Contanos tu empresa y qué querés automatizar, y te respondemos con una propuesta.`,
+    return L(lang, `Escríbenos desde ${MAIL}. Cuéntanos tu empresa y qué quieres automatizar, y te respondemos con una propuesta.`,
       'Write to us using the [contact form](/contacto/).', 'Escreva pelo [formulário de contato](/contacto/).');
   }
   if (/voz|voice|habl|speak|micr[oó]fono|audio/.test(t)) {
-    return L(lang, 'Con la voz funciona así:\n\n- 🎙️ **Tocá el micrófono** y hablá: se envía como **nota de voz** y te respondo **hablando** (y también por escrito).\n- ⌨️ Si **escribís**, te respondo solo con texto.\n- 🔁 **Conversación manos libres**: activala y charlamos por turnos sin tocar nada.\n\nElegí idioma y acento con las banderas.',
+    return L(lang, 'Con la voz funciona así:\n\n- 🎙️ **Toca el micrófono** y habla: se envía como **nota de voz** y te respondo **hablando** (y también por escrito).\n- ⌨️ Si **escribes**, te respondo solo con texto.\n- 🔁 **Conversación manos libres**: actívala y charlamos por turnos sin tocar nada.\n\nElige idioma y acento con las banderas.',
       'Tap the mic and talk: it is sent as a voice note and I answer with my voice (and text). If you type, I answer in text. Hands-free mode lets us talk in turns.',
       'Toque no microfone e fale: vai como nota de voz e eu respondo com voz e texto. Se digitar, respondo só em texto.');
   }
   if (/qu[eé] es|qu[eé] hac[eé]s|qui[eé]n sos|agenticu[aá]ntico|what is|who are|o que [eé]|about you/.test(t)) {
-    return L(lang, '**AgentiCuántico** es una plataforma argentina de inteligencia artificial para personas y empresas:\n\n- **Chat** con voz que decide solo cuánto pensar.\n- **Tareas de varios pasos** y **Ordenador virtual**: un navegador en la nube que hace trámites en la web mientras mirás.\n- **Especialistas** que sumás con @ (en todos los planes).\n- **Documentos**: PDF, Word, Excel, CSV e imágenes.\n- **Búsqueda web** con fuentes, imágenes y ayuda para buscar empleo.\n- Pagos con **Mercado Pago** (ARS) o **PayPal** (USD).\n\n¿Querés que te muestre cómo resolvería una tarea tuya?',
+    return L(lang, '**AgentiCuántico** es una plataforma argentina de inteligencia artificial para personas y empresas:\n\n- **Chat** con voz que decide solo cuánto pensar.\n- **Tareas de varios pasos** y **Ordenador virtual**: un navegador en la nube que hace trámites en la web mientras miras.\n- **Especialistas** que sumas con @ (en todos los planes).\n- **Documentos**: PDF, Word, Excel, CSV e imágenes.\n- **Búsqueda web** con fuentes, imágenes y ayuda para buscar empleo.\n- Pagos con **Mercado Pago** (ARS) o **PayPal** (USD).\n\n¿Quieres que te muestre cómo resolvería una tarea tuya?',
       '**AgentiCuántico** is an Argentine AI platform: voice chat, multi-step tasks, a virtual computer (cloud browser), specialists on every plan, documents, web search with sources, and Mercado Pago / PayPal billing.',
       'A **AgentiCuántico** é uma plataforma argentina de IA: chat com voz, tarefas de várias etapas, computador virtual (navegador na nuvem), especialistas em todos os planos, documentos, pesquisa na web com fontes e pagamentos via Mercado Pago ou PayPal.');
   }
   const topic = String(q || '').trim().replace(/\s+/g, ' ').slice(0, 90);
   return L(lang,
-    `Sobre «${topic}»: desde este dispositivo puedo ayudarte con información de AgentiCuántico, cálculos exactos, ejemplos de código y análisis de documentos que subas. Las respuestas abiertas sobre cualquier tema llegan cuando el servicio de IA completo esté conectado, y ahí te respondo sin cambiar nada de tu lado.\n\nMientras tanto podés probar:\n\n- *¿Qué es AgentiCuántico?*\n- *Escribí una función en Python que ordene precios*\n- *¿Cuánto es 15600 × 12?*\n- Subí un PDF y preguntame por su contenido.`,
+    `Sobre «${topic}»: desde este dispositivo puedo ayudarte con información de AgentiCuántico, cálculos exactos, ejemplos de código y análisis de documentos que subas. Las respuestas abiertas sobre cualquier tema llegan cuando el servicio de IA completo esté conectado, y ahí te respondo sin cambiar nada de tu lado.\n\nMientras tanto puedes probar:\n\n- *¿Qué es AgentiCuántico?*\n- *Escribe una función en Python que ordene precios*\n- *¿Cuánto es 15600 × 12?*\n- Sube un PDF y pregúntame por su contenido.`,
     `About “${topic}”: from this device I can help with AgentiCuántico info, exact math, code samples and analysis of documents you upload. Open-ended answers arrive once the full AI service is connected — nothing changes on your side.`,
     `Sobre «${topic}»: daqui posso ajudar com informações da AgentiCuántico, cálculos, exemplos de código e análise de documentos. Respostas abertas chegam quando o serviço completo de IA estiver conectado.`);
 }
@@ -404,7 +404,7 @@ function agentLocal(agent, q, lang) {
     programador: () => /c[oó]digo|funci|script|python|javascript|html|css|sql/i.test(t) ? codeAnswer(t, lang) : '1. Definir entradas, salidas y casos borde.\n2. Escribir la función con tipos y validaciones.\n3. Agregar tests mínimos (feliz, borde, error).\n4. Documentar uso con un ejemplo.',
     investigadora: () => '- **Hechos verificables**: lo que figura en fuentes oficiales o documentos que compartas.\n- **Supuestos**: lo que hay que confirmar antes de decidir.\n- **Próximo paso**: con búsqueda web activa en el servidor, traigo fuentes con enlaces.',
     disenador: () => '- Jerarquía clara: un mensaje principal y una acción primaria por pantalla.\n- Contraste AA, foco visible y objetivos táctiles de 44 px.\n- Sistema de diseño: 2 tipografías, escala de espacios de 4/8 px, componentes reutilizables.',
-    analista: () => (findExpr(t) ? localAnswer(t, lang) : '- Definir la métrica principal y su fórmula.\n- Revisar calidad de datos (vacíos, duplicados, outliers).\n- Comparar contra un período base.\n\nSubí un CSV o Excel y te calculo filas, columnas y totales en tu dispositivo.'),
+    analista: () => (findExpr(t) ? localAnswer(t, lang) : '- Definir la métrica principal y su fórmula.\n- Revisar calidad de datos (vacíos, duplicados, outliers).\n- Comparar contra un período base.\n\nSube un CSV o Excel y te calculo filas, columnas y totales en tu dispositivo.'),
     redactora: () => `**Asunto:** ${t.slice(0, 60) || 'Propuesta'}\n\nHola, ¿cómo estás?\n\nTe escribo para contarte brevemente nuestra propuesta y los próximos pasos. Quedo atenta a tus comentarios.\n\nSaludos,\nEquipo AgentiCuántico`,
     marketing: () => '| Acción | Métrica | Costo |\n|---|---|---|\n| SEO de 5 páginas clave | Visitas orgánicas | Bajo |\n| Campaña de búsqueda local | Costo por contacto | Medio |\n| Contenido semanal en redes | Interacción | Bajo |',
     legal: () => '- **Privacidad**: Ley 25.326 y disposiciones de la AAIP; informar finalidad y derechos ARCO.\n- **Consumo**: Ley 24.240 y botón de arrepentimiento (Res. 424/2020) para servicios online.\n- **Contratos**: objeto, precio, plazo, rescisión y jurisdicción claros.',
@@ -423,7 +423,7 @@ async function localChat(o) {
   return { text, local: true };
 }
 
-/* ---------- Agente local "Hace todo por vos" ---------- */
+/* ---------- Agente local "Hace todo por ti" ---------- */
 const CONSEQUENTIAL = /(env[ií]a|mand[aá]|public[aá]|pag[aá]|compr[aá]|borr[aá]|elimin[aá]|send|publish|pay|buy|delete|transfer)/i;
 function deliverableFor(task) {
   const t = task.toLowerCase();
@@ -450,7 +450,7 @@ function artifactFor(d, task, lang, extras) {
 const REASON = {
   quota: ['Llegaste al límite diario del modelo de IA completo.', 'You reached the daily limit of the full AI model.', 'Você atingiu o limite diário do modelo de IA completo.'],
   upgrade: ['Llegaste al límite diario de tu plan.', 'You reached your plan\'s daily limit.', 'Você atingiu o limite diário do seu plano.'],
-  login: ['Para usar el modelo de IA completo tenés que iniciar sesión.', 'Sign in to use the full AI model.', 'Entre na sua conta para usar o modelo de IA completo.'],
+  login: ['Para usar el modelo de IA completo tienes que iniciar sesión.', 'Sign in to use the full AI model.', 'Entre na sua conta para usar o modelo de IA completo.'],
   offline: ['No pude conectar con el servidor de IA en este momento.', 'I could not reach the AI server right now.', 'Não consegui conectar ao servidor de IA agora.'],
   fallback: ['El servidor de IA no respondió a tiempo.', 'The AI server did not respond in time.', 'O servidor de IA não respondeu a tempo.']
 };
@@ -492,8 +492,8 @@ async function localAuto(o) {
       emit({ type: 'log', id: s.id, text: `${d.name} · ${content.length} caracteres` });
     }
     if (s.tool === 'confirm') {
-      const ok = o.confirm ? await o.confirm('La tarea incluye una acción con consecuencias (enviar, publicar, pagar o borrar). ¿Querés que la prepare igual? No se ejecuta nada externo sin el servidor y sin tu aprobación final.') : false;
-      emit({ type: 'log', id: s.id, text: ok ? 'Confirmado: se prepara el borrador, sin ejecutar acciones externas.' : 'Cancelado por vos: solo se entrega el borrador.' });
+      const ok = o.confirm ? await o.confirm('La tarea incluye una acción con consecuencias (enviar, publicar, pagar o borrar). ¿Quieres que la prepare igual? No se ejecuta nada externo sin el servidor y sin tu aprobación final.') : false;
+      emit({ type: 'log', id: s.id, text: ok ? 'Confirmado: se prepara el borrador, sin ejecutar acciones externas.' : 'Cancelado por ti: solo se entrega el borrador.' });
     }
     if (s.tool === 'verify') emit({ type: 'log', id: s.id, text: 'OK · el entregable cumple los criterios.' });
     emit({ type: 'step', id: s.id, status: 'done', phase: s.phase, title: s.title });
@@ -504,13 +504,13 @@ async function localAuto(o) {
   if (d.kind === 'html' && content) {
     const brand = (extras.site && extras.site.data && extras.site.data.brand) || '';
     summary = L(lang,
-      `Listo: diseñé **${d.name}**${brand ? ` (marca de ejemplo: **${brand}**)` : ''} con nuestro diseño prediseñado premium del rubro: escena inmersiva, secciones completas y textos profesionales.\n\n${why} Por eso no pude escribir textos ni imágenes a medida para tu pedido; cuando el servicio vuelva, pedímelo de nuevo y lo personalizo. Tocá **Expandir** para verlo en pantalla completa.`,
+      `Listo: diseñé **${d.name}**${brand ? ` (marca de ejemplo: **${brand}**)` : ''} con nuestro diseño prediseñado premium del rubro: escena inmersiva, secciones completas y textos profesionales.\n\n${why} Por eso no pude escribir textos ni imágenes a medida para tu pedido; cuando el servicio vuelva, pedímelo de nuevo y lo personalizo. Toca **Expandir** para verlo en pantalla completa.`,
       `Done: I designed **${d.name}** with our premium pre-built design for this industry.\n\n${why} So I could not write custom copy or images; ask again when the service is back and I will personalise it. Tap **Expand** to view it full screen.`,
       `Pronto: criei **${d.name}** com nosso design premium pré-construído do setor.\n\n${why} Por isso não consegui escrever textos ou imagens sob medida; peça de novo quando o serviço voltar. Toque em **Expandir** para ver em tela cheia.`);
   } else if (content) {
-    summary = `Listo. Preparé **${d.name}** con lo que pude resolver en tu dispositivo.\n\n${why} ${d.kind === 'markdown' ? 'La vista previa está acá arriba.' : 'Podés abrirlo en el lienzo, editarlo y descargarlo.'}`;
+    summary = `Listo. Preparé **${d.name}** con lo que pude resolver en tu dispositivo.\n\n${why} ${d.kind === 'markdown' ? 'La vista previa está aquí arriba.' : 'Puedes abrirlo en el lienzo, editarlo y descargarlo.'}`;
   } else {
-    summary = L(lang, `${why} Para esta tarea necesito el modelo completo, así que no voy a entregarte un documento genérico. Probá de nuevo en un rato${o.reason === 'login' ? ' o iniciá sesión' : o.reason === 'quota' || o.reason === 'upgrade' ? ' o mirá los [planes](/planes.html)' : ''}.`,
+    summary = L(lang, `${why} Para esta tarea necesito el modelo completo, así que no voy a entregarte un documento genérico. Prueba de nuevo en un rato${o.reason === 'login' ? ' o inicia sesión' : o.reason === 'quota' || o.reason === 'upgrade' ? ' o mira los [planes](/planes.html)' : ''}.`,
       `${why} This task needs the full model, so I will not hand you a generic document. Please try again shortly.`,
       `${why} Esta tarefa precisa do modelo completo, então não vou entregar um documento genérico. Tente novamente em instantes.`);
   }

@@ -72,6 +72,6 @@ export function analyzeLocally(docs, question = '', lang = 'es') {
       out.push('', p.length ? `**Pasajes que responden a «${q.slice(0, 80)}»:**` : `No encontré pasajes que mencionen «${q.slice(0, 80)}».`, ...p.map((x) => '> ' + x));
     }
   }
-  out.push('', '_Análisis hecho en tu dispositivo por extracción de texto. Preguntame por un tema puntual del documento para buscar pasajes._');
+  out.push('', '_Análisis hecho en tu dispositivo por extracción de texto. Pregúntame por un tema puntual del documento para buscar pasajes._');
   return out.join('\n');
 }

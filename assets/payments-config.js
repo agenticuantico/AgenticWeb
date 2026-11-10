@@ -1,19 +1,19 @@
 /**
  * AgentiCuántico · configuración de cobros (PÚBLICA, sin secretos).
  *
- * Completá estos valores cuando tengas los planes creados:
+ * Completa estos valores cuando tengas los planes creados:
  *
  * Mercado Pago (ARS) — Suscripciones con plan asociado (preapproval_plan):
- *   1. En Mercado Pago → Tu negocio → Suscripciones, creá un plan por cada nivel (Pro y Empresa).
- *   2. Copiá el link de pago del plan (init_point), p. ej.
+ *   1. En Mercado Pago → Tu negocio → Suscripciones, crea un plan por cada nivel (Pro y Empresa).
+ *   2. Copia el link de pago del plan (init_point), p. ej.
  *      https://www.mercadopago.com.ar/subscriptions/checkout?preapproval_plan_id=2c93808...
- *   3. Configurá como back_url:  https://agenticuantico.dev.ar/cuenta/?pago=mp&plan=pro  (o plan=empresa)
+ *   3. Configura como back_url:  https://agenticuantico.dev.ar/cuenta/?pago=mp&plan=pro  (o plan=empresa)
  *   4. PUBLIC_KEY (opcional): clave pública de la app de Mercado Pago (APP_USR-...), para guardar
  *      tarjetas con el Card Payment Brick cuando el servidor (worker-v2) esté activo.
  *
  * PayPal (USD) — Subscriptions:
  *   1. developer.paypal.com → Apps & Credentials → tu app LIVE → Client ID (es público).
- *   2. Creá un producto y dos planes (Pro USD 10/mes, Empresa USD 30/mes) y copiá sus plan_id (P-...).
+ *   2. Crea un producto y dos planes (Pro USD 10/mes, Empresa USD 30/mes) y copia sus plan_id (P-...).
  *
  * Nunca se guarda número de tarjeta ni CVV en AgentiCuántico: el cobro y la tarjeta quedan en el
  * procesador. La activación definitiva del plan la confirma el servidor con los webhooks firmados.
@@ -35,7 +35,7 @@ export const PAYMENTS = Object.freeze({
     }
   },
   paypal: {
-    // Credenciales LIVE públicas (el Client ID es público por diseño). El secreto NUNCA va acá:
+    // Credenciales LIVE públicas (el Client ID es público por diseño). El secreto NUNCA va aquí:
     // vive solo en el servidor como variable PAYPAL_CLIENT_SECRET (wrangler secret put).
     CLIENT_ID: 'BAAVb151UeAXrpmiSFW4edo5HEEq02mx80g4eEJ21q0dz9OJu0BY8ewqPR8o8j9wzkkDrAV7REtbilN0NE',
     PRODUCT_ID: 'PROD-0WM85076V9857451H',

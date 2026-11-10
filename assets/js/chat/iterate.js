@@ -1,6 +1,6 @@
 /**
- * Órdenes de seguimiento sobre un diseño que ya está en la conversación («implementalo y mejoralo»,
- * «agregá panel admin 3D…», «cambiá el color a violeta»). Misma detección que el servidor
+ * Órdenes de seguimiento sobre un diseño que ya está en la conversación («impleméntalo y mejóralo»,
+ * «agrega panel admin 3D…», «cambia el color a violeta»). Misma detección que el servidor
  * (worker-v2/src/webdesign/iterate.ts · isIterateOrder). Sin DOM: se prueba con vitest.
  */
 const EDIT_VERB = /(^|[^\p{L}])(implement\p{L}*|mejor\p{L}*|agreg\p{L}*|agrega|sum\p{L}*|a[ñn]ad\p{L}*|incorpor\p{L}*|integr\p{L}*|cambi\p{L}*|modific\p{L}*|actualiz\p{L}*|ampli\p{L}*|complet\p{L}*|pon[eé]\p{L}*|pone(le|lo)|sac\p{L}*|quit\p{L}*|elimin\p{L}*|reemplaz\p{L}*|convert\p{L}*|transform\p{L}*|hacelo|hac[eé]le|hacele|hazlo|segu[ií]|continu\p{L}*|desarroll\p{L}*|program\p{L}*|constru\p{L}*|termin\p{L}*|pul\p{L}*|refin\p{L}*|optimiz\p{L}*|improve|implement|add|change|update|make it|build|melhor\p{L}*|adicion\p{L}*|acrescent\p{L}*|mud\p{L}*)(?=$|[^\p{L}])/iu;

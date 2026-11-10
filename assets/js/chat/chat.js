@@ -14,15 +14,15 @@ import { renderMarkdown, looksLikeMarkdown } from './md.js';
 import { LANGS, getLang, flagUrl, startLang } from './languages.js';
 const SITE_IDS = ['es-AR', 'es-ES', 'en-US', 'pt-BR'];
 import { AGENTS, TOOLS, SKILLS, CONNECTORS, agentById, initials } from './agents.js';
-import { speak, stop as stopSpeech } from './voice.js?v=7.17.0';
+import { speak, stop as stopSpeech } from './voice.js?v=7.19.0';
 import { VoiceRecorder, fmtClock } from './recorder.js';
 import { readFile, fmtSize } from './docs.js';
 // Rendimiento (Fase 3): la computadora del agente y la videollamada se cargan recién cuando se usan.
-import { needsWebAction, isFollowUp } from './intent.js?v=7.17.0';
-import { decideRoute, OVERRIDES, ROUTE_LABEL } from './router.js?v=7.17.0';
-import { workScreen, fmtElapsed } from './work-screen.js?v=7.17.0';
-import { openComputerPanel } from './computer-panel.js?v=7.17.0';
-import { lastWebArtifact } from './iterate.js?v=7.17.0';
+import { needsWebAction, isFollowUp } from './intent.js?v=7.19.0';
+import { decideRoute, OVERRIDES, ROUTE_LABEL } from './router.js?v=7.19.0';
+import { workScreen, fmtElapsed } from './work-screen.js?v=7.19.0';
+import { openComputerPanel } from './computer-panel.js?v=7.19.0';
+import { lastWebArtifact } from './iterate.js?v=7.19.0';
 import { detectMediaIntent, mediaMessage, mediaCard, isMediaMessage, runMedia as runMediaTask } from './media.js';
 import { cleanArtifact, cleanThought } from './clean.js';
 import { PreviewCard, LiveFrame, previewKind, previewHtml, isPreviewable } from './preview-card.js';
@@ -31,18 +31,18 @@ import { toolBlock, wantsTools } from './tool-cards.js';
 const MODES = {
   fast: { label: 'Rápido', short: 'Rápido', icon: 'bolt', desc: 'Respuestas al instante' },
   deep: { label: 'Pensar', short: 'Pensar', icon: 'bulb', desc: 'Razonamiento profundo' },
-  auto: { label: 'Hace todo por vos', short: 'Agente', icon: 'agent', desc: 'Planifica, usa herramientas y verifica', flagship: true }
+  auto: { label: 'Hace todo por ti', short: 'Agente', icon: 'agent', desc: 'Planifica, usa herramientas y verifica', flagship: true }
 };
 
 const PHASES = { thinking: 'Pensando', searching: 'Buscando', coding: 'Escribiendo código', verifying: 'Verificando', reading: 'Leyendo', agent: 'Especialista', confirm: 'Confirmación' };
-const FACE = '/media/avatar/face-256.webp?v=7.17.0';
-const FACE_SET = '/media/avatar/face-128.webp?v=7.17.0 128w, /media/avatar/face-256.webp?v=7.17.0 256w, /media/avatar/face-512.webp?v=7.17.0 512w';
-const FACE_PNG = '/media/avatar/face-256.png?v=7.17.0';
+const FACE = '/media/avatar/face-256.webp?v=7.19.0';
+const FACE_SET = '/media/avatar/face-128.webp?v=7.19.0 128w, /media/avatar/face-256.webp?v=7.19.0 256w, /media/avatar/face-512.webp?v=7.19.0 512w';
+const FACE_PNG = '/media/avatar/face-256.png?v=7.19.0';
 
 const SUGGESTIONS = [
   { t: '¿Qué es AgentiCuántico?', i: 'info' },
-  { t: 'Armá una landing page para una cafetería', i: 'spark', mode: 'auto' },
-  { t: 'Escribí una función en Python que ordene precios', i: 'code' },
+  { t: 'Arma una landing page para una cafetería', i: 'spark', mode: 'auto' },
+  { t: 'Escribe una función en Python que ordene precios', i: 'code' },
   { t: '¿Cuánto es 15600 × 12?', i: 'calc' }
 ];
 
@@ -148,7 +148,7 @@ export class ChatApp {
         <div class="composer-box ace-box" data-role="box">
           <div class="composer-files" data-role="files" hidden></div>
           <label class="sr-only" for="${this.variant}-input">Mensaje</label>
-          <textarea id="${this.variant}-input" data-role="input" rows="1" placeholder="Preguntá lo que quieras" enterkeyhint="send"></textarea>
+          <textarea id="${this.variant}-input" data-role="input" rows="1" placeholder="Pregunta lo que quieras" enterkeyhint="send"></textarea>
           <div class="ace-row">
             <div class="ace-left" data-popover-host>
               <button class="ace-ib round ace-plus" type="button" data-act="plus" aria-haspopup="menu" aria-expanded="false" aria-label="Cámara, archivos, agentes y conectores">${icon('plus')}</button>
@@ -167,11 +167,11 @@ export class ChatApp {
             <button class="icon-btn" type="button" data-act="recCancel" aria-label="Cancelar grabación">${icon('trash')}</button>
             <span class="rec-dot" aria-hidden="true"></span><span class="rec-time" data-role="recTime">0:00</span>
             <canvas class="rec-wave" data-role="recWave" aria-hidden="true"></canvas>
-            <span class="rec-hint" data-role="recHint">Deslizá a la izquierda para cancelar</span>
+            <span class="rec-hint" data-role="recHint">Desliza a la izquierda para cancelar</span>
             <button class="send-btn" type="button" data-act="recStop" aria-label="Enviar nota de voz">${icon('send')}</button>
           </div>
         </div>
-        ${full ? '<p class="composer-note">AgentiCuántico puede equivocarse. Verificá la información importante. <a href="/legal/uso-aceptable.html">Uso responsable</a></p>' : ''}
+        ${full ? '<p class="composer-note">AgentiCuántico puede equivocarse. Verifica la información importante. <a href="/legal/uso-aceptable.html">Uso responsable</a></p>' : ''}
         <input type="file" data-role="file" multiple hidden accept=".pdf,.docx,.xlsx,.csv,.tsv,.txt,.md,.json,.js,.ts,.py,.html,.css,.sql,.xml,.yaml,.yml,text/*,image/*">
         <input type="file" data-role="cameraFallback" accept="image/*" capture="environment" hidden>
       </form>`;
@@ -197,11 +197,11 @@ export class ChatApp {
       if (fixed) {
         const label = this.override !== 'smart' ? OVERRIDES[fixed].label : fixed === 'computer' ? 'Ordenador · próximo mensaje' : 'Agente para el próximo mensaje';
         chip.innerHTML = `<span>${esc(label)}</span>${icon('close')}`;
-        chip.setAttribute('aria-label', `${label}. Tocá para volver a automático`);
+        chip.setAttribute('aria-label', `${label}. Toca para volver a automático`);
         chip.title = 'Volver a automático';
       }
     }
-    this.$('input').placeholder = fixed === 'auto' ? 'Describí la tarea para el agente' : fixed === 'computer' ? 'Describí la tarea para el ordenador' : 'Preguntá o pedí una tarea';
+    this.$('input').placeholder = fixed === 'auto' ? 'Describe la tarea para el agente' : fixed === 'computer' ? 'Describe la tarea para el ordenador' : 'Pregunta o pide una tarea';
   }
   renderEmpty() {
     const box = this.$('suggestions');
@@ -223,7 +223,7 @@ export class ChatApp {
     for (const id of this.chat.agents) {
       const a = agentById(id, this.store.ws.customAgents);
       if (!a) continue;
-      box.append(h('button', { class: 'participant', type: 'button', title: `${a.name} · tocá para quitar`, style: `--c:${a.color || '#888'}`, onclick: () => this.removeAgent(id) }, h('span', { class: 'p-badge' }, initials(a.name)), h('span', { class: 'p-name' }, a.name)));
+      box.append(h('button', { class: 'participant', type: 'button', title: `${a.name} · toca para quitar`, style: `--c:${a.color || '#888'}`, onclick: () => this.removeAgent(id) }, h('span', { class: 'p-badge' }, initials(a.name)), h('span', { class: 'p-name' }, a.name)));
     }
     box.hidden = !this.chat.agents.length;
   }
@@ -379,9 +379,9 @@ export class ChatApp {
       { label: 'Subir archivo', sub: 'PDF, Word, Excel, CSV, texto o imagen', icon: 'paperclip', onClick: () => this.$('file').click() },
       'sep',
       { label: 'Equipo de agentes con rol', sub: 'Programador, Investigadora, Diseñador…', icon: 'users', onClick: () => this.act_invite(btn) },
-      { label: 'Conectar GitHub', sub: 'Iniciás sesión y volvés conectado', icon: 'code', onClick: () => this.openHub('conectores') },
-      { label: 'Conectar Cloudflare', sub: 'Iniciás sesión y volvés conectado', icon: 'globe', onClick: () => this.openHub('conectores') },
-      { label: 'Llamada de voz en vivo', sub: 'Hablá con AgentiCuántico', icon: 'phone', onClick: () => { location.href = '/llamada/'; } },
+      { label: 'Conectar GitHub', sub: 'Inicias sesión y vuelves conectado', icon: 'code', onClick: () => this.openHub('conectores') },
+      { label: 'Conectar Cloudflare', sub: 'Inicias sesión y vuelves conectado', icon: 'globe', onClick: () => this.openHub('conectores') },
+      { label: 'Llamada de voz en vivo', sub: 'Habla con AgentiCuántico', icon: 'phone', onClick: () => { location.href = '/llamada/'; } },
       'sep',
       { label: 'Herramientas', icon: 'tools', onClick: () => this.openHub('herramientas') },
       { label: 'Habilidades', icon: 'spark', onClick: () => this.openHub('habilidades') },
@@ -408,7 +408,7 @@ export class ChatApp {
     this.renderMode();
     toast(this.override === 'smart' ? 'Listo: elijo solo cómo responder cada mensaje.' : `Modo fijo: ${OVERRIDES[this.override].label.toLowerCase()}.`);
   }
-  /** Compatibilidad (?modo=auto, «Hace todo por vos»): el próximo mensaje va al agente; después vuelve a automático. */
+  /** Compatibilidad (?modo=auto, «Hace todo por ti»): el próximo mensaje va al agente; después vuelve a automático. */
   setMode(m, silent) {
     if (m === 'auto' && !this.flag('agentMode')) { toast('El modo agente está pausado momentáneamente.'); return; }
     this.forceNext = this.override === 'smart' && m === 'auto' ? 'auto' : null;
@@ -471,7 +471,7 @@ export class ChatApp {
     let stream;
     let facing = 'environment';
     const video = h('video', { class: 'cam-video', playsinline: true, autoplay: true, muted: true });
-    const body = h('div', { class: 'cam' }, video, h('p', { class: 'muted small cam-hint' }, 'Encuadrá el documento con buena luz. La foto se adjunta al chat; no se sube a ningún lado hasta que envíes.'));
+    const body = h('div', { class: 'cam' }, video, h('p', { class: 'muted small cam-hint' }, 'Encuadra el documento con buena luz. La foto se adjunta al chat; no se sube a ningún lado hasta que envíes.'));
     const start = async () => {
       stream && stream.getTracks().forEach((t) => t.stop());
       stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: facing }, width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: false });
@@ -493,7 +493,7 @@ export class ChatApp {
     m.done.then(() => stream && stream.getTracks().forEach((t) => t.stop()));
     try { await start(); } catch (e) {
       const denied = e && e.name === 'NotAllowedError';
-      body.innerHTML = `<div class="alert warn">${icon('warn')}<div><strong>${denied ? 'No tenemos permiso para usar la cámara.' : 'No encontramos una cámara disponible.'}</strong><br>${denied ? 'Habilitala desde el candado de la barra de direcciones y volvé a intentar.' : 'Podés elegir una foto desde tu galería.'}</div></div>`;
+      body.innerHTML = `<div class="alert warn">${icon('warn')}<div><strong>${denied ? 'No tenemos permiso para usar la cámara.' : 'No encontramos una cámara disponible.'}</strong><br>${denied ? 'Habilítala desde el candado de la barra de direcciones y vuelve a intentar.' : 'Puedes elegir una foto desde tu galería.'}</div></div>`;
       body.append(h('button', { class: 'btn', type: 'button', style: 'margin-top:12px', onclick: () => { m.close(); this.$('cameraFallback').click(); } }, 'Elegir foto'));
     }
   }
@@ -504,7 +504,7 @@ export class ChatApp {
     if (!this.flag('voice')) return;
     const show = () => { const st = this.avatar.state; this._call.open(this.$('form') || this.root); this._call.setState(st); };
     if (this._call) { show(); return; }
-    import('./avatar-call.js?v=7.17.0').then(({ getAvatarCall }) => {
+    import('./avatar-call.js?v=7.19.0').then(({ getAvatarCall }) => {
       if (!this._call) { this._call = getAvatarCall(); this._call.onClose = () => { stopSpeech(); if (this.handsFree) this.act_handsfree(); }; }
       show();
     }).catch(() => {});
@@ -512,7 +512,7 @@ export class ChatApp {
   async act_mic() {
     if (this.recorder) return;
     if (!this.flag('voice')) { toast('La voz está pausada momentáneamente.'); return; }
-    if (!VoiceRecorder.supported()) { this.addNotice('Este navegador no permite grabar audio. Probá con Chrome, Edge o Safari actualizados.', 'warn'); return; }
+    if (!VoiceRecorder.supported()) { this.addNotice('Este navegador no permite grabar audio. Prueba con Chrome, Edge o Safari actualizados.', 'warn'); return; }
     stopSpeech();
     const rec = new VoiceRecorder({
       lang: this.lang.id,
@@ -527,16 +527,16 @@ export class ChatApp {
       await rec.start();
     } catch (e) {
       this.recorder = null;
-      if (e.code === 'denied') this.addNotice('No tengo permiso para usar el micrófono. Habilitalo desde el candado de la barra de direcciones y volvé a tocar el micrófono.', 'warn');
+      if (e.code === 'denied') this.addNotice('No tengo permiso para usar el micrófono. Habilítalo desde el candado de la barra de direcciones y vuelve a tocar el micrófono.', 'warn');
       else if (e.code === 'nomic') this.addNotice('No encontré un micrófono en este dispositivo.', 'warn');
-      else this.addNotice('No pude iniciar la grabación. Probá de nuevo.', 'warn');
+      else this.addNotice('No pude iniciar la grabación. Prueba de nuevo.', 'warn');
       this.handsFree = false; this.root.classList.remove('hands-free');
       return;
     }
     this.$('rec').hidden = false;
     this.root.classList.add('recording-on');
     this.updateStatus(); this.setFace('listening');
-    this.$('recHint').textContent = VoiceRecorder.speechSupported() ? 'Escuchando… deslizá a la izquierda para cancelar' : 'Grabando… deslizá a la izquierda para cancelar';
+    this.$('recHint').textContent = VoiceRecorder.speechSupported() ? 'Escuchando… desliza a la izquierda para cancelar' : 'Grabando… desliza a la izquierda para cancelar';
     this.openCall();
     this.avatar && this.avatar.setState('listening');
     // corte automático por silencio (manos libres) → enviar
@@ -583,7 +583,7 @@ export class ChatApp {
   act_handsfree() {
     this.handsFree = !this.handsFree;
     this.root.classList.toggle('hands-free', this.handsFree);
-    if (this.handsFree) { toast('Conversación por voz: hablá y te respondo. Tocá ■ para terminar.'); this.act_mic(); }
+    if (this.handsFree) { toast('Conversación por voz: habla y te respondo. Toca ■ para terminar.'); this.act_mic(); }
     else { this.act_recCancel(); stopSpeech(); }
   }
 
@@ -615,7 +615,7 @@ export class ChatApp {
     if (this.busy) return;
     const text = this.$('input').value.trim();
     if (!text && !this.pendingFiles.length) return;
-    this.send(text || 'Analizá estos archivos');
+    this.send(text || 'Analiza estos archivos');
   }
   async send(text) {
     if (this.busy) return;
@@ -630,11 +630,11 @@ export class ChatApp {
     this.pushMessage(msg);
     this.syncSend();
     // Acciones en la web (iniciar sesión, enviar correos, postular, formularios): tarjeta del navegador del agente.
-    // También los seguimientos («seguí», «ahora compará…») de una tarea de la computadora en esta conversación.
+    // También los seguimientos («sigue», «ahora compara…») de una tarea de la computadora en esta conversación.
     const follow = this.browserCard && this.browserCard.chatId === this.chat.id && isFollowUp(text);
     // Pedidos sobre las cuentas conectadas (correo, GitHub, Cloudflare, LinkedIn) o de empleo: herramientas del servidor
     // (más rápidas y sin gastar minutos de navegador). Cualquier escritura pide «Confirmar» en una tarjeta.
-    // Rápido/Profundo: «Buscá en la web: …», «averiguá…», «con fuentes» → búsqueda en vivo (no la computadora del agente).
+    // Rápido/Profundo: «Busca en la web: …», «averigua…», «con fuentes» → búsqueda en vivo (no la computadora del agente).
     // Un solo chat: el router decide por mensaje (rápido, pensar, búsqueda en vivo, computadora o agente).
     const forced = this.override !== 'smart' ? this.override : this.forceNext;
     const pending = this.pendingAction();
@@ -643,7 +643,7 @@ export class ChatApp {
       ? { kind: 'browser', mode: 'fast', why: 'computer-button' }
       : decideRoute(text, { override: forced || 'smart', followBrowser: !!follow, hasFiles: files.length > 0, hasArtifact: !!lastWebArtifact(this.chat.messages), pending });
     this._computerNext = false;
-    // «Está todo en el CV, podés hacerlo»: se retoma la acción pendiente con el pedido original.
+    // «Está todo en el CV, puedes hacerlo»: se retoma la acción pendiente con el pedido original.
     if (decision.why === 'resume' && decision.resume) {
       this.forceNext = null; this.renderMode();
       msg._route = decision.kind;
@@ -662,8 +662,8 @@ export class ChatApp {
       msg._browser = true;
       await this.openBrowserCard(text);
     }
-    // "Recordá que…" → memoria explícita
-    const mem = /^(record[aá]|acordate|guard[aá] en (tu )?memoria)( que)?\s+(.{4,300})$/i.exec(text);
+    // "Recuerda que…" → memoria explícita
+    const mem = /^(record[aá]|recuerda|acordate|acu[eé]rdate|guard[aá] en (tu )?memoria)( que)?\s+(.{4,300})$/i.exec(text);
     if (mem && !this.chat.incognito && this.store.ws.memoryOn) {
       // Se guarda en la cuenta (servidor) si hay; el servidor rechaza contraseñas, códigos y tarjetas.
       this.store.addMemory(mem[4].trim(), 'chat').catch((e) => import('../account/api.js').then((m) => toast(m.errorText(e), 'warn')).catch(() => {}));
@@ -675,7 +675,7 @@ export class ChatApp {
   async openBrowserCard(text) {
     if (this.browserCard) this.browserCard.detach();
     const chatId = this.chat.id;
-    const { AgentBrowserCard } = await import('../agent-browser.js?v=7.17.0');
+    const { AgentBrowserCard } = await import('../agent-browser.js?v=7.19.0');
     this.browserCard = new AgentBrowserCard({
       thread: this.$('inner'), composer: this.$('form'), text, conv: chatId, lang: this.lang.code, isPaid: this.isPaid,
       idToken: this.user ? () => this.user.getIdToken() : null, onScroll: () => this.scrollToEnd(true),
@@ -707,7 +707,7 @@ export class ChatApp {
       this.busy = { ctrl, label: 'Preparando tus postulaciones…' };
       this.updateStatus(); this.syncSend();
       try { await this.runTools({ content: hd.task, _resume: hd.task }, ctrl); this.persist(); }
-      catch (e) { if (e.name !== 'AbortError') this.addNotice('No pude preparar las postulaciones. Probá de nuevo.', 'warn'); }
+      catch (e) { if (e.name !== 'AbortError') this.addNotice('No pude preparar las postulaciones. Prueba de nuevo.', 'warn'); }
       this.finish();
       return;
     }
@@ -812,12 +812,12 @@ export class ChatApp {
       const original = userMsg._resume || userMsg.content;
       if (res.ok) { a.content = j.reply || ''; a.tools = { steps: j.steps || [], actions: j.actions || [], jobs: j.jobs || null, drafts: j.drafts || null, needs: j.needs || [], batch: j.batch || null, resumeText: original, chatId: this.chat.id, ...(j.needsProfile ? { pending: { route: 'apply', text: original } } : {}) }; }
       else {
-        a.content = res.status === 401 ? 'Ingresá a tu cuenta para usar tus cuentas conectadas.' : res.status === 429 ? 'Llegaste al límite de hoy de tu plan. Se renueva a las 21:00 (hora de Argentina).' : 'No pude usar tus cuentas en este momento. Probá de nuevo.';
+        a.content = res.status === 401 ? 'Ingresa a tu cuenta para usar tus cuentas conectadas.' : res.status === 429 ? 'Llegaste al límite de hoy de tu plan. Se renueva a las 21:00 (hora de Argentina).' : 'No pude usar tus cuentas en este momento. Prueba de nuevo.';
         if (res.status === 401) a.notice = 'login'; else if (res.status === 429) a.notice = 'quota';
       }
     } catch (e) {
       if (e.name === 'AbortError') throw e;
-      a.content = 'No pude usar tus cuentas en este momento. Probá de nuevo.';
+      a.content = 'No pude usar tus cuentas en este momento. Prueba de nuevo.';
     }
     a.streaming = false;
     this.updateMessage(a, { now: true });
@@ -836,7 +836,7 @@ export class ChatApp {
         await this.runTools(userMsg, ctrl);
         if (this.chat.title === 'Nueva conversación') this.chat.title = (userMsg.content || '').replace(/\s+/g, ' ').slice(0, 60);
         this.persist();
-      } catch (e) { if (e.name !== 'AbortError') this.addNotice('Algo falló al responder. Probá de nuevo.', 'warn'); }
+      } catch (e) { if (e.name !== 'AbortError') this.addNotice('Algo falló al responder. Prueba de nuevo.', 'warn'); }
       this.finish();
       return;
     }
@@ -859,7 +859,7 @@ export class ChatApp {
           'en-US': "On it. I'm opening the **virtual computer** (a browser in the cloud): I plan and do every step on my own and you see them live. I only stop to ask your approval before buying, paying, sending, posting or applying, and if a site needs a sign-in I show you a secure form.",
           'pt-BR': 'Já estou nisso. Abro o **computador virtual** (um navegador na nuvem): planejo e faço cada passo sozinho, e você vê tudo ao vivo. Só paro para pedir sua aprovação antes de comprar, pagar, enviar, publicar ou me candidatar, e se um site pedir login eu mostro um formulário seguro.',
           'es-ES': 'Me pongo con ello. Abro el **ordenador virtual** (un navegador en la nube): planifico y hago cada paso solo y lo ves en directo. Solo me detengo a pedir tu aprobación antes de comprar, pagar, enviar, publicar o postularme y, si un sitio pide iniciar sesión, te muestro un formulario seguro.'
-        })[this.lang.id] || 'Me pongo a trabajar. Abro el **ordenador virtual** (un navegador en la nube): planifico y hago cada paso solo, y lo ves en vivo. Solo freno para pedirte aprobación antes de comprar, pagar, enviar, publicar o postular, y si un sitio pide iniciar sesión tomás el control y escribís vos.', at: Date.now() };
+        })[this.lang.id] || 'Me pongo a trabajar. Abro el **ordenador virtual** (un navegador en la nube): planifico y hago cada paso solo, y lo ves en vivo. Solo freno para pedirte aprobación antes de comprar, pagar, enviar, publicar o postular, y si un sitio pide iniciar sesión tomas el control y escribes tú.', at: Date.now() };
         this.pushMessage(a);
         // La tarjeta de la computadora va debajo de este aviso.
         if (this.browserCard && this.browserCard.el && this.browserCard.el.isConnected) this.$('inner').append(this.browserCard.el);
@@ -900,7 +900,7 @@ export class ChatApp {
       if (this.chat.title === 'Nueva conversación') this.chat.title = (cleanThought(userMsg.content || '').trim() || 'Nota de voz').replace(/\s+/g, ' ').slice(0, 60);
       this.persist();
     } catch (e) {
-      if (e.name !== 'AbortError') { console.error(e); this.addNotice('Algo falló al responder. Probá de nuevo.', 'warn'); }
+      if (e.name !== 'AbortError') { console.error(e); this.addNotice('Algo falló al responder. Prueba de nuevo.', 'warn'); }
       else this.chat.messages.filter((m) => m.streaming).forEach((m) => { m.streaming = false; m.content += m.content ? '\n\n_(detenido)_' : '_(detenido)_'; this.updateMessage(m); });
     }
     this.finish();
@@ -1168,7 +1168,7 @@ export class ChatApp {
       const blk = toolBlock(m);
       if (slots && blk.isConnected) { const slot = h('i', { class: 'pvc-slot' }); slot._card = blk; body.append(slot); } else body.append(blk);
     }
-    if (m.notice === 'login') body.append(h('div', { class: 'alert info' }, 'Iniciá sesión para seguir con el modelo completo. ', h('a', { href: '/cuenta/' }, 'Ingresar')));
+    if (m.notice === 'login') body.append(h('div', { class: 'alert info' }, 'Inicia sesión para seguir con el modelo completo. ', h('a', { href: '/cuenta/' }, 'Ingresar')));
     if (m.notice === 'upgrade' || m.notice === 'quota') body.append(h('div', { class: 'alert info' }, 'Llegaste al límite de tu plan por hoy. ', h('a', { href: '/planes.html' }, 'Ver planes')));
     if (!m.streaming && m.content) {
       body.append(h('div', { class: 'msg-actions ace-acts' },
@@ -1454,11 +1454,11 @@ export class ChatApp {
 
   async shareChat() {
     if (this.chat.incognito) { toast('Los chats incógnito no se pueden compartir.'); return; }
-    if (!this.user) { this.loginPrompt('Para compartir un chat necesitás una cuenta.'); return; }
+    if (!this.user) { this.loginPrompt('Para compartir un chat necesitas una cuenta.'); return; }
     try {
       const url = await this.store.share(this.chat, this.user);
       const input = h('input', { class: 'input', readonly: true, value: url, 'aria-label': 'Enlace para compartir' });
-      modal({ title: 'Enlace de solo lectura', body: h('div', {}, h('p', { class: 'muted' }, 'Cualquiera con el enlace puede ver esta conversación (sin poder escribir). Podés dejar de compartirla cuando quieras.'), input), actions: [
+      modal({ title: 'Enlace de solo lectura', body: h('div', {}, h('p', { class: 'muted' }, 'Cualquiera con el enlace puede ver esta conversación (sin poder escribir). Puedes dejar de compartirla cuando quieras.'), input), actions: [
         { label: 'Dejar de compartir', class: 'btn-danger-ghost', onClick: async () => { await this.store.unshare(this.chat); toast('Enlace desactivado'); } },
         { label: 'Copiar enlace', class: 'btn-primary', onClick: () => { navigator.clipboard.writeText(url); toast('Enlace copiado'); return false; } }
       ] });
@@ -1471,7 +1471,7 @@ export class ChatApp {
     const lines = [`# ${this.chat.title}`, '', `_Exportado de AgentiCuántico · ${new Date().toLocaleString('es-AR')}_`, ''];
     for (const m of this.chat.messages) {
       if (m.role === 'notice') continue;
-      const who = m.role === 'user' ? 'Vos' : m.agent ? m.agent.name : 'AgentiCuántico';
+      const who = m.role === 'user' ? 'Tú' : m.agent ? m.agent.name : 'AgentiCuántico';
       lines.push(`**${who}:**`, '', m.kind === 'voice' ? `🎙️ _Nota de voz_ — ${m.voice?.transcript || ''}` : m.content, '');
     }
     download(slug(this.chat.title) + '.md', lines.join('\n'), 'text/markdown');
@@ -1502,7 +1502,7 @@ export class ChatApp {
   paywall(feature) {
     const p = CONFIG.PRICES;
     const body = h('div', { class: 'paywall' },
-      h('p', { class: 'muted' }, `${feature}: con Pro o Empresa tenés más uso por día. Todas las funciones están en los tres planes.`),
+      h('p', { class: 'muted' }, `${feature}: con Pro o Empresa tienes más uso por día. Todas las funciones están en los tres planes.`),
       h('div', { class: 'paywall-plans' }, ...PLANS.filter((x) => x.id !== 'gratis').map((pl) => h('div', { class: 'pw-plan' + (pl.featured ? ' featured' : '') },
         h('strong', {}, pl.name), h('span', { class: 'pw-price' }, formatARS(p[pl.id].ars), h('small', {}, ' /mes')), h('span', { class: 'muted small' }, `o USD ${p[pl.id].usd} /mes con PayPal`),
         h('ul', {}, ...pl.features.slice(1, 4).map((f) => h('li', {}, f)))))));
@@ -1514,7 +1514,7 @@ export class ChatApp {
   /* =================== Botón «Ordenador» =================== */
   /** Abre el panel del ordenador virtual con tareas de ejemplo (las frases «…en el ordenador» siguen andando). */
   act_computer() {
-    if (this.busy) { toast('Esperá a que termine la respuesta actual.'); return; }
+    if (this.busy) { toast('Espera a que termine la respuesta actual.'); return; }
     openComputerPanel(this);
   }
   /** Manda una tarea al ordenador virtual (desde el panel). */
@@ -1525,7 +1525,7 @@ export class ChatApp {
     this.send(t);
   }
   loginPrompt(text) {
-    modal({ title: 'Necesitás una cuenta', body: `<p class="muted">${esc(text)}</p>`, actions: [{ label: 'Cancelar', class: 'btn-ghost' }, { label: 'Ingresar o registrarme', class: 'btn-primary', onClick: () => { location.href = '/cuenta/'; } }] });
+    modal({ title: 'Necesitas una cuenta', body: `<p class="muted">${esc(text)}</p>`, actions: [{ label: 'Cancelar', class: 'btn-ghost' }, { label: 'Ingresar o registrarme', class: 'btn-primary', onClick: () => { location.href = '/cuenta/'; } }] });
   }
 
   /* =================== Centro de control =================== */
@@ -1549,7 +1549,7 @@ export function openDesign(f) {
     onclick: () => { fit = !fit; fitBtn.setAttribute('aria-pressed', String(fit)); send(fit); } });
   const openTab = () => {
     const w = window.open('/app/preview.html#tab', '_blank');
-    if (!w) { toast('Permití las ventanas emergentes para abrir el diseño en otra pestaña.'); return; }
+    if (!w) { toast('Permite las ventanas emergentes para abrir el diseño en otra pestaña.'); return; }
     const onReady = (e) => { if (e.source === w && e.data && e.data.type === 'ac-preview-ready') { w.postMessage({ type: 'ac-preview', html, fit: false }, location.origin); window.removeEventListener('message', onReady); } };
     window.addEventListener('message', onReady);
     setTimeout(() => window.removeEventListener('message', onReady), 15000);

@@ -12,7 +12,7 @@ const ST = {
 };
 const TYPE = { decidir: ['Decidir', '#7c3aed', 'check'], error: ['Error', '#dc2626', 'warn'], urgente: ['Urgente', '#ea580c', 'bolt'], informe: ['Informe', '#2563eb', 'file'], sugerencia: ['Ascenso', '#0d9488', 'userPlus'], entrenamiento: ['Entrenamiento', '#b45309', 'brain'] };
 const SEV = { alta: 'Alta', media: 'Media', baja: 'Baja' };
-const ERR = { forbidden_role: 'Tu rol no puede hacer esto.', outside_area: 'Esa orden no es de tu área.', owner_only: 'Solo el CEO (dueño) puede hacer esto.', not_pending: 'Esa orden ya se resolvió.', rate_limited: 'Vas muy rápido: esperá un minuto.' };
+const ERR = { forbidden_role: 'Tu rol no puede hacer esto.', outside_area: 'Esa orden no es de tu área.', owner_only: 'Solo el CEO (dueño) puede hacer esto.', not_pending: 'Esa orden ya se resolvió.', rate_limited: 'Vas muy rápido: espera un minuto.' };
 const fail = (e) => toast(ERR[e && e.code] || (e && e.message) || 'No se pudo completar.', 'danger');
 const when = (t) => new Date(t).toLocaleString('es-AR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hourCycle: 'h23', timeZone: 'America/Argentina/Buenos_Aires' });
 const ago = (t) => { const m = Math.round((Date.now() - t) / 60e3); return m < 1 ? 'recién' : m < 60 ? `hace ${m} min` : m < 1440 ? `hace ${Math.round(m / 60)} h` : `hace ${Math.round(m / 1440)} d`; };
@@ -73,7 +73,7 @@ export async function renderReception(box, token, me, go) {
         h('p', { class: 'small muted' }, 'Todo lo que llegó y espera a alguien: propuestas por aprobar, errores de los últimos 7 días, urgentes sin empezar, informes sin leer, sugerencias de ascenso y entrenamientos a repasar.'),
         h('div', { class: 'desk-sev-row' }, ...[['alta', 'Alta'], ['media', 'Media'], ['baja', 'Baja']].map(([s, l]) => h('div', { class: 'desk-sev-box s-' + s }, h('small', {}, 'Prioridad ' + l.toLowerCase()), h('strong', {}, String(sevCount(s)))))),
         h('div', { class: 'desk-filters' }, chips, area)),
-      h('section', { class: 'card panel' }, items.length ? h('ul', { class: 'desk-list' }, ...items) : empty(d.inbox.length ? 'Nada con ese filtro' : 'Recepción al día', d.inbox.length ? 'Probá con otro tipo o área.' : 'No hay nada esperando: cuando llegue una propuesta, un error o un informe, aparece acá.')));
+      h('section', { class: 'card panel' }, items.length ? h('ul', { class: 'desk-list' }, ...items) : empty(d.inbox.length ? 'Nada con ese filtro' : 'Recepción al día', d.inbox.length ? 'Prueba con otro tipo o área.' : 'No hay nada esperando: cuando llegue una propuesta, un error o un informe, aparece aquí.')));
   }
   await load(false);
 }
@@ -120,7 +120,7 @@ export async function renderRequests(box, token, me, focus) {
           o.result ? h('p', { class: 'small muted' }, 'Resultado: ' + o.result) : null,
           o.link ? h('a', { class: 'small', href: o.link, target: '_blank', rel: 'noopener' }, 'Ver cambio') : null,
           acts.childElementCount ? acts : null);
-      })) : empty(d.orders.length ? 'Sin solicitudes con ese filtro' : 'Todavía no hay solicitudes', d.orders.length ? 'Cambiá el estado, el área o la búsqueda.' : 'Las órdenes del CEO agéntico, de los supervisores y las que crees acá aparecen con su estado.'));
+      })) : empty(d.orders.length ? 'Sin solicitudes con ese filtro' : 'Todavía no hay solicitudes', d.orders.length ? 'Cambia el estado, el área o la búsqueda.' : 'Las órdenes del CEO agéntico, de los supervisores y las que crees aquí aparecen con su estado.'));
       if (focus) setTimeout(() => document.getElementById('req-' + focus)?.scrollIntoView({ block: 'center' }), 50);
     };
     const pills = h('div', { class: 'req-pills' }, ...['pendiente', 'en_curso', 'propuesta', 'fallida', 'hecha'].map((k) => { const [l, c] = ST[k]; return h('button', { type: 'button', class: 'req-pill ' + c, 'aria-pressed': String(f.status === k), onclick: () => { f.status = f.status === k ? '' : k; draw(d); } }, h('strong', {}, String(d.byStatus[k] || 0)), h('span', {}, l)); }));

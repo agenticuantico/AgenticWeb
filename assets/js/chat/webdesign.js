@@ -9,7 +9,7 @@
 // Misma detección que el servidor (worker-v2/src/webdesign/index.ts).
 const WEB_RE = /\b(landing(\s?page)?|sitio(\s+web)?|site|website|web\s?site|web\s?page|webpage|homepage|home\s?page|one[-\s]?page|interfa(z|ces|ce)|ux\/ui|ui\/ux|frontend|front-end|maqueta|mockup|e-?commerce|tienda\s+(online|virtual|web)|loja\s+virtual|p[aá]gina\s+web)\b/i;
 const PAGE_RE = /\bp[aá]gina\b/i;
-const MAKE_RE = /\b(hac[eé]|hacer|haceme|hacme|cre[aá]|crear|creame|cri[ae]r?|arm[aá]|armar|armame|dise[ñn][aá]|dise[ñn]ar|dise[ñn]ame|desenh\w*|desenvolv\w*|constru\w*|gener[aá]\w*|maquet\w*|program[aá]\w*|quiero|necesito|make|build|create|design|generate|code|develop)(?![a-záéíóúñç])/i;
+const MAKE_RE = /\b(hac[eé]|haz|hazme|hacer|haceme|hacme|cre[aá]|crear|creame|cr[eé]ame|cri[ae]r?|arm[aá]|armar|armame|[aá]rmame|dise[ñn][aá]|dise[ñn]ar|dise[ñn]ame|desenh\w*|desenvolv\w*|constru\w*|gener[aá]\w*|maquet\w*|program[aá]\w*|quiero|necesito|make|build|create|design|generate|code|develop)(?![a-záéíóúñç])/i;
 const NOT_WEB = /\b(informe|reporte|report|relat[oó]rio|resumen|summary|ensayo|essay|art[ií]culo|article)\b/i;
 
 /** ¿El pedido es un diseño web? */

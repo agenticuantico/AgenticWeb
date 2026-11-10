@@ -1,11 +1,11 @@
 /** Portada: chat embebido (con el personaje sincronizado), ejemplos que rellenan el chat y planes. */
-import { ChatApp } from './chat/chat.js?v=7.17.0';
+import { ChatApp } from './chat/chat.js?v=7.19.0';
 import { ChatStore } from './chat/store.js';
-import { mountPlans } from './plans.js?v=7.17.0';
+import { mountPlans } from './plans.js?v=7.19.0';
 import { watchUser, getProfile } from './auth.js';
 import { setIdTokenProvider } from './chat/engine.js';
 
-import { AvatarStage } from './chat/avatar.js?v=7.17.0';
+import { AvatarStage } from './chat/avatar.js?v=7.19.0';
 
 /* Portada: personaje en vivo, liviano: sigue el cursor (o el último toque), respira y parpadea. Nada más.
    Los gestos completos (poses, manos, cejas) y los labios sincronizados con la voz van en la videollamada
@@ -34,8 +34,8 @@ watchUser(async (u) => {
 /* Cartel del hero: estado del chat (mismos textos que antes, ya traducidos) */
 {
   const HUD = {
-    idle: ['En espera · escribí en el chat', 'Conectado al chat', '#9fff00'],
-    listening: ['Te escucho', 'Hablá cuando quieras', '#9fff00'],
+    idle: ['En espera · escribe en el chat', 'Conectado al chat', '#9fff00'],
+    listening: ['Te escucho', 'Habla cuando quieras', '#9fff00'],
     thinking: ['Pensando…', 'Preparando la respuesta', '#a855f7'],
     talking: ['Respondiendo', 'Por escrito y con voz', '#22c55e']
   };
@@ -52,7 +52,7 @@ watchUser(async (u) => {
   if (stage) stage.addEventListener('click', () => { const c = document.getElementById('chat'); c && c.scrollIntoView({ behavior: 'smooth' }); setTimeout(() => { const i = document.querySelector('#homeChat textarea'); i && i.focus({ preventScroll: true }); }, 500); });
 }
 
-/* «Qué le podés pedir hoy»: el ejemplo se escribe en el chat de arriba (no se envía solo) para que la persona lo ajuste. */
+/* «Qué le puedes pedir hoy»: el ejemplo se escribe en el chat de arriba (no se envía solo) para que la persona lo ajuste. */
 document.querySelectorAll('[data-ask]').forEach((b) => b.addEventListener('click', () => {
   const input = document.querySelector('#homeChat textarea');
   const c = document.getElementById('chat');

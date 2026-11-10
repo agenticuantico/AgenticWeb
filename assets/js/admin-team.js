@@ -20,11 +20,11 @@ const GSTATE = { activo: ['Equipo activo', 'ok'], pausado: ['Equipo en pausa', '
 const ERR = {
   cycle: 'Esa conexión haría un círculo (alguien terminaría siendo jefe de su jefe).', parent_rank_must_be_higher: 'El jefe tiene que tener un rango más alto (número menor).',
   reports_rank_must_be_lower: 'Hay personas a cargo con un rango igual o más alto.', ceo_has_no_parent: 'El CEO no reporta a nadie.', only_ceo_rank_1: 'El rango 1 es solo del CEO.',
-  has_reports: 'Primero mové a las personas que tiene a cargo.', cannot_delete_ceo: 'El CEO no se puede borrar.', manual_limit: 'Llegaste al máximo de turnos manuales de hoy.',
-  github_not_configured: 'Falta tu cuenta de GitHub conectada para enviar el cambio.', queue_full: 'La cola está llena.', rate_limited: 'Demasiados pedidos seguidos; esperá un minuto.',
-  login_required: 'Tu sesión venció: ingresá de nuevo.', owner_only: 'Solo la cuenta dueña.',
-  forbidden_role: 'Tu rol no permite esta acción.', outside_area: 'Solo podés actuar sobre los agentes de tu área.', owner_decides_this: 'Esto lo decide el dueño o un Co-CEO.', not_your_order: 'Solo podés cancelar las órdenes que diste vos.', session_expired: 'Tu sesión venció: entrá de nuevo.',
-  ceo_protected: 'Al CEO lo modifica solo el dueño.', invalid_parent: 'Ese jefe no sirve (el Co-CEO agéntico no tiene personas a cargo).', not_undoable: 'Ese puesto ya no se puede deshacer.', team_full: 'El equipo llegó al tope de 40 agentes.', not_decided: 'Esa orden todavía no tiene una decisión para revertir.', already_assigned: 'Esa persona ya ocupa un puesto: quitala de ese puesto o movela.', post_has_human: 'Ese puesto ya lo ocupa una persona.', no_room_rank: 'No hay lugar: el equipo de ese puesto ya llega al rango 5.', staff_inactive: 'Esa persona está suspendida.', coceo_post_needs_coceo_role: 'El puesto de Co-CEO lo puede ocupar solo una persona con rol Co-CEO.', slot_taken: 'Ese puesto ya está ocupado.', parent_missing: 'Falta el jefe de ese puesto.', not_your_post: 'Solo la persona de ese puesto (o el dueño) la puede marcar hecha.', not_open: 'Esa orden ya no está abierta.', use_unassign: 'A una persona se la quita con «Quitar del puesto».', invalid_mode: 'Elegí agente o humano.', training_is_for_agents: 'El entrenamiento es solo para agentes.', already_rejected: 'Ya estaba rechazada.', already_approved: 'Ya estaba aprobada.'
+  has_reports: 'Primero mueve a las personas que tiene a cargo.', cannot_delete_ceo: 'El CEO no se puede borrar.', manual_limit: 'Llegaste al máximo de turnos manuales de hoy.',
+  github_not_configured: 'Falta tu cuenta de GitHub conectada para enviar el cambio.', queue_full: 'La cola está llena.', rate_limited: 'Demasiados pedidos seguidos; espera un minuto.',
+  login_required: 'Tu sesión venció: ingresa de nuevo.', owner_only: 'Solo la cuenta dueña.',
+  forbidden_role: 'Tu rol no permite esta acción.', outside_area: 'Solo puedes actuar sobre los agentes de tu área.', owner_decides_this: 'Esto lo decide el dueño o un Co-CEO.', not_your_order: 'Solo puedes cancelar las órdenes que diste tú.', session_expired: 'Tu sesión venció: entra de nuevo.',
+  ceo_protected: 'Al CEO lo modifica solo el dueño.', invalid_parent: 'Ese jefe no sirve (el Co-CEO agéntico no tiene personas a cargo).', not_undoable: 'Ese puesto ya no se puede deshacer.', team_full: 'El equipo llegó al tope de 40 agentes.', not_decided: 'Esa orden todavía no tiene una decisión para revertir.', already_assigned: 'Esa persona ya ocupa un puesto: quítala de ese puesto o muévela.', post_has_human: 'Ese puesto ya lo ocupa una persona.', no_room_rank: 'No hay lugar: el equipo de ese puesto ya llega al rango 5.', staff_inactive: 'Esa persona está suspendida.', coceo_post_needs_coceo_role: 'El puesto de Co-CEO lo puede ocupar solo una persona con rol Co-CEO.', slot_taken: 'Ese puesto ya está ocupado.', parent_missing: 'Falta el jefe de ese puesto.', not_your_post: 'Solo la persona de ese puesto (o el dueño) la puede marcar hecha.', not_open: 'Esa orden ya no está abierta.', use_unassign: 'A una persona se la quita con «Quitar del puesto».', invalid_mode: 'Elige agente o humano.', training_is_for_agents: 'El entrenamiento es solo para agentes.', already_rejected: 'Ya estaba rechazada.', already_approved: 'Ya estaba aprobada.'
 };
 const ago = (t) => (t ? timeAgo(new Date(typeof t === 'number' ? t : Date.parse(t))) : 'todavía no');
 const hhmm = (t) => new Date(t).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Argentina/Buenos_Aires' });
@@ -138,7 +138,7 @@ export async function renderTeam(box, user, { base = String(CONFIG.API_BASE || '
       h('p', {}, r.summary),
       r.tasks ? h('ul', { class: 'team-tasks' }, ...r.tasks.map((t) => h('li', {}, h('strong', {}, nameOf(t.member) + ': '), t.text, t.reason ? h('span', { class: 'muted tiny team-why' }, ' · por qué: ' + t.reason) : null))) : null,
       r.change ? h('p', { class: 'small' }, h('strong', {}, r.change.title + ' · '), r.change.detail) : null,
-      o.rec ? h('div', { class: 'team-rec small' }, h('span', { class: 'chip ' + (REC[o.rec.rec] || ['', ''])[1] }, (REC[o.rec.rec] || [o.rec.rec])[0]), h('span', { class: 'muted' }, ' · Co-CEO agéntico (solo recomienda, decidís vos): '), (o.rec.reasons || []).join(' ')) : null,
+      o.rec ? h('div', { class: 'team-rec small' }, h('span', { class: 'chip ' + (REC[o.rec.rec] || ['', ''])[1] }, (REC[o.rec.rec] || [o.rec.rec])[0]), h('span', { class: 'muted' }, ' · Co-CEO agéntico (solo recomienda, decides tú): '), (o.rec.reasons || []).join(' ')) : null,
       r.hire ? h('div', { class: 'small team-hire' }, h('p', {}, h('strong', {}, `${r.hire.name} (${r.hire.role})`), ` · reporta a ${nameOf(r.hire.parent)}`), h('p', {}, r.hire.why), r.hire.expected ? h('p', { class: 'muted' }, 'Tareas esperadas: ' + r.hire.expected) : null, chips(r.hire.tags)) : null,
       decideBtns(o));
   }
@@ -146,7 +146,7 @@ export async function renderTeam(box, user, { base = String(CONFIG.API_BASE || '
     const list = d.proposals.filter((o) => o.kind !== 'contratacion');
     const hires = d.hires || [];
     const sec = h('section', { class: 'card panel', 'aria-labelledby': 'team-p' }, h('div', { class: 'panel-head' }, h('h2', { id: 'team-p' }, `Esperan tu OK (${list.length})`)));
-    sec.append(list.length ? h('ul', { class: 'team-props' }, ...list.map(proposalItem)) : h('p', { class: 'muted small' }, 'Nada pendiente. Los planes del CEO y los cambios propuestos aparecen acá.'));
+    sec.append(list.length ? h('ul', { class: 'team-props' }, ...list.map(proposalItem)) : h('p', { class: 'muted small' }, 'Nada pendiente. Los planes del CEO y los cambios propuestos aparecen aquí.'));
     sec.append(h('h3', { class: 'team-sub' }, `Contrataciones (${hires.filter((x) => x.status === 'propuesta').length} por decidir)`));
     sec.append(hires.length ? h('ul', { class: 'team-props' }, ...hires.map((o) => o.status === 'propuesta' ? proposalItem(o) : h('li', { class: 'team-prop done' }, h('span', { class: 'chip ' + (OST[o.status] || ['', ''])[1] }, (OST[o.status] || [o.status])[0]), ' ', (o.result && o.result.hire && o.result.hire.role) || o.text, h('span', { class: 'muted tiny' }, ' · ' + ago(o.created_at)))))
       : h('p', { class: 'muted small' }, 'El CEO propone contratar un agente nuevo solo cuando nadie del equipo tiene las habilidades para una orden. Nunca lo crea solo.'));
@@ -177,7 +177,7 @@ export async function renderTeam(box, user, { base = String(CONFIG.API_BASE || '
     }));
     return h('section', { class: 'card panel', 'aria-labelledby': 'team-slots-h' },
       h('div', { class: 'panel-head' }, h('h2', { id: 'team-slots-h' }, `Puestos del organigrama (${v.count} de ${v.max} agentes)`)),
-      h('p', { class: 'muted small' }, 'Si un puesto queda vacío, el turno lo cubre con un agente nuevo (0 XP, «Nuevo», solo propone) y lo anota en la Bitácora y en Dirección. Si quitás un nodo, su puesto queda cerrado hasta que lo reabras. Las consultas al modelo siguen siendo 96 por día para todo el equipo.'),
+      h('p', { class: 'muted small' }, 'Si un puesto queda vacío, el turno lo cubre con un agente nuevo (0 XP, «Nuevo», solo propone) y lo anota en la Bitácora y en Dirección. Si quitas un nodo, su puesto queda cerrado hasta que lo reabras. Las consultas al modelo siguen siendo 96 por día para todo el equipo.'),
       list.childElementCount ? list : h('p', { class: 'muted small' }, 'Todos los puestos están ocupados.'));
   }
 
@@ -206,15 +206,15 @@ export async function renderTeam(box, user, { base = String(CONFIG.API_BASE || '
     const below = d.members.filter((m) => mine.some((x) => m.parent_id === x.id));
     return h('section', { class: 'card panel', 'aria-labelledby': 'team-mine-h' },
       h('div', { class: 'panel-head' }, h('h2', { id: 'team-mine-h' }, 'Tu puesto'), ...mine.map((m) => h('span', { class: 'chip' }, m.role))),
-      h('p', { class: 'muted small' }, 'Trabajás en el organigrama junto a los agentes. Tus permisos son los de tu rol; el puesto no suma permisos. Las órdenes que recibís esperan a que las marques hechas (no las hace ningún agente).'),
-      open.length ? h('ul', { class: 'team-orders' }, ...open.map(orderRow)) : h('p', { class: 'muted small' }, 'No tenés órdenes abiertas.'),
+      h('p', { class: 'muted small' }, 'Trabajas en el organigrama junto a los agentes. Tus permisos son los de tu rol; el puesto no suma permisos. Las órdenes que recibes esperan a que las marques hechas (no las hace ningún agente).'),
+      open.length ? h('ul', { class: 'team-orders' }, ...open.map(orderRow)) : h('p', { class: 'muted small' }, 'No tienes órdenes abiertas.'),
       below.length ? h('div', { class: 'team-below' }, h('small', { class: 'label' }, 'A tu cargo'), h('div', { class: 'team-chips' }, ...below.map((b) => h('button', { type: 'button', class: 'tchip', onclick: () => detail(b.id) }, `${b.name} · ${isHum(b) ? 'Humano' : 'Agente'}`)))) : null);
   }
 
   /** Solo el dueño: poner a una persona del equipo humano en un puesto (tomarlo, uno vacante o uno nuevo). */
   function assignDialog(preset = {}) {
     const free = (d.staff || []).filter((s) => !s.node);
-    if (!free.length) { toast((d.staff || []).length ? 'Todas las personas activas ya tienen puesto. Quitá a alguien de su puesto o invitá a otra persona en «Equipo humano».' : 'Todavía no hay personas en el equipo humano: invitalas en «Equipo humano».', 'info', 6000); return; }
+    if (!free.length) { toast((d.staff || []).length ? 'Todas las personas activas ya tienen puesto. Quita a alguien de su puesto o invita a otra persona en «Equipo humano».' : 'Todavía no hay personas en el equipo humano: invítalas en «Equipo humano».', 'info', 6000); return; }
     const who = h('select', { class: 'select', 'aria-label': 'Persona' }, ...free.map((s) => h('option', { value: s.id }, `${s.name} · ${s.roleLabel}${s.area ? ' (' + s.area + ')' : ''}`)));
     const how = h('select', { class: 'select', 'aria-label': 'Cómo' }, h('option', { value: 'post' }, 'Tomar el puesto de un agente (queda como su asistente)'), h('option', { value: 'slot' }, 'Ocupar un puesto vacante o cerrado'), h('option', { value: 'parent' }, 'Puesto nuevo debajo de alguien'));
     const posts = d.members.filter((m) => m.kind !== 'ceo' && !isHum(m));
@@ -273,7 +273,7 @@ export async function renderTeam(box, user, { base = String(CONFIG.API_BASE || '
   function canvas() {
     const def = defaultLayout(d.members);
     const pos = {}; for (const m of d.members) pos[m.id] = m.x != null && m.y != null ? { x: m.x, y: m.y } : def[m.id];
-    const vp = h('div', { class: 'tc-viewport', tabindex: '0', role: 'application', 'aria-label': 'Lienzo del organigrama. Arrastrá para mover; pellizcá o usá los botones para acercar.' });
+    const vp = h('div', { class: 'tc-viewport', tabindex: '0', role: 'application', 'aria-label': 'Lienzo del organigrama. Arrastra para mover; pellizca o usa los botones para acercar.' });
     const stage = h('div', { class: 'tc-stage' });
     const svgNS = 'http://www.w3.org/2000/svg';
     const svg = document.createElementNS(svgNS, 'svg'); svg.setAttribute('class', 'tc-edges'); svg.setAttribute('aria-hidden', 'true');
@@ -313,7 +313,7 @@ export async function renderTeam(box, user, { base = String(CONFIG.API_BASE || '
       sw.onclick = async (e) => { e.stopPropagation(); try { await call(`/api/admin/team/members/${m.id}`, { method: 'PATCH', body: { status: m.status === 'activo' ? 'desactivado' : 'activo' } }); load(); } catch (er) { fail(er); } };
       const order = h('button', { type: 'button', class: 'tn-order', html: icon('send') + '<span>Dar orden</span>' });
       order.onclick = (e) => { e.stopPropagation(); orderDialog(m); };
-      const port = h('span', { class: 'tn-port', title: 'Arrastrá hasta otro nodo para cambiar a quién reporta', 'aria-hidden': 'true' });
+      const port = h('span', { class: 'tn-port', title: 'Arrastra hasta otro nodo para cambiar a quién reporta', 'aria-hidden': 'true' });
       const hum = isHum(m);
       const n = h('div', { class: `tn tn-${m.kind} st-${m.status}${hum ? ' tn-human' : ''}${m.principal ? ' tn-principal' : ''}`, tabindex: '0', role: 'button', 'aria-label': `${m.name}, ${hum ? 'Humano' : 'Agente'}, ${kindLabel(m)}${m.principal ? ' principal' : ''}, rango ${m.rank}, ${sl}. Abrir detalle.`, dataset: { id: m.id } },
         m.kind !== 'ceo' && m.kind !== 'coceo' && (!hum || owner) ? port : null,
@@ -391,23 +391,23 @@ export async function renderTeam(box, user, { base = String(CONFIG.API_BASE || '
       h('button', { type: 'button', class: 'icon-btn', 'aria-label': 'Acercar', onclick: () => zoomAt(1.2) }, '+'),
       h('button', { type: 'button', class: 'btn btn-sm btn-ghost', onclick: () => fit(true) }, 'Ajustar'),
       h('button', { type: 'button', class: 'btn btn-sm btn-ghost', onclick: async () => { if (!(await confirmDialog({ title: 'Ordenar', text: 'Vuelve a acomodar todos los nodos en su lugar automático.', ok: 'Ordenar' }))) return; try { await call('/api/admin/team/layout', { method: 'POST', body: { reset: true } }); load(); } catch (e) { fail(e); } } }, 'Ordenar'));
-    const legend = h('p', { class: 'muted tiny tc-legend' }, 'Arrastrá un nodo para moverlo · arrastrá el punto de arriba de un nodo hasta otro para cambiar a quién reporta · línea animada = orden que bajó por esa conexión en las últimas 24 h · línea punteada = tarea asignada por el CEO.');
+    const legend = h('p', { class: 'muted tiny tc-legend' }, 'Arrastra un nodo para moverlo · arrastra el punto de arriba de un nodo hasta otro para cambiar a quién reporta · línea animada = orden que bajó por esa conexión en las últimas 24 h · línea punteada = tarea asignada por el CEO.');
     requestAnimationFrame(() => fit(false));
     return h('div', { class: 'tc-wrap' }, legend, h('div', { class: 'tc-box' }, vp, tools));
   }
 
   /* ---------- Diálogos ---------- */
   function orderDialog(m, first = false) {
-    const ta = h('textarea', { class: 'input', rows: '4', maxlength: '1200', required: true, placeholder: m.kind === 'ceo' ? 'Ej.: Mejorá la velocidad de la portada en celulares.' : 'Ej.: Revisá los textos de la página de planes.', 'aria-label': 'Orden' });
+    const ta = h('textarea', { class: 'input', rows: '4', maxlength: '1200', required: true, placeholder: m.kind === 'ceo' ? 'Ej.: Mejora la velocidad de la portada en celulares.' : 'Ej.: Revisa los textos de la página de planes.', 'aria-label': 'Orden' });
     const pr = h('select', { class: 'select', 'aria-label': 'Prioridad' }, ...[2, 3, 4, 1].map((p) => h('option', { value: String(p) }, p === 2 ? 'Prioridad media' : 'Prioridad ' + PRIO[p])));
-    const hint = isHum(m) ? `${m.name} es una persona: la orden le queda en «Tu puesto» y la marca hecha cuando la termina. Ningún agente la hace por ella.` : m.kind === 'ceo' ? 'El CEO arma un plan con las tareas y a quién se las da (con el motivo). El plan llega acá para tu OK.' : m.kind === 'lead' ? 'El líder la pasa a la persona de su equipo cuyas habilidades mejor encajan.' : 'Responde con un informe o una propuesta de cambio. Nada se publica sin las reglas de siempre.';
+    const hint = isHum(m) ? `${m.name} es una persona: la orden le queda en «Tu puesto» y la marca hecha cuando la termina. Ningún agente la hace por ella.` : m.kind === 'ceo' ? 'El CEO arma un plan con las tareas y a quién se las da (con el motivo). El plan llega aquí para tu OK.' : m.kind === 'lead' ? 'El líder la pasa a la persona de su equipo cuyas habilidades mejor encajan.' : 'Responde con un informe o una propuesta de cambio. Nada se publica sin las reglas de siempre.';
     const err = h('p', { class: 'error-text', hidden: true });
     modal({
       title: first ? `Primera tarea para ${m.name}` : `Dar orden a ${m.name}`, label: `Dar orden a ${m.name}`,
       body: h('div', { class: 'stack team-order' }, h('p', { class: 'muted small' }, hint), h('label', { class: 'label' }, 'Qué tiene que hacer'), ta, pr, err,
         h('p', { class: 'muted tiny' }, isHum(m) ? 'Le aparece en su panel en cuanto entra.' : m.status !== 'activo' ? `Ahora está ${ST[m.status][0].toLowerCase()}: la orden espera en la cola hasta que lo actives.` : `Se toma en el próximo turno (cada ${d.schedule.everyMin} min) o con «Hacer trabajar ahora».`)),
       actions: [{ label: 'Cancelar', class: 'btn-ghost', value: false }, { label: 'Enviar orden', class: 'btn-primary', onClick: async () => {
-        if (ta.value.trim().length < 4) { err.textContent = 'Escribí la orden (al menos 4 letras).'; err.hidden = false; return false; }
+        if (ta.value.trim().length < 4) { err.textContent = 'Escribe la orden (al menos 4 letras).'; err.hidden = false; return false; }
         try { await call('/api/admin/team/orders', { method: 'POST', body: { member_id: m.id, text: ta.value.trim(), priority: Number(pr.value) } }); toast('Orden en la cola'); load(); }
         catch (e) { err.textContent = e.message; err.hidden = false; return false; }
       } }],
@@ -486,7 +486,7 @@ export async function renderTeam(box, user, { base = String(CONFIG.API_BASE || '
     const action = o.status === 'aprobada' ? 'reject' : 'approve';
     const b = h('button', { class: 'btn btn-sm btn-ghost', type: 'button' }, action === 'reject' ? 'Revertir (CEO)' : 'Aprobar igual (CEO)');
     b.onclick = async () => {
-      if (!(await confirmDialog({ title: action === 'reject' ? 'Revertir la aprobación' : 'Aprobar igual', text: action === 'reject' ? 'Queda rechazada. Si era un plan, se cancelan sus tareas sin terminar; si era una contratación, el agente queda desactivado. Lo que ya se mandó a GitHub no se puede «desenviar»: te dejamos el enlace.' : 'Se aprueba con tus permisos de CEO, como si la hubieras aprobado vos.', ok: action === 'reject' ? 'Revertir' : 'Aprobar' }))) return;
+      if (!(await confirmDialog({ title: action === 'reject' ? 'Revertir la aprobación' : 'Aprobar igual', text: action === 'reject' ? 'Queda rechazada. Si era un plan, se cancelan sus tareas sin terminar; si era una contratación, el agente queda desactivado. Lo que ya se mandó a GitHub no se puede «desenviar»: te dejamos el enlace.' : 'Se aprueba con tus permisos de CEO, como si la hubieras aprobado tú.', ok: action === 'reject' ? 'Revertir' : 'Aprobar' }))) return;
       b.disabled = true;
       try { const r = await call(`/api/admin/team/orders/${o.id}/override`, { method: 'POST', body: { action } }); toast(action === 'reject' ? 'Revertida' + (r.notes && r.notes.length ? ': ' + r.notes.join(' ') : '') : 'Aprobada', 'success', 6000); load(); }
       catch (e) { fail(e); b.disabled = false; }
@@ -534,11 +534,11 @@ export async function renderTeam(box, user, { base = String(CONFIG.API_BASE || '
     const reps = d.orders.filter((o) => o.kind === 'reporte' && (d.members.find((m) => m.id === o.member_id) || {}).rank === 2).slice(0, 4);
     const list = h('ol', { class: 'team-chat', 'aria-label': 'Mensajes con el CEO' });
     for (const o of msgs) {
-      if (o.source === 'admin') list.append(h('li', { class: 'me' }, h('small', {}, 'Vos · ' + ago(o.created_at)), h('p', {}, o.text)));
+      if (o.source === 'admin') list.append(h('li', { class: 'me' }, h('small', {}, 'Tú · ' + ago(o.created_at)), h('p', {}, o.text)));
       if (o.result && o.result.summary) list.append(h('li', { class: 'ceo' }, h('small', {}, 'CEO agéntico · ' + ago(o.finished_at || o.created_at)), h('p', {}, o.result.summary), o.status === 'propuesta' ? h('p', { class: 'tiny' }, 'Espera tu OK en «Esperan tu OK».') : null));
     }
-    if (!list.children.length) list.append(h('li', { class: 'ceo' }, h('small', {}, 'CEO agéntico'), h('p', {}, 'Todavía no hay mensajes. Cada día publico acá el plan de mejora (desde las 8) y el resumen (desde las 21). Escribime una orden o una pregunta y la tomo en el próximo turno.')));
-    const ta = h('textarea', { class: 'input', rows: '2', maxlength: '1200', placeholder: 'Escribile al CEO: una orden, una pregunta o una prioridad…', 'aria-label': 'Mensaje para el CEO' });
+    if (!list.children.length) list.append(h('li', { class: 'ceo' }, h('small', {}, 'CEO agéntico'), h('p', {}, 'Todavía no hay mensajes. Cada día publico aquí el plan de mejora (desde las 8) y el resumen (desde las 21). Escríbeme una orden o una pregunta y la tomo en el próximo turno.')));
+    const ta = h('textarea', { class: 'input', rows: '2', maxlength: '1200', placeholder: 'Escríbele al CEO: una orden, una pregunta o una prioridad…', 'aria-label': 'Mensaje para el CEO' });
     const send = h('button', { class: 'btn btn-primary btn-sm', type: 'submit', html: icon('send') + 'Enviar' });
     const form = h('form', { class: 'team-chat-form' }, ta, send);
     form.addEventListener('submit', async (e) => { e.preventDefault(); if (ta.value.trim().length < 4 || !ceo) return; send.disabled = true; try { await call('/api/admin/team/orders', { method: 'POST', body: { member_id: ceo.id, text: ta.value.trim(), priority: 3 } }); toast('Enviado al CEO'); load(); } catch (er) { fail(er); send.disabled = false; } });
@@ -546,7 +546,7 @@ export async function renderTeam(box, user, { base = String(CONFIG.API_BASE || '
     if (tab) { tab.querySelector('.tab-badge')?.remove(); if (d.unreadReport) tab.append(h('span', { class: 'tab-badge', 'aria-label': 'Reporte nuevo' }, '1')); }
     const seenBtn = d.unreadReport ? h('button', { class: 'btn btn-sm btn-ghost', type: 'button', onclick: async () => { try { await call('/api/admin/team/seen', { method: 'POST', body: {} }); load(); } catch (e) { fail(e); } } }, 'Marcar como leído') : null;
     return h('section', { class: 'card panel', 'aria-labelledby': 'team-c' }, h('div', { class: 'panel-head' }, h('h2', { id: 'team-c' }, 'CEO agéntico ↔ Demian'), d.unreadReport ? h('span', { class: 'chip gold', role: 'status' }, 'Reporte nuevo') : null, seenBtn),
-      h('p', { class: 'muted small' }, 'El CEO agéntico recomienda; vos decidís. Cada día, desde las 20, los trabajadores reportan a su supervisor, los supervisores a su líder y los líderes al CEO; desde las 21 llega acá un solo reporte. Avisos solo dentro del panel: no se manda nada afuera.'), list,
+      h('p', { class: 'muted small' }, 'El CEO agéntico recomienda; tú decides. Cada día, desde las 20, los trabajadores reportan a su supervisor, los supervisores a su líder y los líderes al CEO; desde las 21 llega aquí un solo reporte. Avisos solo dentro del panel: no se manda nada afuera.'), list,
       reps.length ? h('details', { class: 'team-reps' }, h('summary', {}, `Reportes de los líderes (${reps.length})`), h('ul', {}, ...reps.map((o) => h('li', { class: 'small' }, o.result && o.result.summary)))) : null, form);
   }
 

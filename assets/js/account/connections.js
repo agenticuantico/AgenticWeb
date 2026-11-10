@@ -2,7 +2,7 @@
  * Pestaña «Cuentas conectadas»: galería de conectores (GitHub, Gmail, Google Calendar, Google Drive, LinkedIn y Cloudflare).
  * - OAuth (GitHub, Gmail, LinkedIn): «Conectar» lleva directo a la pantalla de permiso del proveedor en esta misma
  *   pestaña; al aprobar, el servidor guarda la conexión cifrada y vuelve a /app/?cuenta=conectada&proveedor=…
- *   Los tokens quedan cifrados en el servidor y nunca llegan acá.
+ *   Los tokens quedan cifrados en el servidor y nunca llegan aquí.
  * - Cada cuenta conectada tiene «Usar en el chat» (activar/desactivar sin borrarla) y «Desconectar».
  * - Cloudflare: se pega un API token con permisos acotados; el servidor lo verifica antes de guardarlo.
  * - Si el dueño todavía no cargó las credenciales de un proveedor, se muestra «Conexión no configurada».
@@ -40,7 +40,7 @@ export async function renderConnections(el, ctx) {
   }
   el.append(h('div', { class: 'acc-section-h' },
     h('h3', {}, 'Cuentas conectadas'),
-    h('p', { class: 'muted' }, 'Sumá tus apps con un toque y pedile al chat cosas como «revisá mis correos de hoy» o «listá mis repos». El asistente las usa solo cuando se lo pedís, y todo lo que crea, envía o publica te pide «Confirmar» antes.')));
+    h('p', { class: 'muted' }, 'Suma tus apps con un toque y pídele al chat cosas como «revisa mis correos de hoy» o «lista mis repos». El asistente las usa solo cuando se lo pides, y todo lo que crea, envía o publica te pide «Confirmar» antes.')));
   const mine = data.providers.filter((p) => p.status === 'connected' || p.status === 'expired');
   const rest = data.providers.filter((p) => !mine.includes(p));
   if (mine.length) {
@@ -56,8 +56,8 @@ export async function renderConnections(el, ctx) {
     const lg = await call('/api/agent/logins');
     const box = h('section', { class: 'acc-logins', 'aria-labelledby': 'accLoginsH' },
       h('h4', { class: 'acc-gal-h', id: 'accLoginsH' }, 'Accesos guardados en sitios'),
-      h('p', { class: 'acc-small muted' }, 'Cuando el agente necesita entrar a un sitio con tu cuenta, te pide permiso en el chat antes de usar un acceso guardado. Se guardan cifrados y solo vos podés borrarlos.'));
-    if (!lg.logins || !lg.logins.length) box.append(h('p', { class: 'acc-small' }, 'No tenés accesos guardados.'));
+      h('p', { class: 'acc-small muted' }, 'Cuando el agente necesita entrar a un sitio con tu cuenta, te pide permiso en el chat antes de usar un acceso guardado. Se guardan cifrados y solo tú puedes borrarlos.'));
+    if (!lg.logins || !lg.logins.length) box.append(h('p', { class: 'acc-small' }, 'No tienes accesos guardados.'));
     else box.append(h('ul', { class: 'acc-login-list' }, ...lg.logins.map((x) => h('li', {},
       h('span', { class: 'acc-login-ic', html: icon('lock') }),
       h('span', { class: 'acc-login-t' }, h('strong', { 'data-no-i18n': '', title: x.host }, x.host), h('small', { class: 'muted' }, `${x.label || ''}${x.lastUsedAt ? ' · usado ' + timeAgo(x.lastUsedAt) : ''}`)),
@@ -101,17 +101,17 @@ function card(p, ctx, root) {
     if (p.status === 'connected') body.append(chatSwitch(p));
     if (p.status === 'expired' || p.kind === 'oauth2' || p.oauth) acts.append(h('button', { class: 'btn btn-sm' + (p.status === 'expired' ? ' btn-primary' : ''), type: 'button', onclick: (e) => connect(p, e.currentTarget) }, p.status === 'expired' ? 'Reconectar' : 'Cambiar cuenta'));
     acts.append(h('button', { class: 'btn btn-sm btn-danger-ghost', type: 'button', onclick: async () => {
-      if (!(await confirmDialog({ title: `Desconectar ${p.label}`, text: `Se borra el acceso guardado${p.kind === 'oauth2' ? ' y se revoca el permiso en ' + p.label : ''}. Podés volver a conectarla cuando quieras.`, ok: 'Desconectar', danger: true }))) return;
+      if (!(await confirmDialog({ title: `Desconectar ${p.label}`, text: `Se borra el acceso guardado${p.kind === 'oauth2' ? ' y se revoca el permiso en ' + p.label : ''}. Puedes volver a conectarla cuando quieras.`, ok: 'Desconectar', danger: true }))) return;
       try { await call(`/api/connectors/${p.id}/disconnect`, { method: 'POST', body: {} }); toast(`${p.label} desconectada.`); ctx.summary = null; root.innerHTML = ''; renderConnections(root, ctx); }
       catch (e) { toast(errorText(e), 'warn'); }
     } }, 'Desconectar'));
   } else if (p.status === 'not_configured') {
-    body.append(h('p', { class: 'acc-note' }, h('span', { html: icon('info') }), 'Esta conexión todavía no está habilitada en AgentiCuántico. Va a aparecer acá apenas esté lista.'));
+    body.append(h('p', { class: 'acc-note' }, h('span', { html: icon('info') }), 'Esta conexión todavía no está habilitada en AgentiCuántico. Va a aparecer aquí apenas esté lista.'));
   } else if (p.id === 'cloudflare') {
     // Camino principal: iniciar sesión en Cloudflare (si el servidor tiene su cliente OAuth). Respaldo: token en «Opciones avanzadas».
     const adv = h('details', { class: 'acc-help acc-cf-adv' }, h('summary', {}, 'Opciones avanzadas: conectar con un API token'));
     adv.addEventListener('toggle', () => { if (adv.open && !adv.querySelector('form')) { const f = cloudflareForm(ctx, root); adv.append(f); f.querySelector('input').focus(); } }, { once: false });
-    const note = h('p', { class: 'acc-small muted', role: 'status', hidden: true }, 'El inicio de sesión directo con Cloudflare todavía no está habilitado. Mientras tanto podés conectar con un API token en «Opciones avanzadas».');
+    const note = h('p', { class: 'acc-small muted', role: 'status', hidden: true }, 'El inicio de sesión directo con Cloudflare todavía no está habilitado. Mientras tanto puedes conectar con un API token en «Opciones avanzadas».');
     acts.append(h('button', { class: 'btn btn-sm btn-primary', type: 'button', onclick: (e) => { if (p.oauth) return connect(p, e.currentTarget); note.hidden = false; adv.open = true; } }, 'Conectar'));
     body.append(note, adv);
   } else {
@@ -155,29 +155,29 @@ async function connect(p, btn) {
   if (btn) { btn.disabled = true; btn.dataset.label = btn.textContent; btn.textContent = `Abriendo ${p.label}…`; }
   try {
     const r = await startConnect(p.id);
-    if (r.mode === 'device' && r.userCode) { toast(`Abrí ${r.verificationUri} y escribí el código ${r.userCode}`, '', 15000); window.open(r.verificationUri, '_blank', 'noopener'); }
+    if (r.mode === 'device' && r.userCode) { toast(`Abre ${r.verificationUri} y escribe el código ${r.userCode}`, '', 15000); window.open(r.verificationUri, '_blank', 'noopener'); }
     if (r.mode !== 'redirect' && btn) { btn.disabled = false; btn.textContent = btn.dataset.label; }
   } catch (e) { toast(errorText(e), 'warn'); if (btn) { btn.disabled = false; btn.textContent = btn.dataset.label; } }
 }
 
 function cloudflareForm(ctx, root) {
   const id = 'cfTok' + Math.random().toString(36).slice(2, 7);
-  const input = h('input', { class: 'input', id, type: 'password', autocomplete: 'off', spellcheck: 'false', placeholder: 'Pegá tu API token', 'aria-describedby': id + 'h' });
+  const input = h('input', { class: 'input', id, type: 'password', autocomplete: 'off', spellcheck: 'false', placeholder: 'Pega tu API token', 'aria-describedby': id + 'h' });
   const err = h('p', { class: 'error-text', role: 'alert' });
   const btn = h('button', { class: 'btn btn-sm btn-primary', type: 'submit' }, 'Verificar y conectar');
   const f = h('form', { class: 'acc-cf' },
     h('details', { class: 'acc-help' }, h('summary', {}, 'Cómo crear el token (2 minutos)'),
       h('ol', {},
-        h('li', {}, 'Entrá a ', h('a', { href: 'https://dash.cloudflare.com/profile/api-tokens', target: '_blank', rel: 'noopener noreferrer' }, 'dash.cloudflare.com → Mi perfil → API Tokens'), '.'),
-        h('li', {}, 'Tocá «Create Token» y usá la plantilla «Edit Cloudflare Workers».'),
-        h('li', {}, 'Para ver el estado de un Worker, sumá «Account Analytics: Read».'),
-        h('li', {}, 'Copiá el token y pegalo acá. Se guarda cifrado y no se vuelve a mostrar.'))),
-    h('div', { class: 'field' }, h('label', { for: id }, 'API token de Cloudflare'), input, h('small', { id: id + 'h', class: 'muted' }, 'Nunca pegues la Global API Key: usá un token con permisos acotados.')),
+        h('li', {}, 'Entra a ', h('a', { href: 'https://dash.cloudflare.com/profile/api-tokens', target: '_blank', rel: 'noopener noreferrer' }, 'dash.cloudflare.com → Mi perfil → API Tokens'), '.'),
+        h('li', {}, 'Toca «Create Token» y usa la plantilla «Edit Cloudflare Workers».'),
+        h('li', {}, 'Para ver el estado de un Worker, suma «Account Analytics: Read».'),
+        h('li', {}, 'Copia el token y pégalo aquí. Se guarda cifrado y no se vuelve a mostrar.'))),
+    h('div', { class: 'field' }, h('label', { for: id }, 'API token de Cloudflare'), input, h('small', { id: id + 'h', class: 'muted' }, 'Nunca pegues la Global API Key: usa un token con permisos acotados.')),
     err, btn);
   f.addEventListener('submit', async (e) => {
     e.preventDefault(); err.textContent = '';
     const token = input.value.trim();
-    if (!token) { err.textContent = 'Pegá el token.'; input.focus(); return; }
+    if (!token) { err.textContent = 'Pega el token.'; input.focus(); return; }
     btn.disabled = true; btn.textContent = 'Verificando…';
     try {
       const r = await call('/api/connectors/cloudflare', { method: 'POST', body: { token } });
@@ -198,7 +198,7 @@ export async function finishOAuthFromHash(ctx) {
   const label = { github: 'GitHub', google: 'Gmail', gcalendar: 'Google Calendar', gdrive: 'Google Drive', linkedin: 'LinkedIn' }[prov] || prov;
   const err = q.get('error');
   if (err) {
-    toast(({ denied: `Cancelaste la conexión con ${label}.`, not_configured: `La conexión con ${label} no está configurada.`, expired: 'El enlace venció. Probá de nuevo.' })[err] || `No se pudo conectar ${label}. Probá de nuevo.`, 'warn', 6000);
+    toast(({ denied: `Cancelaste la conexión con ${label}.`, not_configured: `La conexión con ${label} no está configurada.`, expired: 'El enlace venció. Prueba de nuevo.' })[err] || `No se pudo conectar ${label}. Prueba de nuevo.`, 'warn', 6000);
     return;
   }
   const p = q.get('p');

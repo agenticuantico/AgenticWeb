@@ -29,14 +29,14 @@
   "skip": "Saltar al contenido",
   "menu": "Menú",
   "close": "Cerrar",
-  "scroll": "Deslizá",
+  "scroll": "Desliza",
   "name": "Nombre",
   "email": "Email",
   "message": "Mensaje",
   "sent": "¡Gracias! Te respondemos a la brevedad."
  },
  "title": "Nexo · La plataforma que conecta a tu equipo",
- "description": "Automatizá procesos, centralizá datos y tomá mejores decisiones con una plataforma simple y segura.",
+ "description": "Automatiza procesos, centraliza datos y toma mejores decisiones con una plataforma simple y segura.",
  "nav": [
   {
    "label": "Producto",
@@ -64,7 +64,7 @@
   "eyebrow": "Plataforma · Automatización · Datos",
   "title": "Tu operación,",
   "titleEm": "en piloto automático.",
-  "lead": "Conectá tus herramientas, automatizá las tareas repetitivas y mirá todo en tiempo real desde un solo lugar.",
+  "lead": "Conecta tus herramientas, automatiza las tareas repetitivas y mira todo en tiempo real desde un solo lugar.",
   "primary": "Ver planes",
   "secondary": "Agendar una demo",
   "images": []
@@ -94,21 +94,21 @@
   "title": "Tres pasos",
   "items": [
    {
-    "kicker": "01 · Conectá",
+    "kicker": "01 · Conecta",
     "title": "Tus herramientas, unidas.",
-    "text": "Sumá correo, planillas, CRM y pagos en minutos, sin código.",
+    "text": "Suma correo, planillas, CRM y pagos en minutos, sin código.",
     "image": "",
     "art": "2"
    },
    {
-    "kicker": "02 · Automatizá",
+    "kicker": "02 · Automatiza",
     "title": "Flujos que trabajan solos.",
-    "text": "Definí reglas y dejá que la plataforma haga el resto, con alertas cuando importa.",
+    "text": "Define reglas y deja que la plataforma haga el resto, con alertas cuando importa.",
     "image": "",
     "art": "3"
    },
    {
-    "kicker": "03 · Decidí",
+    "kicker": "03 · Decide",
     "title": "Datos claros, en vivo.",
     "text": "Tableros listos para compartir con tu equipo y tus clientes.",
     "image": "",
@@ -119,8 +119,8 @@
  },
  "offer": {
   "eyebrow": "Planes",
-  "title": "Elegí cómo empezar.",
-  "lead": "Sin permanencia. Cambiá de plan cuando quieras.",
+  "title": "Elige cómo empezar.",
+  "lead": "Sin permanencia. Cambia de plan cuando quieras.",
   "items": [
    {
     "name": "Inicial",
@@ -186,7 +186,7 @@
    },
    {
     "quote": "La implementación fue rapidísima y el soporte responde en serio.",
-    "name": "Tomás F.",
+    "name": "Tomas F.",
     "role": "CTO"
    },
    {
@@ -199,7 +199,7 @@
  "contact": {
   "eyebrow": "Contacto",
   "title": "Hablemos de tu equipo.",
-  "lead": "Contanos qué querés automatizar y te mostramos cómo en una demo de 20 minutos.",
+  "lead": "Cuéntanos qué quieres automatizar y te mostramos cómo en una demo de 20 minutos.",
   "address": "Atención 100% online",
   "city": "Respuesta en menos de 24 h hábiles",
   "hours": [
@@ -216,8 +216,8 @@
   "cta": "Solicitar demo"
  },
  "final": {
-  "title": "Empezá hoy. Escalá mañana.",
-  "lead": "Probalo gratis, sin tarjeta.",
+  "title": "Empieza hoy. Escala mañana.",
+  "lead": "Pruébalo gratis, sin tarjeta.",
   "cta": "Probar gratis",
   "cta2": "Ver planes"
  },

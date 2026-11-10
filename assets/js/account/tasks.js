@@ -1,6 +1,6 @@
 /**
  * Pestaña «Tareas»: tareas programadas de la persona (búsqueda diaria de empleo, resumen web) y sus resultados.
- * Las corre el servidor con un solo Cron Trigger (plan gratis); acá se crean, se editan, se pausan, se ejecutan una vez,
+ * Las corre el servidor con un solo Cron Trigger (plan gratis); aquí se crean, se editan, se pausan, se ejecutan una vez,
  * se ve el historial de ejecuciones y se borran.
  */
 import { h, icon, toast, confirmDialog, timeAgo } from '../ui.js';
@@ -23,7 +23,7 @@ export async function renderTasks(el, ctx) {
     h('p', { class: 'muted' }, `${data.tasks.filter((t) => t.status === 'active').length} de ${data.max} activas · las horas son de Argentina.`));
   el.append(head);
   const list = h('div', { class: 'acc-tasks' });
-  if (!data.tasks.length) list.append(h('div', { class: 'acc-empty sm' }, h('span', { class: 'acc-empty-ic', html: icon('clock') }), h('p', {}, 'Todavía no tenés tareas. Creá una abajo: por ejemplo, buscar empleo todos los días a las 9.')));
+  if (!data.tasks.length) list.append(h('div', { class: 'acc-empty sm' }, h('span', { class: 'acc-empty-ic', html: icon('clock') }), h('p', {}, 'Todavía no tienes tareas. Crea una abajo: por ejemplo, buscar empleo todos los días a las 9.')));
   for (const t of data.tasks) list.append(taskCard(t, ctx, el));
   el.append(list, taskForm(ctx, el, data));
 }
@@ -143,13 +143,13 @@ function taskForm(ctx, root, data, task = null, onCancel = null) {
   const full = !task && data.tasks.filter((t) => t.status === 'active').length >= data.max;
   const form = h('form', { class: 'acc-card acc-form', novalidate: true, 'aria-label': task ? `Editar ${task.title}` : 'Nueva tarea' },
     h('h4', {}, task ? 'Editar tarea' : 'Nueva tarea'),
-    full ? h('p', { class: 'acc-note' }, h('span', { html: icon('info') }), 'Llegaste al máximo de tareas activas de tu plan. Pausá o borrá una para crear otra.') : null,
+    full ? h('p', { class: 'acc-note' }, h('span', { html: icon('info') }), 'Llegaste al máximo de tareas activas de tu plan. Pausa o borra una para crear otra.') : null,
     h('div', { class: 'acc-form-grid' }, title ? field('Nombre', title) : null, field('Qué hace', kind), field('Qué buscar', query), field('Frecuencia', cadence), dayField, field('Hora (Argentina)', hour), engField),
     arField, err, h('div', { class: 'acc-row' }, submit, cancel));
   syncKind();
   form.addEventListener('submit', async (e) => {
     e.preventDefault(); err.textContent = '';
-    if (query.value.trim().length < 2) { err.textContent = 'Escribí qué querés buscar.'; query.focus(); return; }
+    if (query.value.trim().length < 2) { err.textContent = 'Escribe qué quieres buscar.'; query.focus(); return; }
     submit.disabled = true;
     const body = { kind: kind.value, params: kind.value === 'job_search' ? { query: query.value.trim(), ...(english.value ? { english: english.value } : {}), remoteArgentina: ar.checked } : { query: query.value.trim() }, cadence: cadence.value, hourArt: Number(hour.value), weekday: cadence.value === 'weekly' ? Number(weekday.value) : undefined };
     try {

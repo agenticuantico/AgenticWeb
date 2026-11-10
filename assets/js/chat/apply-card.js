@@ -73,7 +73,7 @@ export function applyCard(m) {
       list.append(li);
     }
     root.append(list);
-    root.append(h('label', { class: 'tc-apply-terms', for: terms.id }, terms, h('span', {}, 'Autorizo aceptar en mi nombre los términos y la política de privacidad de cada portal (si no, esas postulaciones quedan para que las completes vos).')));
+    root.append(h('label', { class: 'tc-apply-terms', for: terms.id }, terms, h('span', {}, 'Autorizo aceptar en mi nombre los términos y la política de privacidad de cada portal (si no, esas postulaciones quedan para que las completes tú).')));
     root.append(h('div', { class: 'tc-acts' }, okBtn, noBtn), state);
     count();
     okBtn.addEventListener('click', async () => {
@@ -81,7 +81,7 @@ export function applyCard(m) {
       try {
         const items = autos.map((i) => ({ id: i.id, include: include.get(i.id) !== false, answers: edits.get(i.id) }));
         const r = await call(`/api/apply/batches/${v.batch.id}/approve`, { method: 'POST', body: { items, acceptTerms: terms.checked } });
-        toast('Postulaciones aprobadas. Te muestro el avance acá.', 'ok');
+        toast('Postulaciones aprobadas. Te muestro el avance aquí.', 'ok');
         render(r); poll();
       } catch (e) { state.textContent = errorText(e); okBtn.disabled = noBtn.disabled = false; }
     });

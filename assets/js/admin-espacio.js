@@ -5,15 +5,15 @@
  */
 import { h, icon, toast, confirmDialog, modal } from './ui.js';
 import { api } from './admin-staff.js';
-import { download } from './admin-indicadores.js?v=7.14.0';
-import { renderReception, renderRequests } from './admin-escritorio.js?v=7.16.0';
+import { download } from './admin-indicadores.js?v=7.19.0';
+import { renderReception, renderRequests } from './admin-escritorio.js?v=7.19.0';
 
 const ERRW = {
-  forbidden_channel: 'Tu rol no tiene acceso a este canal.', empty_message: 'Escribí algo antes de mandar.', rate_limited: 'Vas muy rápido: esperá un minuto.',
+  forbidden_channel: 'Tu rol no tiene acceso a este canal.', empty_message: 'Escribe algo antes de mandar.', rate_limited: 'Vas muy rápido: espera un minuto.',
   daily_limit: 'Llegaste al máximo de mensajes de hoy.', no_agent_in_channel: 'En este canal no hay un agente que tome órdenes.', outside_area: 'Ese agente no es de tu área.',
-  invalid_area: 'Elegí un área.', no_agents_in_area: 'No hay agentes activos en esa área.', training_queue_full: 'Ya hay muchas sesiones en espera.', member_not_active: 'Ese agente no está activo.', manual_limit: 'Llegaste al máximo de entrenamientos manuales de hoy.',
+  invalid_area: 'Elige un área.', no_agents_in_area: 'No hay agentes activos en esa área.', training_queue_full: 'Ya hay muchas sesiones en espera.', member_not_active: 'Ese agente no está activo.', manual_limit: 'Llegaste al máximo de entrenamientos manuales de hoy.',
   member_not_in_channel: 'Ese agente no es de este canal.', owner_only: 'Solo el CEO (dueño) puede hacer esto.', not_undoable: 'Ese cambio ya no se puede deshacer.',
-  not_pending: 'Esa sugerencia ya se resolvió.', area_required: 'Elegí el área del supervisor.', only_owner_grants_coceo: 'Solo el dueño puede dar el rol Co-CEO.', cannot_grant_role: 'Tu rol no puede dar ese rol.'
+  not_pending: 'Esa sugerencia ya se resolvió.', area_required: 'Elige el área del supervisor.', only_owner_grants_coceo: 'Solo el dueño puede dar el rol Co-CEO.', cannot_grant_role: 'Tu rol no puede dar ese rol.'
 };
 const fail = (e) => toast(ERRW[e && e.code] || (e && e.message) || 'No se pudo completar.', 'danger');
 const AREAS = [['dev', 'Desarrollo'], ['soporte', 'Soporte'], ['diseno', 'Diseño'], ['crecimiento', 'Crecimiento']];
@@ -51,7 +51,7 @@ async function renderChannels(box, token, me) {
   const list = h('nav', { class: 'ws-channels', 'aria-label': 'Canales' });
   const head = h('div', { class: 'ws-head' });
   const feed = h('ol', { class: 'ws-feed', 'aria-live': 'polite', 'aria-label': 'Mensajes' });
-  const input = h('textarea', { class: 'input ws-input', rows: '2', maxlength: '1000', 'aria-label': 'Mensaje', placeholder: 'Escribí un mensaje…' });
+  const input = h('textarea', { class: 'input ws-input', rows: '2', maxlength: '1000', 'aria-label': 'Mensaje', placeholder: 'Escribe un mensaje…' });
   const ask = h('input', { type: 'checkbox', id: 'wsAsk', checked: true });
   const askL = h('label', { class: 'ws-opt small', for: 'wsAsk' }, ask, ' Pedir respuesta del agente');
   const send = h('button', { class: 'btn btn-primary', type: 'submit', html: icon('send') + '<span>Mandar</span>' });
@@ -65,12 +65,12 @@ async function renderChannels(box, token, me) {
     try { ov = await api('/api/panel/ws', { token }); }
     catch (e) { root.replaceChildren(h('div', { class: 'alert warn' }, h('span', { html: icon('warn') }), h('div', {}, 'No se pudo abrir el espacio de trabajo: ' + (ERRW[e.code] || e.message)))); return false; }
     if (!ov.channels.length) {
-      root.replaceChildren(h('div', { class: 'card panel empty-state' }, h('span', { class: 'gate-ic', html: icon('users') }), h('h2', {}, 'Todavía no tenés canales'),
-        h('p', { class: 'muted' }, 'El espacio de trabajo es para el CEO, el Co-CEO y los supervisores de área. Si necesitás uno, pedíselo al CEO.')));
+      root.replaceChildren(h('div', { class: 'card panel empty-state' }, h('span', { class: 'gate-ic', html: icon('users') }), h('h2', {}, 'Todavía no tienes canales'),
+        h('p', { class: 'muted' }, 'El espacio de trabajo es para el CEO, el Co-CEO y los supervisores de área. Si necesitas uno, pedíselo al CEO.')));
       return false;
     }
     drawList();
-    quota.textContent = `Respuestas de los agentes hoy: ${ov.quota.agentReplies.used} de ${ov.quota.agentReplies.max} (dentro de las ${ov.quota.team.max} consultas diarias del equipo; usadas ${ov.quota.team.used}). Los agentes no publican ni envían nada desde acá.`;
+    quota.textContent = `Respuestas de los agentes hoy: ${ov.quota.agentReplies.used} de ${ov.quota.agentReplies.max} (dentro de las ${ov.quota.team.max} consultas diarias del equipo; usadas ${ov.quota.team.used}). Los agentes no publican ni envían nada desde aquí.`;
     return true;
   }
   function drawList() {
@@ -98,7 +98,7 @@ async function renderChannels(box, token, me) {
     if (!quiet) feed.replaceChildren(h('li', {}, h('div', { class: 'skeleton', style: 'height:60px' })));
     try {
       const r = await api('/api/panel/ws/' + c.id, { token });
-      feed.replaceChildren(...(r.messages.length ? r.messages.map(bubble) : [h('li', { class: 'muted small ws-empty' }, c.agent ? 'Sin mensajes todavía. Preguntale algo al agente o dale una orden.' : 'Sin mensajes todavía.')]));
+      feed.replaceChildren(...(r.messages.length ? r.messages.map(bubble) : [h('li', { class: 'muted small ws-empty' }, c.agent ? 'Sin mensajes todavía. Pregúntale algo al agente o dale una orden.' : 'Sin mensajes todavía.')]));
       feed.scrollTop = feed.scrollHeight;
       const x = ov.channels.find((y) => y.id === c.id); if (x) x.unread = 0; drawList();
     } catch (e) { feed.replaceChildren(h('li', { class: 'error-text' }, ERRW[e.code] || e.message)); }
@@ -160,7 +160,7 @@ export async function renderTraining(box, token, me) {
       rows.length ? h('div', { class: 'table-wrap' }, h('table', { class: 'table' }, h('caption', { class: 'sr-only' }, 'Puntajes de entrenamiento por agente'),
         h('thead', {}, h('tr', {}, ...['Agente', 'Área', 'Sesiones', 'Aprobadas', 'Promedio', 'Nivel interno'].map((t) => h('th', { scope: 'col' }, t)))),
         h('tbody', {}, ...rows.map((m) => h('tr', {}, h('td', {}, h('strong', {}, m.name)), h('td', { class: 'small' }, (d.areas.find((a) => a.id === m.area) || {}).label || m.area), h('td', {}, String(m.sessions)), h('td', {}, String(m.passed)), h('td', {}, m.avg == null ? '—' : m.avg + '/100'), h('td', { class: 'small' }, `Nv ${m.level} · ${m.title} · ${m.xp} XP`))))))
-        : h('p', { class: 'muted small' }, 'Todavía nadie entrenó. Las primeras sesiones aparecen acá con su puntaje real.'));
+        : h('p', { class: 'muted small' }, 'Todavía nadie entrenó. Las primeras sesiones aparecen aquí con su puntaje real.'));
     const hist = h('section', { class: 'card panel train-hist' }, h('div', { class: 'panel-head' }, h('h2', {}, 'Historial de entrenamiento')),
       d.sessions.length ? h('ul', { class: 'team-props' }, ...d.sessions.map((x) => {
         const [l, c] = TST[x.status] || [x.status, ''];
@@ -259,5 +259,5 @@ async function renderReports(box, token) {
   };
   box.replaceChildren(h('section', { class: 'card panel' }, h('div', { class: 'panel-head' }, h('h2', {}, 'Informes de supervisores'), d.unread ? h('span', { class: 'chip info' }, `${d.unread} sin leer`) : null, gen),
     h('p', { class: 'small muted' }, `Cada supervisor evalúa a su equipo con datos reales y manda el informe al CEO y al Co-CEO cada ${d.every} días. Sin datos suficientes, no hay puntaje.`),
-    d.reports.length ? h('div', { class: 'rep-list' }, ...d.reports.slice(0, 16).map((r) => card(r))) : h('p', { class: 'muted small' }, 'Todavía no hay informes. El primero sale en el próximo turno de la mañana' + (d.canGenerate ? ', o pedilo ahora.' : '.'))));
+    d.reports.length ? h('div', { class: 'rep-list' }, ...d.reports.slice(0, 16).map((r) => card(r))) : h('p', { class: 'muted small' }, 'Todavía no hay informes. El primero sale en el próximo turno de la mañana' + (d.canGenerate ? ', o pídelo ahora.' : '.'))));
 }

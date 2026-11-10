@@ -354,7 +354,7 @@ body.design-lock { overflow: hidden; }
 .ws-tools { display: flex; align-items: center; gap: 6px; margin-left: auto; }
 @media (max-width: 520px) { .ws-title { flex-basis: calc(100% - 40px); } .ws-tools { width: 100%; justify-content: flex-end; } }
 
-/* ---------- Botón fijo «Ordenador» en la barra del chat + su panel (7.17.0) ---------- */
+/* ---------- Botón fijo «Ordenador» en la barra del chat + su panel (7.19.0) ---------- */
 .chat.ace .ace-pc { display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 14px 0 11px; margin-left: 2px; border-radius: 999px; border: 1px solid var(--a-border-strong); background: #fff; color: var(--a-ink); font: 650 13.5px/1 var(--font, system-ui); cursor: pointer; white-space: nowrap; flex: none; transition: background .15s, border-color .15s; }
 .chat.ace .ace-pc svg { width: 18px; height: 18px; flex: none; }
 .chat.ace .ace-pc:hover { background: #f7ffe9; border-color: rgba(101, 163, 13, .55); }

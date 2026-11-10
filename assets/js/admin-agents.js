@@ -23,7 +23,7 @@ export async function renderAutonomy(box, user, { base = String(CONFIG.API_BASE 
     if (body) headers['Content-Type'] = 'application/json';
     const r = await fetch(base + path, { method, headers, body: body ? JSON.stringify(body) : undefined, cache: 'no-store' });
     const j = await r.json().catch(() => ({}));
-    if (!r.ok) { const e = new Error(({ forbidden_role: 'Tu rol no permite esta acción.', outside_area: 'Solo podés actuar sobre los agentes de tu área.', session_expired: 'Tu sesión venció: entrá de nuevo.' })[j.error] || j.error || 'error_' + r.status); e.code = j.error; throw e; }
+    if (!r.ok) { const e = new Error(({ forbidden_role: 'Tu rol no permite esta acción.', outside_area: 'Solo puedes actuar sobre los agentes de tu área.', session_expired: 'Tu sesión venció: entra de nuevo.' })[j.error] || j.error || 'error_' + r.status); e.code = j.error; throw e; }
     return j;
   };
   const section = h('section', { class: 'card panel wide agx', 'aria-labelledby': 'agx-title' });
@@ -37,7 +37,7 @@ export async function renderAutonomy(box, user, { base = String(CONFIG.API_BASE 
     try { d = await call('/api/admin/agents/overview'); }
     catch (e) {
       section.lastChild.remove();
-      section.append(h('div', { class: 'alert warn' }, h('span', { html: icon('warn') }), h('div', {}, 'No se pudo leer el estado de los agentes (', esc(e.code || e.message), '). Revisá tu sesión o el servidor.')));
+      section.append(h('div', { class: 'alert warn' }, h('span', { html: icon('warn') }), h('div', {}, 'No se pudo leer el estado de los agentes (', esc(e.code || e.message), '). Revisa tu sesión o el servidor.')));
       return;
     }
     section.lastChild.remove();
@@ -63,7 +63,7 @@ export async function renderAutonomy(box, user, { base = String(CONFIG.API_BASE 
     runBtn.onclick = async () => {
       runBtn.disabled = true;
       try { const r = await call('/api/admin/agents/run', { method: 'POST', body: { role: who.value } }); toast(`Listo: ${r.role ? 'el agente' : 'el equipo'} empieza en 1 o 2 minutos (${r.started.join(' y ')}).`, 'ok', 7000); setTimeout(draw, 4000); }
-      catch (e) { toast(e.code === 'agents_pausado' || e.code === 'agents_detenido' ? 'Primero reanudá los agentes.' : 'No se pudo lanzar: ' + (e.code || e.message), 'error', 7000); runBtn.disabled = false; }
+      catch (e) { toast(e.code === 'agents_pausado' || e.code === 'agents_detenido' ? 'Primero reanuda los agentes.' : 'No se pudo lanzar: ' + (e.code || e.message), 'error', 7000); runBtn.disabled = false; }
     };
     const setState = async (next) => {
       if (next === 'detenido') {
@@ -113,7 +113,7 @@ export async function renderAutonomy(box, user, { base = String(CONFIG.API_BASE 
       view.onclick = async () => { try { const r = await call(`/api/admin/pr/${p.repo}/${p.number}`); detail.textContent = `${r.changedFiles} archivo(s) · +${r.additions} −${r.deletions} · ${r.files.map((f) => f.name).slice(0, 6).join(', ')}`; } catch (e) { detail.textContent = 'No se pudo leer: ' + (e.code || e.message); } };
       const ok = h('button', { class: 'btn btn-sm btn-primary', type: 'button' }, 'Aprobar');
       ok.onclick = async () => {
-        if (!(await confirmDialog({ title: 'Aprobar propuesta', text: `Se publica «${p.title}» (${p.repo} #${p.number}). ¿Confirmás?`, ok: 'Aprobar y publicar' }))) return;
+        if (!(await confirmDialog({ title: 'Aprobar propuesta', text: `Se publica «${p.title}» (${p.repo} #${p.number}). ¿Confirmas?`, ok: 'Aprobar y publicar' }))) return;
         try { await call(`/api/admin/pr/${p.repo}/${p.number}/approve`, { method: 'POST', body: { confirm: true } }); toast('Aprobada y publicada.', 'ok'); draw(); }
         catch (e) { toast('No se pudo aprobar: ' + (e.code || e.message), 'error', 7000); }
       };

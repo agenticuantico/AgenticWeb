@@ -25,7 +25,7 @@ export function statusLine(s) {
     case 'thinking': return { text: 'Pensando el siguiente paso…', kind: 'run', mode };
     case 'awaiting_approval': return { text: 'Esperando tu aprobación', kind: 'wait', mode };
     case 'needs_user': return { text: s.ask && s.ask.kind === 'login' ? `Necesito que inicies sesión${host ? ' en ' + host : ''}` : 'Necesito tu ayuda para seguir', kind: 'wait', mode };
-    case 'takeover': return { text: 'Tenés el control', kind: 'you', mode };
+    case 'takeover': return { text: 'Tienes el control', kind: 'you', mode };
     case 'done': return { text: 'Listo', kind: 'ok', mode };
     case 'ended': return { text: 'Detenida', kind: 'off', mode };
     case 'error': return { text: 'No disponible', kind: 'off', mode };
@@ -80,7 +80,7 @@ export function workMode(s) {
 
 /** Nombre visible. Es un navegador en la nube, no una computadora completa ni un servidor propio. */
 export const VPC_NAME = 'Ordenador virtual';
-export const VPC_HELP = 'Es un navegador en la nube que abre páginas, hace clics y completa formularios por vos mientras mirás. No es una computadora completa ni un servidor propio. Tu sesión es privada: solo la ves vos. Si un sitio pide iniciar sesión, tocás «Tomar el control» y escribís vos: el agente no ve tus contraseñas. Las sesiones de los sitios se guardan cifradas 7 días y las borrás con «Cerrar sesiones».';
+export const VPC_HELP = 'Es un navegador en la nube que abre páginas, hace clics y completa formularios por ti mientras miras. No es una computadora completa ni un servidor propio. Tu sesión es privada: solo la ves tú. Si un sitio pide iniciar sesión, tocas «Tomar el control» y escribes tú: el agente no ve tus contraseñas. Las sesiones de los sitios se guardan cifradas 7 días y las borras con «Cerrar sesiones».';
 
 /** «0:42», «12:05», «1:02:10». */
 export function elapsedText(ms) {

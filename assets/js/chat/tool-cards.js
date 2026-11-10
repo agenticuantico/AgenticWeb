@@ -11,12 +11,12 @@ import { call, errorText } from '../account/api.js';
 import { startConnect } from '../account/oauth-connect.js';
 import { applyCard } from './apply-card.js';
 
-/* ------------------- «Conectá X para seguir» (cuenta que falta) ------------------- */
+/* ------------------- «Conecta X para seguir» (cuenta que falta) ------------------- */
 const NEED_LOGO = { github: 'github', google: 'google', gcalendar: 'gcalendar', gdrive: 'gdrive', linkedin: 'linkedin', cloudflare: 'cloudflare' };
 export function needCard(n, m) {
   const state = h('p', { class: 'tc-state', role: 'status', 'aria-live': 'polite' });
-  const title = n.state === 'disabled' ? `Activá ${n.label} para seguir` : n.state === 'expired' ? `Reconectá ${n.label} para seguir` : `Conectá ${n.label} para seguir`;
-  const sub = n.state === 'disabled' ? 'Está conectada pero apagada para el chat.' : n.state === 'expired' ? 'El permiso venció.' : 'Se abre la pantalla de permiso y volvés acá.';
+  const title = n.state === 'disabled' ? `Activa ${n.label} para seguir` : n.state === 'expired' ? `Reconecta ${n.label} para seguir` : `Conecta ${n.label} para seguir`;
+  const sub = n.state === 'disabled' ? 'Está conectada pero apagada para el chat.' : n.state === 'expired' ? 'El permiso venció.' : 'Se abre la pantalla de permiso y vuelves aquí.';
   const btnLabel = n.state === 'disabled' ? 'Activar en el chat' : n.state === 'expired' ? `Reconectar ${n.label}` : `Conectar ${n.label}`;
   const btn = h('button', { class: 'btn btn-sm btn-primary', type: 'button' }, btnLabel);
   const logo = h('span', { class: 'tc-need-logo', html: icon('plug') });
@@ -37,7 +37,7 @@ export function needCard(n, m) {
       }
       state.textContent = `Abriendo ${n.label}…`;
       const r = await startConnect(n.provider, { resume: { chatId: m && m.tools ? m.tools.chatId : null, text } });
-      if (r.mode === 'device' && r.userCode) { state.textContent = `Abrí ${r.verificationUri} y escribí el código ${r.userCode}.`; window.open(r.verificationUri, '_blank', 'noopener'); btn.disabled = false; }
+      if (r.mode === 'device' && r.userCode) { state.textContent = `Abre ${r.verificationUri} y escribe el código ${r.userCode}.`; window.open(r.verificationUri, '_blank', 'noopener'); btn.disabled = false; }
     } catch (e) { state.textContent = errorText(e); btn.disabled = false; }
   });
   return card;
@@ -146,11 +146,11 @@ export function draftsCard(r) {
     } }, h('span', { html: icon('mail') }), `Enviar por Gmail a ${apply.email}`));
   }
   return h('div', { class: 'tc-drafts' },
-    h('p', { class: 'tc-drafts-h' }, h('strong', {}, 'Borradores para revisar'), h('small', {}, d.generatedBy === 'ia' ? 'Hechos con IA a partir de tu perfil. Revisalos antes de usarlos.' : 'Plantilla a partir de tu perfil (la IA no estaba disponible). Revisala y completala.')),
+    h('p', { class: 'tc-drafts-h' }, h('strong', {}, 'Borradores para revisar'), h('small', {}, d.generatedBy === 'ia' ? 'Hechos con IA a partir de tu perfil. Revísalos antes de usarlos.' : 'Plantilla a partir de tu perfil (la IA no estaba disponible). Revísala y complétala.')),
     h('div', { class: 'tc-draft' }, h('div', { class: 'tc-draft-h' }, h('span', {}, 'Resumen de CV'), copy(cv, 'Resumen')), cv),
     h('div', { class: 'tc-draft' }, h('div', { class: 'tc-draft-h' }, h('span', {}, `Carta · Asunto: ${d.subject}`), copy(letter, 'Carta')), letter),
     apply.note ? h('p', { class: 'tc-note' }, apply.note) : null,
-    h('p', { class: 'tc-note' }, 'AgentiCuántico nunca postula solo: abrís la oferta y enviás vos, o confirmás el correo.'),
+    h('p', { class: 'tc-note' }, 'AgentiCuántico nunca postula solo: abres la oferta y envías tú, o confirmas el correo.'),
     acts, slot);
 }
 

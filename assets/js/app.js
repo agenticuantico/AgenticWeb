@@ -1,5 +1,5 @@
 /** App completa /app/: barra lateral (proyectos, fijados, historial) y chat. */
-import { ChatApp } from './chat/chat.js?v=7.17.0';
+import { ChatApp } from './chat/chat.js?v=7.19.0';
 import { ChatStore } from './chat/store.js';
 import { watchUser, getProfile } from './auth.js';
 import { setIdTokenProvider } from './chat/engine.js';
@@ -9,7 +9,7 @@ import { prefs } from './consent.js';
 
 const $ = (id) => document.getElementById(id);
 /** Mensaje claro para errores del servidor (memoria, proyectos). */
-const errText = async (e) => { try { return (await import('./account/api.js')).errorText(e); } catch { return 'Algo falló. Probá de nuevo.'; } };
+const errText = async (e) => { try { return (await import('./account/api.js')).errorText(e); } catch { return 'Algo falló. Prueba de nuevo.'; } };
 const store = new ChatStore();
 const chat = new ChatApp($('appChat'), { variant: 'full', avatar: null, store });
 // Conversación abierta desde el chat de la portada (botón de pantalla completa)
@@ -74,7 +74,7 @@ function renderSidebar() {
   const list = store.list();
   const pl = $('projectList');
   pl.innerHTML = '';
-  if (!store.ws.projects.length) pl.append(h('p', { class: 'sb-empty' }, 'Agrupá chats por proyecto.'));
+  if (!store.ws.projects.length) pl.append(h('p', { class: 'sb-empty' }, 'Agrupa chats por proyecto.'));
   for (const p of store.ws.projects) {
     const items = list.filter((c) => c.projectId === p.id);
     const det = h('details', { class: 'sb-project', open: items.some((c) => c.id === chat.chat.id) || null }, h('summary', { html: icon('folder') + `<span>${esc(p.name)}</span><small>${items.length}</small>` }), ...items.map(chatItem));
@@ -89,7 +89,7 @@ function renderSidebar() {
   const hs = $('historySection');
   hs.innerHTML = '';
   hs.append(h('div', { class: 'sb-head' }, h('span', {}, 'Recientes')));
-  if (!rest.length) hs.append(h('p', { class: 'sb-empty' }, store.uid ? 'Tus conversaciones aparecen acá.' : 'Sin cuenta, tus chats quedan solo en este dispositivo.'));
+  if (!rest.length) hs.append(h('p', { class: 'sb-empty' }, store.uid ? 'Tus conversaciones aparecen aquí.' : 'Sin cuenta, tus chats quedan solo en este dispositivo.'));
   else hs.append(h('div', { role: 'list' }, ...rest.slice(0, 80).map(chatItem)));
 }
 store.on(renderSidebar);

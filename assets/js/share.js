@@ -6,7 +6,7 @@ import { renderMarkdown } from './chat/md.js';
 const root = document.getElementById('shareRoot');
 const id = (new URLSearchParams(location.search).get('id') || '').replace(/[^a-z0-9]/gi, '').slice(0, 40);
 (async () => {
-  if (!id) { root.innerHTML = '<h1>Enlace incompleto</h1><p class="muted">Pedile a quien te lo compartió que te reenvíe el enlace.</p>'; return; }
+  if (!id) { root.innerHTML = '<h1>Enlace incompleto</h1><p class="muted">Pídele a quien te lo compartió que te reenvíe el enlace.</p>'; return; }
   try {
     const { fs, db } = await getStore();
     const s = await fs.getDoc(fs.doc(db, 'shares', id));
@@ -23,6 +23,6 @@ const id = (new URLSearchParams(location.search).get('id') || '').replace(/[^a-z
         thread.append(h('div', { class: 'msg assistant' }, h('div', { class: 'msg-who' }, h('strong', {}, m.agent ? m.agent.name : 'AgentiCuántico')), h('div', { class: 'msg-body' }, body)));
       }
     }
-    root.append(thread, h('div', { class: 'band', style: 'margin-top:40px' }, h('div', {}, h('h2', {}, 'Probá AgentiCuántico'), h('p', {}, 'Chateá, hablá con el avatar y dejá que el agente haga el trabajo.')), h('div', {}, h('a', { class: 'btn btn-lg', href: '/app/' }, 'Abrir el chat'))));
+    root.append(thread, h('div', { class: 'band', style: 'margin-top:40px' }, h('div', {}, h('h2', {}, 'Prueba AgentiCuántico'), h('p', {}, 'Chatea, habla con el avatar y deja que el agente haga el trabajo.')), h('div', {}, h('a', { class: 'btn btn-lg', href: '/app/' }, 'Abrir el chat'))));
   } catch (e) { root.innerHTML = `<h1>No se pudo abrir</h1><p class="muted">${esc(friendlyError(e))}</p>`; }
 })();

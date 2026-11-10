@@ -29,7 +29,7 @@
   "skip": "Saltar al contenido",
   "menu": "Menú",
   "close": "Cerrar",
-  "scroll": "Deslizá",
+  "scroll": "Desliza",
   "name": "Nombre",
   "email": "Email",
   "message": "Mensaje",
@@ -199,7 +199,7 @@
  "contact": {
   "eyebrow": "Reservas",
   "title": "Te guardamos una mesa.",
-  "lead": "Escribinos y confirmamos tu reserva en el día.",
+  "lead": "Escríbenos y confirmamos tu reserva en el día.",
   "address": "Calle y número del restaurante",
   "city": "Tu ciudad",
   "hours": [
@@ -220,8 +220,8 @@
   "cta": "Pedir reserva"
  },
  "final": {
-  "title": "La próxima sobremesa empieza acá.",
-  "lead": "Reservá tu mesa para esta semana.",
+  "title": "La próxima sobremesa empieza aquí.",
+  "lead": "Reserva tu mesa para esta semana.",
   "cta": "Reservar mesa",
   "cta2": "Ver la carta"
  },

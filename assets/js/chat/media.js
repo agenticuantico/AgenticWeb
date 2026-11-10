@@ -20,7 +20,7 @@ import * as engine from './engine.js';
 })();
 
 /* ---------- Detección del pedido (es / en / pt) ---------- */
-const VERB = String.raw`(?:cre[aá](?:me|r)?|gener[aá](?:me|r)?|dibuj[aá](?:me|r)?|hac[eé](?:me)?|haceme|hacer|pint[aá](?:me)?|arm[aá](?:me)?|mostr[aá](?:me)?|dise[ñn][aá](?:me)?|quiero|necesito|make|create|generate|draw|paint|render|design|produce|i want|crie|criar|cria|gere|gerar|gera|fa[cç]a|fazer|faz|desenhe|desenhar|desenha|quero|preciso)`;
+const VERB = String.raw`(?:cre[aá](?:me|r)?|gener[aá](?:me|r)?|dibuj[aá](?:me|r)?|hac[eé](?:me)?|hazme|hacer|pint[aá](?:me)?|arm[aá](?:me)?|mostr[aá](?:me)?|dise[ñn][aá](?:me)?|quiero|necesito|make|create|generate|draw|paint|render|design|produce|i want|crie|criar|cria|gere|gerar|gera|fa[cç]a|fazer|faz|desenhe|desenhar|desenha|quero|preciso)`;
 const IMG_NOUN = String.raw`(?:im[aá]gen(?:es)?|imagem|imagens|image|images|picture|pic|foto(?:grafía|grafia)?s?|photo|ilustraci[oó]n|ilustra[cç][aã]o|illustration|dibujo|desenho|drawing|logo(?:tipo)?|p[oó]ster|poster|wallpaper|fondo de pantalla|papel de parede|retrato|portrait|avatar|icono|ícone|icon|arte|artwork)`;
 const VID_NOUN = String.raw`(?:v[ií]deos?|clip(?: animado)?|animaci[oó]n|anima[cç][aã]o|animation|reel|slideshow)`;
 const LINK = String.raw`(?:\s+(?:de|del|de la|con|sobre|que muestre|mostrando|para|of|showing|about|with|for|com|do|da|dos|das|pra))?`;
@@ -83,20 +83,20 @@ export function detectMediaIntent(text) {
 
 /* ---------- Servidor ---------- */
 const ERRORS = {
-  offline: 'La creación de imágenes necesita conexión con el servidor. Probá de nuevo en un rato.',
+  offline: 'La creación de imágenes necesita conexión con el servidor. Prueba de nuevo en un rato.',
   image_quota_exceeded: 'Llegaste al límite de imágenes de hoy. Mañana se renueva.',
-  rate_limited: 'Hiciste muchos pedidos seguidos. Esperá un minuto y probá de nuevo.',
-  prompt_blocked: 'No puedo crear esa imagen. Probá con otra descripción.',
-  bad_prompt: 'Contame qué querés ver en la imagen.',
-  image_unavailable: 'La creación de imágenes no está disponible en este momento. Probá más tarde.',
-  turnstile_required: 'Iniciá sesión para crear imágenes.',
+  rate_limited: 'Hiciste muchos pedidos seguidos. Espera un minuto y prueba de nuevo.',
+  prompt_blocked: 'No puedo crear esa imagen. Prueba con otra descripción.',
+  bad_prompt: 'Cuéntame qué quieres ver en la imagen.',
+  image_unavailable: 'La creación de imágenes no está disponible en este momento. Prueba más tarde.',
+  turnstile_required: 'Inicia sesión para crear imágenes.',
   maintenance: 'La creación de imágenes está pausada momentáneamente.',
-  no_recorder: 'Este navegador no permite grabar el clip. Probá con Chrome, Edge o Safari actualizados.',
+  no_recorder: 'Este navegador no permite grabar el clip. Prueba con Chrome, Edge o Safari actualizados.',
   stopped: 'Creación detenida.',
-  failed: 'No se pudo crear la imagen. Probá de nuevo.',
-  output_blocked: 'El resultado no pasó la revisión de seguridad, así que no lo muestro. Probá con otra descripción.',
+  failed: 'No se pudo crear la imagen. Prueba de nuevo.',
+  output_blocked: 'El resultado no pasó la revisión de seguridad, así que no lo muestro. Prueba con otra descripción.',
   video_quota_exceeded: 'Llegaste al límite de videos con IA de hoy. Mañana se renueva.',
-  video_failed: 'No se pudo crear el video. Probá de nuevo.'
+  video_failed: 'No se pudo crear el video. Prueba de nuevo.'
 };
 export class MediaError extends Error { constructor(code, message) { super(code); this.code = code; this.serverMessage = message || ''; } }
 export const POLICY_URL = '/gobernanza/';
@@ -491,7 +491,7 @@ function reportBox(st, onDone) {
       const r = await engine.apiFetch('/api/ai/report', { method: 'POST', body: { reason: sel.value, details: txt.value, id: st.aiId || undefined } });
       if (!r.ok) throw new Error();
       msg.textContent = 'Gracias. Lo revisa una persona del equipo.'; setTimeout(onDone, 1800);
-    } catch { msg.textContent = 'No se pudo enviar. Escribinos a agenticuantico@gmail.com.'; send.disabled = false; }
+    } catch { msg.textContent = 'No se pudo enviar. Escríbenos a agenticuantico@gmail.com.'; send.disabled = false; }
   } }, 'Enviar reporte');
   return h('div', { class: 'mc-rep' }, h('strong', {}, 'Reportar este resultado'), sel, txt, h('div', { class: 'mc-rep-row' }, send, h('button', { class: 'btn btn-sm', type: 'button', onclick: onDone }, 'Cancelar')), msg);
 }
@@ -543,7 +543,7 @@ export function mediaCard(m, chat) {
       acts.append(
         h('button', { class: 'btn btn-sm btn-primary mc-dl', type: 'button', onclick: () => save(st.url, `${slug(st.prompt)}-generado-con-ia.${st.ext || 'jpg'}`) }, h('span', { html: icon('download') }), isVideo ? (st.ext === 'mp4' ? 'Descargar MP4' : 'Descargar WebM') : 'Descargar'),
         h('button', { class: 'btn btn-sm mc-again', type: 'button', disabled: chat && chat.busy ? '' : null, onclick: () => chat && chat.runMedia && chat.runMedia(m, { again: true }) }, h('span', { html: icon('refresh') }), 'Otra versión'));
-      if (!isVideo && st.blob && chat && chat.createMedia) acts.append(h('button', { class: 'btn btn-sm mc-animate', type: 'button', disabled: chat.busy ? '' : null, onclick: () => chat.createMedia({ kind: 'video', prompt: st.prompt, aspect: st.aspect === 'square' ? 'square' : st.aspect, fromImage: st.blob, seconds: 5, scenes: 1 }) }, h('span', { html: icon('play') }), 'Animar con IA'));
+      if (!isVideo && st.blob && chat && chat.createMedia) acts.append(h('button', { class: 'btn btn-sm mc-anímate', type: 'button', disabled: chat.busy ? '' : null, onclick: () => chat.createMedia({ kind: 'video', prompt: st.prompt, aspect: st.aspect === 'square' ? 'square' : st.aspect, fromImage: st.blob, seconds: 5, scenes: 1 }) }, h('span', { html: icon('play') }), 'Animar con IA'));
       acts.append(h('button', { class: 'btn btn-sm btn-ghost mc-report', type: 'button', onclick: () => { extra.innerHTML = ''; extra.append(reportBox(st, () => { extra.innerHTML = ''; })); } }, h('span', { html: icon('flag') }), 'Reportar'));
       const parts = [];
       if (isVideo && st.clip) parts.push(st.clipReason ? st.clipReason + ' ' : '', 'Clip animado hecho con imágenes generadas, con movimiento y transiciones. No es un video generado por IA.');
