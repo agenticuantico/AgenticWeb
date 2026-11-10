@@ -22,7 +22,7 @@ function renderAuth(tab = params.get('registro') ? 'signup' : 'login') {
   const card = h('div', { class: 'card auth-card' });
   const wrap = h('div', { class: 'auth-wrap' },
     h('div', { class: 'auth-aside' },
-      h('img', { src: '/media/avatar/face-256.webp?v=7.11.1', alt: '', width: 72, height: 72, class: 'auth-face' }),
+      h('img', { src: '/media/avatar/face-256.webp?v=7.14.0', alt: '', width: 72, height: 72, class: 'auth-face' }),
       h('h1', {}, tab === 'signup' ? 'Creá tu cuenta' : tab === 'reset' ? 'Recuperá tu acceso' : 'Te damos la bienvenida'),
       h('p', { class: 'muted' }, 'Sincronizá tus chats entre dispositivos, compartí conversaciones y elegí tu plan.'),
       h('ul', { class: 'checklist' }, ...['Chats guardados en tu cuenta', 'Todas las funciones en todos los planes', 'Pagos seguros con PayPal y Mercado Pago'].map((t) => h('li', { html: icon('check') + `<span>${t}</span>` })))),
