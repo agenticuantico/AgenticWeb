@@ -17,15 +17,15 @@
  */
 import { h, icon } from './ui.js';
 import * as engine from './chat/engine.js';
-import { needsWebAction, isFollowUp, wantsComputer, stripComputer } from './chat/intent.js?v=7.19.0';
-import { statusLine, visitedSites, summaryMeta, workMode, workSteps, VPC_NAME, VPC_HELP, elapsedText, taskElapsed, quotaText, addressText, whatIDid } from './chat/computer-status.js?v=7.19.0';
+import { needsWebAction, isFollowUp, wantsComputer, stripComputer } from './chat/intent.js?v=7.19.1';
+import { statusLine, visitedSites, summaryMeta, workMode, workSteps, VPC_NAME, VPC_HELP, elapsedText, taskElapsed, quotaText, addressText, whatIDid } from './chat/computer-status.js?v=7.19.1';
 /** Reexportadas para el código que ya las importaba desde aquí (la lógica vive en chat/intent.js, sin DOM). */
 export { needsWebAction, isFollowUp };
 
 (function css() {
   if (typeof document === 'undefined' || document.getElementById('ac-ab2-css')) return;
   const l = document.createElement('link');
-  l.id = 'ac-ab2-css'; l.rel = 'stylesheet'; l.href = '/assets/css/agent-browser.css?v=7.19.0';
+  l.id = 'ac-ab2-css'; l.rel = 'stylesheet'; l.href = '/assets/css/agent-browser.css?v=7.19.1';
   document.head.appendChild(l);
 })();
 

@@ -1,11 +1,11 @@
 /** Portada: chat embebido (con el personaje sincronizado), ejemplos que rellenan el chat y planes. */
-import { ChatApp } from './chat/chat.js?v=7.19.0';
+import { ChatApp } from './chat/chat.js?v=7.19.1';
 import { ChatStore } from './chat/store.js';
-import { mountPlans } from './plans.js?v=7.19.0';
+import { mountPlans } from './plans.js?v=7.19.1';
 import { watchUser, getProfile } from './auth.js';
 import { setIdTokenProvider } from './chat/engine.js';
 
-import { AvatarStage } from './chat/avatar.js?v=7.19.0';
+import { AvatarStage } from './chat/avatar.js?v=7.19.1';
 
 /* Portada: personaje en vivo, liviano: sigue el cursor (o el último toque), respira y parpadea. Nada más.
    Los gestos completos (poses, manos, cejas) y los labios sincronizados con la voz van en la videollamada

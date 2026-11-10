@@ -82,7 +82,7 @@ setTheme();
 document.querySelectorAll('[data-consent-open]').forEach((b) => b.addEventListener('click', () => showConsent(true)));
 const isAdminPage = location.pathname.startsWith('/admin');
 function maybeAnalytics() {
-  if (hasConsent('analytics') && !isAdminPage) import('./analytics.js?v=7.19.0').then((m) => m.initAnalytics()).catch(() => {});
+  if (hasConsent('analytics') && !isAdminPage) import('./analytics.js?v=7.19.1').then((m) => m.initAnalytics()).catch(() => {});
 }
 window.addEventListener('ac:consent', maybeAnalytics);
 maybeAnalytics();
@@ -112,7 +112,7 @@ function showMaintenance(sys) {
   ov.className = 'maintenance';
   ov.setAttribute('role', 'alertdialog');
   ov.setAttribute('aria-labelledby', 'mtTitle');
-  ov.innerHTML = `<div class="card"><img src="/media/avatar/face-256.webp?v=7.19.0" alt="" width="72" height="72" style="border-radius:50%;margin:0 auto 16px">
+  ov.innerHTML = `<div class="card"><img src="/media/avatar/face-256.webp?v=7.19.1" alt="" width="72" height="72" style="border-radius:50%;margin:0 auto 16px">
     <h1 id="mtTitle" style="font-size:1.6rem">Estamos haciendo mantenimiento</h1>
     <p class="muted">${esc(sys.maintenanceMessage || 'AgentiCuántico vuelve en breve. Gracias por la paciencia.')}</p>
     <p class="small muted">Consultas: <a href="mailto:agenticuantico@gmail.com">agenticuantico@gmail.com</a></p></div>`;

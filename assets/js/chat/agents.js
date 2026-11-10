@@ -36,7 +36,7 @@ export const SKILLS = [
   { id: 'resumen', name: 'Resúmenes ejecutivos', desc: 'Respuestas con conclusión primero y puntos clave.' },
   { id: 'codigo-probado', name: 'Código con tests', desc: 'Cuando escribe código, agrega pruebas mínimas.' },
   { id: 'fuentes', name: 'Citar fuentes', desc: 'Indica de dónde sale cada dato cuando puede.' },
-  { id: 'rioplatense', name: 'Español neutro', desc: 'Usa voseo y expresiones de Argentina.' },
+  { id: 'rioplatense', name: 'Español rioplatense', desc: 'Usa voseo y expresiones de Argentina.' },
   { id: 'paso-a-paso', name: 'Paso a paso', desc: 'Explica procesos en pasos numerados.' },
   { id: 'tablas', name: 'Tablas comparativas', desc: 'Compara opciones en tablas cuando conviene.' }
 ];

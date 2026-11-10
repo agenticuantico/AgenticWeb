@@ -1,5 +1,5 @@
 /** App completa /app/: barra lateral (proyectos, fijados, historial) y chat. */
-import { ChatApp } from './chat/chat.js?v=7.19.0';
+import { ChatApp } from './chat/chat.js?v=7.19.1';
 import { ChatStore } from './chat/store.js';
 import { watchUser, getProfile } from './auth.js';
 import { setIdTokenProvider } from './chat/engine.js';
