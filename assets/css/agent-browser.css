@@ -372,3 +372,8 @@
 .ab-card.cc.vpc .ab-tbtn-stop, .ab-card.cc.vpc .ab-mode-left { display: none !important; }
 .ab-card.cc.vpc.is-full .vpc-btn[aria-label="Plegar"], .ab-card.cc.vpc.is-full .vpc-btn[aria-label="Desplegar"] { display: none; }
 .ab-card.cc.vpc.is-done > .ab-controls { display: none !important; }
+/* Pantalla completa: la pantalla nunca se achica a cero aunque haya mucho contenido debajo */
+.ab-card.cc.vpc.is-full > .cc-frame { flex: none; }
+.ab-card.cc.vpc.is-full .ab-view { min-height: min(56vh, 620px); }
+/* Celular: el título entra completo */
+@media (max-width: 520px) { .vpc-title > span, .vpc-time > span { display: none; } .vpc-time { padding: 3px 8px; } }
