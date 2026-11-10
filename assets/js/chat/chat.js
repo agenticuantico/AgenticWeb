@@ -635,7 +635,17 @@ export class ChatApp {
     // Rápido/Profundo: «Buscá en la web: …», «averiguá…», «con fuentes» → búsqueda en vivo (no la computadora del agente).
     // Un solo chat: el router decide por mensaje (rápido, pensar, búsqueda en vivo, computadora o agente).
     const forced = this.override !== 'smart' ? this.override : this.forceNext;
-    const decision = decideRoute(text, { override: forced || 'smart', followBrowser: !!follow, hasFiles: files.length > 0, hasArtifact: !!lastWebArtifact(this.chat.messages) });
+    const pending = this.pendingAction();
+    const decision = decideRoute(text, { override: forced || 'smart', followBrowser: !!follow, hasFiles: files.length > 0, hasArtifact: !!lastWebArtifact(this.chat.messages), pending });
+    // «Está todo en el CV, podés hacerlo»: se retoma la acción pendiente con el pedido original.
+    if (decision.why === 'resume' && decision.resume) {
+      this.forceNext = null; this.renderMode();
+      msg._route = decision.kind;
+      if (decision.kind === 'tools' && this.toolsReady()) { msg._tools = true; msg._resume = decision.resume; }
+      else { msg._browser = true; await this.openBrowserCard(decision.resume); }
+      await this.respond(msg, { voice: false });
+      return;
+    }
     this.forceNext = null; this.renderMode();
     this.mode = decision.mode;
     msg._route = decision.kind;
@@ -644,15 +654,7 @@ export class ChatApp {
     else if (route === 'search' && !follow) msg._search = true;
     else if (!detectMediaIntent(text) && (route === 'browser' || follow)) {
       msg._browser = true;
-      if (this.browserCard) this.browserCard.detach();
-      const chatId = this.chat.id;
-      const { AgentBrowserCard } = await import('../agent-browser.js?v=7.13.0');
-      this.browserCard = new AgentBrowserCard({
-        thread: this.$('inner'), composer: this.$('form'), text, conv: chatId, lang: this.lang.code, isPaid: this.isPaid,
-        idToken: this.user ? () => this.user.getIdToken() : null, onScroll: () => this.scrollToEnd(true),
-        onFiles: (files) => this.browserFiles(chatId, files)
-      });
-      this.browserCard.chatId = chatId;
+      await this.openBrowserCard(text);
     }
     // "Recordá que…" → memoria explícita
     const mem = /^(record[aá]|acordate|guard[aá] en (tu )?memoria)( que)?\s+(.{4,300})$/i.exec(text);
@@ -661,6 +663,58 @@ export class ChatApp {
       this.store.addMemory(mem[4].trim(), 'chat').catch((e) => import('../account/api.js').then((m) => toast(m.errorText(e), 'warn')).catch(() => {}));
     }
     await this.respond(msg, { voice: false });
+  }
+
+  /** Abre la computadora del agente (tarjeta en vivo) con un pedido. */
+  async openBrowserCard(text) {
+    if (this.browserCard) this.browserCard.detach();
+    const chatId = this.chat.id;
+    const { AgentBrowserCard } = await import('../agent-browser.js?v=7.13.0');
+    this.browserCard = new AgentBrowserCard({
+      thread: this.$('inner'), composer: this.$('form'), text, conv: chatId, lang: this.lang.code, isPaid: this.isPaid,
+      idToken: this.user ? () => this.user.getIdToken() : null, onScroll: () => this.scrollToEnd(true),
+      onFiles: (files) => this.browserFiles(chatId, files)
+    });
+    this.browserCard.chatId = chatId;
+    return this.browserCard;
+  }
+
+  /** Acción que quedó esperando (faltaba el CV o el chat derivó): { route, text } del último mensaje de la app. */
+  pendingAction() {
+    const msgs = (this.chat && this.chat.messages) || [];
+    for (let i = msgs.length - 1, n = 0; i >= 0 && n < 4; i--, n++) {
+      const m = msgs[i];
+      if (m.role !== 'assistant') continue;
+      if (m.handoff && m.handoff.task) return { route: m.handoff.route === 'apply' ? 'apply' : 'browser', text: m.handoff.task };
+      if (m.tools && m.tools.pending && m.tools.pending.text) return m.tools.pending;
+      return null;
+    }
+    return null;
+  }
+
+  /** El servidor pidió abrir la computadora del agente / la tanda de postulaciones (pedido de acción en el chat). */
+  async startHandoff(hd) {
+    if (!hd || !hd.task || (this.chat && this.chat._handoffDone === hd.task)) return;
+    this.chat._handoffDone = hd.task;
+    if (hd.route === 'apply' && this.toolsReady()) {
+      const ctrl = new AbortController();
+      this.busy = { ctrl, label: 'Preparando tus postulaciones…' };
+      this.updateStatus(); this.syncSend();
+      try { await this.runTools({ content: hd.task, _resume: hd.task }, ctrl); this.persist(); }
+      catch (e) { if (e.name !== 'AbortError') this.addNotice('No pude preparar las postulaciones. Probá de nuevo.', 'warn'); }
+      this.finish();
+      return;
+    }
+    await this.openBrowserCard(hd.task);
+    if (this.browserCard && this.browserCard.el && !this.browserCard.el.isConnected) this.$('inner').append(this.browserCard.el);
+    this.scrollToEnd(true);
+  }
+
+  /** Texto del CV adjunto en esta conversación (extraído en el dispositivo), para armar el perfil de empleo. */
+  cvText() {
+    const docs = this.chat.messages.flatMap((m) => m._docs || []).filter((d) => d && d.text && d.text.length > 80);
+    const cv = [...docs].reverse().find((d) => /(cv|curr[ií]cul|resume|hoja de vida)/i.test(d.name || '')) || [...docs].reverse().find((d) => /(experiencia|formaci[oó]n|educaci[oó]n|habilidades|skills|experience)/i.test(d.text));
+    return cv ? cv.text.slice(0, 30000) : '';
   }
 
   /** Archivos que creó la computadora del agente → mensaje con entregables (vista previa automática y Archivos). */
@@ -746,9 +800,11 @@ export class ChatApp {
     const a = { id: uid('m'), role: 'assistant', content: '', at: Date.now(), streaming: true };
     this.pushMessage(a);
     try {
-      const res = await engine.apiFetch('/api/tools/chat', { method: 'POST', signal: ctrl.signal, body: { messages: this.history().slice(-12), lang: this.lang.code } });
+      const cv = this.cvText();
+      const res = await engine.apiFetch('/api/tools/chat', { method: 'POST', signal: ctrl.signal, body: { messages: this.history().slice(-12), lang: this.lang.code, ...(cv ? { cv } : {}) } });
       const j = await res.json().catch(() => ({}));
-      if (res.ok) { a.content = j.reply || ''; a.tools = { steps: j.steps || [], actions: j.actions || [], jobs: j.jobs || null, drafts: j.drafts || null, needs: j.needs || [], batch: j.batch || null, resumeText: userMsg.content, chatId: this.chat.id }; }
+      const original = userMsg._resume || userMsg.content;
+      if (res.ok) { a.content = j.reply || ''; a.tools = { steps: j.steps || [], actions: j.actions || [], jobs: j.jobs || null, drafts: j.drafts || null, needs: j.needs || [], batch: j.batch || null, resumeText: original, chatId: this.chat.id, ...(j.needsProfile ? { pending: { route: 'apply', text: original } } : {}) }; }
       else {
         a.content = res.status === 401 ? 'Ingresá a tu cuenta para usar tus cuentas conectadas.' : res.status === 429 ? 'Llegaste al límite de hoy de tu plan. Se renueva a las 21:00 (hora de Argentina).' : 'No pude usar tus cuentas en este momento. Probá de nuevo.';
         if (res.status === 401) a.notice = 'login'; else if (res.status === 429) a.notice = 'quota';
@@ -814,11 +870,17 @@ export class ChatApp {
         if (!onlyAgents) {
           const a = { id: uid('m'), role: 'assistant', content: '', at: Date.now(), streaming: true };
           this.pushMessage(a);
-          const r = await engine.chat({ messages: this.history(), lang: this.lang.code, mode: this.mode, system: this.systemContext(), docs, signal: ctrl.signal, search: (this.webSearch || userMsg._search) ? true : undefined, onEvent: (ev) => this.onSearchEvent(a, ev), onDelta: (d) => { a.content += d; if (a.search && a.search.state !== 'writing' && a.search.state !== 'done') this.onSearchEvent(a, { type: 'search_done' }); this.updateMessage(a); } });
+          const r = await engine.chat({ messages: this.history(), lang: this.lang.code, mode: this.mode, system: this.systemContext(), docs, signal: ctrl.signal, search: (this.webSearch || userMsg._search) ? true : undefined, onEvent: (ev) => {
+            if (ev.type === 'guard') { a.content = ev.replace; a.guarded = true; this.updateMessage(a); return; }
+            if (ev.type === 'handoff') { a.handoff = { route: ev.route, task: ev.task }; return; }
+            this.onSearchEvent(a, ev);
+          }, onDelta: (d) => { a.content += d; if (a.search && a.search.state !== 'writing' && a.search.state !== 'done') this.onSearchEvent(a, { type: 'search_done' }); this.updateMessage(a); } });
           a.streaming = false; a.content = r.text; if (r.notice) a.notice = r.notice;
           if (a.search) a.search.state = 'done';
           this.updateMessage(a);
           finalText = r.text;
+          // Pedido de acción: se abre la computadora del agente (o la tanda) con el pedido original, sin otro mensaje.
+          if (a.handoff) this._handoff = a.handoff;
         }
         const responders = mentioned.length ? mentioned : invited;
         for (const ag of responders) {
@@ -836,6 +898,7 @@ export class ChatApp {
       else this.chat.messages.filter((m) => m.streaming).forEach((m) => { m.streaming = false; m.content += m.content ? '\n\n_(detenido)_' : '_(detenido)_'; this.updateMessage(m); });
     }
     this.finish();
+    if (this._handoff) { const hd = this._handoff; this._handoff = null; if (!ctrl.signal.aborted) this.startHandoff(hd); }
     if (voice && finalText && !ctrl.signal.aborted) {
       await this.say(finalText);
       if (this.handsFree) this.act_mic();

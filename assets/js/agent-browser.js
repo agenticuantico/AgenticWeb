@@ -38,12 +38,7 @@ const SITES = [
 /** Pedido de búsqueda explícito en el ordenador sin sitio puntual: arranca en un buscador con el pedido. */
 export function computerStartUrl(text) {
   const q = stripComputer(text).replace(/^(busc[aá](me)?|fijate|mir[aá]|averigu[aá]|decime|mostrame)\s+/i, '').slice(0, 200).trim();
-  if (!q) return null;
-  // Clima: fuente abierta de pronóstico (los buscadores bloquean navegadores automáticos).
-  const w = /(clima|tiempo|pron[oó]stico|temperatura|lluvia)\s+(?:de|en|para|hoy en)?\s*(.+)$/i.exec(q);
-  if (w && w[2]) return 'https://wttr.in/' + encodeURIComponent(w[2].replace(/[?.!]+$/, '').trim()) + '?lang=es&m';
-  // Resto: el agente busca desde el servidor y abre el resultado en la pantalla.
-  return null;
+  return q ? 'https://www.bing.com/search?setlang=es&q=' + encodeURIComponent(q) : null;
 }
 
 export function guessUrl(text) {
@@ -376,7 +371,6 @@ export class AgentBrowserCard {
     this.el.dataset.status = s.status;
     this.renderLine(s);
     this.renderWindow(s);
-    this.vStop.hidden = s.status === 'done' || s.status === 'ended';
     this.renderClock();
     this.renderPlan(s);
     this.renderSteps(s.steps || []);
@@ -417,7 +411,10 @@ export class AgentBrowserCard {
     this.modeBar.replaceChildren(
       h('span', { class: 'ab-mode-chip' + (browser ? ' is-browser' : '') }, h('span', { html: icon(browser ? 'monitor' : 'file') }), browser ? 'Navegador real' : 'Modo lectura'),
       h('span', { class: 'ab-mode-meta muted' }, browser ? '' : `${Math.round((s.browserMs || 0) / 1000)} s de navegador`),
-      h('span', { class: 'ab-mode-left muted' }, left > 0 ? `Te quedan ${human(left)} de ordenador hoy` : 'Sin minutos de ordenador hoy'));
+      h('span', { class: 'ab-mode-left muted' }, left > 0 ? `Te quedan ${human(left)} de ordenador hoy` : 'Sin minutos de ordenador hoy'),
+      // Tareas que actúan en sitios: cuánto entra hoy con los minutos reales y aviso honesto sobre verificaciones.
+      s.budget ? h('span', { class: 'ab-mode-budget', 'data-no-i18n': '' }, s.budget) : null,
+      s.task && s.task !== 'read' ? h('span', { class: 'ab-mode-note muted' }, 'Algunos sitios no permiten automatizar o piden verificación: ahí te paso el control. Nunca salteo captchas.') : null);
   }
 
   renderReader(s) {
@@ -449,7 +446,8 @@ export class AgentBrowserCard {
     const plan = s.plan || [];
     if (!plan.length) { this.planBox.hidden = true; return; }
     this.planBox.hidden = false;
-    const done = s.status === 'done' ? plan.length : Math.min(s.planDone || 0, s.status === 'awaiting_approval' ? plan.length - 1 : plan.length);
+    // Tarea de empleo: el servidor marca el plan con hechos (no se completa solo por terminar si no se postuló).
+    const done = s.status === 'done' && s.task !== 'job' ? plan.length : Math.min(s.planDone || 0, s.status === 'awaiting_approval' ? plan.length - 1 : plan.length);
     this.planBox.replaceChildren(
       h('div', { class: 'ab-plan-h' }, h('strong', {}, 'Plan'), h('span', { class: 'muted', 'data-no-i18n': '' }, `${Math.min(done, plan.length)}/${plan.length}`)),
       h('ul', {}, ...plan.map((p, i) => h('li', { class: i < done ? 'ok' : i === done && LIVE.has(s.status) && s.status !== 'done' ? 'cur' : '' },
