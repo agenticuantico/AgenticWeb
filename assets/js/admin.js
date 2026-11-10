@@ -12,10 +12,10 @@ import { revenueKpis, renderRevenueCard } from './admin-revenue.js';
 import { renderGovernance } from './admin-governance.js';
 import { renderTeam } from './admin-team.js?v=7.14.0';
 import * as staffUi from './admin-staff.js?v=7.14.0';
-import { renderWorkspace, renderPerf } from './admin-espacio.js?v=7.14.0';
+import { renderWorkspace, renderPerf } from './admin-espacio.js?v=7.16.0';
 import { renderKpis } from './admin-indicadores.js?v=7.14.0';
-import { renderAnalytics } from './admin-analitica.js?v=7.15.0';
-import { renderPayments } from './admin-pagos.js?v=7.15.0';
+import { renderAnalytics } from './admin-analitica.js?v=7.16.0';
+import { renderPayments } from './admin-pagos.js?v=7.16.0';
 
 /** Roles con canales en el Espacio de trabajo (el servidor vuelve a controlar cada canal). */
 const WS_ROLES = new Set(['ceo', 'coceo', 'supervisor']);

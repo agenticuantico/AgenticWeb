@@ -6,6 +6,7 @@
 import { h, icon, toast, confirmDialog, modal } from './ui.js';
 import { api } from './admin-staff.js';
 import { download } from './admin-indicadores.js?v=7.14.0';
+import { renderReception, renderRequests } from './admin-escritorio.js?v=7.16.0';
 
 const ERRW = {
   forbidden_channel: 'Tu rol no tiene acceso a este canal.', empty_message: 'Escribí algo antes de mandar.', rate_limited: 'Vas muy rápido: esperá un minuto.',
@@ -20,16 +21,27 @@ const when = (t) => new Date(t).toLocaleString('es-AR', { day: '2-digit', month:
 
 /* =================== Espacio de trabajo =================== */
 export async function renderWorkspace(box, token, me) {
-  // Dos vistas: Canales (chat) y Entrenamiento (sesiones de práctica de los agentes con material real).
-  const top = h('div', { class: 'stack-lg' }); box.replaceChildren(top);
-  const chBox = h('div'); const trBox = h('div', { hidden: true });
-  let view = sessionStorage.getItem('ws-view') === 'entrenamiento' ? 'entrenamiento' : 'canales';
-  const seg = h('div', { class: 'seg seg-sm seg-2 ws-views', role: 'tablist', 'aria-label': 'Vista del espacio de trabajo' });
-  const paint = () => { for (const b of seg.children) b.setAttribute('aria-selected', String(b.dataset.v === view)); chBox.hidden = view !== 'canales'; trBox.hidden = view !== 'entrenamiento'; };
-  for (const [v, l] of [['canales', 'Canales'], ['entrenamiento', 'Entrenamiento']]) seg.append(h('button', { type: 'button', role: 'tab', dataset: { v }, onclick: () => { view = v; sessionStorage.setItem('ws-view', v); paint(); if (v === 'entrenamiento' && !trBox.dataset.loaded) { trBox.dataset.loaded = '1'; renderTraining(trBox, token, me); } } }, l));
-  top.append(seg, chBox, trBox); paint();
-  if (view === 'entrenamiento') { trBox.dataset.loaded = '1'; renderTraining(trBox, token, me); }
-  return renderChannels(chBox, token, me);
+  // Cuatro secciones: Recepción (lo que espera a alguien), Solicitudes (órdenes), Entrenamientos y Conversaciones (canales).
+  const SECS = [['recepcion', 'Recepción', 'mail', 'Lo que llegó y espera a alguien'], ['solicitudes', 'Solicitudes', 'send', 'Órdenes del equipo con su estado'], ['entrenamientos', 'Entrenamientos', 'brain', 'Práctica de los agentes con material real'], ['conversaciones', 'Conversaciones', 'users', 'Canales con el CEO, el Co-CEO y las áreas']];
+  const top = h('div', { class: 'ws-shell' }); box.replaceChildren(top);
+  const nav = h('nav', { class: 'ws-secs', role: 'tablist', 'aria-label': 'Secciones del espacio de trabajo' });
+  const boxes = Object.fromEntries(SECS.map(([id]) => [id, h('div', { role: 'tabpanel', hidden: true })]));
+  const loaded = {};
+  let view = sessionStorage.getItem('ws-sec'); if (!boxes[view]) view = 'recepcion';
+  const go = (id, focus) => {
+    if (!boxes[id]) { document.querySelector(`.admin-tabs [data-tab="${id}"]`)?.click(); return; }
+    view = id; sessionStorage.setItem('ws-sec', id);
+    for (const b of nav.children) b.setAttribute('aria-selected', String(b.dataset.v === id));
+    for (const [k, el] of Object.entries(boxes)) el.hidden = k !== id;
+    if (loaded[id] && !focus) return; loaded[id] = 1;
+    if (id === 'recepcion') renderReception(boxes[id], token, me, go);
+    if (id === 'solicitudes') renderRequests(boxes[id], token, me, focus);
+    if (id === 'entrenamientos') renderTraining(boxes[id], token, me);
+    if (id === 'conversaciones') renderChannels(boxes[id], token, me);
+  };
+  for (const [id, label, ic, sub] of SECS) nav.append(h('button', { type: 'button', role: 'tab', class: 'ws-sec', dataset: { v: id }, onclick: () => go(id) }, h('span', { class: 'ws-sec-ic', html: icon(ic) }), h('span', { class: 'ws-sec-txt' }, h('strong', {}, label), h('small', {}, sub))));
+  top.append(nav, ...Object.values(boxes));
+  go(view);
 }
 
 async function renderChannels(box, token, me) {
@@ -208,10 +220,12 @@ export async function renderPerf(box, token, me) {
       h('thead', {}, h('tr', {}, h('th', { scope: 'col' }, '#'), h('th', { scope: 'col' }, who === 'agent' ? 'Agente o persona' : 'Persona'), h('th', { scope: 'col' }, 'Puesto'), h('th', { scope: 'col' }, 'Puntaje'), who === 'agent' ? h('th', { scope: 'col' }, 'Experiencia y habilidades') : null, h('th', { scope: 'col' }, 'Datos (30 días)'))),
       h('tbody', {}, ...rows.map((x, i) => h('tr', {}, h('td', {}, String(i + 1)), h('td', {}, h('strong', {}, x.name), who === 'agent' ? h('span', { class: 'tn-badge ' + (x.holder === 'humano' ? 'is-human' : 'is-agent'), style: 'margin-left:6px' }, x.holder === 'humano' ? 'Humano' : 'Agente') : null, x.principal ? h('span', { class: 'tn-badge is-principal', style: 'margin-left:4px' }, 'Principal') : null), h('td', { class: 'small' }, who === 'agent' ? x.role : x.roleLabel + (x.area ? ` (${(AREAS.find((a) => a[0] === x.area) || [, x.area])[1]})` : '')), h('td', {}, scoreCell(x)), who === 'agent' ? h('td', { class: 'small perf-growth' }, x.isNew ? h('span', { class: 'tn-new' }, 'Nuevo') : null, ` Nv ${x.level} · ${x.title} · ${x.xp} XP`, (x.skills || []).length ? h('div', { class: 'team-chips' }, ...x.skills.map((s) => h('span', { class: 'tchip won' + (s.source === 'entrenamiento' ? ' trained' : '') }, `${s.tag} ×${s.n}`))) : null) : null, h('td', { class: 'tiny muted' }, counts(x.counts)))))))
       : h('p', { class: 'muted small' }, who === 'agent' ? 'Sin agentes.' : 'Todavía no hay personas invitadas (aparte del dueño).');
+    const reportsBox = h('div'); renderReports(reportsBox, token);
     const anyAgentData = d.agents.some((a) => a.score != null);
     const evalBtn = d.canEvaluate ? h('button', { class: 'btn btn-sm', type: 'button', html: icon('refresh') + '<span>Evaluar ascensos ahora</span>', onclick: async (ev) => { ev.currentTarget.disabled = true; try { const r = await api('/api/panel/perf/evaluate', { method: 'POST', token, body: {} }); toast(r.applied.length ? `Ascensos aplicados: ${r.applied.length}` : 'Nadie cumple la regla todavía.', r.applied.length ? 'success' : 'info'); load(); } catch (e) { fail(e); } } }) : null;
     root.replaceChildren(...[
       h('section', { class: 'card panel' }, h('div', { class: 'panel-head' }, h('h2', {}, 'Rendimiento'), evalBtn), h('p', { class: 'small muted' }, 'Puntajes con datos reales de los últimos 30 días. Sin datos, no se inventa nada.'), d.levelNote ? h('p', { class: 'tiny muted' }, d.levelNote) : null, rules),
+      reportsBox,
       pending.length ? h('section', { class: 'card panel' }, h('h2', {}, 'Ascensos sugeridos (personas)'), h('p', { class: 'small muted' }, 'El sistema solo sugiere: el rol cambia cuando alguien con permiso lo confirma.'), h('ul', { class: 'team-props' }, ...pending.map(promoRow))) : null,
       h('section', { class: 'card panel' }, h('h2', {}, 'Organigrama: agentes y personas'), h('p', { class: 'tiny muted' }, 'Las personas que ocupan un puesto suman con sus acciones reales igual que los agentes. Los ascensos automáticos son solo entre agentes; para personas, solo sugerencias.'), anyAgentData ? null : h('p', { class: 'small muted' }, 'Todavía no hay datos suficientes de ningún agente: el puntaje aparece cuando cada uno junta al menos 3 eventos (tareas, aprobaciones, pruebas).'), table(d.agents, 'agent')),
       d.humans && (me.perms || []).includes('staff.view') ? h('section', { class: 'card panel' }, h('h2', {}, 'Personas'), table(d.humans, 'human')) : null,
@@ -219,4 +233,31 @@ export async function renderPerf(box, token, me) {
     ].filter(Boolean));
   }
   await load();
+}
+
+/* =================== Informes de supervisores =================== */
+const VERD = { ascenso: ['Ascenso', 'ok'], revisar: ['Revisar', 'warn'], sugerencia_persona: ['Sugerencia (persona)', 'info'], sin_datos: ['Sin datos suficientes', ''], sin_cambios: ['Sin cambios', ''] };
+async function renderReports(box, token) {
+  let d;
+  try { d = await api('/api/panel/perf/reports', { token }); } catch (e) { if (e.status === 403) { box.replaceChildren(); return; } box.replaceChildren(h('div', { class: 'alert warn' }, h('span', { html: icon('warn') }), h('div', {}, 'No se pudieron leer los informes: ' + e.message))); return; }
+  const gen = d.canGenerate ? h('button', { class: 'btn btn-sm', type: 'button', html: icon('file') + '<span>Pedir informes ahora</span>', onclick: async (ev) => { ev.currentTarget.disabled = true; try { const r = await api('/api/panel/perf/reports/generate', { method: 'POST', token, body: {} }); toast(r.created.length ? `Informes nuevos: ${r.created.length}` : 'No hay supervisores con equipo a cargo.', 'success'); renderReports(box, token); } catch (e2) { fail(e2); } } }) : null;
+  const card = (r, i) => {
+    const b = r.body || { agents: [], recommendations: [], team: {} };
+    const det = h('details', { class: 'rep', open: i === 0 && !r.readAt ? '' : null },
+      h('summary', {}, h('span', { class: 'rep-area' }, r.areaLabel), h('strong', {}, r.supervisorName), !r.readAt ? h('span', { class: 'chip info' }, 'Nuevo') : null, h('span', { class: 'muted tiny' }, when(r.createdAt) + ' · para ' + (r.recipients || []).join(' y '))),
+      h('p', { class: 'small' }, r.summary),
+      h('div', { class: 'rep-recs' }, ...b.recommendations.map((x) => { const [l, c] = VERD[x.kind] || [x.kind, '']; return h('p', { class: 'small rep-rec' }, h('span', { class: 'chip ' + c }, l), ' ', x.text); })),
+      b.agents.length ? h('div', { class: 'table-wrap' }, h('table', { class: 'table rep-table' }, h('caption', { class: 'sr-only' }, 'Evaluación de ' + r.supervisorName),
+        h('thead', {}, h('tr', {}, ...['Trabajador', 'Puntaje', 'Hechas', 'Aprobadas', 'Pruebas OK', 'PR aprob./rech.', 'Revertidas', 'Errores'].map((t) => h('th', { scope: 'col' }, t)))),
+        h('tbody', {}, ...b.agents.map((a) => h('tr', {}, h('td', {}, h('strong', {}, a.name), h('span', { class: 'tn-badge ' + (a.holder === 'humano' ? 'is-human' : 'is-agent'), style: 'margin-left:6px' }, a.holder === 'humano' ? 'Humano' : 'Agente')),
+          h('td', {}, a.score == null ? h('span', { class: 'muted small' }, 'Sin datos suficientes') : h('span', { class: 'perf-score' }, h('strong', {}, String(a.score)), h('span', { class: 'perf-bar', 'aria-hidden': 'true' }, h('i', { style: `width:${a.score}%` })))),
+          h('td', {}, String(a.counts.done)), h('td', {}, String(a.counts.approved)), h('td', {}, String(a.counts.testsPassed)), h('td', {}, `${a.counts.prApproved}/${a.counts.prRejected}`), h('td', {}, String(a.counts.reverted)), h('td', {}, String(a.counts.failed + a.counts.rejected)))))))
+        : h('p', { class: 'muted small' }, 'Sin trabajadores a cargo.'),
+      b.rule ? h('p', { class: 'tiny muted' }, b.rule) : null);
+    det.addEventListener('toggle', () => { if (det.open && !r.readAt) api(`/api/panel/perf/reports/${r.id}/read`, { method: 'POST', token, body: {} }).then(() => { r.readAt = Date.now(); }).catch(() => {}); });
+    return det;
+  };
+  box.replaceChildren(h('section', { class: 'card panel' }, h('div', { class: 'panel-head' }, h('h2', {}, 'Informes de supervisores'), d.unread ? h('span', { class: 'chip info' }, `${d.unread} sin leer`) : null, gen),
+    h('p', { class: 'small muted' }, `Cada supervisor evalúa a su equipo con datos reales y manda el informe al CEO y al Co-CEO cada ${d.every} días. Sin datos suficientes, no hay puntaje.`),
+    d.reports.length ? h('div', { class: 'rep-list' }, ...d.reports.slice(0, 16).map(card)) : h('p', { class: 'muted small' }, 'Todavía no hay informes. El primero sale en el próximo turno de la mañana' + (d.canGenerate ? ', o pedilo ahora.' : '.'))));
 }

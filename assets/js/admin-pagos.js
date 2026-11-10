@@ -41,7 +41,8 @@ function gatewayCard(id, d) {
       h('span', { class: 'pg-status ' + stCls }, h('i', {}), stLabel)),
     h('div', { class: 'pg-hero' },
       h('div', {}, h('small', {}, 'Cobrado este mes'), h('strong', { 'data-no-i18n': '' }, money(p.monthCents, g.cur))),
-      h('div', {}, h('small', {}, 'Hoy'), h('strong', { class: 'pg-today', 'data-no-i18n': '' }, money(p.todayCents, g.cur)))),
+      h('div', {}, h('small', {}, 'Hoy'), h('strong', { class: 'pg-today', 'data-no-i18n': '' }, money(p.todayCents, g.cur))),
+      h('div', {}, h('small', {}, 'Total histórico'), h('strong', { class: 'pg-today', 'data-no-i18n': '' }, money(p.totalCents, g.cur)))),
     h('div', { class: 'pg-stats' },
       stat('Cobros del mes', nf.format(p.monthPayments)),
       stat('Suscripciones activas', nf.format(p.activeSubscriptions)),
@@ -73,11 +74,14 @@ export async function renderPayments(box, token) {
     refresh.disabled = false;
     stamp.textContent = 'Actualizado ' + tAR(d.generatedAt, { timeStyle: 'short' });
     const mp = d.providers.mercadopago, pp = d.providers.paypal;
-    const tiles = h('div', { class: 'an-tiles pg-tiles' },
-      h('div', { class: 'an-tile t-mp' }, h('span', { class: 'an-tile-ic', html: icon('card') }), h('div', {}, h('small', {}, 'Mercado Pago · hoy'), h('strong', { 'data-no-i18n': '' }, money(mp.todayCents, 'ARS')), h('span', { class: 'an-sub' }, 'mes: ' + money(mp.monthCents, 'ARS')))),
-      h('div', { class: 'an-tile t-pp' }, h('span', { class: 'an-tile-ic', html: icon('card') }), h('div', {}, h('small', {}, 'PayPal · hoy'), h('strong', { 'data-no-i18n': '' }, money(pp.todayCents, 'USD')), h('span', { class: 'an-sub' }, 'mes: ' + money(pp.monthCents, 'USD')))),
-      h('div', { class: 'an-tile t-views' }, h('span', { class: 'an-tile-ic', html: icon('chart') }), h('div', {}, h('small', {}, 'Cobros del mes'), h('strong', {}, nf.format(mp.monthPayments + pp.monthPayments)), h('span', { class: 'an-sub' }, `${nf.format(mp.monthPayments)} MP · ${nf.format(pp.monthPayments)} PayPal`))),
-      h('div', { class: 'an-tile t-users' }, h('span', { class: 'an-tile-ic', html: icon('users') }), h('div', {}, h('small', {}, 'Suscripciones activas'), h('strong', {}, nf.format(mp.activeSubscriptions + pp.activeSubscriptions)), h('span', { class: 'an-sub' }, `${nf.format(mp.activeSubscriptions)} MP · ${nf.format(pp.activeSubscriptions)} PayPal`))));
+    const sumRow = (id) => { const g = GW[id]; const x = d.providers[id]; const st = d.gateways[id];
+      return h('div', { class: 'pg-sum-row', style: `--gw:${g.color};--gw-soft:${g.soft}` },
+        h('div', { class: 'pg-sum-who' }, h('img', { src: g.logo, alt: g.name, width: Math.round(g.lw * 0.7), height: Math.round(g.lh * 0.7), decoding: 'async' }), h('span', {}, g.curLabel), h('span', { class: 'pg-status ' + (STATUS[st.status] || STATUS.sin_configurar)[1] }, h('i', {}), (STATUS[st.status] || STATUS.sin_configurar)[0])),
+        ...[['Hoy', money(x.todayCents, g.cur)], ['Este mes', money(x.monthCents, g.cur)], ['Total', money(x.totalCents, g.cur)], ['Cobros del mes', nf.format(x.monthPayments)], ['Suscripciones activas', nf.format(x.activeSubscriptions)]]
+          .map(([l, v], i) => h('div', { class: 'pg-sum-cell' + (i === 1 ? ' main' : '') }, h('small', {}, l), h('b', { 'data-no-i18n': '' }, v)))); };
+    const tiles = h('section', { class: 'card panel pg-sum' }, h('div', { class: 'panel-head' }, h('h2', {}, 'Ingresos del sitio'), h('span', { class: 'chip' }, 'por moneda, sin mezclar')),
+      sumRow('mercadopago'), sumRow('paypal'),
+      !mp.totalCents && !pp.totalCents ? h('p', { class: 'small muted' }, 'Todavía sin cobros registrados: los montos aparecen en cuanto entre el primer pago aprobado.') : null);
     // Referencia convertida (plegada): dice siempre la cotización usada.
     const ref = h('div', {});
     const drawRef = () => {
