@@ -1,5 +1,8 @@
 /**
- * Ordenador virtual (antes «Computadora del agente»): un navegador en la nube con ventana tipo escritorio remoto
+ * Ordenador virtual (antes «Computadora del agente»): un navegador en la nube dentro de un escritorio propio tipo
+ * escritorio remoto (fondo, íconos, ventana del navegador con controles, barra de tareas con reloj) y un puntero que
+ * muestra cada clic, campo y desplazamiento REAL del agente (coordenadas medidas por el navegador; ver
+ * chat/computer-pointer.js y worker-v2/src/browser/pointer.ts). Antes: ventana tipo escritorio remoto
  * (barra de título, barra de direcciones, pantalla en vivo, acción actual, pasos, tiempo, Detener, plegar, pantalla
  * completa y «Qué hice» al final, solo con pasos reales). Se enciende solo cuando el pedido lo necesita o cuando la
  * persona dice «en el ordenador» / «usa el ordenador»; la sesión es de su cuenta y nadie más la ve.
@@ -17,17 +20,20 @@
  */
 import { h, icon } from './ui.js';
 import * as engine from './chat/engine.js';
-import { needsWebAction, isFollowUp, wantsComputer, stripComputer } from './chat/intent.js?v=7.19.1';
-import { statusLine, visitedSites, summaryMeta, workMode, workSteps, VPC_NAME, VPC_HELP, elapsedText, taskElapsed, quotaText, addressText, whatIDid } from './chat/computer-status.js?v=7.19.1';
+import { needsWebAction, isFollowUp, wantsComputer, stripComputer } from './chat/intent.js?v=7.20.0';
+import { statusLine, visitedSites, summaryMeta, workMode, workSteps, VPC_NAME, VPC_HELP, elapsedText, taskElapsed, quotaText, addressText, whatIDid } from './chat/computer-status.js?v=7.20.0';
 /** Reexportadas para el código que ya las importaba desde aquí (la lógica vive en chat/intent.js, sin DOM). */
 export { needsWebAction, isFollowUp };
 
 (function css() {
   if (typeof document === 'undefined' || document.getElementById('ac-ab2-css')) return;
   const l = document.createElement('link');
-  l.id = 'ac-ab2-css'; l.rel = 'stylesheet'; l.href = '/assets/css/agent-browser.css?v=7.19.1';
+  l.id = 'ac-ab2-css'; l.rel = 'stylesheet'; l.href = '/assets/css/agent-browser.css?v=7.20.0';
   document.head.appendChild(l);
 })();
+
+// Puntero del escritorio (cálculos sin DOM).
+import { fitRect, toView, followY, newEvents, changedEvents, eventFits, pointerText, travelMs, fromView, parsePosY } from './chat/computer-pointer.js?v=7.20.0';
 
 const SITES = [
   [/linkedin/i, 'https://www.linkedin.com/'], [/computrabajo/i, 'https://ar.computrabajo.com/'], [/bumeran/i, 'https://www.bumeran.com.ar/'],
@@ -79,6 +85,11 @@ const STATUS_TEXT = {
   awaiting_approval: 'Esperando tu aprobación', needs_user: 'Necesita tu acción', queued: 'En fila', takeover: 'Tienes el control', done: 'Tarea terminada', ended: 'Sesión cerrada', error: 'No disponible'
 };
 
+/** Puntero propio (flecha redondeada con borde claro y punto de acento). */
+const CURSOR_SVG = '<svg viewBox="0 0 28 28" width="26" height="26" aria-hidden="true"><path d="M5 3.2 22.4 13.6l-7.3 1.7 4.2 7.6-3.3 1.8-4.2-7.6-5.6 5.1z" fill="#16151a" stroke="#fff" stroke-width="1.7" stroke-linejoin="round"/><circle cx="5" cy="3.2" r="1.9" fill="#9fff00"/></svg>';
+const clampN = (n, a, b) => Math.min(b, Math.max(a, n));
+const pause = (ms) => new Promise((r) => setTimeout(r, Math.max(0, ms)));
+
 export class AgentBrowserCard {
   /**
    * @param {{ thread: HTMLElement, composer: HTMLElement, text: string, conv?: string, lang?: string, isPaid?: boolean,
@@ -94,6 +105,10 @@ export class AgentBrowserCard {
     this.timer = 0; this.tick = 0;
     this.stopped = false; this.stepping = false; this.approving = false; this.askKey = '';
     this.fileSeen = new Map();
+    // Puntero y pantalla en vivo: eventos ya mostrados, cola de animaciones, captura mostrada / recibida, conexión.
+    this.seen = null; this.lastSeq = 0; this.evq = []; this.animating = false; this.pendingFrame = null;
+    this.shownAt = 0; this.haveAt = 0; this.skew = 0; this.posY = 0; this.netFails = 0; this.polling = false;
+    this.reduced = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
     this.device = window.matchMedia('(max-width: 700px)').matches ? 'mobile' : 'desktop';
     this.build();
     this.start();
@@ -137,10 +152,10 @@ export class AgentBrowserCard {
     this.sum = h('div', { class: 'cc-sum', hidden: true });
     this.head = h('header', { class: 'ab-head' }, h('span', { class: 'ab-title', html: icon('monitor') + '<span>' + VPC_NAME + '</span>' }), this.pill, h('span', { class: 'ab-actions' }, this.fullBtn, this.stopBtn));
     this.buildWindow();
-    this.el = h('section', { class: 'ab-card cc vpc', 'aria-label': VPC_NAME, 'data-status': 'starting' },
-      this.head, this.bar, this.vAddr, this.help,
-      h('div', { class: 'cc-frame' }, this.screen, this.xBtn),
-      this.line, this.modeNote, this.miniSteps, this.foot, this.sum,
+    this.buildDesktop();
+    this.el = h('section', { class: 'ab-card cc vpc vpc-os', 'aria-label': VPC_NAME, 'data-status': 'starting' },
+      this.head, this.desk, this.task, this.help,
+      this.modeNote, this.miniSteps, this.foot, this.sum,
       this.modeBar, this.addr, this.kb, this.controls, this.notice, this.asks, this.approvals, this.planBox, this.stepsBox, this.filesBox, this.result);
     this.o.thread.append(this.el);
     this.o.onScroll && this.o.onScroll();
@@ -154,14 +169,18 @@ export class AgentBrowserCard {
     this.foldBtn = h('button', { class: 'vpc-btn', type: 'button', 'aria-label': 'Plegar', title: 'Plegar', 'aria-expanded': 'true', html: icon('collapse'), onclick: () => this.toggleFold() });
     this.maxBtn = h('button', { class: 'vpc-btn', type: 'button', 'aria-label': 'Pantalla completa', title: 'Pantalla completa', html: icon('expand'), onclick: () => this.toggleFull() });
     this.vStop = h('button', { class: 'vpc-btn vpc-stop', type: 'button', 'aria-label': 'Detener', title: 'Detener', onclick: () => this.stop() }, h('span', { html: icon('stop') }), h('span', { class: 'vpc-stop-t' }, 'Detener'));
+    // Barra de título de la ventana del navegador: pestaña con el sitio actual y controles propios (plegar, pantalla
+    // completa, Detener). Sin formas ni íconos de otros sistemas operativos.
+    this.tabIc = h('i', { class: 'vpc-tab-ic', 'aria-hidden': 'true' }, '·');
+    this.tabText = h('strong', { class: 'vpc-tab-t', 'data-no-i18n': '' }, VPC_NAME);
     this.bar = h('header', { class: 'vpc-bar' },
-      h('span', { class: 'vpc-dots', 'aria-hidden': 'true' }, h('i'), h('i'), h('i')),
-      h('span', { class: 'vpc-title' }, h('span', { html: icon('monitor') }), h('strong', {}, VPC_NAME)),
-      this.elapsed,
+      h('span', { class: 'vpc-app', 'aria-hidden': 'true', html: icon('globe') }),
+      h('span', { class: 'vpc-title vpc-tab' }, this.tabIc, this.tabText),
       h('span', { class: 'vpc-acts' }, this.helpBtn, this.foldBtn, this.maxBtn, this.vStop));
     this.addrText = h('span', { class: 'vpc-url', 'data-no-i18n': '' }, this.url || 'Preparando…');
     this.modeTag = h('span', { class: 'vpc-mode' }, 'Lectura');
-    this.vAddr = h('div', { class: 'vpc-addr', role: 'group', 'aria-label': 'Dirección actual' }, h('span', { class: 'vpc-lock', html: icon('lock') }), this.addrText, this.modeTag);
+    this.load = h('i', { class: 'vpc-load', 'aria-hidden': 'true' });
+    this.vAddr = h('div', { class: 'vpc-addr', role: 'group', 'aria-label': 'Dirección actual' }, h('span', { class: 'vpc-lock', html: icon('lock') }), this.addrText, this.modeTag, this.load);
     this.help = h('p', { class: 'vpc-help', id: hid, hidden: true }, VPC_HELP);
     this.miniSteps = h('ol', { class: 'vpc-steps', 'aria-label': 'Pasos', hidden: true });
     this.quota = h('span', { class: 'vpc-quota', 'aria-live': 'polite' }, '');
@@ -169,10 +188,268 @@ export class AgentBrowserCard {
     this.foot = h('div', { class: 'vpc-foot' }, this.quota, this.logoutBtn);
   }
 
+  /**
+   * Escritorio propio del ordenador virtual: fondo, accesos (Navegador, Archivos, Pasos, Ayuda), la ventana del
+   * navegador y la barra de tareas (inicio, ventana abierta, estado en vivo, conexión, tiempo y reloj local).
+   * El puntero vive en una capa sobre la captura y solo se mueve con acciones reales (ver onPointer).
+   */
+  buildDesktop() {
+    this.cursor = h('span', { class: 'vpc-cursor', html: CURSOR_SVG });
+    this.field = h('span', { class: 'vpc-field' }, h('i', { class: 'vpc-caret' }));
+    this.bubble = h('span', { class: 'vpc-bubble', 'data-no-i18n': '' });
+    this.scrollChip = h('span', { class: 'vpc-scroll' }, h('i', { class: 'vpc-wheel' }), h('b', { 'data-no-i18n': '' }));
+    this.ptr = h('div', { class: 'vpc-ptr', 'aria-hidden': 'true' }, this.field, this.scrollChip, this.cursor, this.bubble);
+    // Texto alternativo del paso actual para lectores de pantalla (lo mismo que dice el globo del puntero).
+    this.ptrLive = h('span', { class: 'sr-only', 'aria-live': 'polite', 'data-no-i18n': '' });
+    this.screen.append(this.ptr, this.ptrLive);
+    const ico = (ic, label, on) => h('button', { class: 'vpc-ico', type: 'button', onclick: on }, h('span', { class: 'vpc-ico-g', html: icon(ic) }), h('span', { class: 'vpc-ico-t' }, label));
+    this.icoFiles = ico('folder', 'Archivos', () => this.openPanel(this.filesBox));
+    this.icoFiles.hidden = true;
+    this.icons = h('nav', { class: 'vpc-icons', 'aria-label': 'Accesos del escritorio' },
+      ico('globe', 'Navegador', () => this.toggleFull(true)), this.icoFiles,
+      ico('check', 'Pasos', () => this.openPanel(this.stepsBox)), ico('info', 'Ayuda', () => this.toggleHelp(true)));
+    this.win = h('div', { class: 'vpc-win' }, this.bar, this.vAddr, h('div', { class: 'cc-frame' }, this.screen, this.xBtn));
+    this.desk = h('div', { class: 'vpc-desk' }, h('div', { class: 'vpc-wall', 'aria-hidden': 'true' }, h('i'), h('i'), h('i')), this.icons, this.win);
+    this.clockT = h('time', { class: 'vpc-clock-t', 'data-no-i18n': '' }, '');
+    this.net = h('span', { class: 'vpc-net', 'data-state': 'ok', role: 'img', 'aria-label': 'Conexión estable', title: 'Conexión estable' }, h('i'), h('i'), h('i'));
+    this.startBtn = h('button', { class: 'vpc-start', type: 'button', 'aria-label': '¿Qué es el ordenador virtual?', title: '¿Qué es?', 'aria-expanded': 'false', 'aria-controls': this.help.id, onclick: () => this.toggleHelp() },
+      h('span', { class: 'vpc-orb', 'aria-hidden': 'true' }, h('i'), h('i')));
+    this.taskWin = h('button', { class: 'vpc-twin', type: 'button', 'aria-label': 'Ventana del navegador: pantalla completa', onclick: () => this.toggleFull() }, h('span', { html: icon('globe') }), h('span', { class: 'vpc-twin-t', 'data-no-i18n': '' }, 'Navegador'));
+    this.task = h('footer', { class: 'vpc-task' }, this.startBtn, this.taskWin, this.line,
+      h('span', { class: 'vpc-tray' }, this.net, this.elapsed, h('span', { class: 'vpc-clock', title: 'Hora local' }, this.clockT)));
+    this.renderTaskClock();
+    // La capa del puntero sigue a la pantalla si cambia de tamaño (girar el celular, pantalla completa).
+    if (typeof ResizeObserver === 'function') { this._ro = new ResizeObserver(() => { this.ptr.classList.remove('has-bubble'); this.placeCursor(); }); this._ro.observe(this.screen); }
+    this._online = () => this.kick();
+    this._vis = () => { if (!document.hidden) this.kick(); };
+    window.addEventListener('online', this._online);
+    document.addEventListener('visibilitychange', this._vis);
+  }
+
+  /** Abre la pantalla completa y lleva a un panel (Archivos, Pasos). */
+  openPanel(el) {
+    this.toggleFull(true);
+    if (!el || el.hidden) return;
+    if (el.tagName === 'DETAILS') el.open = true;
+    setTimeout(() => { el.scrollIntoView({ block: 'start', behavior: this.reduced ? 'auto' : 'smooth' }); const f = el.querySelector('summary, button, a'); if (f) f.focus({ preventScroll: true }); }, 60);
+  }
+
+  /** Reloj de la barra de tareas (hora local de la persona). */
+  renderTaskClock() {
+    if (!this.clockT) return;
+    const d = new Date(Date.now() + (this.skew || 0));
+    const t = d.toLocaleTimeString(this.o.lang || 'es', { hour: '2-digit', minute: '2-digit' });
+    if (this.clockT.textContent !== t) { this.clockT.textContent = t; this.clockT.dateTime = d.toISOString(); }
+  }
+
+  /** Pestaña de la ventana: título de la página (o el sitio) y su inicial. */
+  renderTab(s) {
+    const hst = s.host || host(s.url || '') || (s.reader && s.reader.host) || '';
+    const title = String((s.mode === 'browser' ? s.title : s.reader && s.reader.title) || '').replace(/^\s*(null|undefined)\s*$/i, '').trim();
+    this.tabText.textContent = title || hst || VPC_NAME;
+    this.tabText.title = title && hst ? `${title} · ${hst}` : title || hst;
+    this.tabIc.textContent = (hst || 'o').charAt(0).toUpperCase();
+    this.taskWin.querySelector('.vpc-twin-t').textContent = hst || 'Navegador';
+    this.icoFiles.hidden = !(s.files || []).length;
+    const n = (s.files || []).length;
+    this.icoFiles.querySelector('.vpc-ico-t').textContent = n ? `Archivos (${n})` : 'Archivos';
+  }
+
+  /** Estado de la conexión con el servidor (barra de tareas). */
+  setNet(state) {
+    if (!this.net || this.net.dataset.state === state) return;
+    const t = state === 'ok' ? 'Conexión estable' : state === 'retry' ? 'Reconectando…' : 'Sin conexión';
+    this.net.dataset.state = state; this.net.setAttribute('aria-label', t); this.net.title = t;
+  }
+
+  /* ---------- Pantalla en vivo: capturas sin parpadeo ---------- */
+
+  /** Nueva captura: se decodifica antes de mostrarla y espera a que el puntero termine sobre la anterior. */
+  setFrame(src, at) {
+    if (!src || !this.img) return;
+    if (at && (at === this.shownAt || (this.pendingFrame && this.pendingFrame.at === at))) return;
+    if (!at && this.img.getAttribute('src') === src) return;
+    this.haveAt = Math.max(this.haveAt, at || 0);
+    this.pendingFrame = { src, at: at || 0 };
+    if (!this.animating) this.flushFrame();
+  }
+
+  async flushFrame() {
+    const f = this.pendingFrame;
+    if (!f || !this.img) return;
+    this.pendingFrame = null;
+    try { const im = new Image(); im.src = f.src; if (im.decode) await im.decode(); } catch { /* se muestra igual */ }
+    if (f.at && f.at < this.shownAt) return;   // llegó una más nueva mientras se decodificaba
+    this.img.src = f.src; this.shownAt = f.at;
+    this.view.classList.add('has-frame');
+  }
+
+  /* ---------- Puntero: solo acciones reales ---------- */
+
+  /** Eventos del servidor (pointer.ts): nuevos o que cambiaron de estado → cola de animación en orden. */
+  onPointer(s) {
+    const evs = Array.isArray(s.pointer) ? s.pointer : [];
+    if (this.seen && evs.length && evs[evs.length - 1].seq < this.lastSeq) this.seen = null;   // sesión nueva en el servidor
+    if (!this.seen) {   // lo anterior a abrir esta tarjeta no se anima
+      this.seen = new Map(evs.map((e) => [e.seq, e.status]));
+      this.lastSeq = evs.reduce((m, e) => Math.max(m, e.seq), 0);
+      return;
+    }
+    const fresh = newEvents(evs, this.lastSeq), changed = changedEvents(evs, this.seen);
+    if (!fresh.length && !changed.length) return;
+    for (const e of [...changed, ...fresh]) this.seen.set(e.seq, e.status);
+    if (fresh.length) this.lastSeq = fresh[fresh.length - 1].seq;
+    for (const k of this.seen.keys()) if (k < this.lastSeq - 40) this.seen.delete(k);
+    this.evq.push(...[...changed, ...fresh].sort((a, b) => a.seq - b.seq));
+    if (this.evq.length > 6) this.evq = this.evq.slice(-6);   // si quedó atrás, muestra lo último
+    if (!this.animating) this.drain();
+  }
+
+  async drain() {
+    this.animating = true;
+    try {
+      while (this.evq.length) {
+        const ev = this.evq.shift();
+        try { await this.animate(ev, this.evq.length > 2); } catch { /* sigue con el próximo */ }
+      }
+    } finally { this.animating = false; }
+    this.flushFrame();
+  }
+
+  /** Geometría de la captura dentro de la capa del puntero (object-fit/position reales). */
+  geom() {
+    const img = this.img;
+    if (!img || !this.ptr) return null;
+    const r = img.getBoundingClientRect(), pr = this.ptr.getBoundingClientRect();
+    if (!r.width || !r.height || !pr.width) return null;
+    const vp = (this.state && this.state.viewport) || { width: 1024, height: 640 };
+    const nat = { w: img.naturalWidth || vp.width, h: img.naturalHeight || vp.height };
+    const cs = getComputedStyle(img);
+    const fit = cs.objectFit === 'cover' ? 'cover' : 'contain';
+    const imgBox = { w: r.width, h: r.height };
+    const rect = fitRect(nat, imgBox, fit, parsePosY(cs.objectPosition));
+    rect.left += r.left - pr.left; rect.top += r.top - pr.top;
+    return { rect, box: { w: pr.width, h: pr.height }, nat, fit, imgBox };
+  }
+
+  /** Celular (captura recortada): mueve la «cámara» para que el objetivo quede a la vista. */
+  async follow(y, g) {
+    const py = followY(y, g.nat, g.imgBox);
+    if (Math.abs(py - this.posY) < 0.01) return;
+    this.posY = py;
+    this.img.style.objectPosition = `50% ${Math.round(py * 1000) / 10}%`;
+    await pause(this.reduced ? 0 : 380);
+  }
+
+  placeCursor() {
+    if (!this.cursorAt || !this.cursorShown) return;
+    const g = this.geom(); if (!g) return;
+    const p = toView(this.cursorAt, g.rect, g.box);
+    this.cursor.style.transitionDuration = '0ms';
+    this.cursor.style.transform = `translate(${p.x}px, ${p.y}px)`;
+    this.cx = p.x; this.cy = p.y;
+    this.ptr.classList.toggle('has-cursor', p.visible);
+    if (this.fieldBox && this.field.classList.contains('on')) this.placeField(this.fieldBox, g);
+  }
+
+  async moveCursor(pt, p, quick) {
+    const dur = this.reduced || quick || !this.cursorShown ? 0 : travelMs(p.x - (this.cx || 0), p.y - (this.cy || 0));
+    this.cursor.style.transitionDuration = dur + 'ms';
+    this.cursor.style.transform = `translate(${p.x}px, ${p.y}px)`;
+    this.cx = p.x; this.cy = p.y; this.cursorAt = { x: pt.x, y: pt.y }; this.cursorShown = true;
+    this.ptr.classList.add('has-cursor');
+    await pause(dur);
+  }
+
+  placeField(b, g) {
+    const r = g.rect;
+    Object.assign(this.field.style, { left: `${r.left + b.x * r.width - 3}px`, top: `${r.top + b.y * r.height - 3}px`, width: `${b.w * r.width + 6}px`, height: `${b.h * r.height + 6}px` });
+  }
+
+  showBubble(text, p, g) {
+    if (!text) return;
+    this.bubble.textContent = text;
+    this.ptr.classList.add('has-bubble');
+    const w = this.bubble.offsetWidth || 160, hh = this.bubble.offsetHeight || 28;
+    const bw = g ? g.box.w : this.ptr.clientWidth, bh = g ? g.box.h : this.ptr.clientHeight;
+    const x = p ? clampN(p.x + 16, 6, Math.max(6, bw - w - 6)) : 10;
+    const y = p ? (p.y + 30 + hh < bh ? p.y + 30 : Math.max(6, p.y - hh - 12)) : Math.max(6, bh - hh - 10);
+    this.bubble.style.transform = `translate(${Math.round(x)}px, ${Math.round(y)}px)`;
+    clearTimeout(this._bubbleT);
+    this._bubbleT = setTimeout(() => this.ptr.classList.remove('has-bubble'), 2600);
+  }
+
+  ring(p, cls = '') {
+    const r = h('i', { class: 'vpc-ring ' + cls, style: `left:${p.x}px;top:${p.y}px` });
+    this.ptr.append(r);
+    setTimeout(() => r.remove(), 700);
+  }
+
+  /** Imagen: texto alternativo con el sitio y el paso actual. */
+  setAlt(text) {
+    if (!this.img) return;
+    const hst = (this.state && (this.state.host || host(this.state.url || ''))) || '';
+    this.img.alt = `Pantalla del ordenador virtual${hst ? ' en ' + hst : ''}${text ? '. Ahora: ' + text : ''}`;
+  }
+
+  /**
+   * Muestra UN evento real: globo y texto alternativo siempre; el puntero solo si hay coordenadas medidas sobre la
+   * captura que se ve (eventFits). Clic: viaje + presión mientras corre + onda al terminar. Escribir: campo
+   * resaltado con cursor de texto. Desplazamiento: indicador con la dirección. Navegación: barra de carga.
+   */
+  async animate(ev, quick = false) {
+    const text = pointerText(ev);
+    if (text) { this.ptrLive.textContent = text; this.setAlt(text); }
+    if (ev.frame && this.pendingFrame && this.pendingFrame.at === ev.frame) await this.flushFrame();
+    const browser = this.state && this.state.mode === 'browser';
+    if (ev.kind === 'goto' || ev.kind === 'back') {
+      this.load.classList.toggle('on', ev.status === 'running');
+      if (ev.status !== 'running') { this.field.classList.remove('on'); }
+      this.showBubble(text, null, null);
+      return;
+    }
+    if (ev.kind === 'scroll') {
+      this.scrollChip.querySelector('b').textContent = text;
+      this.scrollChip.dataset.dir = Number(ev.dy) > 0 ? 'down' : 'up';
+      this.scrollChip.classList.remove('on'); void this.scrollChip.offsetWidth; this.scrollChip.classList.add('on');
+      clearTimeout(this._scrollT); this._scrollT = setTimeout(() => this.scrollChip.classList.remove('on'), 1400);
+      if (ev.status !== 'running') { this.field.classList.remove('on'); await pause(quick || this.reduced ? 0 : 450); }
+      return;
+    }
+    const g0 = browser && eventFits(ev, this.shownAt) ? this.geom() : null;
+    if (!g0) { if (ev.status === 'error') this.cursor.classList.remove('is-press'); this.showBubble(text, null, null); return; }
+    let g = g0, p = toView(ev, g.rect, g.box);
+    if (!p.visible && g.fit === 'cover') { await this.follow(ev.y, g); g = this.geom() || g; p = toView(ev, g.rect, g.box); }
+    if (!p.visible) { this.showBubble(text, null, null); return; }
+    const already = this.cursorAt && Math.abs(this.cursorAt.x - ev.x) < 0.002 && Math.abs(this.cursorAt.y - ev.y) < 0.002;
+    if (!already) await this.moveCursor(ev, p, quick || ev.by === 'user');
+    this.showBubble(text, p, g);
+    if (ev.kind === 'click') {
+      this.cursor.classList.toggle('is-press', ev.status === 'running');
+      if (ev.status === 'done') { this.ring(p, ev.by === 'user' ? 'is-user' : ''); await pause(quick || this.reduced ? 0 : 560); }   // la onda termina antes de mostrar la página nueva
+    } else if (ev.kind === 'type') {
+      if (ev.box) { this.fieldBox = ev.box; this.placeField(ev.box, g); }
+      this.field.classList.toggle('on', !!ev.box && ev.status !== 'error');
+      this.field.classList.toggle('is-typing', ev.status === 'running');
+      this.field.classList.toggle('is-done', ev.status === 'done');
+      if (ev.status === 'done') { clearTimeout(this._fieldT); this._fieldT = setTimeout(() => this.field.classList.remove('on', 'is-done'), 1400); await pause(quick || this.reduced ? 0 : 260); }
+    } else if (ev.kind === 'key') {
+      if (ev.status === 'done') { this.ring(p, 'is-key'); await pause(quick || this.reduced ? 0 : 220); }
+    }
+  }
+
+  /** Sin tarea activa: se apagan los indicadores en curso (el puntero queda donde estuvo el último clic real). */
+  calmPointer() {
+    this.cursor.classList.remove('is-press');
+    this.field.classList.remove('is-typing');
+    this.load.classList.remove('on');
+  }
+
   toggleHelp(force) {
     const on = typeof force === 'boolean' ? force : this.help.hidden;
     this.help.hidden = !on;
     this.helpBtn.setAttribute('aria-expanded', String(on));
+    if (this.startBtn) this.startBtn.setAttribute('aria-expanded', String(on));
   }
 
   toggleFold(force) {
@@ -206,7 +483,7 @@ export class AgentBrowserCard {
 
   renderElapsed() {
     const b = this.elapsed && this.elapsed.querySelector('b');
-    if (b) b.textContent = elapsedText(taskElapsed(this.state));
+    if (b) b.textContent = elapsedText(taskElapsed(this.state, Date.now() + this.skew));
   }
 
   /** «Cerrar sesiones»: borra las cookies guardadas (cifradas) de los sitios. Pide un segundo toque para confirmar. */
@@ -287,6 +564,8 @@ export class AgentBrowserCard {
 
   async api(path, { method = 'POST', body } = {}) {
     const headers = {};
+    // `since`: la captura que ya tenemos; si no cambió, el servidor responde sin imagen (menos datos por consulta).
+    if (this.haveAt && method !== 'GET' && body && typeof body === 'object' && !('since' in body)) body = { ...body, since: this.haveAt };
     if (method !== 'GET') headers['Content-Type'] = 'application/json';
     const t = this.o.idToken ? await this.o.idToken().catch(() => null) : null;
     if (t) headers.Authorization = 'Bearer ' + t;
@@ -331,10 +610,27 @@ export class AgentBrowserCard {
       this.view.dataset.device = s.device || this.device;
       this.controls.hidden = false; this.stepsBox.hidden = false;
       this.apply(s);
-      this.tick = setInterval(() => { this.renderClock(); this.renderElapsed(); }, 1000);
+      this.tick = setInterval(() => { this.renderClock(); this.renderElapsed(); this.renderTaskClock(); }, 1000);
       this.poll();
       this.loop();
-    } catch (e) { this.explain(e); }
+    } catch (e) { this.explain(e); this.offerRetry(e); }
+  }
+
+  /** Error al encender que puede ser pasajero (red, servidor): además de «Entendido», un botón «Reintentar». */
+  offerRetry(e) {
+    if (e && (e.status === 401 || e.status === 503 || e.status === 429)) return;
+    const box = this.view.querySelector('.ab-off');
+    if (!box) return;
+    box.append(h('button', { class: 'btn btn-sm', type: 'button', onclick: () => this.restart() }, h('span', { html: icon('refresh') }), 'Reintentar'));
+  }
+
+  /** «Reintentar»: vuelve a la pantalla de carga y prueba otra vez. */
+  restart() {
+    this.el.classList.remove('is-off'); this.el.dataset.status = 'starting';
+    this.xBtn.hidden = false; this.vStop.hidden = false; this.foot.hidden = false; this.vAddr.hidden = false;
+    this.view.replaceChildren(this.loader());
+    this.lineText.textContent = 'Encendiendo el ordenador virtual…'; this.line.dataset.kind = 'run';
+    this.start();
   }
 
   /** Bucle autónomo: mientras la sesión esté lista, pide el siguiente paso. Se pausa en aprobaciones, formularios o control manual. */
@@ -345,16 +641,24 @@ export class AgentBrowserCard {
       while (!this.stopped && this.state && (this.state.status === 'ready' || this.state.status === 'queued') && this.goal) {
         if (this.state.status === 'ready') { this.setPill('Pensando el siguiente paso', 'run'); this.view.classList.add('is-busy'); }
         const s = await this.api('/api/agent/browser/agent', { body: {} });
+        if (this.loopFails) { this.loopFails = 0; this.noticeSticky = false; this.notice.hidden = true; this.setNet('ok'); }
         this.apply(s);
         if (s.status === 'queued') await new Promise((r) => setTimeout(r, 4000));
         else await new Promise((r) => setTimeout(r, 120));
       }
     } catch (e) {
       if (e.code === 'no_session' || e.code === 'session_closed') { this.ended(e.state); this.stepping = false; return; }
-      this.showNotice('Se cortó la conexión. Reintentando…', 'warn');
-      if (!this.stopped) setTimeout(() => { this.stepping = false; this.loop(); }, 2500);
+      // Reconexión: espera creciente (2,5 s → 20 s), más larga si el servidor pidió frenar; sin red, espera a «online».
+      this.loopFails = (this.loopFails || 0) + 1;
+      const wait = e.status === 429 ? 8000 : Math.min(20_000, 2500 * 2 ** Math.min(3, this.loopFails - 1));
+      this.setNet(navigator.onLine === false ? 'off' : 'retry');
+      this.showNotice(navigator.onLine === false ? 'Sin conexión a internet. Sigo apenas vuelva.' : 'Se cortó la conexión con el ordenador virtual. Reintentando…', 'warn',
+        h('button', { class: 'btn btn-sm btn-ghost', type: 'button', onclick: () => this.kick(true) }, 'Reintentar ahora'));
+      this.noticeSticky = true;
+      if (!this.stopped) { clearTimeout(this.loopT); this.loopT = setTimeout(() => { this.stepping = false; this.loop(); }, wait); }
       return;
     } finally { this.view.classList.remove('is-busy'); }
+    if (this.loopFails) { this.loopFails = 0; this.noticeSticky = false; this.notice.hidden = true; this.setNet('ok'); }
     this.stepping = false;
   }
 
@@ -364,7 +668,8 @@ export class AgentBrowserCard {
     const browser = s.mode === 'browser';
     this.view.classList.toggle('is-reader', !browser);
     this.view.classList.toggle('is-browser', browser);
-    if (s.image && this.img && browser) this.img.src = s.image;
+    if (typeof s.now === 'number') this.skew = s.now - Date.now();   // reloj del servidor (sin desfase del dispositivo)
+    if (s.image && this.img && browser) this.setFrame(s.image, s.shotAt);
     if (s.viewport && browser) this.view.style.setProperty('--ab-ar', `${s.viewport.width} / ${s.viewport.height}`);
     if (!browser) this.renderReader(s);
     if (s.url) { this.addr.hidden = false; this.addr.querySelector('.ab-addr-t').textContent = s.host || host(s.url); }
@@ -376,6 +681,8 @@ export class AgentBrowserCard {
     this.el.dataset.status = s.status;
     this.renderLine(s);
     this.renderWindow(s);
+    this.renderTab(s);
+    if (this.img) { this.onPointer(s); if (!WORKING.has(s.status) || s.status === 'ready') this.calmPointer(); if (!this.animating && !this.ptrLive.textContent) this.setAlt(''); }
     this.vStop.hidden = s.status === 'done' || s.status === 'ended';
     this.renderClock();
     this.renderPlan(s);
@@ -442,7 +749,7 @@ export class AgentBrowserCard {
   renderClock() {
     const s = this.state;
     if (!s || !s.deadline || s.mode !== 'browser' || !LIVE.has(s.status)) { this.clock.hidden = true; return; }
-    const left = s.deadline - Date.now();
+    const left = s.deadline - (Date.now() + this.skew);
     this.clock.hidden = false;
     this.clock.querySelector('b').textContent = mmss(left);
     this.clock.classList.toggle('low', left < 30_000);
@@ -651,15 +958,16 @@ export class AgentBrowserCard {
 
   onScreenClick(ev) {
     if (!this.state || this.state.status !== 'takeover') return;
-    const r = this.img.getBoundingClientRect();
-    const vw = this.state.viewport?.width || 1024, vh = this.state.viewport?.height || 640;
-    const scale = Math.min(r.width / vw, r.height / vh);
-    const w = vw * scale, hh = vh * scale, ox = (r.width - w) / 2, oy = (r.height - hh) / 2;
-    const x = (ev.clientX - r.left - ox) / w, y = (ev.clientY - r.top - oy) / hh;
-    if (x < 0 || x > 1 || y < 0 || y > 1) return;
-    const dot = h('i', { class: 'ab-tap', style: `left:${ev.clientX - r.left}px;top:${ev.clientY - r.top}px` });
-    this.view.append(dot); setTimeout(() => dot.remove(), 600);
-    this.input({ kind: 'click', x, y });
+    // Misma geometría que el puntero (object-fit y object-position reales): antes se suponía la imagen centrada y,
+    // con la captura alineada arriba, el toque caía corrido hacia abajo.
+    const g = this.geom(); if (!g) return;
+    const pr = this.ptr.getBoundingClientRect();
+    const px = ev.clientX - pr.left, py = ev.clientY - pr.top;
+    const pt = fromView(px, py, g.rect);
+    if (!pt) return;
+    const dot = h('i', { class: 'ab-tap', style: `left:${px}px;top:${py}px` });
+    this.ptr.append(dot); setTimeout(() => dot.remove(), 600);
+    this.input({ kind: 'click', x: pt.x, y: pt.y });
   }
 
   async input(inp) {
@@ -667,20 +975,55 @@ export class AgentBrowserCard {
     catch (e) { if (e.code === 'no_session') this.ended(); }
   }
 
-  /** Mientras el agente trabaja, el estado se consulta seguido: los pasos aparecen en vivo. */
+  /**
+   * Mientras el agente trabaja, el estado se consulta seguido: los pasos y el puntero aparecen en vivo.
+   * Manda `since` (la captura que ya tiene) para no recibir la misma imagen; con errores espera cada vez más
+   * (hasta 15 s) y vuelve enseguida al recuperar la red o la pestaña. Al terminar deja de consultar.
+   */
   async poll() {
+    if (this.stopped || this.polling) return;
+    this.polling = true; clearTimeout(this.timer);
+    let ok = true;
+    try {
+      const s = await this.api('/api/agent/browser/frame' + (this.haveAt ? `?since=${this.haveAt}` : ''), { method: 'GET' });
+      if (this.netFails) { this.netFails = 0; this.setNet('ok'); if (!this.loopFails && this.noticeSticky) { this.noticeSticky = false; this.notice.hidden = true; } }
+      if (!this.approving) this.apply(s);
+    } catch (e) {
+      if (e.status === 404 || e.code === 'no_session') { this.polling = false; this.ended(); return; }
+      ok = false; this.netFails++;
+      if (this.netFails >= 2) this.setNet(navigator.onLine === false ? 'off' : 'retry');
+    } finally { this.polling = false; }
     if (this.stopped) return;
-    try { const s = await this.api('/api/agent/browser/frame', { method: 'GET' }); if (!this.approving) this.apply(s); }
-    catch (e) { if (e.status === 404 || e.code === 'no_session') { this.ended(); return; } }
     const st = this.state && this.state.status;
+    // Terminada: ya no cambia nada (antes se seguía consultando cada 8 s para siempre).
+    if (st === 'done' && !this.stepping && ok) return;
     const fast = st === 'takeover' || st === 'acting' || st === 'thinking' || this.stepping;
     // Pantalla en vivo: cada ~1,2 s mientras trabaja (el servidor saca una captura nueva cada 1,5 s); 2 s en espera.
-    this.timer = setTimeout(() => this.poll(), document.hidden ? 6000 : fast ? 1200 : st === 'queued' ? 4000 : st === 'done' ? 8000 : 2000);
+    const base = document.hidden ? 6000 : fast ? 1200 : st === 'queued' ? 4000 : 2000;
+    const wait = ok ? base : Math.min(15_000, 1500 * 2 ** Math.min(4, this.netFails - 1));
+    this.timer = setTimeout(() => this.poll(), wait);
+  }
+
+  /** Volvió la red, la pestaña o la persona tocó «Reintentar ahora»: consulta ya, sin esperar el próximo turno. */
+  kick(loopToo = false) {
+    if (this.stopped) return;
+    clearTimeout(this.timer);
+    this.poll();
+    if ((loopToo || this.loopFails) && !this.approving) { clearTimeout(this.loopT); this.stepping = false; this.loop(); }
+  }
+
+  /** Suelta escuchas globales (red, pestaña, tamaño) cuando la tarjeta deja de estar activa. */
+  unlisten() {
+    window.removeEventListener('online', this._online);
+    document.removeEventListener('visibilitychange', this._vis);
+    clearTimeout(this.loopT);
+    this.evq = [];
+    if (this.cursor) this.calmPointer();
   }
 
   /** Otra tarjeta toma la conversación: esta deja de consultar (la sesión del servidor sigue). */
   detach() {
-    this.stopped = true; clearTimeout(this.timer); clearInterval(this.tick);
+    this.stopped = true; clearTimeout(this.timer); clearInterval(this.tick); this.unlisten();
     if (this.el.classList.contains('is-full')) this.toggleFull(false);
     this.el.classList.add('is-detached'); this.controls.hidden = true; this.stopBtn.hidden = true; this.vStop.hidden = true; this.xBtn.hidden = true;
     if (this.state && !['done', 'ended'].includes(this.state.status)) this.renderSummary({ ...this.state, status: 'ended', endedReason: 'detached', canResume: false }, true);
@@ -689,7 +1032,7 @@ export class AgentBrowserCard {
   ended(s) {
     if (this.stopped && this._endedShown) return;
     this.stopped = true; this._endedShown = true;
-    clearTimeout(this.timer); clearInterval(this.tick);
+    clearTimeout(this.timer); clearInterval(this.tick); this.unlisten();
     this.kb.hidden = true; this.controls.hidden = true; this.clock.hidden = true; this.stopBtn.hidden = true; this.vStop.hidden = true; this.asks.replaceChildren();
     this.view.classList.remove('is-takeover', 'is-busy');
     this.setPill('Detenida', 'off');
@@ -709,9 +1052,12 @@ export class AgentBrowserCard {
     try {
       const s = await this.api('/api/agent/browser/resume', { body: {} });
       this.stopped = false; this._endedShown = false;
+      window.addEventListener('online', this._online); document.addEventListener('visibilitychange', this._vis);
       this.controls.hidden = false; this.stopBtn.hidden = false; this.vStop.hidden = false; this.result.hidden = true; this.xBtn.hidden = false;
       this.apply(s);
-      this.tick = setInterval(() => { this.renderClock(); this.renderElapsed(); }, 1000);
+      clearInterval(this.tick);
+      this.tick = setInterval(() => { this.renderClock(); this.renderElapsed(); this.renderTaskClock(); }, 1000);
+      this.netFails = 0; this.seen = null;
       this.poll(); this.loop();
     } catch (e) { this.showNotice('No pude retomar la tarea. Pedímela de nuevo.', 'warn'); }
   }
@@ -734,7 +1080,20 @@ export class AgentBrowserCard {
     this.maxBtn.innerHTML = icon(f ? 'collapse' : 'expand');
     this.maxBtn.setAttribute('aria-label', f ? 'Salir de pantalla completa' : 'Pantalla completa'); this.maxBtn.title = f ? 'Salir de pantalla completa' : 'Pantalla completa';
     if (f && this.el.classList.contains('is-folded')) this.toggleFold(false);
-    if (f) { this._esc = (e) => { if (e.key === 'Escape') this.toggleFull(false); }; document.addEventListener('keydown', this._esc); setTimeout(() => this.maxBtn.focus({ preventScroll: true }), 30); }
+    if (f) {
+      // Escape cierra; Tab queda dentro de la ventana (diálogo modal).
+      this._esc = (e) => {
+        if (e.key === 'Escape') return this.toggleFull(false);
+        if (e.key !== 'Tab') return;
+        const list = [...this.el.querySelectorAll('button:not([disabled]), a[href], input:not([disabled]):not([type=hidden]), summary, [tabindex="0"]')].filter((x) => x.offsetParent !== null || x === document.activeElement);
+        if (!list.length) return;
+        const first = list[0], last = list[list.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && (document.activeElement === last || !this.el.contains(document.activeElement))) { e.preventDefault(); first.focus(); }
+      };
+      document.addEventListener('keydown', this._esc); setTimeout(() => this.maxBtn.focus({ preventScroll: true }), 30);
+    }
     else { document.removeEventListener('keydown', this._esc); this.screen.focus({ preventScroll: true }); this.o.onScroll && this.o.onScroll(); }
+    requestAnimationFrame(() => this.placeCursor());
   }
 }

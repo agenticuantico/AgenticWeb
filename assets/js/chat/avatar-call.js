@@ -3,7 +3,7 @@
  * nota de voz: muestra el avatar 3D, que procesa (pulsos dorados hacia el cerebro) y responde hablando
  * con gestos y labios sincronizados. Se puede arrastrar, ampliar a pantalla completa o cerrar.
  */
-import { AgentAvatar } from './agent-avatar.js?v=7.19.1';
+import { AgentAvatar } from './agent-avatar.js?v=7.20.0';
 import { icon } from '../ui.js';
 
 let instance = null;

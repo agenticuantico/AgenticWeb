@@ -4,7 +4,7 @@ import { CONFIG, formatARS } from './config.js';
 import { PAYMENTS } from '../payments-config.js';
 import * as auth from './auth.js';
 import { getAuthApi, getStore, friendlyError } from './firebase.js';
-import { mountPlans, openPayModal } from './plans.js?v=7.19.1';
+import { mountPlans, openPayModal } from './plans.js?v=7.20.0';
 import { state as engineState, init as engineInit } from './chat/engine.js';
 import * as callMem from './companion/memory.js';
 
@@ -22,7 +22,7 @@ function renderAuth(tab = params.get('registro') ? 'signup' : 'login') {
   const card = h('div', { class: 'card auth-card' });
   const wrap = h('div', { class: 'auth-wrap' },
     h('div', { class: 'auth-aside' },
-      h('img', { src: '/media/avatar/face-256.webp?v=7.19.1', alt: '', width: 72, height: 72, class: 'auth-face' }),
+      h('img', { src: '/media/avatar/face-256.webp?v=7.20.0', alt: '', width: 72, height: 72, class: 'auth-face' }),
       h('h1', {}, tab === 'signup' ? 'Crea tu cuenta' : tab === 'reset' ? 'Recupera tu acceso' : 'Te damos la bienvenida'),
       h('p', { class: 'muted' }, 'Sincroniza tus chats entre dispositivos, comparte conversaciones y elige tu plan.'),
       h('ul', { class: 'checklist' }, ...['Chats guardados en tu cuenta', 'Todas las funciones en todos los planes', 'Pagos seguros con PayPal y Mercado Pago'].map((t) => h('li', { html: icon('check') + `<span>${t}</span>` })))),
@@ -127,7 +127,7 @@ async function renderPanel(user) {
   const dataError = profile && profile._error;
   if (dataError) profile = null;
   // volver de un checkout
-  const ret = await import('./payments.js?v=7.19.1').then((m) => m.handleReturn(user)).catch(() => null);
+  const ret = await import('./payments.js?v=7.20.0').then((m) => m.handleReturn(user)).catch(() => null);
   // Al volver de Mercado Pago con el id de la suscripción, se pide al servidor que la confirme YA consultando a Mercado Pago
   // (el servidor solo toma el id y lee el estado real de la API; no hace falta webhook ni clave). Sin esperar respuesta.
   if (ret && ret.ok && ret.provider === 'mercadopago' && ret.subscriptionId) {
@@ -264,7 +264,7 @@ function planes(pane, { user, profile, reload }) {
   try { mem = JSON.parse(sessionStorage.getItem('ac.mpPending') || 'null'); } catch {}
   if (mem && Date.now() - mem.at < 3600_000 && !(profile && profile.subscription && profile.subscription.status === 'pending')) {
     pane.prepend(h('div', { class: 'alert info' }, h('div', {}, '¿Aprobaste la suscripción en Mercado Pago? ',
-      h('button', { class: 'linklike', type: 'button', onclick: async () => { const m = await import('./payments.js?v=7.19.1'); try { await m.recordPending(user.uid, { provider: 'mercadopago', plan: mem.plan, subscriptionId: null }); sessionStorage.removeItem('ac.mpPending'); toast('Pago en verificación.', 'ok'); reload(); } catch (e) { toast(friendlyError(e), 'error'); } } }, 'Sí, la aprobé'))));
+      h('button', { class: 'linklike', type: 'button', onclick: async () => { const m = await import('./payments.js?v=7.20.0'); try { await m.recordPending(user.uid, { provider: 'mercadopago', plan: mem.plan, subscriptionId: null }); sessionStorage.removeItem('ac.mpPending'); toast('Pago en verificación.', 'ok'); reload(); } catch (e) { toast(friendlyError(e), 'error'); } } }, 'Sí, la aprobé'))));
   }
 }
 
