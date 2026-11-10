@@ -41,7 +41,7 @@ export function computerStartUrl(text) {
   if (!q) return null;
   // Clima: fuente abierta de pronóstico (los buscadores bloquean navegadores automáticos).
   const w = /(clima|tiempo|pron[oó]stico|temperatura|lluvia)\s+(?:de|en|para|hoy en)?\s*(.+)$/i.exec(q);
-  if (w && w[2]) return 'https://wttr.in/' + encodeURIComponent(w[2].replace(/[?.!]+$/, '').trim()) + '?lang=es';
+  if (w && w[2]) return 'https://wttr.in/' + encodeURIComponent(w[2].replace(/[?.!]+$/, '').trim()) + '?lang=es&m';
   // Resto: el agente busca desde el servidor y abre el resultado en la pantalla.
   return null;
 }
@@ -376,6 +376,7 @@ export class AgentBrowserCard {
     this.el.dataset.status = s.status;
     this.renderLine(s);
     this.renderWindow(s);
+    this.vStop.hidden = s.status === 'done' || s.status === 'ended';
     this.renderClock();
     this.renderPlan(s);
     this.renderSteps(s.steps || []);
@@ -413,13 +414,13 @@ export class AgentBrowserCard {
     this.modeBar.hidden = false;
     const browser = s.mode === 'browser';
     const left = Math.max(s.browserLeftMs || 0, s.remoteLeftMs || 0);
-    this.modeBar.replaceChildren(
+    this.modeBar.replaceChildren(...[
       h('span', { class: 'ab-mode-chip' + (browser ? ' is-browser' : '') }, h('span', { html: icon(browser ? 'monitor' : 'file') }), browser ? 'Navegador real' : 'Modo lectura'),
       h('span', { class: 'ab-mode-meta muted' }, browser ? '' : `${Math.round((s.browserMs || 0) / 1000)} s de navegador`),
       h('span', { class: 'ab-mode-left muted' }, left > 0 ? `Te quedan ${human(left)} de ordenador hoy` : 'Sin minutos de ordenador hoy'),
       // Tareas que actúan en sitios: cuánto entra hoy con los minutos reales y aviso honesto sobre verificaciones.
       s.budget ? h('span', { class: 'ab-mode-budget', 'data-no-i18n': '' }, s.budget) : null,
-      s.task && s.task !== 'read' ? h('span', { class: 'ab-mode-note muted' }, 'Algunos sitios no permiten automatizar o piden verificación: ahí te paso el control. Nunca salteo captchas.') : null);
+      s.task && s.task !== 'read' ? h('span', { class: 'ab-mode-note muted' }, 'Algunos sitios no permiten automatizar o piden verificación: ahí te paso el control. Nunca salteo captchas.') : null].filter(Boolean));
   }
 
   renderReader(s) {
