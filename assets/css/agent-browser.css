@@ -366,3 +366,5 @@
 }
 @media (prefers-reduced-motion: reduce) { .vpc-steps .st-running .st-ic { animation: none; } }
 @keyframes ab-spin { to { transform: rotate(360deg); } }
+/* Un solo reloj visible en la ventana chica (el tiempo de la tarea); el del tramo de navegador queda en pantalla completa */
+.ab-card.cc.vpc:not(.is-full) .cc-line .ab-clock { display: none !important; }
