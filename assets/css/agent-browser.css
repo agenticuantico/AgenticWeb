@@ -6,6 +6,9 @@
 .ab-mode-chip.is-browser { background: #e6c579; }
 .ab-mode-meta, .ab-mode-left { color: #a9a8b0; }
 .ab-mode-left { margin-left: auto; }
+.ab-mode-budget { flex-basis: 100%; padding: 6px 10px; border-radius: 12px; background: #f3ffe0; color: #3f6212; font-weight: 600; line-height: 1.35; }
+.ab-mode-note { flex-basis: 100%; line-height: 1.35; }
+.ab-card.cc.is-full .ab-mode-note { color: var(--cc-muted); }
 
 /* Vista: lector de páginas (fondo blanco premium) o captura del navegador real */
 .ab-view.is-reader { aspect-ratio: auto; min-height: 220px; max-height: 420px; place-items: stretch; background: #fff; color: #18181b; }
@@ -368,3 +371,7 @@
 @keyframes ab-spin { to { transform: rotate(360deg); } }
 /* Un solo reloj visible en la ventana chica (el tiempo de la tarea); el del tramo de navegador queda en pantalla completa */
 .ab-card.cc.vpc:not(.is-full) .cc-line .ab-clock { display: none !important; }
+/* Pantalla completa y terminada: sin botones repetidos (Detener y reloj quedan en la barra de título) */
+.ab-card.cc.vpc .ab-tbtn-stop, .ab-card.cc.vpc .ab-mode-left { display: none !important; }
+.ab-card.cc.vpc.is-full .vpc-btn[aria-label="Plegar"], .ab-card.cc.vpc.is-full .vpc-btn[aria-label="Desplegar"] { display: none; }
+.ab-card.cc.vpc.is-done > .ab-controls { display: none !important; }
