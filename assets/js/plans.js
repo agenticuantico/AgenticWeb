@@ -18,11 +18,11 @@ export function mountPlans(root, { user = null, profile = null, onChange } = {})
   for (const p of PLANS) {
     const price = CONFIG.PRICES[p.id];
     const card = h('article', { class: 'plan' + (p.featured ? ' featured' : ''), id: 'plan-' + p.id, 'aria-labelledby': 'plan-t-' + p.id });
-    if (p.featured) card.append(h('span', { class: 'chip gold badge' }, 'Más elegido'));
+    if (p.featured) card.append(h('span', { class: 'chip gold badge' }, 'Recomendado'));
     card.append(
       h('h3', { id: 'plan-t-' + p.id }, p.name),
       h('p', { class: 'tag' }, p.tagline),
-      h('div', {}, h('div', { class: 'price' }, price.usd === 0 ? 'Gratis' : formatARS(price.ars), price.usd ? h('small', {}, ' /mes') : null),
+      h('div', {}, h('div', { class: 'price' }, price.usd === 0 ? 'ARS 0' : formatARS(price.ars), price.usd ? h('small', {}, ' /mes') : null),
         h('div', { class: 'price-alt' }, price.usd === 0 ? 'Para siempre' : `o USD ${price.usd} /mes con PayPal`)),
       h('ul', {}, ...p.features.map((f) => h('li', { html: icon('check') + `<span>${f}</span>` }))));
     const pay = h('div', { class: 'pay' });

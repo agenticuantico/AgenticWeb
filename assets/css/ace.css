@@ -353,3 +353,29 @@ body.design-lock { overflow: hidden; }
 .ws-title { flex: 1 1 160px; }
 .ws-tools { display: flex; align-items: center; gap: 6px; margin-left: auto; }
 @media (max-width: 520px) { .ws-title { flex-basis: calc(100% - 40px); } .ws-tools { width: 100%; justify-content: flex-end; } }
+
+/* ---------- Botón fijo «Ordenador» en la barra del chat + su panel (7.15.0) ---------- */
+.chat.ace .ace-pc { display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 14px 0 11px; margin-left: 2px; border-radius: 999px; border: 1px solid var(--a-border-strong); background: #fff; color: var(--a-ink); font: 650 13.5px/1 var(--font, system-ui); cursor: pointer; white-space: nowrap; flex: none; transition: background .15s, border-color .15s; }
+.chat.ace .ace-pc svg { width: 18px; height: 18px; flex: none; }
+.chat.ace .ace-pc:hover { background: #f7ffe9; border-color: rgba(101, 163, 13, .55); }
+.chat.ace .ace-pc:focus-visible { outline: 2px solid #1d4ed8; outline-offset: 2px; }
+@media (max-width: 400px) { .chat.ace .ace-pc { height: 36px; padding: 0 11px 0 9px; font-size: 13px; gap: 5px; } .chat.ace .ace-pc svg { width: 16px; height: 16px; } }
+@media (max-width: 340px) { .chat.ace .ace-pc-t { display: none; } .chat.ace .ace-pc { width: 36px; padding: 0; justify-content: center; } }
+.pc-panel { display: grid; gap: 12px; }
+.pc-lead { margin: 0; color: #3f3f46; font-size: 15px; line-height: 1.55; }
+.pc-h { margin: 4px 0 0; font-size: 12.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: #52525b; }
+.pc-tasks { display: grid; gap: 8px; }
+.pc-task { box-sizing: border-box; display: flex; align-items: center; gap: 12px; width: 100%; min-height: 52px; padding: 10px 12px; border: 1px solid rgba(24, 24, 27, .12); border-radius: 16px; background: #fff; color: #18181b; font: 500 14.5px/1.4 var(--font, system-ui); text-align: left; cursor: pointer; transition: border-color .15s, background .15s; }
+.pc-task:hover { border-color: rgba(101, 163, 13, .6); background: #fbfff3; }
+.pc-task:focus-visible { outline: 2px solid #1d4ed8; outline-offset: 2px; }
+.pc-task-ic { width: 32px; height: 32px; flex: 0 0 32px; display: grid; place-items: center; border-radius: 10px; background: rgba(159, 255, 0, .22); color: #18181b; }
+.pc-task-ic svg { width: 17px; height: 17px; }
+.pc-task-t { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
+.pc-task-go { flex: none; color: #71717a; }
+.pc-task-go svg { width: 16px; height: 16px; }
+.pc-rules { margin: 2px 0 0; padding-left: 18px; display: grid; gap: 4px; color: #52525b; font-size: 13.5px; line-height: 1.5; }
+.pc-login { display: flex; gap: 12px; align-items: flex-start; padding: 14px; border-radius: 16px; background: #f7ffe9; border: 1px solid rgba(101, 163, 13, .35); }
+.pc-login strong { display: block; font-size: 16px; margin-bottom: 2px; color: #18181b; }
+.pc-login p { margin: 0; color: #3f3f46; }
+.pc-login-ic { width: 36px; height: 36px; flex: none; display: grid; place-items: center; border-radius: 50%; background: #fff; border: 1px solid rgba(24, 24, 27, .1); }
+.pc-login-ic svg { width: 18px; height: 18px; }
