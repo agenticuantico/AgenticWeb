@@ -1,0 +1,40 @@
+/* Tarjeta «Sitio web premium» del chat (vista previa multipágina + descarga .zip). */
+.stc { margin: 0 0 12px; border: 1px solid rgba(24, 24, 27, .12); border-radius: 18px; background: #fff; overflow: hidden; max-width: 100%; min-width: 0; box-shadow: 0 1px 2px rgba(24, 24, 27, .04), 0 10px 30px -18px rgba(24, 24, 27, .22); color: #18181b; }
+.stc-h { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-bottom: 1px solid rgba(24, 24, 27, .08); min-width: 0; }
+.stc-ic { display: inline-grid; place-items: center; width: 34px; height: 34px; border-radius: 10px; background: #ecfccb; color: #3f6212; flex: none; }
+.stc-ic svg { width: 18px; height: 18px; }
+.stc-tit { flex: 1; min-width: 0; display: grid; }
+.stc-tit strong { font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.stc-tit span { font-size: 12.5px; color: #52525b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.stc-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 12px; background: #fafafa; border-bottom: 1px solid rgba(24, 24, 27, .06); }
+.stc-select { height: 34px; border-radius: 10px; border: 1px solid rgba(24, 24, 27, .18); background: #fff; padding: 0 10px; font: inherit; font-size: 13.5px; max-width: 60%; color: #18181b; }
+.stc-seg { display: inline-flex; border: 1px solid rgba(24, 24, 27, .16); border-radius: 999px; padding: 2px; background: #fff; }
+.stc-segb { border: 0; background: transparent; height: 28px; padding: 0 11px; border-radius: 999px; font: inherit; font-size: 12.5px; font-weight: 700; color: #3f3f46; cursor: pointer; }
+.stc-segb[aria-pressed="true"] { background: #18181b; color: #fff; }
+.stc-stage { position: relative; height: 460px; background: repeating-conic-gradient(#f4f4f5 0 25%, #fafafa 0 50%) 0 0 / 22px 22px; overflow: hidden; display: flex; justify-content: center; }
+.stc-scale { height: 100%; overflow: hidden; }
+.stc-frame { display: block; border: 0; background: #fff; transform-origin: 0 0; box-shadow: 0 0 0 1px rgba(24, 24, 27, .08); }
+.stc-acts { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 10px 12px; border-top: 1px solid rgba(24, 24, 27, .08); }
+.stc-btn { display: inline-flex; align-items: center; gap: 6px; min-height: 38px; padding: 0 14px; border-radius: 999px; border: 1px solid rgba(24, 24, 27, .18); background: #fff; color: #18181b; font: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer; text-decoration: none; }
+.stc-btn:hover { border-color: #18181b; }
+.stc-btn:focus-visible, .stc-segb:focus-visible, .stc-select:focus-visible { outline: 3px solid #65a30d; outline-offset: 2px; }
+.stc-btn span { display: inline-grid; } .stc-btn svg { width: 16px; height: 16px; }
+.stc-btn[disabled] { opacity: .6; cursor: progress; }
+.stc-primary { background: #18181b; color: #fff; border-color: #18181b; }
+.stc-ghost { min-height: 34px; padding: 0 11px; font-size: 13px; }
+.stc-combo { margin-left: auto; font-size: 12px; color: #52525b; }
+.stc-estado { margin: 0; padding: 0 14px 12px; font-size: 13.5px; line-height: 1.5; color: #3f3f46; }
+.stc-estado:empty { display: none; }
+.stc-estado.info { color: #1e3a8a; } .stc-estado.ok { color: #166534; } .stc-estado.error { color: #991b1b; }
+.stc-estado a { color: inherit; font-weight: 700; text-decoration: underline; }
+.stc-form { border-top: 1px solid rgba(24, 24, 27, .08); padding: 12px 14px 4px; display: grid; gap: 10px; background: #fcfcfc; }
+.stc-nota { margin: 0; font-size: 12.5px; color: #52525b; }
+.stc-grid { display: grid; gap: 10px; grid-template-columns: 1fr; }
+@media (min-width: 640px) { .stc-grid { grid-template-columns: 1fr 1fr; } }
+.stc-f { display: grid; gap: 4px; font-size: 12.5px; font-weight: 700; color: #3f3f46; min-width: 0; }
+.stc-f input, .stc-f select { height: 38px; border-radius: 10px; border: 1px solid rgba(24, 24, 27, .2); padding: 0 10px; font: inherit; font-size: 14px; font-weight: 400; background: #fff; color: #18181b; min-width: 0; width: 100%; box-sizing: border-box; }
+.stc-f input[type=color] { padding: 3px; width: 64px; }
+.stc-f input[type=file] { padding: 6px; height: auto; }
+.stc-form .stc-acts { border: 0; padding: 4px 0 8px; }
+@media (max-width: 480px) { .stc-stage { height: 520px; } .stc-combo { width: 100%; margin: 0; } }
+@media (min-width: 900px) { .stc-stage { height: 520px; } }

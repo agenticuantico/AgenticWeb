@@ -7,7 +7,7 @@
 import { h, icon, esc, toast, confirmDialog, fmtDate, timeAgo } from './ui.js';
 import { CONFIG } from './config.js';
 import { getStore, friendlyError } from './firebase.js';
-import { renderAutonomy } from './admin-agents.js?v=7.20.0';
+import { renderAutonomy } from './admin-agents.js?v=7.23.0';
 
 const STAGES = [['nuevo', 'Nuevo'], ['contactado', 'Contactado'], ['reunion', 'Reunión'], ['negociacion', 'Negociación'], ['cerrado', 'Cerrado'], ['descartado', 'Descartado']];
 const TYPES = { inversion: 'Inversión', asociacion: 'Asociación', whitelabel: 'White-label', piloto: 'Piloto enterprise', reunion: 'Reunión', consulta: 'Consulta', empresa: 'Plan Empresa' };

@@ -6,9 +6,9 @@
  */
 import { h, icon, esc, toast, modal } from '../ui.js';
 import { prefs } from '../consent.js';
-import { AgentAvatar } from '../chat/agent-avatar.js?v=7.20.0';
+import { AgentAvatar } from '../chat/agent-avatar.js?v=7.23.0';
 import * as engine from '../chat/engine.js';
-import { speak, stop as stopSpeech } from '../chat/voice.js?v=7.20.0';
+import { speak, stop as stopSpeech } from '../chat/voice.js?v=7.23.0';
 import { LANGS, getLang, flagUrl, startLang } from '../chat/languages.js';
 import { watchUser, getProfile } from '../auth.js';
 import { systemPrompt, localReply, greeting, extractFacts, CRISIS_RE } from './brain.js';

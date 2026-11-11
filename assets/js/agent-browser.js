@@ -20,20 +20,23 @@
  */
 import { h, icon } from './ui.js';
 import * as engine from './chat/engine.js';
-import { needsWebAction, isFollowUp, wantsComputer, stripComputer } from './chat/intent.js?v=7.20.0';
-import { statusLine, visitedSites, summaryMeta, workMode, workSteps, VPC_NAME, VPC_HELP, elapsedText, taskElapsed, quotaText, addressText, whatIDid } from './chat/computer-status.js?v=7.20.0';
+import { needsWebAction, isFollowUp, wantsComputer, stripComputer } from './chat/intent.js?v=7.23.0';
+import { statusLine, visitedSites, summaryMeta, workMode, workSteps, VPC_NAME, VPC_HELP, elapsedText, taskElapsed, quotaText, addressText, whatIDid } from './chat/computer-status.js?v=7.23.0';
 /** Reexportadas para el código que ya las importaba desde aquí (la lógica vive en chat/intent.js, sin DOM). */
 export { needsWebAction, isFollowUp };
 
 (function css() {
   if (typeof document === 'undefined' || document.getElementById('ac-ab2-css')) return;
   const l = document.createElement('link');
-  l.id = 'ac-ab2-css'; l.rel = 'stylesheet'; l.href = '/assets/css/agent-browser.css?v=7.20.0';
+  l.id = 'ac-ab2-css'; l.rel = 'stylesheet'; l.href = '/assets/css/agent-browser.css?v=7.23.0';
   document.head.appendChild(l);
 })();
 
 // Puntero del escritorio (cálculos sin DOM).
-import { fitRect, toView, followY, newEvents, changedEvents, eventFits, pointerText, travelMs, fromView, parsePosY } from './chat/computer-pointer.js?v=7.20.0';
+import { fitRect, toView, followY, newEvents, changedEvents, eventFits, pointerText, travelMs, fromView, parsePosY } from './chat/computer-pointer.js?v=7.23.0';
+// Escritorio de sistema operativo propio y gestor de ventanas.
+import { VirtualDesktop } from './chat/computer-desktop.js?v=7.23.0';
+import { readingNote } from './chat/computer-wm.js?v=7.23.0';
 
 const SITES = [
   [/linkedin/i, 'https://www.linkedin.com/'], [/computrabajo/i, 'https://ar.computrabajo.com/'], [/bumeran/i, 'https://www.bumeran.com.ar/'],
@@ -99,7 +102,8 @@ export class AgentBrowserCard {
     this.o = o;
     this.goal = String(o.text || '').trim();
     // «…en el ordenador» / «usa el ordenador»: se abre el navegador en la nube desde el primer paso (vista en vivo).
-    this.explicit = wantsComputer(this.goal);
+    // También el botón «Ordenador» del chat (o.explicit): antes solo contaban las frases y caía en modo lectura.
+    this.explicit = o.explicit === true || wantsComputer(this.goal);
     this.url = guessUrl(this.goal) || (this.explicit ? computerStartUrl(this.goal) : null);
     this.state = null;
     this.timer = 0; this.tick = 0;
@@ -131,19 +135,17 @@ export class AgentBrowserCard {
     this.filesBox = h('div', { class: 'ab-files', hidden: true });
     this.result = h('div', { class: 'ab-result', hidden: true });
     this.takeBtn = h('button', { class: 'ab-tbtn', type: 'button', onclick: () => this.setTakeover(!(this.state && this.state.status === 'takeover')) }, h('span', { html: icon('keyboard') }), h('span', { class: 'ab-tbtn-t' }, 'Tomar el control'));
-    this.toolsBtn = h('details', { class: 'ab-tools' }, h('summary', { class: 'ab-tbtn' }, h('span', { html: icon('download') }), 'Guardar'),
+    this.toolsBtn = h('details', { class: 'ab-tools' }, h('summary', { class: 'ab-tbtn' }, h('span', { html: icon('download') }), h('span', { class: 'ab-tbtn-t' }, 'Guardar')),
       h('div', { class: 'ab-tools-m' },
         h('button', { type: 'button', onclick: () => this.capture('page') }, h('span', { html: icon('file') }), 'Texto de la página'),
         h('button', { type: 'button', onclick: () => this.capture('screenshot') }, h('span', { html: icon('image') }), 'Captura de pantalla'),
         h('button', { type: 'button', onclick: () => this.capture('pdf') }, h('span', { html: icon('print') }), 'PDF de la página')));
-    this.controls = h('div', { class: 'ab-controls', hidden: true }, this.takeBtn, this.toolsBtn,
-      h('button', { class: 'ab-tbtn ab-tbtn-stop', type: 'button', onclick: () => this.stop() }, h('span', { html: icon('stop') }), 'Detener'));
     this.kb = this.keyboardBar();
-    // Pantalla en vivo: tocarla abre la vista completa (con «Tomar el control»). La ✕ detiene al agente.
+    // Pantalla en vivo dentro de la ventana del navegador. En la tarjeta, tocarla abre la pantalla completa.
     this.badge = h('span', { class: 'cc-badge', 'data-no-i18n': '' }, 'Modo lectura');
     this.screen = h('div', { class: 'cc-screen', role: 'button', tabindex: '0', 'aria-label': 'Ver el ordenador virtual en pantalla completa' },
       this.view, this.badge, h('span', { class: 'cc-zoom', 'aria-hidden': 'true', html: icon('expand') }));
-    this.screen.addEventListener('click', (e) => { if (!this.el.classList.contains('is-full')) { e.preventDefault(); this.toggleFull(true); } });
+    this.screen.addEventListener('click', (e) => { if (!this.el.classList.contains('is-full') && !(this.state && this.state.status === 'takeover')) { e.preventDefault(); this.toggleFull(true); } });
     this.screen.addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && !this.el.classList.contains('is-full') && e.target === this.screen) { e.preventDefault(); this.toggleFull(true); } });
     this.xBtn = h('button', { class: 'cc-x', type: 'button', 'aria-label': 'Detener al agente', title: 'Detener', html: icon('close'), onclick: (e) => { e.stopPropagation(); this.stop(); } });
     this.lineText = h('span', { class: 'cc-text', 'data-no-i18n': '' }, 'Encendiendo el ordenador virtual…');
@@ -153,44 +155,46 @@ export class AgentBrowserCard {
     this.head = h('header', { class: 'ab-head' }, h('span', { class: 'ab-title', html: icon('monitor') + '<span>' + VPC_NAME + '</span>' }), this.pill, h('span', { class: 'ab-actions' }, this.fullBtn, this.stopBtn));
     this.buildWindow();
     this.buildDesktop();
+    // Avisos, aprobaciones, formularios y preguntas: debajo del escritorio en el chat; flotando sobre él en pantalla completa.
+    this.dock = h('div', { class: 'vos-dock' }, this.notice, this.asks, this.approvals);
     this.el = h('section', { class: 'ab-card cc vpc vpc-os', 'aria-label': VPC_NAME, 'data-status': 'starting' },
-      this.head, this.desk, this.task, this.help,
-      this.modeNote, this.miniSteps, this.foot, this.sum,
-      this.modeBar, this.addr, this.kb, this.controls, this.notice, this.asks, this.approvals, this.planBox, this.stepsBox, this.filesBox, this.result);
+      this.desk, this.task, this.sum, this.dock);
     this.o.thread.append(this.el);
+    this.os.layout();
     this.o.onScroll && this.o.onScroll();
   }
 
-  /** Ventana tipo escritorio remoto: barra de título (tiempo, ayuda, plegar, pantalla completa, Detener) y dirección. */
+  /** Ventana del navegador: dirección, herramientas (Tomar el control, Guardar, Detener), aviso de lectura y pantalla. */
   buildWindow() {
     const hid = 'vpc-help-' + Math.random().toString(36).slice(2, 8);
     this.elapsed = h('span', { class: 'vpc-time', title: 'Tiempo de la tarea' }, h('span', { html: icon('clock') }), h('b', { 'data-no-i18n': '', 'aria-label': 'Tiempo de la tarea' }, '0:00'));
-    this.helpBtn = h('button', { class: 'vpc-btn', type: 'button', 'aria-label': '¿Qué es el ordenador virtual?', title: '¿Qué es?', 'aria-expanded': 'false', 'aria-controls': hid, html: icon('info'), onclick: () => this.toggleHelp() });
-    this.foldBtn = h('button', { class: 'vpc-btn', type: 'button', 'aria-label': 'Plegar', title: 'Plegar', 'aria-expanded': 'true', html: icon('collapse'), onclick: () => this.toggleFold() });
-    this.maxBtn = h('button', { class: 'vpc-btn', type: 'button', 'aria-label': 'Pantalla completa', title: 'Pantalla completa', html: icon('expand'), onclick: () => this.toggleFull() });
-    this.vStop = h('button', { class: 'vpc-btn vpc-stop', type: 'button', 'aria-label': 'Detener', title: 'Detener', onclick: () => this.stop() }, h('span', { html: icon('stop') }), h('span', { class: 'vpc-stop-t' }, 'Detener'));
-    // Barra de título de la ventana del navegador: pestaña con el sitio actual y controles propios (plegar, pantalla
-    // completa, Detener). Sin formas ni íconos de otros sistemas operativos.
-    this.tabIc = h('i', { class: 'vpc-tab-ic', 'aria-hidden': 'true' }, '·');
-    this.tabText = h('strong', { class: 'vpc-tab-t', 'data-no-i18n': '' }, VPC_NAME);
-    this.bar = h('header', { class: 'vpc-bar' },
-      h('span', { class: 'vpc-app', 'aria-hidden': 'true', html: icon('globe') }),
-      h('span', { class: 'vpc-title vpc-tab' }, this.tabIc, this.tabText),
-      h('span', { class: 'vpc-acts' }, this.helpBtn, this.foldBtn, this.maxBtn, this.vStop));
+    this.vStop = h('button', { class: 'vpc-btn vpc-stop', type: 'button', 'aria-label': 'Detener al agente', title: 'Detener al agente', onclick: () => this.stop() }, h('span', { html: icon('stop') }), h('span', { class: 'vpc-stop-t' }, 'Detener'));
     this.addrText = h('span', { class: 'vpc-url', 'data-no-i18n': '' }, this.url || 'Preparando…');
     this.modeTag = h('span', { class: 'vpc-mode' }, 'Lectura');
     this.load = h('i', { class: 'vpc-load', 'aria-hidden': 'true' });
     this.vAddr = h('div', { class: 'vpc-addr', role: 'group', 'aria-label': 'Dirección actual' }, h('span', { class: 'vpc-lock', html: icon('lock') }), this.addrText, this.modeTag, this.load);
-    this.help = h('p', { class: 'vpc-help', id: hid, hidden: true }, VPC_HELP);
+    this.controls = h('div', { class: 'vos-tools', hidden: true }, this.takeBtn, this.toolsBtn, h('span', { class: 'vos-sp' }), this.vStop);
+    this.readNote = h('div', { class: 'vos-read', hidden: true, role: 'note' }, h('span', { class: 'vos-read-ic', html: icon('file') }),
+      h('p', {}, h('strong', {}, 'Vista de lectura'), ' ', h('span', { class: 'vos-read-t' }, '')));
+    this.help = h('div', { class: 'vpc-help', id: hid },
+      h('p', {}, VPC_HELP),
+      h('ul', { class: 'vos-rules' },
+        h('li', {}, 'Antes de comprar, pagar, enviar, publicar o postularse, te pide aprobación.'),
+        h('li', {}, 'Si un sitio pide iniciar sesión, aparece un formulario seguro: el modelo de IA no ve tu contraseña.'),
+        h('li', {}, '«Tomar el control» te deja tocar y escribir en la página tú mismo.'),
+        h('li', {}, 'Las capturas en vivo se ven cuando está abierto el navegador real; si solo hace falta leer, verás la «Vista de lectura».')));
     this.miniSteps = h('ol', { class: 'vpc-steps', 'aria-label': 'Pasos', hidden: true });
     this.quota = h('span', { class: 'vpc-quota', 'aria-live': 'polite' }, '');
     this.logoutBtn = h('button', { class: 'vpc-link', type: 'button', hidden: true, onclick: () => this.logoutSessions() }, h('span', { html: icon('logout') }), h('span', { class: 'vpc-link-t' }, 'Cerrar sesiones'));
     this.foot = h('div', { class: 'vpc-foot' }, this.quota, this.logoutBtn);
+    // Compatibilidad: plegar ya no existe (la ventana se minimiza a la barra de tareas).
+    this.foldBtn = h('button', { type: 'button', hidden: true });
+    this.helpBtn = h('button', { type: 'button', hidden: true });
   }
 
   /**
-   * Escritorio propio del ordenador virtual: fondo, accesos (Navegador, Archivos, Pasos, Ayuda), la ventana del
-   * navegador y la barra de tareas (inicio, ventana abierta, estado en vivo, conexión, tiempo y reloj local).
+   * Escritorio de sistema operativo propio (chat/computer-desktop.js): fondo, íconos, ventanas con barra de título,
+   * barra de tareas con inicio, ventanas abiertas, estado, conexión, tiempo, reloj y pantalla completa.
    * El puntero vive en una capa sobre la captura y solo se mueve con acciones reales (ver onPointer).
    */
   buildDesktop() {
@@ -202,63 +206,120 @@ export class AgentBrowserCard {
     // Texto alternativo del paso actual para lectores de pantalla (lo mismo que dice el globo del puntero).
     this.ptrLive = h('span', { class: 'sr-only', 'aria-live': 'polite', 'data-no-i18n': '' });
     this.screen.append(this.ptr, this.ptrLive);
-    const ico = (ic, label, on) => h('button', { class: 'vpc-ico', type: 'button', onclick: on }, h('span', { class: 'vpc-ico-g', html: icon(ic) }), h('span', { class: 'vpc-ico-t' }, label));
-    this.icoFiles = ico('folder', 'Archivos', () => this.openPanel(this.filesBox));
-    this.icoFiles.hidden = true;
-    this.icons = h('nav', { class: 'vpc-icons', 'aria-label': 'Accesos del escritorio' },
-      ico('globe', 'Navegador', () => this.toggleFull(true)), this.icoFiles,
-      ico('check', 'Pasos', () => this.openPanel(this.stepsBox)), ico('info', 'Ayuda', () => this.toggleHelp(true)));
-    this.win = h('div', { class: 'vpc-win' }, this.bar, this.vAddr, h('div', { class: 'cc-frame' }, this.screen, this.xBtn));
-    this.desk = h('div', { class: 'vpc-desk' }, h('div', { class: 'vpc-wall', 'aria-hidden': 'true' }, h('i'), h('i'), h('i')), this.icons, this.win);
-    this.clockT = h('time', { class: 'vpc-clock-t', 'data-no-i18n': '' }, '');
-    this.net = h('span', { class: 'vpc-net', 'data-state': 'ok', role: 'img', 'aria-label': 'Conexión estable', title: 'Conexión estable' }, h('i'), h('i'), h('i'));
-    this.startBtn = h('button', { class: 'vpc-start', type: 'button', 'aria-label': '¿Qué es el ordenador virtual?', title: '¿Qué es?', 'aria-expanded': 'false', 'aria-controls': this.help.id, onclick: () => this.toggleHelp() },
-      h('span', { class: 'vpc-orb', 'aria-hidden': 'true' }, h('i'), h('i')));
-    this.taskWin = h('button', { class: 'vpc-twin', type: 'button', 'aria-label': 'Ventana del navegador: pantalla completa', onclick: () => this.toggleFull() }, h('span', { html: icon('globe') }), h('span', { class: 'vpc-twin-t', 'data-no-i18n': '' }, 'Navegador'));
-    this.task = h('footer', { class: 'vpc-task' }, this.startBtn, this.taskWin, this.line,
-      h('span', { class: 'vpc-tray' }, this.net, this.elapsed, h('span', { class: 'vpc-clock', title: 'Hora local' }, this.clockT)));
+    this.net = h('span', { class: 'vpc-net', 'data-state': 'ok', role: 'img', 'aria-label': 'Conectado al ordenador virtual', title: 'Conectado al ordenador virtual' }, h('i'), h('i'), h('i'));
+    this.os = new VirtualDesktop({ lang: this.o.lang, reduced: this.reduced, line: this.line, net: this.net, elapsed: this.elapsed,
+      onExpand: () => this.toggleFull(), onStop: () => this.stop(), isFull: () => this.el && this.el.classList.contains('is-full'),
+      onOpen: (id) => { if (id === 'tasks') this.loadTasks(); } });
+    this.os.menuExtra.append(this.logoutBtn);
+    // Ventanas: navegador (abierto) y las aplicaciones del escritorio.
+    this.os.addWindow('browser', { title: 'Navegador', label: 'Ventana del navegador',
+      body: h('div', { class: 'vos-browser' }, this.vAddr, this.controls, this.readNote, h('div', { class: 'cc-frame' }, this.screen, this.xBtn), this.kb) });
+    this.filesEmpty = h('div', { class: 'vos-empty' }, h('span', { html: icon('folder') }), h('strong', {}, 'Todavía no hay archivos'), h('p', {}, 'Los informes, tablas, capturas y PDF que arme el agente aparecen aquí.'));
+    this.os.addWindow('files', { title: 'Archivos', body: h('div', { class: 'vos-app-body' }, this.filesBox, this.filesEmpty) });
+    // Actividad: registro real del agente (pedido, resultado, plan, pasos, modo y minutos del día).
+    this.goalBox = h('div', { class: 'vos-goal' }, h('small', {}, 'Pedido'), h('p', { 'data-no-i18n': '' }, this.goal || '—'));
+    this.planEmpty = h('p', { class: 'vos-muted' }, 'El plan aparece aquí apenas el agente lo arma.');
+    this.os.addWindow('activity', { title: 'Actividad', body: h('div', { class: 'vos-app-body vos-activity' }, this.goalBox, this.result, this.planBox, this.planEmpty, this.modeBar, this.stepsBox, this.foot) });
+    // Tareas: las tareas programadas reales de la cuenta (servidor /api/tasks). Se cargan al abrir la ventana.
+    this.tasksBox = h('div', { class: 'vos-tasks', 'aria-live': 'polite' });
+    this.os.addWindow('tasks', { title: 'Tareas programadas', label: 'Tareas programadas', body: h('div', { class: 'vos-app-body' }, this.tasksBox) });
+    this.os.addWindow('help', { title: 'Ayuda', body: h('div', { class: 'vos-app-body' }, this.help) });
+    this.os.open('browser');
+    this.desk = this.os.desk; this.task = this.os.bar; this.win = this.os.wins.browser.el;
+    this.maxBtn = this.os.expandBtn; this.startBtn = this.os.startBtn;
     this.renderTaskClock();
-    // La capa del puntero sigue a la pantalla si cambia de tamaño (girar el celular, pantalla completa).
+    // La capa del puntero sigue a la pantalla si cambia de tamaño (girar el celular, mover o agrandar la ventana).
     if (typeof ResizeObserver === 'function') { this._ro = new ResizeObserver(() => { this.ptr.classList.remove('has-bubble'); this.placeCursor(); }); this._ro.observe(this.screen); }
-    this._online = () => this.kick();
+    this._online = () => { this.setNet('ok'); this.kick(); };
+    this._offline = () => this.setNet('off');
     this._vis = () => { if (!document.hidden) this.kick(); };
     window.addEventListener('online', this._online);
+    window.addEventListener('offline', this._offline);
     document.addEventListener('visibilitychange', this._vis);
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) this.setNet('off');
   }
 
-  /** Abre la pantalla completa y lleva a un panel (Archivos, Pasos). */
+  /** Abre una aplicación del escritorio (Archivos, Tareas, Actividad…). */
   openPanel(el) {
-    this.toggleFull(true);
-    if (!el || el.hidden) return;
-    if (el.tagName === 'DETAILS') el.open = true;
-    setTimeout(() => { el.scrollIntoView({ block: 'start', behavior: this.reduced ? 'auto' : 'smooth' }); const f = el.querySelector('summary, button, a'); if (f) f.focus({ preventScroll: true }); }, 60);
+    const id = el === this.filesBox ? 'files' : el === this.stepsBox || el === this.planBox || el === this.result ? 'activity' : 'browser';
+    this.os.open(id);
   }
 
-  /** Reloj de la barra de tareas (hora local de la persona). */
+  /** Reloj y fecha de la barra de tareas: el reloj real del dispositivo de la persona. */
   renderTaskClock() {
-    if (!this.clockT) return;
-    const d = new Date(Date.now() + (this.skew || 0));
-    const t = d.toLocaleTimeString(this.o.lang || 'es', { hour: '2-digit', minute: '2-digit' });
-    if (this.clockT.textContent !== t) { this.clockT.textContent = t; this.clockT.dateTime = d.toISOString(); }
+    if (!this.os) return;
+    this.os.renderClock(new Date(), this.o.lang || 'es');
   }
 
-  /** Pestaña de la ventana: título de la página (o el sitio) y su inicial. */
+  /**
+   * Ventana «Tareas programadas»: lista real de la cuenta (GET /api/tasks) con estado, horario y última ejecución;
+   * «Ejecutar ahora» llama al servidor (POST /api/tasks/:id/run). Se administran en Tu cuenta → Tareas.
+   */
+  async loadTasks() {
+    const box = this.tasksBox; if (!box) return;
+    const manage = h('a', { class: 'vos-link', href: '#cuenta/tareas', onclick: () => { if (this.el.classList.contains('is-full')) this.toggleFull(false); } }, h('span', { html: icon('settings') }), 'Administrar tareas');
+    const reload = h('button', { class: 'vos-link', type: 'button', onclick: () => this.loadTasks() }, h('span', { html: icon('refresh') }), 'Actualizar');
+    box.replaceChildren(h('p', { class: 'vos-muted' }, 'Cargando tus tareas programadas…'));
+    let data;
+    try { data = await this.api('/api/tasks', { method: 'GET' }); }
+    catch (e) {
+      box.replaceChildren(h('div', { class: 'vos-empty' }, h('span', { html: icon(e.status === 401 ? 'user' : 'warn') }),
+        h('strong', {}, e.status === 401 ? 'Ingresa con tu cuenta' : 'No pude cargar tus tareas'),
+        h('p', {}, e.status === 401 ? 'Las tareas programadas son de tu cuenta.' : 'Revisa tu conexión y vuelve a intentarlo.'), reload));
+      return;
+    }
+    const tasks = Array.isArray(data && data.tasks) ? data.tasks : [];
+    const active = tasks.filter((t) => t.status === 'active').length;
+    const head = h('div', { class: 'vos-tasks-h' }, h('p', { class: 'vos-muted' }, `${active} de ${data.max || tasks.length} activas · horas de Argentina`), h('span', { class: 'vos-tasks-acts' }, reload, manage));
+    if (!tasks.length) {
+      box.replaceChildren(head, h('div', { class: 'vos-empty' }, h('span', { html: icon('clock') }), h('strong', {}, 'Todavía no tienes tareas programadas'),
+        h('p', {}, 'Por ejemplo: buscar empleo todos los días a las 9 o un resumen web semanal. Se crean en Tu cuenta → Tareas.')));
+      return;
+    }
+    const when = (ts) => { try { return new Date(ts).toLocaleString(this.o.lang || 'es', { timeZone: 'America/Argentina/Buenos_Aires', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', ...(/^en/i.test(this.o.lang || '') ? {} : { hourCycle: 'h23' }) }); } catch { return ''; } };
+    box.replaceChildren(head, h('ul', { class: 'vos-task-list' }, ...tasks.map((t) => {
+      const r = t.lastRun;
+      const run = h('button', { class: 'vos-link', type: 'button', onclick: async () => {
+        run.disabled = true; run.lastChild.textContent = 'Ejecutando…';
+        try { await this.api(`/api/tasks/${t.id}/run`, { body: {} }); this.os.toast(`«${t.title}» se está ejecutando.`); setTimeout(() => this.loadTasks(), 1500); }
+        catch (e) { run.disabled = false; run.lastChild.textContent = 'Ejecutar ahora'; this.os.toast(e.status === 429 ? 'Espera un momento antes de volver a ejecutarla.' : 'No pude ejecutarla ahora.'); }
+      } }, h('span', { html: icon('play') }), h('span', {}, 'Ejecutar ahora'));
+      return h('li', { class: 'vos-task' },
+        h('div', { class: 'vos-task-t' }, h('strong', { 'data-no-i18n': '' }, t.title || 'Tarea'), h('span', { class: 'vos-chip' + (t.status === 'active' ? ' is-on' : '') }, t.status === 'active' ? 'Activa' : 'Pausada')),
+        t.schedule ? h('small', { class: 'vos-muted', 'data-no-i18n': '' }, t.schedule) : null,
+        r ? h('p', { class: 'vos-task-r', 'data-no-i18n': '' }, `${r.status === 'ok' ? 'Último resultado' : r.status === 'running' ? 'En curso' : 'Última ejecución con problemas'} · ${when(r.startedAt)}${r.summary ? ' — ' + String(r.summary).slice(0, 160) : ''}`) : h('p', { class: 'vos-task-r vos-muted' }, 'Todavía no se ejecutó.'),
+        h('div', { class: 'vos-task-a' }, run));
+    })));
+  }
+
+  /** Título de la ventana del navegador: título de la página (o el sitio). Archivos: número en el ícono. */
   renderTab(s) {
     const hst = s.host || host(s.url || '') || (s.reader && s.reader.host) || '';
     const title = String((s.mode === 'browser' ? s.title : s.reader && s.reader.title) || '').replace(/^\s*(null|undefined)\s*$/i, '').trim();
-    this.tabText.textContent = title || hst || VPC_NAME;
-    this.tabText.title = title && hst ? `${title} · ${hst}` : title || hst;
-    this.tabIc.textContent = (hst || 'o').charAt(0).toUpperCase();
-    this.taskWin.querySelector('.vpc-twin-t').textContent = hst || 'Navegador';
-    this.icoFiles.hidden = !(s.files || []).length;
+    const shown = title || hst || 'Navegador';
+    this.os.setTitle('browser', shown, title && hst ? `${title} · ${hst}` : shown);
     const n = (s.files || []).length;
-    this.icoFiles.querySelector('.vpc-ico-t').textContent = n ? `Archivos (${n})` : 'Archivos';
+    this.os.setBadge('files', n);
+    this.filesEmpty.hidden = n > 0;
+    this.planEmpty.hidden = (s.plan || []).length > 0 || s.status === 'done';
+    const rn = this.lastShot ? null : readingNote(s);
+    const hasPage = !!(s.reader && s.reader.kind && s.reader.kind !== 'none');
+    this.readNote.hidden = !rn || !hasPage;
+    if (rn) { this.readNote.dataset.kind = rn.kind; this.readNote.querySelector('.vos-read-t').textContent = rn.text; }
+    // Al terminar en pantalla completa se abre «Actividad» con el resultado (una vez).
+    if (s.status === 'done' && !this._doneShown) { this._doneShown = true; if (this.el && this.el.classList.contains('is-full')) this.os.open('activity'); else this.os.toast('Tarea terminada. El resultado está en «Actividad».'); }
+    if (s.status !== 'done') this._doneShown = false;
   }
 
   /** Estado de la conexión con el servidor (barra de tareas). */
   setNet(state) {
-    if (!this.net || this.net.dataset.state === state) return;
-    const t = state === 'ok' ? 'Conexión estable' : state === 'retry' ? 'Reconectando…' : 'Sin conexión';
+    if (!this.net) return;
+    if (state === 'ok' && typeof navigator !== 'undefined' && navigator.onLine === false) state = 'off';
+    // Tipo de conexión real del dispositivo cuando el navegador lo informa (Chrome/Android: 4g, 3g…).
+    const c = typeof navigator !== 'undefined' && navigator.connection;
+    const kind = c && c.effectiveType ? ` · ${String(c.effectiveType).toUpperCase()}` : '';
+    const t = state === 'ok' ? 'Conectado al ordenador virtual' + kind : state === 'retry' ? 'Reconectando…' : 'Sin conexión a internet';
+    if (this.net.dataset.state === state && this.net.title === t) return;
     this.net.dataset.state = state; this.net.setAttribute('aria-label', t); this.net.title = t;
   }
 
@@ -445,11 +506,12 @@ export class AgentBrowserCard {
     this.load.classList.remove('on');
   }
 
+  /** «Ayuda» del menú de inicio: ventana con qué es el ordenador virtual y sus reglas. */
   toggleHelp(force) {
-    const on = typeof force === 'boolean' ? force : this.help.hidden;
-    this.help.hidden = !on;
-    this.helpBtn.setAttribute('aria-expanded', String(on));
-    if (this.startBtn) this.startBtn.setAttribute('aria-expanded', String(on));
+    const w = this.os && this.os.wins.help;
+    if (!w) return;
+    const on = typeof force === 'boolean' ? force : !(w.open && !w.min);
+    if (on) this.os.open('help'); else this.os.close('help');
   }
 
   toggleFold(force) {
@@ -468,13 +530,14 @@ export class AgentBrowserCard {
     this.addrText.textContent = addr || (s.mode === 'browser' ? 'Página en blanco' : 'Sin página abierta todavía');
     this.addrText.title = addr;
     const browser = s.mode === 'browser';
-    this.modeTag.textContent = browser ? 'En vivo' : 'Lectura';
+    this.modeTag.textContent = browser ? 'En vivo' : this.lastShot ? 'Última captura' : 'Lectura';
     this.modeTag.classList.toggle('is-live', browser);
-    this.modeTag.title = browser ? 'Navegador en la nube abierto' : 'Leo la página como texto (no gasta minutos)';
+    this.modeTag.title = browser ? 'Navegador en la nube abierto' : this.lastShot ? 'Captura real del último momento; el navegador ya se cerró' : 'Leo la página como texto (no gasta minutos)';
     const steps = (s.steps || []).slice(-3);
     this.miniSteps.hidden = !steps.length;
     this.miniSteps.replaceChildren(...steps.map((x) => h('li', { class: 'st-' + x.status }, h('span', { class: 'st-ic', 'aria-hidden': 'true' }), h('span', { 'data-no-i18n': '' }, x.label))));
     this.quota.textContent = quotaText(s);
+    if (this.os) this.os.quota.textContent = quotaText(s);
     const hosts = Array.isArray(s.jarHosts) ? s.jarHosts : [];
     this.logoutBtn.hidden = !hosts.length;
     if (hosts.length) { this.logoutBtn.title = 'Sesiones guardadas (cifradas): ' + hosts.join(', '); this.logoutBtn.querySelector('.vpc-link-t').textContent = `Cerrar sesiones (${hosts.length})`; }
@@ -665,11 +728,14 @@ export class AgentBrowserCard {
   apply(s) {
     if (!s || !s.status) return;
     this.state = s;
-    const browser = s.mode === 'browser';
+    // Al terminar, el servidor cierra el navegador (modo «light»): se queda a la vista la última captura REAL que se
+    // vio, en lugar de pasar a la vista de lectura como si nunca se hubiera abierto el navegador.
+    this.lastShot = (s.status === 'done' || s.status === 'ended') && s.mode !== 'browser' && this.shownAt > 0;
+    const browser = s.mode === 'browser' || this.lastShot;
     this.view.classList.toggle('is-reader', !browser);
     this.view.classList.toggle('is-browser', browser);
     if (typeof s.now === 'number') this.skew = s.now - Date.now();   // reloj del servidor (sin desfase del dispositivo)
-    if (s.image && this.img && browser) this.setFrame(s.image, s.shotAt);
+    if (s.image && this.img && s.mode === 'browser') this.setFrame(s.image, s.shotAt);
     if (s.viewport && browser) this.view.style.setProperty('--ab-ar', `${s.viewport.width} / ${s.viewport.height}`);
     if (!browser) this.renderReader(s);
     if (s.url) { this.addr.hidden = false; this.addr.querySelector('.ab-addr-t').textContent = s.host || host(s.url); }
@@ -998,7 +1064,7 @@ export class AgentBrowserCard {
     // Terminada: ya no cambia nada (antes se seguía consultando cada 8 s para siempre).
     if (st === 'done' && !this.stepping && ok) return;
     const fast = st === 'takeover' || st === 'acting' || st === 'thinking' || this.stepping;
-    // Pantalla en vivo: cada ~1,2 s mientras trabaja (el servidor saca una captura nueva cada 1,5 s); 2 s en espera.
+    // Pantalla en vivo: cada ~1,2 s mientras trabaja o mientras la persona tiene el control (el servidor saca una captura nueva cada 1,5 s); 2 s en espera.
     const base = document.hidden ? 6000 : fast ? 1200 : st === 'queued' ? 4000 : 2000;
     const wait = ok ? base : Math.min(15_000, 1500 * 2 ** Math.min(4, this.netFails - 1));
     this.timer = setTimeout(() => this.poll(), wait);
@@ -1015,6 +1081,7 @@ export class AgentBrowserCard {
   /** Suelta escuchas globales (red, pestaña, tamaño) cuando la tarjeta deja de estar activa. */
   unlisten() {
     window.removeEventListener('online', this._online);
+    window.removeEventListener('offline', this._offline);
     document.removeEventListener('visibilitychange', this._vis);
     clearTimeout(this.loopT);
     this.evq = [];
@@ -1025,6 +1092,7 @@ export class AgentBrowserCard {
   detach() {
     this.stopped = true; clearTimeout(this.timer); clearInterval(this.tick); this.unlisten();
     if (this.el.classList.contains('is-full')) this.toggleFull(false);
+    if (this.os) this.os.destroy();
     this.el.classList.add('is-detached'); this.controls.hidden = true; this.stopBtn.hidden = true; this.vStop.hidden = true; this.xBtn.hidden = true;
     if (this.state && !['done', 'ended'].includes(this.state.status)) this.renderSummary({ ...this.state, status: 'ended', endedReason: 'detached', canResume: false }, true);
   }
@@ -1052,7 +1120,7 @@ export class AgentBrowserCard {
     try {
       const s = await this.api('/api/agent/browser/resume', { body: {} });
       this.stopped = false; this._endedShown = false;
-      window.addEventListener('online', this._online); document.addEventListener('visibilitychange', this._vis);
+      window.addEventListener('online', this._online); window.addEventListener('offline', this._offline); document.addEventListener('visibilitychange', this._vis);
       this.controls.hidden = false; this.stopBtn.hidden = false; this.vStop.hidden = false; this.result.hidden = true; this.xBtn.hidden = false;
       this.apply(s);
       clearInterval(this.tick);
@@ -1077,13 +1145,13 @@ export class AgentBrowserCard {
     if (f) this.el.setAttribute('aria-modal', 'true'); else this.el.removeAttribute('aria-modal');
     this.screen.setAttribute('tabindex', f ? '-1' : '0');
     document.body.classList.toggle('ab-lock', f);
-    this.maxBtn.innerHTML = icon(f ? 'collapse' : 'expand');
-    this.maxBtn.setAttribute('aria-label', f ? 'Salir de pantalla completa' : 'Pantalla completa'); this.maxBtn.title = f ? 'Salir de pantalla completa' : 'Pantalla completa';
+    this.os.setFull(f);
+    if (!f) this.os.toggleStart(false);
     if (f && this.el.classList.contains('is-folded')) this.toggleFold(false);
     if (f) {
       // Escape cierra; Tab queda dentro de la ventana (diálogo modal).
       this._esc = (e) => {
-        if (e.key === 'Escape') return this.toggleFull(false);
+        if (e.key === 'Escape') { if (!this.os.menu.hidden) { this.os.toggleStart(false); return; } return this.toggleFull(false); }
         if (e.key !== 'Tab') return;
         const list = [...this.el.querySelectorAll('button:not([disabled]), a[href], input:not([disabled]):not([type=hidden]), summary, [tabindex="0"]')].filter((x) => x.offsetParent !== null || x === document.activeElement);
         if (!list.length) return;

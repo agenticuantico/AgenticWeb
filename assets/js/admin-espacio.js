@@ -5,8 +5,8 @@
  */
 import { h, icon, toast, confirmDialog, modal } from './ui.js';
 import { api } from './admin-staff.js';
-import { download } from './admin-indicadores.js?v=7.20.0';
-import { renderReception, renderRequests } from './admin-escritorio.js?v=7.20.0';
+import { download } from './admin-indicadores.js?v=7.23.0';
+import { renderReception, renderRequests } from './admin-escritorio.js?v=7.23.0';
 
 const ERRW = {
   forbidden_channel: 'Tu rol no tiene acceso a este canal.', empty_message: 'Escribe algo antes de mandar.', rate_limited: 'Vas muy rápido: espera un minuto.',

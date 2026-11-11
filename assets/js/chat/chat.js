@@ -14,19 +14,20 @@ import { renderMarkdown, looksLikeMarkdown } from './md.js';
 import { LANGS, getLang, flagUrl, startLang } from './languages.js';
 const SITE_IDS = ['es-AR', 'es-ES', 'en-US', 'pt-BR'];
 import { AGENTS, TOOLS, SKILLS, CONNECTORS, agentById, initials } from './agents.js';
-import { speak, stop as stopSpeech } from './voice.js?v=7.20.0';
+import { speak, stop as stopSpeech } from './voice.js?v=7.23.0';
 import { VoiceRecorder, fmtClock } from './recorder.js';
 import { readFile, fmtSize } from './docs.js';
 // Rendimiento (Fase 3): la computadora del agente y la videollamada se cargan recién cuando se usan.
-import { needsWebAction, isFollowUp } from './intent.js?v=7.20.0';
-import { decideRoute, OVERRIDES, ROUTE_LABEL } from './router.js?v=7.20.0';
-import { workScreen, fmtElapsed } from './work-screen.js?v=7.20.0';
-import { openComputerPanel } from './computer-panel.js?v=7.20.0';
-import { lastWebArtifact } from './iterate.js?v=7.20.0';
+import { needsWebAction, isFollowUp } from './intent.js?v=7.23.0';
+import { decideRoute, OVERRIDES, ROUTE_LABEL } from './router.js?v=7.23.0';
+import { workScreen, fmtElapsed } from './work-screen.js?v=7.23.0';
+import { openComputerPanel } from './computer-panel.js?v=7.23.0';
+import { lastWebArtifact } from './iterate.js?v=7.23.0';
 import { detectMediaIntent, mediaMessage, mediaCard, isMediaMessage, runMedia as runMediaTask } from './media.js';
 import { cleanArtifact, cleanThought } from './clean.js';
 import { PreviewCard, LiveFrame, previewKind, previewHtml, isPreviewable } from './preview-card.js';
 import { toolBlock, wantsTools } from './tool-cards.js';
+import { SiteCard } from './site-card.js?v=7.23.0';
 
 const MODES = {
   fast: { label: 'Rápido', short: 'Rápido', icon: 'bolt', desc: 'Respuestas al instante' },
@@ -35,9 +36,9 @@ const MODES = {
 };
 
 const PHASES = { thinking: 'Pensando', searching: 'Buscando', coding: 'Escribiendo código', verifying: 'Verificando', reading: 'Leyendo', agent: 'Especialista', confirm: 'Confirmación' };
-const FACE = '/media/avatar/face-256.webp?v=7.20.0';
-const FACE_SET = '/media/avatar/face-128.webp?v=7.20.0 128w, /media/avatar/face-256.webp?v=7.20.0 256w, /media/avatar/face-512.webp?v=7.20.0 512w';
-const FACE_PNG = '/media/avatar/face-256.png?v=7.20.0';
+const FACE = '/media/avatar/face-256.webp?v=7.23.0';
+const FACE_SET = '/media/avatar/face-128.webp?v=7.23.0 128w, /media/avatar/face-256.webp?v=7.23.0 256w, /media/avatar/face-512.webp?v=7.23.0 512w';
+const FACE_PNG = '/media/avatar/face-256.png?v=7.23.0';
 
 const SUGGESTIONS = [
   { t: '¿Qué es AgentiCuántico?', i: 'info' },
@@ -504,7 +505,7 @@ export class ChatApp {
     if (!this.flag('voice')) return;
     const show = () => { const st = this.avatar.state; this._call.open(this.$('form') || this.root); this._call.setState(st); };
     if (this._call) { show(); return; }
-    import('./avatar-call.js?v=7.20.0').then(({ getAvatarCall }) => {
+    import('./avatar-call.js?v=7.23.0').then(({ getAvatarCall }) => {
       if (!this._call) { this._call = getAvatarCall(); this._call.onClose = () => { stopSpeech(); if (this.handsFree) this.act_handsfree(); }; }
       show();
     }).catch(() => {});
@@ -660,7 +661,8 @@ export class ChatApp {
     else if (route === 'search' && !follow) msg._search = true;
     else if (!detectMediaIntent(text) && (route === 'browser' || follow)) {
       msg._browser = true;
-      await this.openBrowserCard(text);
+      // Botón «Ordenador»: se abre el navegador real desde el primer paso (antes quedaba en modo lectura).
+      await this.openBrowserCard(text, { explicit: decision.why === 'computer-button' });
     }
     // "Recuerda que…" → memoria explícita
     const mem = /^(record[aá]|recuerda|acordate|acu[eé]rdate|guard[aá] en (tu )?memoria)( que)?\s+(.{4,300})$/i.exec(text);
@@ -672,12 +674,12 @@ export class ChatApp {
   }
 
   /** Abre la computadora del agente (tarjeta en vivo) con un pedido. */
-  async openBrowserCard(text) {
+  async openBrowserCard(text, opts = {}) {
     if (this.browserCard) this.browserCard.detach();
     const chatId = this.chat.id;
-    const { AgentBrowserCard } = await import('../agent-browser.js?v=7.20.0');
+    const { AgentBrowserCard } = await import('../agent-browser.js?v=7.23.0');
     this.browserCard = new AgentBrowserCard({
-      thread: this.$('inner'), composer: this.$('form'), text, conv: chatId, lang: this.lang.code, isPaid: this.isPaid,
+      thread: this.$('inner'), composer: this.$('form'), text, explicit: opts.explicit === true, conv: chatId, lang: this.lang.code, isPaid: this.isPaid,
       idToken: this.user ? () => this.user.getIdToken() : null, onScroll: () => this.scrollToEnd(true),
       onFiles: (files) => this.browserFiles(chatId, files)
     });
@@ -952,6 +954,7 @@ export class ChatApp {
         else if (ev.type === 'log') { (a.logs[ev.id] = a.logs[ev.id] || []).push(ev.text); }
         else if (ev.type === 'agent') { (a.logs[ev.id] = a.logs[ev.id] || []).push(`${ev.agent.name}: listo.`); this.pushMessage({ id: uid('m'), role: 'assistant', content: ev.text, at: Date.now(), agent: ev.agent }); }
         else if (ev.type === 'artifact' || ev.type === 'artifact_delta') this.onArtifact(a, ev);
+        else if (ev.type === 'site') { a.site = { id: ev.id, previewUrl: ev.previewUrl, zipUrl: ev.zipUrl, meta: ev.meta, brief: ev.brief }; }
         else if (typeof ev.delta === 'string') a.content += ev.delta;
         else if (ev.type === 'error') a.content += '\n\n' + (ev.message || 'Hubo un error en un paso.');
         this.updateMessage(a);
@@ -1157,6 +1160,12 @@ export class ChatApp {
       }
       const rest = m.artifacts.filter((x) => !isPreviewable(x));
       if (rest.length) body.append(this.filesList(m, rest));
+    }
+    if (m.site && m.site.id) {
+      // Sitio web premium: vista previa multipágina + «Descargar .zip» (el servidor exige plan pago). Un solo nodo por mensaje.
+      if (!m._siteCard) Object.defineProperty(m, '_siteCard', { value: new SiteCard(m.site, { lang: this.lang.code, onUpdate: (site) => { m.site = site; this.persist && this.persist(); } }), enumerable: false, writable: true });
+      const card = m._siteCard.el;
+      if (slots && card.isConnected) { const slot = h('i', { class: 'pvc-slot' }); slot._card = card; body.append(slot); } else body.append(card);
     }
     if (m.search) body.append(this.searchCard(m));
     const md = h('div', { class: 'md' });

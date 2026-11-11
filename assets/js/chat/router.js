@@ -11,8 +11,8 @@
  * Ajuste manual opcional (escondido en «Ajustes de respuesta», apagado por defecto):
  *  'smart' (automático) | 'fast' | 'deep' | 'auto' (agente). Con un modo fijo se respeta el comportamiento anterior.
  */
-import { EXPLICIT_SEARCH, BROWSER_ACTION, RESEARCH, routeWebIntent, needsWebAction, wantsComputer } from './intent.js?v=7.20.0';
-import { isIterateOrder } from './iterate.js?v=7.20.0';
+import { EXPLICIT_SEARCH, BROWSER_ACTION, RESEARCH, routeWebIntent, needsWebAction, wantsComputer } from './intent.js?v=7.23.0';
+import { isIterateOrder } from './iterate.js?v=7.23.0';
 
 const W = '(?![\\wáéíóúñ])';
 

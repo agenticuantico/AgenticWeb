@@ -31,6 +31,7 @@ export function serializeChat(c) {
       attachments: (m.attachments || []).map((a) => ({ name: a.name, kind: a.kind, size: a.size })).slice(0, 10),
       agent: m.agent ? { id: m.agent.id, name: m.agent.name, color: m.agent.color } : null,
       steps: m.steps ? m.steps.slice(0, 30).map((s) => ({ id: s.id, title: s.title, status: s.status, phase: s.phase })) : null,
+      site: m.site && m.site.id ? { id: m.site.id, previewUrl: m.site.previewUrl, zipUrl: m.site.zipUrl, meta: m.site.meta, brief: m.site.brief } : null,
       artifacts: m.artifacts ? m.artifacts.slice(0, 4).map((a) => ({ name: a.name, mime: a.mime, content: String(a.content || '').slice(0, 120000) })) : null
     }))
   };

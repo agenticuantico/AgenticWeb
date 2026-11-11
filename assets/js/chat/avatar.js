@@ -18,7 +18,7 @@
  */
 import { prefersReducedMotion } from '../ui.js';
 
-const V = '7.20.0';
+const V = '7.23.0';
 const IMG_W = 640, IMG_H = 954;
 /* Capas sobre la cara (x, y, ancho, alto en % de la imagen); salen de tooling/avatar/build_sprites.py */
 const PATCH = {

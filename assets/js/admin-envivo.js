@@ -5,8 +5,8 @@
  * Ingresos: nunca (el servidor oculta montos). Los textos se pintan como texto, nunca como HTML.
  */
 import { h, icon, toast } from './ui.js';
-import { api } from './admin-staff.js?v=7.20.0';
-import { download } from './admin-indicadores.js?v=7.20.0';
+import { api } from './admin-staff.js?v=7.23.0';
+import { download } from './admin-indicadores.js?v=7.23.0';
 
 const TYPE = { orden: 'Orden', delegacion: 'Delegación', resultado: 'Resultado', propuesta: 'Propuesta', decision: 'Decisión', recomendacion: 'Recomendación', entrenamiento: 'Entrenamiento', puesto: 'Puesto', ascenso: 'Ascenso' };
 const TCLS = { orden: 'info', delegacion: 'info', resultado: 'ok', propuesta: 'gold', decision: 'ok', recomendacion: 'warn', entrenamiento: '', puesto: '', ascenso: '' };

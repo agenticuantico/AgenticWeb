@@ -1,5 +1,5 @@
 /** /planes.html: planes con login previo y ventana de pago (Mercado Pago y PayPal). */
-import { mountPlans, openPayModal } from './plans.js?v=7.20.0';
+import { mountPlans, openPayModal } from './plans.js?v=7.23.0';
 import { watchUser, getProfile, mightBeSignedIn } from './auth.js';
 
 const mount = document.getElementById('plansFull');

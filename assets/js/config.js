@@ -42,15 +42,15 @@ export const CONFIG = Object.freeze({
 export const PLANS = [
   {
     id: 'gratis', name: 'Gratis', tagline: 'Todas las funciones, para probar con calma.',
-    features: ['Todas las funciones de AgentiCuántico', '20 mensajes por día', '8 búsquedas web en vivo por día', '3 búsquedas de empleo y 3 postulaciones automáticas por día', '30 acciones con tus cuentas conectadas por día', '2 tareas programadas activas']
+    features: ['Todas las funciones de AgentiCuántico', '20 mensajes por día', '8 búsquedas web en vivo por día', '3 búsquedas de empleo y 3 postulaciones automáticas por día', '30 acciones con tus cuentas conectadas por día', '2 tareas programadas activas', 'Sitios web premium: vista previa en el chat']
   },
   {
     id: 'pro', name: 'Pro', tagline: 'Para profesionales y creadores.', featured: true,
-    features: ['Todas las funciones de AgentiCuántico', '500 mensajes por día', '60 búsquedas web en vivo por día', '30 búsquedas de empleo y 15 postulaciones automáticas por día', '300 acciones con tus cuentas conectadas por día', '10 tareas programadas activas']
+    features: ['Todas las funciones de AgentiCuántico', '500 mensajes por día', '60 búsquedas web en vivo por día', '30 búsquedas de empleo y 15 postulaciones automáticas por día', '300 acciones con tus cuentas conectadas por día', '10 tareas programadas activas', 'Sitios web premium descargables (.zip listo para publicar)']
   },
   {
     id: 'empresa', name: 'Empresa', tagline: 'Para equipos y uso intensivo.',
-    features: ['Todas las funciones de AgentiCuántico', '3000 mensajes por día', '200 búsquedas web en vivo por día', '100 búsquedas de empleo y 40 postulaciones automáticas por día', '1500 acciones con tus cuentas conectadas por día', '30 tareas programadas activas y soporte prioritario por correo']
+    features: ['Todas las funciones de AgentiCuántico', '3000 mensajes por día', '200 búsquedas web en vivo por día', '100 búsquedas de empleo y 40 postulaciones automáticas por día', '1500 acciones con tus cuentas conectadas por día', '30 tareas programadas activas y soporte prioritario por correo', 'Sitios web premium descargables (.zip listo para publicar)']
   }
 ];
 

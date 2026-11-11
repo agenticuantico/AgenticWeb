@@ -87,6 +87,8 @@ export function setIdTokenProvider(fn) { idToken = fn; }
 /** ¿Hay una cuenta iniciada? (lo usan el área Cuenta y el chat con herramientas). */
 export function hasAccount() { return typeof idToken === 'function'; }
 
+/** URL absoluta del servidor para un recurso (p. ej. la vista previa aislada de un sitio generado). */
+export function apiUrl(path) { return (state.base || '') + path; }
 /** Llamada autenticada al servidor (la usan media.js y otros módulos del chat). */
 export function apiFetch(path, opts) { return api(path, opts); }
 async function api(path, { method = 'GET', body, signal, raw } = {}) {
