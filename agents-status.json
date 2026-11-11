@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-11T00:22:50.441Z",
+  "updated": "2026-11-11T00:31:44.207Z",
   "source": "agentes-24-7",
   "note": "Estado público del equipo de agentes del sitio. Lo actualiza el workflow Agentes 24/7 (solo datos).",
   "agents": [
@@ -31,7 +31,7 @@
       "role": "Textos alternativos y nombres accesibles",
       "emoji": "♿",
       "auto": true,
-      "status": "activo",
+      "status": "espera",
       "last_activity": "Revisó su área y no encontró nada para arreglar.",
       "last_run": "2026-11-11T00:22:37.070Z",
       "pr": null
@@ -42,7 +42,7 @@
       "role": "Carga diferida de imágenes",
       "emoji": "⚡",
       "auto": true,
-      "status": "activo",
+      "status": "espera",
       "last_activity": "Revisó su área y no encontró nada para arreglar.",
       "last_run": "2026-11-11T00:22:38.612Z",
       "pr": null
@@ -55,8 +55,8 @@
       "auto": false,
       "status": "revision",
       "last_activity": "Propuso una mejora: Optimización de carga de scripts (espera aprobación).",
-      "last_run": "2026-11-11T00:20:18.400Z",
-      "pr": "https://github.com/agenticuantico/AgenticWeb/pull/21"
+      "last_run": "2026-11-11T00:31:22.129Z",
+      "pr": "https://github.com/agenticuantico/AgenticWeb/pull/25"
     },
     {
       "id": "diseno-web",
@@ -66,7 +66,7 @@
       "auto": false,
       "status": "revision",
       "last_activity": "Tiene una propuesta esperando aprobación.",
-      "last_run": "2026-11-11T00:21:03.455Z",
+      "last_run": "2026-11-11T00:31:33.261Z",
       "pr": null
     },
     {
