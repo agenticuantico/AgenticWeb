@@ -7,7 +7,7 @@ html { scroll-behavior: smooth; }
   radial-gradient(40% 50% at 70% 20%, rgba(243, 209, 128, .35), transparent 70%),
   radial-gradient(35% 40% at 15% 10%, rgba(143, 212, 27, .10), transparent 70%); }
 .hero-head { max-width: 860px; margin: 0 auto clamp(24px, 4vw, 40px); text-align: center; }
-.hero h1 { font-size: var(--fs-hero); line-height: 1.1; letter-spacing: -.015em; margin-bottom: 18px; }
+.hero h1 { font-size: clamp(2rem, 5vw + 1rem, 3.5rem); line-height: 1.1; letter-spacing: -.015em; margin-bottom: 18px; }
 .hero h1 .accent { background: var(--lime); color: #10140a; padding: 0 .16em .04em; border-radius: .18em; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
 .hero .lead { max-width: 640px; margin: 0 auto 26px; }
 .hero-ctas { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 12px; }
