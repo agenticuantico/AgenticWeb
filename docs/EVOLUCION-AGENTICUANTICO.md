@@ -35,3 +35,21 @@ La interfaz debe usar adaptadores de proveedor en backend. No se debe prometer q
 - Se muestra una vista previa antes de aplicar cambios.
 - Las acciones sensibles requieren aprobación específica.
 - Las pruebas se ejecutan en esta rama y la publicación queda pendiente de aprobación humana.
+
+## Inventario técnico verificado en la rama
+La revisión del código existente encontró componentes reutilizables que deben integrarse y probarse antes de crear duplicados:
+- `assets/js/companion/call.js`: página de llamada manos libres; solicita permiso de micrófono, controla silencio activando/desactivando la pista de audio y permite finalizar la llamada. La llamada tiene gestión de cuota y estados propios.
+- `assets/js/chat/voice.js`: salida de voz, selección de voz y eventos `ac-speech` para sincronización labial; la voz española prioriza síntesis del servidor y puede quedar solo en texto si el servicio no responde.
+- `assets/js/chat/avatar-call.js`: ventana flotante arrastrable, ampliable y cerrable que aloja el avatar.
+- `assets/js/chat/avatar.js` y `agent-avatar.js`: rig visual con estados, visemas y gestos de brazos/manos; respeta la preferencia de movimiento reducido.
+- `assets/js/chat/recorder.js`: grabación de notas de voz con medidor, transcripción opcional y liberación de recursos.
+
+### Brechas que siguen abiertas (no marcarlas como terminadas)
+1. Unificar la llamada manos libres con el chat principal, conservando contexto e historial y permitiendo minimizar/restaurar sin perder la sesión.
+2. Probar en Android real los estados de micrófono silenciado/escuchando y la reproducción de audio; revisar permisos, interrupciones y limpieza de pistas.
+3. Confirmar si el avatar humanoide GLB es el personaje final o si el rig 2D por capas sigue siendo la representación activa; validar gestos en móvil y accesibilidad.
+4. Implementar el estudio creativo conectado a un proveedor real de imágenes y, por separado, uno de vídeo; mostrar disponibilidad, cuotas y costos reales.
+5. Implementar ejecución de tareas persistentes con cola, almacenamiento de eventos, reintentos, límites, alertas y controles de pausa/cancelación. No afirmar 24/7 hasta desplegar y monitorizar esa infraestructura.
+6. Ejecutar pruebas automatizadas y pruebas manuales de móvil/escritorio; revisar la vista previa antes de cualquier publicación.
+
+Este inventario es una inspección de código, no una certificación de funcionamiento en producción. Cada punto requiere pruebas de integración y evidencia reproducible.
