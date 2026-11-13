@@ -418,3 +418,52 @@ body.design-lock { overflow: hidden; }
   .chat.ace .ace-send:hover, .chat.ace .ace-sug:hover,
   .chat.ace .suggestion:hover { transform: none; }
 }
+
+
+/* Fase móvil: ergonomía táctil y áreas seguras en Android/iOS. */
+@media (max-width: 640px) {
+  .chat.ace[data-variant="full"],
+  .chat.ace[data-variant="embed"] {
+    max-width: 100%;
+    max-height: 100dvh;
+    min-width: 0;
+    border-radius: 20px;
+  }
+  .chat.ace .chat-body,
+  .chat.ace .chat-thread,
+  .chat.ace .thread-inner,
+  .chat.ace .composer,
+  .chat.ace .composer-box {
+    min-width: 0;
+  }
+  .chat.ace .chat-thread {
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+  .chat.ace .composer {
+    padding-bottom: max(10px, env(safe-area-inset-bottom));
+  }
+  .chat.ace .ace-head {
+    padding-top: max(10px, env(safe-area-inset-top));
+  }
+  .chat.ace .ace-ib,
+  .chat.ace .ace-send,
+  .chat.ace .ace-plus,
+  .chat.ace .ace-flag {
+    min-width: 40px;
+    min-height: 40px;
+    touch-action: manipulation;
+  }
+  .chat.ace textarea,
+  .chat.ace input,
+  .chat.ace button {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+@media (max-width: 380px) {
+  .chat.ace .ace-head { gap: 4px; padding-left: 8px; padding-right: 6px; }
+  .chat.ace .ace-txt strong { font-size: 14px; }
+  .chat.ace .ace-actions { gap: 0; }
+  .chat.ace .ace-ib { width: 36px; min-width: 36px; }
+  .chat.ace .composer-box { padding-left: 10px; padding-right: 6px; }
+}
