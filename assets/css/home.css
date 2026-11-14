@@ -84,3 +84,6 @@
 .hn-shot figcaption { margin: 13px 8px 4px; font-size: 13px; line-height: 1.45; color: #52525b; }
 @media (max-width: 860px) { .hn-shot { width: 100%; } }
 @media (max-width: 560px) { .hn-shot { padding: 7px; border-radius: 21px; } .hn-shot img { border-radius: 15px; } .hn-shot figcaption { margin: 10px 6px 3px; font-size: 12px; } }
+
+/* Personaje principal del bloque Ordenador: encuadre adaptable y ligero */
+.hn-shot img.hn-assistant-img { width: min(100%, 460px); max-height: 560px; height: auto; margin-inline: auto; object-fit: contain; background: radial-gradient(ellipse at 50% 48%, rgba(159,255,0,.12), rgba(237,238,245,.92) 72%); }
