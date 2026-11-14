@@ -379,3 +379,91 @@ body.design-lock { overflow: hidden; }
 .pc-login p { margin: 0; color: #3f3f46; }
 .pc-login-ic { width: 36px; height: 36px; flex: none; display: grid; place-items: center; border-radius: 50%; background: #fff; border: 1px solid rgba(24, 24, 27, .1); }
 .pc-login-ic svg { width: 18px; height: 18px; }
+
+
+/* AgentiCuántico · mejora progresiva premium (feature branch)
+   Conserva la interfaz clara y la identidad lima; añade marco luminoso,
+   profundidad y foco visible sin alterar la estructura ni el flujo del chat. */
+.chat.ace[data-variant="full"],
+.chat.ace[data-variant="embed"] {
+  --ac-lime: #9fff00;
+  border: 1px solid rgba(159,255,0,.72);
+  border-radius: 28px;
+  box-shadow: 0 18px 60px rgba(24,24,27,.10), 0 0 0 1px rgba(159,255,0,.12),
+              0 0 28px rgba(159,255,0,.13);
+}
+.chat.ace .composer-box {
+  border: 1.5px solid rgba(132,204,22,.58);
+  box-shadow: 0 3px 18px rgba(24,24,27,.045), inset 0 0 0 1px rgba(159,255,0,.08);
+  transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+}
+.chat.ace .composer-box:focus-within {
+  border-color: #84cc16;
+  box-shadow: 0 0 0 3px rgba(159,255,0,.20), 0 8px 28px rgba(24,24,27,.08);
+  transform: translateY(-1px);
+}
+.chat.ace .ace-send {
+  box-shadow: 0 4px 14px rgba(24,24,27,.16);
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.chat.ace .ace-send:hover { transform: translateY(-1px) scale(1.035); box-shadow: 0 7px 20px rgba(24,24,27,.20); }
+.chat.ace .ace-sug,
+.chat.ace .suggestion { transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease; }
+.chat.ace .ace-sug:hover,
+.chat.ace .suggestion:hover { transform: translateY(-2px); border-color: rgba(132,204,22,.65); box-shadow: 0 8px 24px rgba(24,24,27,.07); }
+.chat.ace .ace-ava img { box-shadow: 0 0 0 2px #fff, 0 0 0 4px rgba(159,255,0,.75), 0 0 24px rgba(159,255,0,.28); }
+@media (prefers-reduced-motion: reduce) {
+  .chat.ace .composer-box, .chat.ace .ace-send,
+  .chat.ace .ace-sug, .chat.ace .suggestion { transition: none; }
+  .chat.ace .ace-send:hover, .chat.ace .ace-sug:hover,
+  .chat.ace .suggestion:hover { transform: none; }
+}
+
+
+/* Fase móvil: ergonomía táctil y áreas seguras en Android/iOS. */
+@media (max-width: 640px) {
+  .chat.ace[data-variant="full"],
+  .chat.ace[data-variant="embed"] {
+    max-width: 100%;
+    max-height: 100dvh;
+    min-width: 0;
+    border-radius: 20px;
+  }
+  .chat.ace .chat-body,
+  .chat.ace .chat-thread,
+  .chat.ace .thread-inner,
+  .chat.ace .composer,
+  .chat.ace .composer-box {
+    min-width: 0;
+  }
+  .chat.ace .chat-thread {
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+  .chat.ace .composer {
+    padding-bottom: max(10px, env(safe-area-inset-bottom));
+  }
+  .chat.ace .ace-head {
+    padding-top: max(10px, env(safe-area-inset-top));
+  }
+  .chat.ace .ace-ib,
+  .chat.ace .ace-send,
+  .chat.ace .ace-plus,
+  .chat.ace .ace-flag {
+    min-width: 40px;
+    min-height: 40px;
+    touch-action: manipulation;
+  }
+  .chat.ace textarea,
+  .chat.ace input,
+  .chat.ace button {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+@media (max-width: 380px) {
+  .chat.ace .ace-head { gap: 4px; padding-left: 8px; padding-right: 6px; }
+  .chat.ace .ace-txt strong { font-size: 14px; }
+  .chat.ace .ace-actions { gap: 0; }
+  .chat.ace .ace-ib { width: 36px; min-width: 36px; }
+  .chat.ace .composer-box { padding-left: 10px; padding-right: 6px; }
+}
