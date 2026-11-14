@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-14T11:55:27.994Z",
+  "updated": "2026-11-14T11:56:25.021Z",
   "source": "agentes-24-7",
   "note": "Estado público del equipo de agentes del sitio. Lo actualiza el workflow Agentes 24/7 (solo datos).",
   "agents": [
@@ -9,9 +9,9 @@
       "role": "Ortografía y errores de tipeo",
       "emoji": "✍️",
       "auto": true,
-      "status": "espera",
+      "status": "activo",
       "last_activity": "Revisó su área y no encontró nada para arreglar.",
-      "last_run": "2026-11-14T11:52:59.799Z",
+      "last_run": "2026-11-14T11:56:03.269Z",
       "pr": null
     },
     {
@@ -31,7 +31,7 @@
       "role": "Textos alternativos y nombres accesibles",
       "emoji": "♿",
       "auto": true,
-      "status": "activo",
+      "status": "espera",
       "last_activity": "Revisó su área y no encontró nada para arreglar.",
       "last_run": "2026-11-14T11:55:15.113Z",
       "pr": null
@@ -42,7 +42,7 @@
       "role": "Carga diferida de imágenes",
       "emoji": "⚡",
       "auto": true,
-      "status": "activo",
+      "status": "espera",
       "last_activity": "Revisó su área y no encontró nada para arreglar.",
       "last_run": "2026-11-14T11:55:16.278Z",
       "pr": null
@@ -77,7 +77,7 @@
       "auto": false,
       "status": "revision",
       "last_activity": "Tiene una propuesta esperando aprobación.",
-      "last_run": "2026-11-14T11:54:36.007Z",
+      "last_run": "2026-11-14T11:56:01.909Z",
       "pr": null
     }
   ]
