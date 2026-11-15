@@ -23,11 +23,28 @@ export const CONFIG = Object.freeze({
     ACTIONS_DEV: 'https://github.com/agenticuantico/AgenticDev/actions',
     ACTIONS_WEB: 'https://github.com/agenticuantico/AgenticWeb/actions'
   },
-  /** Precios: tipo de cambio BNA vendedor 1560 (31/10/2026), ARS redondeado a 100. */
+  /**
+   * Precios (actualizados nov-2026): ARS = USD × 1560 (BNA vendedor 31/10/2026), redondeado a 100.
+   * Deben coincidir con worker-v2/src/config.ts (PRICE_*) y con los planes de Mercado Pago / PayPal de payments-config.js.
+   */
   PRICES: {
     gratis: { usd: 0, ars: 0 },
+    pro: { usd: 24, ars: 37400 },
+    empresa: { usd: 69, ars: 107600 }
+  },
+  /** Precios anteriores: quien ya estaba suscripto los conserva mientras su suscripción siga activa. */
+  LEGACY_PRICES: {
     pro: { usd: 10, ars: 15600 },
     empresa: { usd: 30, ars: 46800 }
+  },
+  /** Fecha desde la que rigen los precios nuevos (actualizar al publicar). Antes = precio anterior. */
+  PRICE_CHANGE_AT: '2026-11-15T20:00:00Z',
+  PRICE_KEEP_NOTE: 'Si ya tienes una suscripción activa, conservas tu precio actual mientras siga activa.',
+  /** Plan a medida (Empresa+ / API): sin precio publicado; se cotiza según volumen. */
+  CUSTOM_PLAN: {
+    id: 'empresa-plus', name: 'Empresa+ / API', tagline: 'Para integrar agentes en tus sistemas con volumen propio.',
+    features: ['Todo lo del plan Empresa', 'Claves de API con alcances por agente', 'Cupos y límites por minuto a medida', 'Registro de uso por clave', 'Acompañamiento para la integración'],
+    cta: 'Hablar con ventas', href: '/contacto/?tema=empresa-plus'
   },
   /** Fase 1: todas las funciones en todos los planes; los planes solo cambian el uso diario (igual que el servidor). */
   ALL_FEATURES_ALL_PLANS: true,

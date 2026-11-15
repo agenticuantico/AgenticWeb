@@ -130,3 +130,10 @@ html { scroll-behavior: smooth; }
 @media (max-width: 560px) { .pay-methods { grid-template-columns: 1fr; } }
 .call-link svg { color: var(--ok); }
 .hero-inv .lead { margin: 0 0 26px; max-width: 720px; } .hero-inv .hero-ctas { justify-content: flex-start; } .hero-inv h1 { max-width: 22ch; }
+/* Plan a medida (Empresa+ / API) y nota de precio conservado (nov-2026) */
+.plan.plan-custom { margin-top: 16px; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.4fr) minmax(0, .8fr); align-items: center; gap: 20px; }
+.plan.plan-custom .price { font-size: 1.6rem; }
+.plan.plan-custom ul { margin: 0; }
+.plan-keep { display: flex; gap: 8px; align-items: center; justify-content: center; margin: 14px auto 0; color: var(--muted); text-align: center; }
+.plan-keep svg { width: 16px; height: 16px; flex: none; }
+@media (max-width: 960px) { .plan.plan-custom { grid-template-columns: 1fr; max-width: 520px; margin-inline: auto; } }

@@ -6,7 +6,7 @@
  *  - Mercado Pago Suscripciones (ARS): enlace al checkout del plan (init_point) cuando esté configurado.
  * Nunca se ve ni se guarda un número de tarjeta: todo ocurre en las ventanas del procesador.
  */
-import { PAYMENTS, paypalReady, mpReady } from '../payments-config.js';
+import { PAYMENTS, paypalReady, mpReady, priceMatches } from '../payments-config.js';
 import { getStore, friendlyError } from './firebase.js';
 import { h, icon } from './ui.js';
 
@@ -40,7 +40,7 @@ export async function recordPending(uid, data) {
  */
 export async function renderPayPal(container, { plan, user, onApproved, onError }) {
   container.innerHTML = '';
-  if (!paypalReady(plan)) { container.append(h('p', { class: 'muted small' }, 'PayPal en configuración.')); return; }
+  if (!paypalReady(plan)) { container.append(h('p', { class: 'muted small' }, priceMatches('paypal', plan) ? 'PayPal en configuración.' : 'Estamos actualizando este plan en PayPal. Mientras tanto no se puede pagar por aquí: nunca cobramos un precio distinto al publicado.')); return; }
   if (!user) {
     container.append(h('a', { class: 'btn btn-block', href: '/cuenta/?registro=1&siguiente=planes' }, 'Ingresa para pagar con PayPal'));
     return;
@@ -79,7 +79,9 @@ export async function renderPayPal(container, { plan, user, onApproved, onError 
 export function renderMercadoPago(container, { plan, user }) {
   container.innerHTML = '';
   if (!mpReady(plan)) {
-    container.append(h('button', { class: 'btn btn-block', type: 'button', disabled: true, title: 'Estamos terminando la configuración de Mercado Pago' }, h('span', {}, 'Mercado Pago muy pronto')));
+    const updating = PAYMENTS.mercadopago.ENABLED && !priceMatches('mercadopago', plan);
+    container.append(h('button', { class: 'btn btn-block', type: 'button', disabled: true, title: updating ? 'Estamos actualizando este plan en Mercado Pago' : 'Estamos terminando la configuración de Mercado Pago' }, h('span', {}, updating ? 'Plan en actualización' : 'Mercado Pago no disponible')));
+    if (updating) container.append(h('p', { class: 'tiny muted', style: 'margin:0;text-align:center' }, 'Nunca cobramos un precio distinto al publicado.'));
     return;
   }
   if (!user) { container.append(h('a', { class: 'btn btn-block', href: '/cuenta/?registro=1&siguiente=planes' }, 'Ingresa para pagar con Mercado Pago')); return; }

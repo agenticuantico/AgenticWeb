@@ -7,15 +7,15 @@ import { CONFIG } from './config.js';
 import * as auth from './auth.js';
 import { getStore, getRtdb, friendlyError } from './firebase.js';
 import { DEFAULT_SYSTEM, clearSystemCache } from './sysconfig.js';
-import { renderLeads, renderAgentsControl } from './admin-control.js?v=7.24.0';
+import { renderLeads, renderAgentsControl } from './admin-control.js?v=7.25.0';
 import { revenueKpis, renderRevenueCard } from './admin-revenue.js';
 import { renderGovernance } from './admin-governance.js';
-import { renderTeam } from './admin-team.js?v=7.24.0';
-import * as staffUi from './admin-staff.js?v=7.24.0';
-import { renderWorkspace, renderPerf } from './admin-espacio.js?v=7.24.0';
-import { renderKpis } from './admin-indicadores.js?v=7.24.0';
-import { renderAnalytics } from './admin-analitica.js?v=7.24.0';
-import { renderPayments } from './admin-pagos.js?v=7.24.0';
+import { renderTeam } from './admin-team.js?v=7.25.0';
+import * as staffUi from './admin-staff.js?v=7.25.0';
+import { renderWorkspace, renderPerf } from './admin-espacio.js?v=7.25.0';
+import { renderKpis } from './admin-indicadores.js?v=7.25.0';
+import { renderAnalytics } from './admin-analitica.js?v=7.25.0';
+import { renderPayments } from './admin-pagos.js?v=7.25.0';
 
 /** Roles con canales en el Espacio de trabajo (el servidor vuelve a controlar cada canal). */
 const WS_ROLES = new Set(['ceo', 'coceo', 'supervisor']);
@@ -131,9 +131,9 @@ function renderPanel(token, me) {
     if (id === 'analitica') renderAnalytics(boxes.analitica, token);
     if (id === 'pagos') renderPayments(boxes.pagos, token);
     if (id === 'equipo') renderTeam(boxes.equipo, null, { extraHeaders: hdr, owner: u.role === 'ceo' });
-    if (id === 'agentes') import('./admin-agents.js?v=7.24.0').then((m) => m.renderAutonomy(boxes.agentes, null, { extraHeaders: hdr }));
+    if (id === 'agentes') import('./admin-agents.js?v=7.25.0').then((m) => m.renderAutonomy(boxes.agentes, null, { extraHeaders: hdr }));
     if (id === 'espacio') renderWorkspace(boxes.espacio, token, me);
-    if (id === 'envivo') import('./admin-envivo.js?v=7.24.0').then((m) => m.renderLive(boxes.envivo, token, me));
+    if (id === 'envivo') import('./admin-envivo.js?v=7.25.0').then((m) => m.renderLive(boxes.envivo, token, me));
     if (id === 'rendimiento') renderPerf(boxes.rendimiento, token, me);
     if (id === 'indicadores') renderKpis(boxes.indicadores, token, me);
     if (id === 'humano') staffUi.renderStaff(boxes.humano, token, me);
@@ -284,7 +284,7 @@ async function renderDashboard(user) {
       if (id === 'analitica') withPanel(extra[id], renderAnalytics);
       if (id === 'pagos') withPanel(extra[id], renderPayments);
       if (id === 'espacio') withPanel(extra[id], renderWorkspace);
-      if (id === 'envivo') withPanel(extra[id], (b, t, me) => import('./admin-envivo.js?v=7.24.0').then((m) => m.renderLive(b, t, me)));
+      if (id === 'envivo') withPanel(extra[id], (b, t, me) => import('./admin-envivo.js?v=7.25.0').then((m) => m.renderLive(b, t, me)));
       if (id === 'rendimiento') withPanel(extra[id], renderPerf);
       if (id === 'indicadores') withPanel(extra[id], renderKpis);
       if (id === 'humano') withPanel(extra[id], (b, t, me) => staffUi.renderStaff(b, t, me));
@@ -445,7 +445,10 @@ async function renderSubscriptions(grid, user, fs, db) {
           try {
             const base = s.currentPeriodEnd && s.currentPeriodEnd.toMillis && s.currentPeriodEnd.toMillis() > Date.now() ? s.currentPeriodEnd.toMillis() : Date.now();
             const end = fs.Timestamp.fromMillis(base + 30 * 86400000);
-            const price = CONFIG.PRICES[s.plan] || { ars: 0, usd: 0 };
+            // Suscripciones anteriores a la suba de nov-2026 conservan su precio (CONFIG.LEGACY_PRICES).
+            const since = [s.startedAt, s.createdAt].map((t) => (t && t.toMillis ? t.toMillis() : 0)).find(Boolean) || 0;
+            const legacy = since && since < Date.parse(CONFIG.PRICE_CHANGE_AT || '2026-11-15T20:00:00Z') && CONFIG.LEGACY_PRICES;
+            const price = (legacy && CONFIG.LEGACY_PRICES[s.plan]) || CONFIG.PRICES[s.plan] || { ars: 0, usd: 0 };
             const pay = { uid: u.id, email: u.email || null, plan: s.plan, provider: s.provider, subscriptionId: s.subscriptionId || null, amount: s.provider === 'paypal' ? price.usd : price.ars, currency: s.provider === 'paypal' ? 'USD' : 'ARS', status: 'confirmado-manual', confirmedBy: user.email, createdAt: fs.serverTimestamp() };
             const b = fs.writeBatch(db);
             b.update(fs.doc(db, 'users', u.id), { plan: s.plan, planStatus: 'active', renewsAt: end, 'subscription.status': 'active', 'subscription.currentPeriodEnd': end, 'subscription.verifiedBy': user.email, 'subscription.verifiedAt': fs.serverTimestamp() });

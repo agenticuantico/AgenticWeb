@@ -9,7 +9,7 @@ import { apiFetch, apiUrl, hasAccount } from './engine.js';
 (function css() {
   if (typeof document === 'undefined' || document.getElementById('ac-site-css')) return;
   const l = document.createElement('link');
-  l.id = 'ac-site-css'; l.rel = 'stylesheet'; l.href = '/assets/css/site-card.css?v=7.24.0';
+  l.id = 'ac-site-css'; l.rel = 'stylesheet'; l.href = '/assets/css/site-card.css?v=7.25.0';
   document.head.appendChild(l);
 })();
 

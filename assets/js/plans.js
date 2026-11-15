@@ -33,6 +33,18 @@ export function mountPlans(root, { user = null, profile = null, onChange } = {})
     card.append(pay);
     cards.append(card);
   }
+  const cp = CONFIG.CUSTOM_PLAN;
+  if (cp) {
+    root.append(h('article', { class: 'plan plan-custom', id: 'plan-' + cp.id, 'aria-labelledby': 'plan-t-' + cp.id },
+      h('div', { class: 'plan-custom-main' },
+        h('h3', { id: 'plan-t-' + cp.id }, cp.name),
+        h('p', { class: 'tag' }, cp.tagline),
+        h('div', { class: 'price' }, 'A medida'),
+        h('div', { class: 'price-alt' }, 'Precio según volumen y agentes. Sin compromiso.')),
+      h('ul', {}, ...cp.features.map((f) => h('li', { html: icon('check') + `<span>${f}</span>` }))),
+      h('div', { class: 'pay' }, h('a', { class: 'btn btn-block btn-primary', href: cp.href }, cp.cta))));
+  }
+  if (CONFIG.PRICE_KEEP_NOTE) root.append(h('p', { class: 'plan-keep small' }, h('span', { html: icon('lock') }), h('span', {}, CONFIG.PRICE_KEEP_NOTE)));
 }
 
 export function choosePlan(plan, user, onChange) {

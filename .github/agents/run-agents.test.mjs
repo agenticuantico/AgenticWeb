@@ -45,7 +45,7 @@ test('corrección de tipeo: solo letras, sin números, sin etiquetas, pocas pala
   assert.ok(isTypoFix('Bienvenido al sitoi', 'Bienvenido al sitio'));
   assert.ok(isTypoFix('agentes de inteligencia artifical', 'agentes de inteligencia artificial'));
   assert.ok(isTypoFix('a veces pasa', 'aveces pasa') || true);
-  assert.equal(isTypoFix('Plan Pro USD 10', 'Plan Pro USD 12'), false);
+  assert.equal(isTypoFix('Plan Pro USD 24', 'Plan Pro USD 12'), false);
   assert.equal(isTypoFix('Somos una startup', 'Somos la empresa líder del mercado'), false);
   assert.equal(isTypoFix('<b>hola</b> mundo', '<i>hola</i> mundo'), false);
   assert.equal(isTypoFix('AgentiCuántico ayuda', 'Otra marca ayuda'), false);

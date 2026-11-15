@@ -25,6 +25,9 @@ export const PAYMENTS = Object.freeze({
     ENABLED: true,
     PUBLIC_KEY: 'APP_USR-bcd9bf1d-55ed-4c68-8286-8c275917cb44',
     // Planes de Suscripciones (preapproval_plan), ARS mensuales, back_url https://agenticuantico.dev.ar/cuenta/
+    // Precio REAL que cobra cada plan de arriba. Si no coincide con CONFIG.PRICES, el botón queda deshabilitado
+    // (nunca se cobra un precio distinto al publicado). Al crear los planes nuevos: reemplazar ids, links y estos montos.
+    planPrices: { pro: 15600, empresa: 46800 },
     plans: {
       pro: '7461f35cf2ef4e45a804d30cfc39160d',      // ARS 15.600 / mes
       empresa: 'd74cfde5cd01402094276e5660be0ac6'   // ARS 46.800 / mes
@@ -39,6 +42,8 @@ export const PAYMENTS = Object.freeze({
     // vive solo en el servidor como variable PAYPAL_CLIENT_SECRET (wrangler secret put).
     CLIENT_ID: 'BAAVb151UeAXrpmiSFW4edo5HEEq02mx80g4eEJ21q0dz9OJu0BY8ewqPR8o8j9wzkkDrAV7REtbilN0NE',
     PRODUCT_ID: 'PROD-0WM85076V9857451H',
+    // Precio REAL (USD) de cada plan P-… de abajo; ver nota de Mercado Pago.
+    planPrices: { pro: 10, empresa: 30 },
     plans: {
       pro: 'P-4XC87513LL1618724NLTANOY',      // USD 10 / mes
       empresa: 'P-7F877411LX287864FNLTAN4Q'   // USD 30 / mes
@@ -46,6 +51,14 @@ export const PAYMENTS = Object.freeze({
   }
 });
 
-export function mpReady(plan) { return PAYMENTS.mercadopago.ENABLED && /^https:\/\/(www\.)?mercadopago\.com(\.ar)?\//.test(PAYMENTS.mercadopago.checkout[plan] || ''); }
-export function paypalReady(plan) { return !!(/^[A-Za-z0-9_-]{20,}$/.test(PAYMENTS.paypal.CLIENT_ID) && /^P-[A-Z0-9]+$/.test(PAYMENTS.paypal.plans[plan] || '')); }
+import { CONFIG } from './js/config.js';
+/** ¿El plan del procesador cobra exactamente el precio publicado? Si no, no se ofrece el pago. */
+export function priceMatches(provider, plan) {
+  const pub = CONFIG.PRICES[plan];
+  const real = PAYMENTS[provider] && PAYMENTS[provider].planPrices ? PAYMENTS[provider].planPrices[plan] : undefined;
+  if (!pub || real === undefined) return false;
+  return provider === 'paypal' ? Number(real) === Number(pub.usd) : Number(real) === Number(pub.ars);
+}
+export function mpReady(plan) { return PAYMENTS.mercadopago.ENABLED && /^https:\/\/(www\.)?mercadopago\.com(\.ar)?\//.test(PAYMENTS.mercadopago.checkout[plan] || '') && priceMatches('mercadopago', plan); }
+export function paypalReady(plan) { return !!(/^[A-Za-z0-9_-]{20,}$/.test(PAYMENTS.paypal.CLIENT_ID) && /^P-[A-Z0-9]+$/.test(PAYMENTS.paypal.plans[plan] || '')) && priceMatches('paypal', plan); }
 export function anyPaymentReady() { return ['pro', 'empresa'].some((p) => mpReady(p) || paypalReady(p)); }

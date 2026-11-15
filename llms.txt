@@ -23,8 +23,8 @@ Sitio: https://agenticuantico.dev.ar/ · Contacto comercial: agenticuantico@gmai
 
 ## Planes (precio final por mes, sin permanencia)
 - Gratis: 0 · 20 mensajes por día.
-- Pro: ARS 15.600 o USD 10 · 500 mensajes por día.
-- Empresa: ARS 46.800 o USD 30 · 3000 mensajes por día.
+- Pro: ARS 37.400 o USD 24 · 500 mensajes por día.
+- Empresa: ARS 107.600 o USD 69 · 3000 mensajes por día.
 - Mercado Pago cobra en pesos y PayPal en dólares. Se cancela desde la cuenta; botón de arrepentimiento de 10 días (Res. 424/2020).
 
 ## Privacidad y seguridad
@@ -63,4 +63,4 @@ Sitio: https://agenticuantico.dev.ar/ · Contacto comercial: agenticuantico@gmai
 - [IA para imobiliárias: anúncios, atendimento e contratos](https://agenticuantico.dev.ar/pt/solucoes/imobiliarias/): IA para imobiliárias e corretores: escreva descrições de imóveis, respostas a interessados, resumos de contratos e relatórios para proprietários. Teste grátis.
 
 ## In English
-AgentiCuántico is an Argentine voice-first AI agents platform: voice or text chat, an agent mode that plans and runs multi-step tasks with human approval for consequential actions, invitable specialist agents, document analysis and a code canvas. Plans: Free, Pro (USD 10/month) and Business «Empresa» (USD 30/month, custom agents and priority support). Custom integrations, measurable pilots and white-label resale are arranged through sales contact; there is no public self-serve API.
+AgentiCuántico is an Argentine voice-first AI agents platform: voice or text chat, an agent mode that plans and runs multi-step tasks with human approval for consequential actions, invitable specialist agents, document analysis and a code canvas. Plans: Free, Pro (USD 24/month) and Business «Empresa» (USD 69/month, custom agents and priority support). Custom integrations, measurable pilots and white-label resale are arranged through sales contact; there is no public self-serve API.

@@ -92,7 +92,7 @@ Aplicación completa en `app/` (HTML + CSS + JS sin dependencias ni build):
 * Compartir conversación por enlace, configuración (tema claro/oscuro/sistema, idioma ES/EN/PT,
   voz femenina por idioma con banderas, exportar o borrar datos, estado de conexiones), menú de cuenta,
   inicio de sesión por email/Google y planes Gratis / Pro / Empresa
-  (Mercado Pago en ARS 15.600 / 46.800, PayPal en USD 10 / 30).
+  (Mercado Pago en ARS 37.400 / 107.600, PayPal en USD 24 / 69).
 * Conversaciones guardadas en `localStorage` del navegador.
 
 ### Conexión con el servidor
