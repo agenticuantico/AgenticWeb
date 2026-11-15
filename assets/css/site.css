@@ -79,7 +79,7 @@ html { scroll-behavior: smooth; }
 
 /* Equipo de agentes */
 .team { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
-.team-card { display: grid; gap: 6px; padding: 16px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); }
+.team-card { display: grid; gap: 6px; padding: 16px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); transition: border-color 0.2s ease; } .team-card:hover { border-color: var(--gold); }
 .team-card .t-top { display: flex; align-items: center; gap: 10px; }
 .team-card .t-emoji { font-size: 22px; line-height: 1; }
 .team-card strong { font-size: .98rem; }
