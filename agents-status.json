@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-15T17:51:33.045Z",
+  "updated": "2026-11-15T20:36:05.227Z",
   "source": "agentes-24-7",
   "note": "Estado público del equipo de agentes del sitio. Lo actualiza el workflow Agentes 24/7 (solo datos).",
   "agents": [
@@ -31,7 +31,7 @@
       "role": "Textos alternativos y nombres accesibles",
       "emoji": "♿",
       "auto": true,
-      "status": "activo",
+      "status": "espera",
       "last_activity": "Revisó su área y no encontró nada para arreglar.",
       "last_run": "2026-11-15T17:51:21.322Z",
       "pr": null
@@ -42,7 +42,7 @@
       "role": "Carga diferida de imágenes",
       "emoji": "⚡",
       "auto": true,
-      "status": "activo",
+      "status": "espera",
       "last_activity": "Revisó su área y no encontró nada para arreglar.",
       "last_run": "2026-11-15T17:51:22.817Z",
       "pr": null
@@ -55,7 +55,7 @@
       "auto": false,
       "status": "revision",
       "last_activity": "Tiene una propuesta esperando aprobación.",
-      "last_run": "2026-11-15T11:30:37.535Z",
+      "last_run": "2026-11-15T20:35:24.647Z",
       "pr": null
     },
     {
@@ -65,9 +65,9 @@
       "emoji": "🌐",
       "auto": false,
       "status": "revision",
-      "last_activity": "Tiene una propuesta esperando aprobación.",
-      "last_run": "2026-11-15T17:49:43.751Z",
-      "pr": null
+      "last_activity": "Propuso una mejora: Mejora de interactividad en tarjetas de equipo (espera aprobación).",
+      "last_run": "2026-11-15T20:35:25.920Z",
+      "pr": "https://github.com/agenticuantico/AgenticWeb/pull/67"
     },
     {
       "id": "seo",
@@ -75,7 +75,7 @@
       "role": "Propone títulos y descripciones",
       "emoji": "🔎",
       "auto": false,
-      "status": "revision",
+      "status": "espera",
       "last_activity": "Tiene una propuesta esperando aprobación.",
       "last_run": "2026-11-15T17:49:45.331Z",
       "pr": null
