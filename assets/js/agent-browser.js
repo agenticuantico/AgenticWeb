@@ -20,23 +20,23 @@
  */
 import { h, icon } from './ui.js';
 import * as engine from './chat/engine.js';
-import { needsWebAction, isFollowUp, wantsComputer, stripComputer } from './chat/intent.js?v=7.23.0';
-import { statusLine, visitedSites, summaryMeta, workMode, workSteps, VPC_NAME, VPC_HELP, elapsedText, taskElapsed, quotaText, addressText, whatIDid } from './chat/computer-status.js?v=7.23.0';
+import { needsWebAction, isFollowUp, wantsComputer, stripComputer } from './chat/intent.js?v=7.24.0';
+import { statusLine, visitedSites, summaryMeta, workMode, workSteps, VPC_NAME, VPC_HELP, elapsedText, taskElapsed, quotaText, addressText, whatIDid } from './chat/computer-status.js?v=7.24.0';
 /** Reexportadas para el código que ya las importaba desde aquí (la lógica vive en chat/intent.js, sin DOM). */
 export { needsWebAction, isFollowUp };
 
 (function css() {
   if (typeof document === 'undefined' || document.getElementById('ac-ab2-css')) return;
   const l = document.createElement('link');
-  l.id = 'ac-ab2-css'; l.rel = 'stylesheet'; l.href = '/assets/css/agent-browser.css?v=7.23.0';
+  l.id = 'ac-ab2-css'; l.rel = 'stylesheet'; l.href = '/assets/css/agent-browser.css?v=7.24.0';
   document.head.appendChild(l);
 })();
 
 // Puntero del escritorio (cálculos sin DOM).
-import { fitRect, toView, followY, newEvents, changedEvents, eventFits, pointerText, travelMs, fromView, parsePosY } from './chat/computer-pointer.js?v=7.23.0';
+import { fitRect, toView, followY, newEvents, changedEvents, eventFits, pointerText, travelMs, fromView, parsePosY } from './chat/computer-pointer.js?v=7.24.0';
 // Escritorio de sistema operativo propio y gestor de ventanas.
-import { VirtualDesktop } from './chat/computer-desktop.js?v=7.23.0';
-import { readingNote } from './chat/computer-wm.js?v=7.23.0';
+import { VirtualDesktop } from './chat/computer-desktop.js?v=7.24.0';
+import { readingNote } from './chat/computer-wm.js?v=7.24.0';
 
 const SITES = [
   [/linkedin/i, 'https://www.linkedin.com/'], [/computrabajo/i, 'https://ar.computrabajo.com/'], [/bumeran/i, 'https://www.bumeran.com.ar/'],

@@ -2191,7 +2191,6 @@
 "Voz femenina en español y en otros 6 idiomas.": "Female voice in Spanish and 6 other languages.",
 "Voz y avatar": "Voice and avatar",
 "animación 3D": "3D animation",
-"chat de IA con voz · hecho en Bahía Blanca": "AI chat with voice · made in Bahía Blanca",
 "con el chat": "with the chat",
 "con voz.": "out loud.",
 "cuando responde.": "when it answers.",
@@ -2251,8 +2250,6 @@
 "Gratis 1 minuto de pantalla en vivo por día, Pro 2 y Empresa 3; leer páginas como texto no gasta minutos.": "Free gets 1 minute of live screen per day, Pro 2 and Business 3; reading pages as text uses no minutes.",
 "Probar el Ordenador": "Try the Computer",
 "Cómo funciona →": "How it works →",
-"Ordenador virtual en el chat: barra con la dirección de la página, aviso «En vivo» y el pronóstico de Bahía Blanca en pantalla": "Virtual computer in the chat: address bar, “Live” badge and the Bahía Blanca forecast on screen",
-"Captura real: «busca el pronóstico de Bahía Blanca en el ordenador».": "Real screenshot: “look up the Bahía Blanca forecast on the computer”.",
 "Todo esto ya funciona": "All of this works today",
 "Desde el navegador del celular o de la compu, sin instalar nada. Las mismas funciones en los tres planes.": "From your phone or computer browser, nothing to install. The same features on all three plans.",
 "Voz y llamada": "Voice and calls",
@@ -2328,7 +2325,6 @@
 "Chat de IA con voz en español: documentos, búsqueda con fuentes, imágenes y un Ordenador virtual que hace tareas en la web mientras miras. Empiezas gratis.": "AI chat with voice: documents, search with sources, images and a virtual computer that does tasks on the web while you watch. Start free.",
 "Recomendado": "Recommended",
 "chat de IA con voz": "AI chat with voice",
-"· hecho en Bahía Blanca": "· made in Bahía Blanca",
 "Nuevo · Sitios web premium": "New · Premium websites",
 "Tu sitio web completo,": "Your complete website,",
 "listo para publicar": "ready to publish",
@@ -2401,5 +2397,10 @@
 "Central de monitoreo: horario y contacto (opcional)": "Monitoring centre: hours and contact (optional)",
 "Número de habilitación y organismo (opcional)": "Licence number and issuing authority (optional)",
 "Autoridad sobria nocturna": "Sober night authority",
-"Técnico de monitoreo": "Monitoring tech"
+"Técnico de monitoreo": "Monitoring tech",
+"Ilustración: tu agente trabaja en su propio ordenador virtual mientras tú haces otra cosa.": "Illustration: your agent works on its own virtual computer while you do something else.",
+"Imagen creada con IA": "AI-generated image",
+"Ilustración de una joven sentada ante un escritorio que señala varias ventanas flotantes con carpetas, un paisaje, código y un chat, como un ordenador virtual que trabaja por ella": "Illustration of a young woman sitting at a desk, pointing at several floating windows with folders, a landscape, code and a chat, like a virtual computer working for her",
+"· Agentes de IA que trabajan por ti": "· AI agents that work for you",
+"chat de IA con voz · Agentes de IA que trabajan por ti": "AI chat with voice · AI agents that work for you"
 }
