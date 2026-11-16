@@ -9,7 +9,7 @@
  * Los cálculos de posición viven en computer-wm.js (sin DOM, con pruebas).
  */
 import { h, icon } from '../ui.js';
-import { isCompact, clampRect, dragRect, resizeRect, defaultRect, raise, activeWindow, dateLabel } from './computer-wm.js?v=7.25.0';
+import { isCompact, clampRect, dragRect, resizeRect, defaultRect, raise, activeWindow, dateLabel } from './computer-wm.js?v=7.25.1';
 
 /** Glifos propios de los controles de ventana (trazo redondeado, sin formas de otros sistemas). */
 const G = {
